@@ -28,6 +28,12 @@ de la versión actual. Cada entrada indica la HU que la menciona.
 - **Historial de versiones** (HU-37): registrar qué miembro realizó cada cambio
   queda para una implementación futura.
 
+## Auth
+- **OAuth de GitHub** (HU-32 CA2): requiere registrar una OAuth App de GitHub y
+  sus credenciales (`Auth:GitHub:ClientId/ClientSecret`). El flujo
+  email+contraseña está completo; el botón de GitHub se agrega al integrar
+  las credenciales.
+
 ## Infraestructura
 - **Integración Cloudflare (D1, R2, Durable Objects)**: los adaptadores
   `Adapters/Cloudflare` del backend son stubs. Todo corre en modo local
