@@ -25,16 +25,23 @@ de la versión actual. Cada entrada indica la HU que la menciona.
   no se reescriben todavía.
 
 ## Colaboración
-- **Edición simultánea en tiempo real + presencia** (HU-05/HU-06/HU-37): la
-  compartición de carpetas con roles (HU-35/HU-36) está completa y el control
-  de acceso por rol efectivo se aplica en el backend. La edición concurrente
-  Yjs (CRDT), el relay de updates y los cursores de presencia quedan diferidos
-  a la integración Cloudflare: el roadmap define el relay como puerto
-  `ICollabRelay` (adaptador local WebSocket en .NET y futuro Durable Object).
-  Hoy las notas compartidas son editables por turnos (cada cliente sincroniza
-  su contenido vía HU-04); el merge CRDT en vivo es el paso siguiente.
-- **Historial de versiones** (HU-37): registrar qué miembro realizó cada cambio
-  queda para una implementación futura.
+- **Edición simultánea en tiempo real + presencia** (HU-05/HU-06/HU-37):
+  arquitectura de doble modo IMPLEMENTADA y lista para Cloudflare. Backend:
+  puerto `ICollabRelay` con adaptadores `LocalCollabRelay` (deshabilitado) y
+  `DurableObjectCollabRelay` (devuelve la URL del relay si se configura
+  `Collab:RelayBaseUrl`), seleccionados por `Storage:Provider`; endpoint
+  `GET /notas/{id}/colaboracion` (solo notas en carpetas compartidas, color de
+  presencia estable por id). Frontend: `lib/collab/collab.ts` integra Yjs +
+  y-codemirror + y-websocket + y-indexeddb en el editor mediante un compartment,
+  con carga dinámica. **En local la colaboración viene deshabilitada** (no hay
+  relay), por lo que las notas compartidas se editan por turnos vía HU-04. Para
+  activarla: implementar el Durable Object (relay y-websocket que persiste el
+  CRDT, HU-05 CA3/CA6) y configurar `Collab:RelayBaseUrl` con `Storage:Provider=cloudflare`.
+- **Ajustes finos de presencia** (HU-06 CA2/CA6): el timeout de 5 s para
+  ocultar el cursor y el agrupado "+N más" tras 8 cursores usan los defaults de
+  y-codemirror/awareness; afinarlos requiere personalizar el render de cursores.
+- **Historial de versiones** (HU-37 CA6): registrar qué miembro realizó cada
+  cambio queda para una implementación futura.
 
 ## Import / Export
 - **Adjuntos en la importación** (HU-07/HU-11): la importación de Obsidian
