@@ -25,8 +25,25 @@ de la versión actual. Cada entrada indica la HU que la menciona.
   no se reescriben todavía.
 
 ## Colaboración
+- **Edición simultánea en tiempo real + presencia** (HU-05/HU-06/HU-37): la
+  compartición de carpetas con roles (HU-35/HU-36) está completa y el control
+  de acceso por rol efectivo se aplica en el backend. La edición concurrente
+  Yjs (CRDT), el relay de updates y los cursores de presencia quedan diferidos
+  a la integración Cloudflare: el roadmap define el relay como puerto
+  `ICollabRelay` (adaptador local WebSocket en .NET y futuro Durable Object).
+  Hoy las notas compartidas son editables por turnos (cada cliente sincroniza
+  su contenido vía HU-04); el merge CRDT en vivo es el paso siguiente.
 - **Historial de versiones** (HU-37): registrar qué miembro realizó cada cambio
   queda para una implementación futura.
+
+## Import / Export
+- **Adjuntos en la importación** (HU-07/HU-11): la importación de Obsidian
+  preserva notas `.md` y la estructura de carpetas, pero los adjuntos
+  (`.png`, `.jpg`, `.pdf`, `.svg`, `.excalidraw` sueltos) se reportan como
+  omitidos en el resumen porque aún no existe un subsistema de adjuntos.
+- **Exportar ZIP de vaults ≥ 200 MB en el servidor** (HU-09 CA5): la
+  exportación ZIP corre 100% en el cliente (JSZip). La rama de compresión
+  delegada al servidor con polling de progreso queda diferida.
 
 ## Auth
 - **OAuth de GitHub** (HU-32 CA2): requiere registrar una OAuth App de GitHub y
