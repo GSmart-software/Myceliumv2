@@ -1,4 +1,4 @@
-# Sistema de diseño — Micelio
+# Sistema de diseño — Mycelium
 
 ## Concepto de marca
 
@@ -423,7 +423,7 @@ El resultado esperado al completar las HUs de shell (HU-28, HU-29, HU-01, HU-02,
 HU-25) es esta composición:
 
 ```
-┌─ Micelio ─── [Buscar en la nota…  ⌘F] ─────────── [Compartir] [AG] ─┐
+┌─ Mycelium ─── [Buscar en la nota…  ⌘F] ─────────── [Compartir] [AG] ─┐
 ├──┬─ Explorador ───────────────┬─ Red de conocimiento ──┬─ Grafo ───────┤
 │🗂│  📄 Red de conocimiento    │ # Red de conocimiento  │ Salientes (2) │
 │🔍│  📄 Ideas sueltas          │                        │ Retro (2)     │
