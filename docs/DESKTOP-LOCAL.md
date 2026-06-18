@@ -110,6 +110,36 @@ wrangler d1 execute micelio-prod --remote \
 `appsettings*.json`). El exe es autocontenido: **no requiere instalar .NET**. Quien
 lo reciba solo necesita poner su `appsettings.Local.json` con las credenciales.
 
+### Instalador (Windows, Inno Setup)
+
+Para entregar un **único `MycelioSetup.exe`** que instala con accesos directos y
+desinstalador (sin necesidad del repo, Node ni el SDK .NET):
+
+1. Instalá **Inno Setup 6** una vez en la máquina que compila:
+   ```powershell
+   winget install JRSoftware.InnoSetup
+   ```
+2. Asegurate de tener `dist/desktop/appsettings.Local.json` con tus keys
+   (el instalador **las incluye**).
+3. Construí el instalador:
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File scripts/build-installer.ps1
+   ```
+   Genera **`dist/installer/MycelioSetup.exe`**.
+
+El instalador:
+- instala en `%LOCALAPPDATA%\Programs\Micelio` (**por usuario, sin admin**),
+- crea accesos directos en Menú Inicio (y escritorio, opcional) y un desinstalador,
+- al terminar puede abrir la app (que a su vez abre el navegador en `:5279`).
+
+> ⚠️ Como el instalador **incluye las credenciales de Cloudflare**, cualquiera que
+> lo tenga accede a la misma base. Distribuilo solo a gente de confianza. Para varios
+> usuarios reales, lo correcto es el backend hosteado (ver `docs/DEPLOYMENT.md`),
+> donde las keys nunca llegan a las máquinas.
+
+> La ventana de consola que aparece **es** la app corriendo: cerrarla detiene el
+> servidor (equivale a "salir").
+
 ---
 
 ## Problemas frecuentes
