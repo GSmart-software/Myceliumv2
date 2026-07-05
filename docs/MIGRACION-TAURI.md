@@ -80,18 +80,16 @@ Esquema portado ya presente: `frontend/src-tauri/migrations/001_init.sql`
 > a través de `tauri-plugin-sql`, con `lib/api.ts` como dispatcher.
 
 ### 1A. Infraestructura de la capa de datos
-- [ ] **T1.1** Crear `frontend/lib/db/client.ts`: singleton `Database` de `tauri-plugin-sql`
-      (carga lazy, ruta del `.db` en app-data dir). Helpers `select<T>()` / `execute()`.
-      ▸ *Verif.: abre la DB y hace un `SELECT 1` desde el webview.*
-- [ ] **T1.2** Definir tipos TS del modelo en `frontend/lib/db/types.ts` (Carpeta, Nota,
-      NodoArbol, EntradaPapelera, Snippet, Preferencias, etc.) espejando las respuestas
-      actuales del backend. ▸ *Verif.: `tsc` compila; tipos usados por al menos un repo.*
-- [ ] **T1.3** Utilidades comunes `frontend/lib/db/util.ts`: `nuevoId()` (formato de id
-      actual), `ahoraIso()`, mapeo de filas → objetos de dominio. ▸ *Verif.: unit test mínimo.*
-- [ ] **T1.4** Verificar/ajustar `001_init.sql` contra `backend/migrations/local/local_schema.sql`:
-      confirmar paridad de tablas/índices y **tabla/columna de preferencias** y de contenido de
-      nota. Añadir lo que falte como migración nueva `002_*.sql`. ▸ *Verif.: diff de esquema
-      documentado; migraciones corren limpias en DB vacía.*
+- [x] **T1.1** `frontend/lib/db/client.ts`: puerto `SqlExecutor` (select/execute) + executor
+      Tauri por defecto (carga lazy de `@tauri-apps/plugin-sql`, `Database.load('sqlite:mycelium.db')`)
+      + `setExecutor()` para inyectar en tests/adaptador web. SQL portable con placeholders `?`.
+- [x] **T1.2** `frontend/lib/db/types.ts`: filas `Row*` (snake_case) + DTOs de respuesta con la
+      forma EXACTA que ya esperan los call-sites (tree, papelera, contenido, sesión, snippets, búsqueda…).
+- [x] **T1.3** `frontend/lib/db/util.ts`: `nuevoId()` (uuid), `ahoraIso()`, `byteLen()`,
+      `tituloUnico()` y `buildRutaLookup()/rutaDe()` — portados 1:1 de `VaultEndpoints`.
+- [x] **T1.4** Esquema verificado: `001_init.sql` coincide con el backend salvo los cambios
+      deliberados (contenido en `contenidos`/`diagramas`, sin `r2_key`, sin `refresh_tokens`/
+      `tokens_un_uso` por auth latente sin JWT, preferencias en la fila `usuarios`). Sin cambios.
 
 ### 1B. Repo de estructura (árbol + carpetas)
 - [ ] **T1.5** `db/tree.ts` → `tree(vaultId)`: construir árbol carpetas+notas como hoy
