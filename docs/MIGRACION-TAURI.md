@@ -185,8 +185,8 @@ Esquema portado ya presente: `frontend/src-tauri/migrations/001_init.sql`
       conserva la forma del store para la nube futura. ▸ *Verif. (pendiente E2E): arranque directo.*
 - [x] **T3.6** Sharing **no-op** (`sharing.ts`): `/compartido`, `/carpetas/{id}/miembros`,
       `/compartir`, `/miembros/{u}` devuelven vacío/`{ok}`; tablas conservadas.
-- [x] **T3.7** Colaboración **deshabilitada**: `GET /notas/{id}/colaboracion` → `null` (como el
-      local hoy); Yjs no se importa (carga dinámica sólo si hay relay).
+- [x] **T3.7** Colaboración **deshabilitada**: `GET /notas/{id}/colaboracion` → `{habilitada:false}`
+      (NO null; startCollab lee `info.habilitada` y caería si fuese null); Yjs no se importa.
 - [~] **T3.8** Smoke test de fase 3 (preferencias + snippets + arranque sin login).
       **Pendiente:** requiere runtime Tauri (junto con T1.20/T2.6).
 
