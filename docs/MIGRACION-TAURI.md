@@ -171,28 +171,24 @@ Esquema portado ya presente: `frontend/src-tauri/migrations/001_init.sql`
 
 # FASE 3 — Preferencias, CSS snippets y auth latente
 
-- [ ] **T3.1** `db/preferencias.ts` → leer/escribir preferencias (`PUT /preferencias` + lectura
-      vía `/me`). ▸ *Verif.: tema/preferencias persisten entre reinicios de la app.*
-- [ ] **T3.2** `db/snippets.ts` → CRUD css snippets (`GET/POST /css/snippets`,
-      `PATCH/DELETE /css/snippets/{id}`). ▸ *Verif.: crear/editar/activar/borrar snippet aplica
-      CSS en vivo.*
-- [ ] **T3.3** `db/auth.ts` — **auth latente**: `seed()` que siembra 1 usuario + 1 vault por
-      defecto si la DB está vacía; `me()` devuelve esa sesión fija. ▸ *Verif.: primera apertura
-      crea usuario+vault; siguientes reutilizan.*
-- [ ] **T3.4** Stubs locales de `login/register/refresh/logout/verify-email/forgot-password/
-      reset-password/cambiar-password/cerrar-todo/perfil`: resuelven local sin JWT, conservan
-      forma de respuesta. ▸ *Verif.: ningún flujo de UI rompe por auth; sin red.*
-- [ ] **T3.5** Ajustar `frontend/stores/authStore.ts`: `restore()/login()` resuelven contra el
-      usuario+vault sembrado; `initialized:true` para pasar `WorkspaceGuard`; token vacío.
-      Conservar la forma del store para la nube futura. ▸ *Verif.: la app arranca directo al
-      workspace sin pantalla de login.*
-- [ ] **T3.6** Sharing como **no-op**: `GET /compartido`, `carpetas-compartidas`, `compartir`,
-      `miembros/*` devuelven vacío/éxito neutro; tablas conservadas. ▸ *Verif.: UI de compartir
-      no crashea; muestra estado vacío.*
-- [ ] **T3.7** Colaboración **deshabilitada**: `GET /notas/{id}/colaboracion` → `null` (como
-      local hoy); Yjs no se importa. ▸ *Verif.: abrir nota no intenta relay; editor normal.*
-- [ ] **T3.8** Smoke test de fase 3 (preferencias + snippets + arranque sin login).
-      ▸ *Verif.: script verde; toda la UI navegable.*
+- [x] **T3.1** `db/preferencias.ts` → `putPreferencias` escribe tema/modo/tipografía en la fila
+      `usuarios`; la lectura va por `/auth/me`.
+- [x] **T3.2** `db/snippets.ts` → CRUD css snippets (`GET/POST /auth/css/snippets`,
+      `PATCH/DELETE /auth/css/snippets/{id}`).
+- [x] **T3.3** `db/auth.ts` — **auth latente**: `ensureSeed()` siembra usuario+vault+membresía
+      por defecto (idempotente); `me()`/`session()` devuelven esa sesión fija (sin JWT).
+- [x] **T3.4** Stubs locales en el dispatcher: `login/refresh` → sesión sembrada;
+      `register/verify-email/forgot/reset/cambiar-password` → `{message}`; `logout/cerrar-todo`
+      → `{ok}`; `perfil` → actualiza y devuelve el usuario.
+- [x] **T3.5** `authStore` **sin cambios por diseño**: como `/auth/refresh` devuelve la sesión
+      sembrada, `restore()` resuelve `initialized:true` y pasa `WorkspaceGuard` tal cual. Se
+      conserva la forma del store para la nube futura. ▸ *Verif. (pendiente E2E): arranque directo.*
+- [x] **T3.6** Sharing **no-op** (`sharing.ts`): `/compartido`, `/carpetas/{id}/miembros`,
+      `/compartir`, `/miembros/{u}` devuelven vacío/`{ok}`; tablas conservadas.
+- [x] **T3.7** Colaboración **deshabilitada**: `GET /notas/{id}/colaboracion` → `null` (como el
+      local hoy); Yjs no se importa (carga dinámica sólo si hay relay).
+- [~] **T3.8** Smoke test de fase 3 (preferencias + snippets + arranque sin login).
+      **Pendiente:** requiere runtime Tauri (junto con T1.20/T2.6).
 
 ---
 
