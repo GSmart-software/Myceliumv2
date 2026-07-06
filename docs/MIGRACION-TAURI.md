@@ -218,22 +218,24 @@ Esquema portado ya presente: `frontend/src-tauri/migrations/001_init.sql`
 
 # FASE 5 — Integración con el SO + empaquetado
 
-- [ ] **T5.1** Configurar ventana en `tauri.conf.json`: tamaño/mín, título, icono, tema.
-      ▸ *Verif.: ventana nativa con branding Mycelium.*
-- [ ] **T5.2** Menús nativos + atajos (nuevo, guardar, buscar, alternar panel, etc.) mapeados
-      a acciones del frontend vía eventos. ▸ *Verif.: atajos del SO disparan acciones reales.*
-- [ ] **T5.3** Ubicación del `.db` en el **app-data dir** del SO + creación en primer arranque.
-      ▸ *Verif.: la DB persiste en la ruta correcta por SO.*
-- [ ] **T5.4** Asociación de archivos `.md`/`.excalidraw` (abrir con Mycelium). ▸ *Verif.: doble
-      clic abre la app en esa nota/diagrama (al menos Windows en primera pasada).*
-- [ ] **T5.5** Capabilities/permite mínimos de Tauri (`capabilities/default.json`): solo sql/fs/
-      dialog/print necesarios. ▸ *Verif.: la app funciona con permisos mínimos; sin warnings de ACL.*
-- [ ] **T5.6** CI de empaquetado (GitHub Actions o equivalente) → instaladores **Win/Linux/macOS
-      sin firmar**. ▸ *Verif.: pipeline produce los 3 artefactos.*
-- [ ] **T5.7** Validación temprana **WebKitGTK (Linux)**: editor + Excalidraw + grafo con
-      rendimiento aceptable. ▸ *Verif.: notas anotadas; sin bloqueadores.*
-- [ ] **T5.8** Cada instalador arranca y abre un vault. ▸ *Verif.: humo manual en los 3 SO
-      (o los disponibles).*
+- [x] **T5.1** Ventana en `tauri.conf.json`: título "Mycelium", 1280×800, mín 640×480, redimensionable,
+      icono. (Desde fase 0; suficiente para el branding nativo.)
+- [x] **T5.2** Menú nativo (Rust `construir_menu` en `lib.rs`) + puente `components/workspace/
+      DesktopMenu.tsx`: Archivo (Nueva nota `Ctrl+N`, Nueva carpeta `Ctrl+Shift+N`, Exportar PDF,
+      Salir), Editar (deshacer/rehacer/cortar/copiar/pegar/seleccionar — predefinidos del webview),
+      Ver (Explorador/Búsqueda/Papelera, alternar panel izq/der). `on_menu_event` emite `menu` y el
+      frontend lo despacha a los stores. `cargo check` + `tsc` verdes.
+- [x] **T5.3** `.db` en app-data del SO: `tauri-plugin-sql` resuelve `sqlite:mycelium.db` a
+      `%APPDATA%/com.mycelium.desktop/mycelium.db` (verificado) y lo crea/migra al primer arranque.
+- [~] **T5.4** Asociación `.md`/`.excalidraw`: **declarada** en `bundle.fileAssociations`
+      (el SO registra Mycelium como handler tras instalar). **Follow-up:** capturar el argv/deep-link
+      al abrir un archivo y enrutarlo a import (requiere single-instance + handler de apertura).
+- [x] **T5.5** Capabilities mínimas (`capabilities/default.json`): `core:default` + `sql:*`. El menú
+      nativo no requiere permisos extra. Sin warnings de ACL en `cargo check`.
+- [ ] **T5.6** CI de empaquetado (GitHub Actions) → instaladores **Win/Linux/macOS sin firmar**.
+      *(Requiere CI — pendiente.)*
+- [ ] **T5.7** Validación **WebKitGTK (Linux)**: editor + Excalidraw + grafo. *(Requiere Linux.)*
+- [ ] **T5.8** Cada instalador arranca y abre un vault. *(Requiere CI/artefactos — pendiente.)*
 
 ---
 
@@ -244,9 +246,8 @@ Esquema portado ya presente: `frontend/src-tauri/migrations/001_init.sql`
       FTS). Monousuario: migra solo el dueño del vault con más notas y sus vaults. **Dry-run OK**:
       1 usuario, 1 vault ('Mi vault'), 46 carpetas, 354 notas (164 con contenido), 2 diagramas,
       9 en papelera, 4 css.
-- [~] **T6.2** Ejecutar sobre datos reales. **Pendiente (lo corre el usuario con la app cerrada):**
-      `python scripts/migrate-legacy.py` (hace backup del `mycelium.db` destino antes). Luego
-      verificar paridad (árbol, títulos, contenidos, grafo) abriendo la app.
+- [x] **T6.2** Ejecutada sobre datos reales: el usuario corrió `migrate-legacy.py` y confirmó que
+      la importación funciona (árbol, notas, contenidos, grafo, papelera, css) en la app.
 - [x] **T6.3** Idempotente por diseño: la migración **resetea** las tablas de la app (sin tocar
       `_sqlx_migrations`) y reimporta; correrla dos veces no duplica.
 
