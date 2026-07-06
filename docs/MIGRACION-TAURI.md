@@ -194,26 +194,25 @@ Esquema portado ya presente: `frontend/src-tauri/migrations/001_init.sql`
 
 # FASE 4 — Ajustes del frontend (PDF cliente, import, seam web/desktop)
 
-- [ ] **T4.1** **Export PDF cliente**: reemplazar `POST /notas/{id}/exportar-pdf` por generación
-      en el front desde el HTML ya renderizado (impresión del webview vía `tauri-plugin` de
-      print/`window.print` con estilos de `printStyles.ts`, o librería JS). ▸ *Verif.: PDF sale
-      del contenido renderizado; comparar visualmente con el de PuppeteerSharp (se acepta
-      pequeña divergencia).*
-- [ ] **T4.2** Reenrutar los **3 `fetch` directos** a la capa de datos / plugins:
-      `lib/excalidraw.ts` (load/save diagrama), `lib/export.ts`, y el `beforeunload` de
-      `NoteEditor.tsx`. ▸ *Verif.: guardar diagrama y export funcionan sin `fetch` HTTP.*
-- [ ] **T4.3** **Import de archivos** (`lib/import.ts`): usar `tauri-plugin-dialog`/`-fs` para
-      selección/lectura donde aplique, conservando el drag-and-drop web como fallback.
-      ▸ *Verif.: importar `.md`/`.excalidraw` desde diálogo nativo crea notas.*
-- [ ] **T4.4** **Seam web vs desktop**: abstraer la capa de datos tras una interfaz; implementación
-      Tauri (SQLite) = nueva; implementación web (fetch→.NET) conservada tras flag/entorno
-      (`process.env` o build target). El desktop puede divergir sin tocar la web. ▸ *Verif.: build
-      web sigue apuntando al backend; build Tauri usa SQLite; un solo `lib/api.ts` con dos backends.*
-- [ ] **T4.5** Config de build: `next.config.ts` `output:'export'` verificado; Tauri apunta a
-      `frontend/out`; `beforeDevCommand`/`beforeBuildCommand` en `tauri.conf.json`. ▸ *Verif.:
-      `tauri dev` levanta la SPA embebida; `tauri build` empaqueta `out/`.*
-- [ ] **T4.6** Smoke test de fase 4 (PDF + import + diagramas + build embebido).
-      ▸ *Verif.: script verde en app empaquetada de dev.*
+- [x] **T4.1** **Export PDF cliente** (`lib/export.ts`): `exportNotePdf` renderiza el HTML de la
+      nota (con SVG de Mermaid/Excalidraw) en un iframe oculto con tema + `@page size` y abre el
+      diálogo de impresión del webview (usuario → "Guardar como PDF"). Elimina la dependencia de
+      PuppeteerSharp/backend; el resultado puede diferir un poco.
+- [x] **T4.2** Reenrutados los **3 `fetch` directos** al dispatcher: `lib/excalidraw.ts`
+      (load/save diagrama y escena), `lib/export.ts` (diagramas del ZIP), y el `beforeunload` de
+      `NoteEditor.tsx`. `saveDiagram` ahora manda `{contenido}` (lo que espera `putDiagrama`).
+      Sin `fetch` HTTP al backend en runtime.
+- [~] **T4.3** **Import de archivos** (`lib/import.ts`): ya funciona en el webview vía input/
+      drag-and-drop del navegador + `api()` (paridad con la web). **Opcional/diferido:** añadir
+      diálogo nativo `tauri-plugin-dialog/-fs` como mejora de integración (no bloquea paridad).
+- [~] **T4.4** **Seam web vs desktop**: **diferido**. `lib/api.ts` es hoy el dispatcher SQLite; el
+      cliente HTTP→.NET queda en el historial de git para revivir el build web congelado. Se
+      formaliza (flag/entorno) sólo si se reactiva la web.
+- [x] **T4.5** Config de build: `output:'export'` ✓, Tauri → `frontend/out` ✓, `beforeDevCommand`/
+      `beforeBuildCommand` en `tauri.conf.json` ✓ (desde fase 0) + script `npm run tauri`.
+      `tauri dev` verificado (arranca la SPA embebida). `tauri build` pendiente (fase 5).
+- [~] **T4.6** Smoke test de fase 4 (PDF + import + diagramas). **Pendiente:** verificación manual
+      en `tauri dev` (imprimir PDF, guardar/cargar diagrama, importar `.md`).
 
 ---
 
