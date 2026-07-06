@@ -92,57 +92,59 @@ Esquema portado ya presente: `frontend/src-tauri/migrations/001_init.sql`
       `tokens_un_uso` por auth latente sin JWT, preferencias en la fila `usuarios`). Sin cambios.
 
 ### 1B. Repo de estructura (árbol + carpetas)
-- [ ] **T1.5** `db/tree.ts` → `tree(vaultId)`: construir árbol carpetas+notas como hoy
+- [x] **T1.5** `db/tree.ts` → `tree(vaultId)`: construir árbol carpetas+notas como hoy
       (`GET /vaults/{v}/tree`). ▸ *Verif.: árbol idéntico al de la web para un vault de prueba.*
-- [ ] **T1.6** `db/carpetas.ts` → `crearCarpeta(vaultId, padreId, nombre)` con nombre único
+- [x] **T1.6** `db/carpetas.ts` → `crearCarpeta(vaultId, padreId, nombre)` con nombre único
       entre hermanos. ▸ *Verif.: crear dos "Carpeta" produce "Carpeta" y "Carpeta 2".*
-- [ ] **T1.7** `renombrarCarpeta(id, nombre)` (`PATCH /carpetas/{id}`). ▸ *Verif.: renombra y
+- [x] **T1.7** `renombrarCarpeta(id, nombre)` (`PATCH /carpetas/{id}`). ▸ *Verif.: renombra y
       persiste; colisión de nombre resuelta como el backend.*
-- [ ] **T1.8** `moverCarpeta(id, nuevoPadreId)` con **chequeo anti-ciclo de subárbol**
+- [x] **T1.8** `moverCarpeta(id, nuevoPadreId)` con **chequeo anti-ciclo de subárbol**
       (`POST /carpetas/{id}/mover`). ▸ *Verif.: mover una carpeta dentro de su propio subárbol
       se rechaza igual que en .NET.*
-- [ ] **T1.9** `borrarCarpeta(id)` (recursivo: notas a papelera / borrado según regla actual)
+- [x] **T1.9** `borrarCarpeta(id)` (recursivo: notas a papelera / borrado según regla actual)
       (`DELETE /carpetas/{id}`). ▸ *Verif.: paridad con backend (subárbol + notas).*
 
 ### 1C. Repo de notas
-- [ ] **T1.10** `db/notas.ts` → `crearNota(vaultId, carpetaId)` con **sufijo de título único**
+- [x] **T1.10** `db/notas.ts` → `crearNota(vaultId, carpetaId)` con **sufijo de título único**
       ("Nota"→"Nota 2") (`POST /vaults/{v}/notas`). ▸ *Verif.: sufijo idéntico al backend.*
-- [ ] **T1.11** `renombrarNota(id, titulo)` (`PATCH /notas/{id}`) — mantener unicidad.
+- [x] **T1.11** `renombrarNota(id, titulo)` (`PATCH /notas/{id}`) — mantener unicidad.
       ▸ *Verif.: renombra y reindexa título en FTS (ver T1.16).*
-- [ ] **T1.12** `moverNota(id, carpetaId)` (`POST /notas/{id}/mover`). ▸ *Verif.: mueve; el
+- [x] **T1.12** `moverNota(id, carpetaId)` (`POST /notas/{id}/mover`). ▸ *Verif.: mueve; el
       árbol refleja el cambio.*
-- [ ] **T1.13** `duplicarNota(id)` (`POST /notas/{id}/duplicar`) — copia contenido+diagramas,
+- [x] **T1.13** `duplicarNota(id)` (`POST /notas/{id}/duplicar`) — copia contenido+diagramas,
       título único. ▸ *Verif.: duplicado con "… copia"/sufijo como el backend.*
 
 ### 1D. Papelera
-- [ ] **T1.14** `db/papelera.ts` → `borrarNota(id)`→papelera (`DELETE /notas/{id}`),
+- [x] **T1.14** `db/papelera.ts` → `borrarNota(id)`→papelera (`DELETE /notas/{id}`),
       `listarPapelera(vaultId)` (`GET /vaults/{v}/papelera`), `recuperar(id)`
       (`POST /notas/{id}/recuperar`), `borrarPermanente(id)` (`DELETE /notas/{id}/permanente`).
       ▸ *Verif.: ciclo borrar→listar→recuperar→borrar-permanente completo.*
-- [ ] **T1.15** `purgarPapelera(vaultId)` **>30 días** (misma regla que backend). Definir
+- [x] **T1.15** `purgarPapelera(vaultId)` **>30 días** (misma regla que backend). Definir
       cuándo se dispara (al abrir vault / al listar). ▸ *Verif.: entrada con fecha vieja
       se purga; reciente no.*
 
 ### 1E. Contenido + FTS
-- [ ] **T1.16** `db/contenido.ts` → `getContenido(id)` / `putContenido(id, texto)` sobre la
+- [x] **T1.16** `db/contenido.ts` → `getContenido(id)` / `putContenido(id, texto)` sobre la
       **tabla de contenido** (`GET/PUT /notas/{id}/contenido`, forma `{ contenido, actualizadoEn }`).
       Incluir **reindex FTS** (delete+insert en `notas_fts`) en cada save y en rename/crear/duplicar.
       ▸ *Verif.: guardar contenido → aparece en búsqueda; el caché IndexedDB del editor sigue
       funcionando sin cambios.*
-- [ ] **T1.17** `db/diagramas.ts` → `getDiagrama(n,d)` / `putDiagrama(n,d,json)`
+- [x] **T1.17** `db/diagramas.ts` → `getDiagrama(n,d)` / `putDiagrama(n,d,json)`
       (`GET/PUT /notas/{n}/diagramas/{d}`). ▸ *Verif.: embed Excalidraw carga/guarda.*
 
 ### 1F. Dispatcher
-- [ ] **T1.18** Convertir `frontend/lib/api.ts` en **dispatcher local**: parsear `(method, path)`
+- [x] **T1.18** Convertir `frontend/lib/api.ts` en **dispatcher local**: parsear `(method, path)`
       y enrutar a las funciones de `lib/db/*`; conservar la firma `api<T>(path, {method, body})`
       y `ApiError`. Quitar `fetch`/base URL/cookies/token. **Los ~53 call-sites quedan intactos.**
       Rutas aún no migradas → error explícito "no implementado" temporal.
       ▸ *Verif.: `tsc` compila; una operación de árbol real pasa por el dispatcher.*
-- [ ] **T1.19** Cablear en el dispatcher todo el grupo **árbol/carpetas/notas/papelera/
+- [x] **T1.19** Cablear en el dispatcher todo el grupo **árbol/carpetas/notas/papelera/
       contenido/diagramas** (T1.5–T1.17). ▸ *Verif.: crear/renombrar/mover/borrar/recuperar
       y editar contenido desde la UI real, sin backend levantado.*
-- [ ] **T1.20** Smoke test de fase 1 (adaptar `smoke-*.mjs`): árbol + CRUD + papelera + contenido.
+- [~] **T1.20** Smoke test de fase 1 (adaptar `smoke-*.mjs`): árbol + CRUD + papelera + contenido.
       ▸ *Verif.: script verde end-to-end contra la app Tauri.*
+      **Pendiente:** requiere runtime Tauri (webview + `tauri-plugin-sql`). La semántica SQL/FTS
+      ya está cubierta por el test Rust `data_layer.rs`; el dispatcher + repos pasan `tsc` verde.
 
 ---
 
