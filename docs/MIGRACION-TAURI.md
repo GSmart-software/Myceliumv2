@@ -225,9 +225,11 @@ Esquema portado ya presente: `frontend/src-tauri/migrations/001_init.sql`
       (duplicaba la interfaz). `lib.rs` no llama a `set_menu`; sin barra en Win/Linux.
 - [x] **T5.3** `.db` en app-data del SO: `tauri-plugin-sql` resuelve `sqlite:mycelium.db` a
       `%APPDATA%/com.mycelium.desktop/mycelium.db` (verificado) y lo crea/migra al primer arranque.
-- [~] **T5.4** Asociación `.md`/`.excalidraw`: **declarada** en `bundle.fileAssociations`
-      (el SO registra Mycelium como handler tras instalar). **Follow-up:** capturar el argv/deep-link
-      al abrir un archivo y enrutarlo a import (requiere single-instance + handler de apertura).
+- [x] **T5.4** Asociación `.md`/`.excalidraw` **declarada** (`bundle.fileAssociations`) + **handler
+      de apertura**: Rust lee el archivo del argv (con `tauri-plugin-single-instance` para reenviar a
+      la instancia viva y enfocar), lo entrega por el comando `take_opened_files` (lanzamiento inicial)
+      o el evento `open-files` (instancia ya abierta); el puente `FileOpenBridge.tsx` lo importa al
+      vault (nota md/excalidraw) y la abre, o abre la existente si el título ya está.
 - [x] **T5.5** Capabilities mínimas (`capabilities/default.json`): `core:default` + `sql:*`. El menú
       nativo no requiere permisos extra. Sin warnings de ACL en `cargo check`.
 - [~] **T5.6** CI de empaquetado: **workflow escrito** `.github/workflows/desktop-build.yml`
