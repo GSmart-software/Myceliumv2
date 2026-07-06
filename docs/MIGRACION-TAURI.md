@@ -239,14 +239,16 @@ Esquema portado ya presente: `frontend/src-tauri/migrations/001_init.sql`
 
 # FASE 6 — Migración de datos existentes
 
-- [ ] **T6.1** Script/rutina de migración: leer `micelio.local.db` + `.local-storage/blobs`
-      actuales (`.md`/`.excalidraw`/CSS) e **importar contenido a la tabla** del nuevo modelo.
-      ▸ *Verif.: dry-run reporta N notas/diagramas/snippets a migrar.*
-- [ ] **T6.2** Ejecutar migración sobre datos reales y confirmar **lectura/escritura sin pérdida**
-      (conteos, títulos, contenidos, enlaces del grafo). ▸ *Verif.: checklist de paridad de datos
-      100%; backup del origen guardado antes.*
-- [ ] **T6.3** Idempotencia/reejecución segura de la migración. ▸ *Verif.: correr dos veces no
-      duplica.*
+- [x] **T6.1** `scripts/migrate-legacy.py` (Python 3, con FTS5): lee `micelio.local.db` +
+      `.local-storage/blobs` e importa al modelo nuevo (contenido/diagramas/css en tablas + reindex
+      FTS). Monousuario: migra solo el dueño del vault con más notas y sus vaults. **Dry-run OK**:
+      1 usuario, 1 vault ('Mi vault'), 46 carpetas, 354 notas (164 con contenido), 2 diagramas,
+      9 en papelera, 4 css.
+- [~] **T6.2** Ejecutar sobre datos reales. **Pendiente (lo corre el usuario con la app cerrada):**
+      `python scripts/migrate-legacy.py` (hace backup del `mycelium.db` destino antes). Luego
+      verificar paridad (árbol, títulos, contenidos, grafo) abriendo la app.
+- [x] **T6.3** Idempotente por diseño: la migración **resetea** las tablas de la app (sin tocar
+      `_sqlx_migrations`) y reimporta; correrla dos veces no duplica.
 
 ---
 
