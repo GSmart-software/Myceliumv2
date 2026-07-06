@@ -150,21 +150,22 @@ Esquema portado ya presente: `frontend/src-tauri/migrations/001_init.sql`
 
 # FASE 2 — Búsqueda y grafo en TS
 
-- [ ] **T2.1** Portar `BuildFtsQuery` (de `SearchEndpoints.cs`) a `frontend/lib/db/fts.ts`:
+- [x] **T2.1** Portar `BuildFtsQuery` (de `SearchEndpoints.cs`) a `frontend/lib/db/fts.ts`:
       tokenización, comillas, prefijo `*`, exacta vs prefijo (respetar el toggle DEF-035).
       ▸ *Verif.: mismos tokens de salida que el backend para casos de prueba.*
-- [ ] **T2.2** `db/buscar.ts` → `buscar(vaultId, q, opts)` con `… FROM notas_fts WHERE notas_fts
+- [x] **T2.2** `db/buscar.ts` → `buscar(vaultId, q, opts)` con `… FROM notas_fts WHERE notas_fts
       MATCH ?` + `snippet()` (`GET /vaults/{v}/buscar`). ▸ *Verif.: resultados y snippets
       equivalentes a la web; búsqueda por prefijo por defecto + toggle exacta.*
-- [ ] **T2.3** Portar `BuildVaultGraphAsync` a `db/grafo.ts` → `grafo(vaultId)`: leer contenidos,
+- [x] **T2.3** Portar `BuildVaultGraphAsync` a `db/grafo.ts` → `grafo(vaultId)`: leer contenidos,
       regex `[[wikilink]]` / `#tag`, resolver por título (reusar `resolveWikilink`), aristas+grados
       (`GET /vaults/{v}/grafo`). ▸ *Verif.: grafo con mismos nodos/aristas; construcción temporal
       (timelapse) y reglas de ocultar nodos siguen funcionando.*
-- [ ] **T2.4** `conexiones(notaId)` (`GET /notas/{id}/conexiones`) — enlaces entrantes/salientes.
+- [x] **T2.4** `conexiones(notaId)` (`GET /notas/{id}/conexiones`) — enlaces entrantes/salientes.
       ▸ *Verif.: panel de conexiones idéntico.*
-- [ ] **T2.5** Cablear búsqueda+grafo+conexiones en el dispatcher. ▸ *Verif.: búsqueda global
+- [x] **T2.5** Cablear búsqueda+grafo+conexiones en el dispatcher. ▸ *Verif.: búsqueda global
       y grafo operan desde la UI real.*
-- [ ] **T2.6** Smoke test de fase 2 (búsqueda + grafo). ▸ *Verif.: script verde.*
+- [~] **T2.6** Smoke test de fase 2 (búsqueda + grafo). ▸ *Verif.: script verde.*
+      **Pendiente:** requiere runtime Tauri (junto con T1.20).
 
 ---
 
