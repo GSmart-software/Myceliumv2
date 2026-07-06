@@ -232,8 +232,9 @@ Esquema portado ya presente: `frontend/src-tauri/migrations/001_init.sql`
       al abrir un archivo y enrutarlo a import (requiere single-instance + handler de apertura).
 - [x] **T5.5** Capabilities mínimas (`capabilities/default.json`): `core:default` + `sql:*`. El menú
       nativo no requiere permisos extra. Sin warnings de ACL en `cargo check`.
-- [ ] **T5.6** CI de empaquetado (GitHub Actions) → instaladores **Win/Linux/macOS sin firmar**.
-      *(Requiere CI — pendiente.)*
+- [~] **T5.6** CI de empaquetado: **workflow escrito** `.github/workflows/desktop-build.yml`
+      (`tauri-action`, matriz Win/Linux/macOS sin firmar; tag `v*` → Release borrador, manual →
+      artefactos). **Pendiente:** ejecutarlo (push de tag / dispatch) para producir los 3 instaladores.
 - [ ] **T5.7** Validación **WebKitGTK (Linux)**: editor + Excalidraw + grafo. *(Requiere Linux.)*
 - [ ] **T5.8** Cada instalador arranca y abre un vault. *(Requiere CI/artefactos — pendiente.)*
 
