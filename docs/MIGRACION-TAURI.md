@@ -220,11 +220,9 @@ Esquema portado ya presente: `frontend/src-tauri/migrations/001_init.sql`
 
 - [x] **T5.1** Ventana en `tauri.conf.json`: título "Mycelium", 1280×800, mín 640×480, redimensionable,
       icono. (Desde fase 0; suficiente para el branding nativo.)
-- [x] **T5.2** Menú nativo (Rust `construir_menu` en `lib.rs`) + puente `components/workspace/
-      DesktopMenu.tsx`: Archivo (Nueva nota `Ctrl+N`, Nueva carpeta `Ctrl+Shift+N`, Exportar PDF,
-      Salir), Editar (deshacer/rehacer/cortar/copiar/pegar/seleccionar — predefinidos del webview),
-      Ver (Explorador/Búsqueda/Papelera, alternar panel izq/der). `on_menu_event` emite `menu` y el
-      frontend lo despacha a los stores. `cargo check` + `tsc` verdes.
+- [x] **T5.2** **Descartado por decisión de UX**: se probó un menú nativo del SO (Archivo/Editar/Ver)
+      pero todas esas acciones ya existen dentro de la propia UI, así que **no se añade barra de menú**
+      (duplicaba la interfaz). `lib.rs` no llama a `set_menu`; sin barra en Win/Linux.
 - [x] **T5.3** `.db` en app-data del SO: `tauri-plugin-sql` resuelve `sqlite:mycelium.db` a
       `%APPDATA%/com.mycelium.desktop/mycelium.db` (verificado) y lo crea/migra al primer arranque.
 - [~] **T5.4** Asociación `.md`/`.excalidraw`: **declarada** en `bundle.fileAssociations`
