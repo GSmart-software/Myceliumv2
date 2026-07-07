@@ -14,26 +14,26 @@ solo divergen en la capa de datos.
 toda la historia de la web). Comparten el 100% del frontend salvo unos ~17 commits
 (capa de datos y ajustes desktop).
 
-## Regla de oro
+## Regla de oro: implementación independiente por rama (sin migración)
 
-> **La web es "aguas arriba"; el desktop, "aguas abajo".**
+Cada versión se implementa **por separado** en su rama. **No se migra código entre
+`web-cloud` y `desktop-tauri`** (nada de cherry-pick ni merge entre ellas): así
+pueden divergir libremente. El flujo lo coordina el **orquestador** con **subagentes
+en worktrees** — ver [`CLAUDE.md`](../CLAUDE.md) en la raíz para el proceso completo.
 
-- **Cambios compartidos** (UI, editor, grafo, render, stores…): hacerlos en
-  **`web-cloud`** y **fusionar hacia adelante** (`web-cloud` → `desktop-tauri`).
-  Al ser archivos que no divergen, el merge no genera conflictos.
+- **Cambios que aplican a ambas** (aunque sean de UI): se especifican una vez y se
+  implementan en **las dos ramas en paralelo** (un subagente por rama), lo más
+  parecido posible. Por defecto, si se puede en las dos, se hace en las dos.
 - **Cambios solo-desktop** (capa `lib/db`, Rust/Tauri, empaquetado): solo en
   `desktop-tauri`.
 - **Cambios solo-web** (endpoints .NET, D1/R2): solo en `web-cloud`.
-- **Evitar** hacer un cambio compartido primero en `desktop-tauri`: habría que
-  backportearlo a mano a la web (fuente de deriva).
+- Cada feature se hace en una **rama de feature** (`feat/<slug>-web`,
+  `feat/<slug>-desktop`) y se fusiona a su rama principal correspondiente.
 
-**Por defecto**, si un cambio se puede aplicar a ambas versiones, se aplica a las
-dos (empezando por `web-cloud`), salvo que se indique lo contrario.
+### Archivos que divergen entre las dos versiones
 
-### Archivos que SÍ divergen (conflictos esperables al fusionar)
-
-Solo estos difieren entre ramas; al fusionar `web-cloud → desktop-tauri`, si un
-cambio web los toca, se resuelve **conservando la versión desktop**:
+Estos difieren por diseño entre `web-cloud` y `desktop-tauri` (nunca se sincronizan
+entre ramas):
 
 - `frontend/lib/api.ts` (dispatcher vs cliente HTTP)
 - `frontend/lib/db/*` (solo desktop)
