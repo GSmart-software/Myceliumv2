@@ -42,6 +42,15 @@ entre ramas):
 - `frontend/app/page.tsx` (redirección directa al workspace en desktop)
 - `frontend/src-tauri/*`, `scripts/migrate-legacy.py`, `.github/workflows/desktop-build.yml`
 
+### Artefactos solo-web (no existen en `desktop-tauri`)
+
+`desktop-tauri` se limpió de todo lo ajeno al escritorio; esto vive **solo en
+`web-cloud`**: `backend/` (.NET), `wrangler.toml`/`.wrangler/` (Cloudflare),
+`render.yaml` (Render), `DEPLOYMENT-PLAN.md`, `docs/DEPLOYMENT.md` y `legacy/`
+(prototipo original). Ojo: los **datos locales** de la web
+(`backend/src/Micelio.Api/micelio.local.db` y `.local-storage/`) están fuera de
+git — viven solo en el directorio de trabajo; no borrar del disco.
+
 ## Pendiente en el remoto (`origin`)
 
 `origin` tiene `desktop-cloud`, `main`, `deploy/cloudflare`. Los renombres se
