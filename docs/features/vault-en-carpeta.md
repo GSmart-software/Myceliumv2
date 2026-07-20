@@ -58,10 +58,11 @@ contaminan los archivos. Esto elimina el mayor obstáculo típico de esta migrac
 
 ## 4. Decisiones de diseño
 
-### 4.1 Identidad de una nota → **la ruta relativa**
+### 4.1 Identidad de una nota → **la ruta relativa** (decidido)
 
 Hoy la identidad es un UUID. Con archivos como verdad, la identidad natural es la
-**ruta relativa** (`Proyectos/2026/plan.md`), como en Obsidian.
+**ruta relativa** (`Proyectos/2026/plan.md`), como en Obsidian. **Decisión tomada:
+identidad por ruta**, sin UUIDs en los archivos (los `.md` quedan puros).
 
 - El índice mantiene una tabla `notas(ruta PRIMARY KEY, titulo, tipo, mtime, tamano)`.
 - Se conserva un `id` estable **derivado de la ruta** para no romper el frontend
@@ -126,13 +127,22 @@ genera eventos de watcher constantes y puede provocar reindexados espurios y con
 de escritura. Debe documentarse como escenario no recomendado o, al menos, con el
 watcher menos agresivo.
 
-## 6. Migración de datos
+## 6. Estrategia de arranque: **empezar vacío** (decidido)
 
-1. El usuario elige la carpeta del vault (diálogo nativo, ya disponible).
-2. Se **exporta el vault actual** a esa carpeta reutilizando `exportVaultACarpeta()`
-   (ya implementado y probado): árbol de `.md` + `adjuntos/*.excalidraw`.
-3. Se crea `.mycelium/index.db` y se indexa.
-4. El `mycelium.db` anterior **se conserva intacto** como respaldo (no se borra).
+No hay migración automática del vault SQLite actual. El modo carpeta es un modo
+nuevo que **coexiste** con el SQLite clásico durante el desarrollo:
+
+1. El usuario elige la carpeta del vault (diálogo nativo, ya disponible). Puede estar
+   **vacía** o contener ya `.md`/`.excalidraw` (p. ej. una carpeta de Obsidian, o el
+   resultado de "Exportar a carpeta" de la opción 1).
+2. Se crea `.mycelium/index.db` y se indexa lo que haya (vacío → vault vacío).
+3. **El `mycelium.db` clásico no se toca**: queda intacto y separado. Quien quiera
+   sembrar la carpeta desde su vault SQLite usa "Exportar a carpeta" (opción 1),
+   manualmente.
+
+El modo activo (SQLite clásico vs carpeta) se resuelve por configuración: si hay una
+carpeta de vault seleccionada, la app trabaja contra ella; si no, sigue con el SQLite
+clásico. A futuro el modo carpeta puede volverse el único de desktop.
 
 ## 7. Fases de implementación
 
