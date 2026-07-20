@@ -179,6 +179,42 @@ clásico. A futuro el modo carpeta puede volverse el único de desktop.
 Cada fase se verifica con `cargo check`/`cargo test`, `tsc` y prueba en la app antes de
 seguir. Se integra por ramas de feature según el flujo de `CLAUDE.md`.
 
+### 7.1 Fase 2 — decisiones concretas del índice (implementadas)
+
+La fase 2 construye **solo la infraestructura** del índice; queda lista pero
+**inactiva** (el arranque y el dispatcher `lib/api.ts` siguen usando `mycelium.db`).
+Decisiones tomadas:
+
+- **Ubicación del índice → app-data, un archivo por vault.** El índice NO vive
+  dentro del vault sino en el app-data de la app, con nombre relativo
+  `sqlite:index-<hash>.db` (el plugin `tauri-plugin-sql` lo resuelve en app-data).
+  `<hash>` = primeros 16 hex del SHA-256 de la **ruta absoluta** del vault
+  (calculado en TS con `crypto.subtle.digest`, en `lib/db/client.ts`
+  `abrirIndiceDeVault`). Motivo: evita el dolor de cargar SQLite en rutas
+  absolutas arbitrarias en Windows, y el índice es desechable/reconstruible.
+- **Identidad de nota = su ruta relativa POSIX** (sin barra inicial): en el índice
+  `notas.id = ruta` (p. ej. `Proyectos/2026/plan.md`). `titulo` = nombre de
+  archivo sin extensión; `tipo` = `markdown`|`excalidraw` por extensión.
+- **Carpetas derivadas de las rutas**: `carpetas.id` = ruta POSIX de la carpeta
+  (`Proyectos/2026`), `padre_id` = carpeta padre o `NULL` en raíz, `nombre` =
+  basename.
+- **`vault_id` = constante `"vault"`** en todas las filas (hay un índice por
+  vault, no hace falta distinguir).
+- **Esquema espejo de `001_init.sql`.** El esquema del índice se define en TS
+  (`lib/db/indexer.ts`, `ESQUEMA_INDICE`) con `CREATE TABLE IF NOT EXISTS`
+  espejando las columnas de `carpetas`, `notas`, `contenidos`, `notas_fts`,
+  `papelera` y `diagramas`, y **debe mantenerse en sync** con `001_init.sql`. NO
+  se usa `_sqlx_migrations` (el índice no se migra con sqlx). Diferencias
+  intencionadas: se omiten `usuarios`/`vaults`/`membresias`/`css_snippets` y las
+  FK hacia `vaults`/`usuarios` (`vault_id` queda TEXT plano), y `notas` añade una
+  columna extra **`mtime INTEGER`** para la validación incremental.
+- **Indexado incremental por `mtime`.** El comando Rust `listar_archivos_meta`
+  devuelve por archivo `{ rutaRelativa, contenido, mtime (ms epoch), tipo }`
+  (ignora ocultos y el dir `.mycelium`). `indexarVault` upserta carpetas y notas,
+  se salta las notas cuyo `mtime` no cambió, reindexa FTS (delete+insert) y borra
+  del índice lo que ya no existe en disco. Excalidraw guarda su escena en
+  `contenidos` igual que el markdown (fase 2 no separa `diagramas`).
+
 ---
 
 ## 8. Cómo volver atrás (SQLite como fuente de verdad)
@@ -214,7 +250,10 @@ sean texto plano: no hay nada propietario que rescatar.
   almacenamiento no debe tocar los ~53 call-sites del frontend. Esta es la garantía
   más importante para poder ir y volver.
 - **El índice es desechable**: nunca debe contener información que no se pueda
-  reconstruir releyendo la carpeta.
+  reconstruir releyendo la carpeta. Al vivir en el app-data (`index-<hash>.db`,
+  §7.1) y NO dentro del vault, **se puede borrar sin tocar los datos**: la próxima
+  apertura del vault lo regenera releyendo la carpeta. Esto vale también como
+  reinicio ante corrupción del índice.
 
 ### Alternativa intermedia (si el problema es solo rendimiento)
 Antes de revertir del todo, se puede mantener el modelo de archivos pero **cachear más
