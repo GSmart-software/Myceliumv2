@@ -127,6 +127,28 @@ genera eventos de watcher constantes y puede provocar reindexados espurios y con
 de escritura. Debe documentarse como escenario no recomendado o, al menos, con el
 watcher menos agresivo.
 
+## 5bis. Múltiples vaults y selector de arranque (decidido)
+
+Modelo Obsidian completo: los vaults pueden vivir en **cualquier carpeta del
+dispositivo** y Mycelium las abre. La app mantiene un **registro de vaults
+vinculados** (en el config-dir, fuera de los vaults).
+
+- **Registro** (`vaults.json` en el config-dir): lista de `{ ruta, nombre,
+  ultimoAcceso }` + `autoAbrir: ruta | null`.
+- **Al arrancar:**
+  - Si hay `autoAbrir` → abre ese vault directo.
+  - Si no → muestra el **selector de vaults**: lista de vinculados (por acceso
+    reciente), botón "Abrir", "Vincular carpeta…" (diálogo del SO), quitar de la
+    lista, y un check **"Abrir este vault automáticamente"**.
+- **Salir del vault:** una acción dentro del workspace cierra la sesión del vault
+  actual y vuelve al selector, para elegir/vincular otro.
+- **Vincular** = añadir la carpeta al registro (no copia nada; solo la recuerda).
+  **Desvincular** = quitarla del registro (los archivos en disco no se tocan).
+- `nombre` por defecto = nombre de la carpeta; editable a futuro.
+
+El "vault abierto" es estado de runtime (qué carpeta usa la sesión actual),
+distinto del registro (qué vaults conoce la app).
+
 ## 6. Estrategia de arranque: **empezar vacío** (decidido)
 
 No hay migración automática del vault SQLite actual. El modo carpeta es un modo
