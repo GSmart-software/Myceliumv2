@@ -264,6 +264,51 @@ posibles reindexados espurios. Los dos debounces (400 ms en Rust + 300 ms en el
 frontend) lo mitigan. No se ofrece todavía un interruptor para desactivar el
 watcher (queda para fase 6/7). Sigue siendo un escenario no recomendado (§5).
 
+### 7.3 Fase 7 — endurecido de casos borde del sistema de archivos (implementada)
+
+Endurece las cuatro esquinas que el modelo "archivos = verdad" hace visibles. Todo
+actúa SOLO en modo carpeta (`getVaultActual() !== null`); el SQLite clásico queda
+byte a byte igual.
+
+- **Nombres inválidos → saneo centralizado.** Se extrajo un módulo **puro** sin
+  dependencias `lib/db/nombres.ts` (`sanearNombre`, `esReservadoWindows`,
+  `desambiguar`), reexportado desde `vaultFs.ts`. `sanearNombre`: reemplaza los
+  prohibidos (`\ / : * ? " < > |`) por `-`, quita caracteres de control, colapsa
+  espacios, recorta espacios/puntos finales (Windows los recorta), aplica un
+  `fallback` si queda vacío ("Sin título" para notas, "Sin nombre" para carpetas) y
+  añade `_` a los reservados de Windows (`CON`, `PRN`, `AUX`, `NUL`, `COM1`–`COM9`,
+  `LPT1`–`LPT9`, case-insensitive). El título mostrado sigue al nombre saneado (como
+  Obsidian). Test headless en `scripts/test-nombres.mjs`
+  (`node --test`, transpila el `.ts` puro al vuelo con la devDep `typescript`).
+- **Colisiones en la misma carpeta.**
+  - *Crear / duplicar nota y crear carpeta*: la desambiguación se hace a nivel de
+    **nombre de archivo** (no de título) con sufijo incremental estilo Obsidian
+    (" 1", " 2"…) consultando el índice (`nombreNotaLibre`/`nombreCarpetaLibre` en
+    `vaultFs.ts`). Así no se pisa un archivo real aunque dos títulos distintos
+    saneen al mismo nombre o ya exista una carpeta con ese nombre.
+  - *Renombrar / mover nota o carpeta*: si el destino ya existe en la misma carpeta
+    se **rechaza** con `DbError(409, "Ya existe … con ese nombre …")` (`rutaOcupada`
+    consulta el índice antes de tocar el disco), en vez de pisar.
+  - *Red de seguridad en Rust*: `vault_fs::mover_ruta` ya NO sobrescribe un destino
+    existente (devuelve error), salvo el renombrado que solo cambia
+    mayúsculas/minúsculas en FS insensibles (origen y destino canonicalizan al mismo
+    archivo).
+- **Papelera: purga física.** `borrarPermanente`/`purgarExpiradas` ya borraban el
+  archivo físico de `.mycelium/.trash` vía `borrar_definitivo` (retención de 30 días
+  intacta). La fase 7 añade en Rust la **poda de subcarpetas vacías** de la papelera
+  tras cada borrado, para no dejar un esqueleto de directorios.
+- **Carpetas vacías sobreviven al reindex.** Nuevo comando Rust
+  `archivos::listar_directorios` enumera TODOS los directorios reales (incluidos los
+  vacíos), ignorando ocultos/`.mycelium`. `indexer.ts::indexarVault` los inserta
+  además de las carpetas derivadas de las rutas de archivos, de modo que una carpeta
+  sin notas persiste al reabrir el vault.
+
+**Riesgo — carpetas en la nube (recordatorio).** Un vault dentro de
+Dropbox/OneDrive/Drive sigue siendo escenario no recomendado (§5, §7.2): además de
+los eventos espurios del watcher, la sincronización externa puede renombrar/duplicar
+archivos con sufijos propios ("(conflicted copy)") que el saneo/desambiguación de
+esta fase NO reconcilia. Sigue pendiente un interruptor para desactivar el watcher.
+
 ---
 
 ## 8. Cómo volver atrás (SQLite como fuente de verdad)
