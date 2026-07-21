@@ -134,12 +134,17 @@ dispositivo** y Mycelium las abre. La app mantiene un **registro de vaults
 vinculados** (en el config-dir, fuera de los vaults).
 
 - **Registro** (`vaults.json` en el config-dir): lista de `{ ruta, nombre,
-  ultimoAcceso }` + `autoAbrir: ruta | null`.
+  ultimoAcceso }` + `abrirUltimo: bool` (ajuste **global**, no por vault).
 - **Al arrancar:**
-  - Si hay `autoAbrir` → abre ese vault directo.
+  - Si hay una ruta persistida en la sesión (recarga) → reabre ese vault.
+  - Si no y `abrirUltimo` está activo → reabre el **último vault usado** (el de
+    `ultimoAcceso` más reciente), sea cual sea.
   - Si no → muestra el **selector de vaults**: lista de vinculados (por acceso
-    reciente), botón "Abrir", "Vincular carpeta…" (diálogo del SO), quitar de la
-    lista, y un check **"Abrir este vault automáticamente"**.
+    reciente), botón "Abrir", "Vincular carpeta…" (diálogo del SO) y quitar de la
+    lista.
+- **"Abrir el último vault al iniciar"** es un interruptor global en
+  **Configuración → Vault** (no una opción por vault): si está activo, la próxima
+  vez que se inicie se abre el último vault que se haya usado.
 - **Salir del vault:** una acción dentro del workspace cierra la sesión del vault
   actual y vuelve al selector, para elegir/vincular otro.
 - **Vincular** = añadir la carpeta al registro (no copia nada; solo la recuerda).
