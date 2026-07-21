@@ -215,6 +215,55 @@ Decisiones tomadas:
   del índice lo que ya no existe en disco. Excalidraw guarda su escena en
   `contenidos` igual que el markdown (fase 2 no separa `diagramas`).
 
+### 7.2 Fase 5 — watcher de cambios externos (implementada)
+
+La fase 5 refleja en la UI los cambios hechos **desde fuera de la app** (editar un
+`.md` con otro editor, `git pull`, sincronización con Syncthing/Dropbox…). Solo
+actúa en modo carpeta; el SQLite clásico queda intacto.
+
+- **Watcher nativo (Rust).** `src-tauri/src/vault_watch.rs` usa el crate
+  **`notify-debouncer-full` 0.3** (que arrastra `notify` v6). Un estado gestionado
+  por Tauri (`WatcherState = Mutex<Option<Debouncer<…>>>`) guarda el debouncer
+  activo. Dos comandos:
+  - `iniciar_watcher(app, state, vaultRuta)`: crea un debouncer (~400 ms) que
+    observa la carpeta recursivamente. Filtra por ruta relativa lo que cae bajo un
+    directorio oculto (`.mycelium`, `.git`, `.obsidian`, …) y lo que no es
+    `.md`/`.excalidraw` (los **borrados** sí pasan aunque no tengan extensión: la
+    ruta borrada puede ser una carpeta entera). Si queda algo relevante, emite el
+    evento Tauri **`vault-cambios`** con las rutas relativas afectadas. Reemplaza
+    cualquier watcher previo (al cambiar de vault).
+  - `detener_watcher(state)`: descarta el debouncer (dropearlo detiene la
+    observación). Se llama al salir del vault.
+- **Arranque/parada (frontend).** `vaultSessionStore.abrir()` invoca
+  `iniciar_watcher` tras indexar; `salir()` (ahora `async`) invoca
+  `detener_watcher` antes de soltar el vault.
+- **Reacción (frontend).** `lib/vaultWatch.ts::escucharCambiosVault()` escucha
+  `vault-cambios` con un **debounce propio (~300 ms)** para agrupar ráfagas; en
+  cada tanda reindexa (`indexarVault`, incremental) y refresca el árbol
+  (`useVaultStore.loadTree`). Luego dispara el evento de DOM
+  `micelio:vault-recargar`. El listener se engancha en `WorkspaceShell` solo cuando
+  hay un vault de carpeta abierto y se limpia al desmontar/salir (sin listeners
+  duplicados).
+- **Nota abierta.** Cada `NoteEditor` escucha `micelio:vault-recargar` y recarga su
+  contenido desde el índice **solo si no tiene cambios locales sin guardar**
+  (`dirtyRef`). Si los tiene, **no se pisa** la edición local (un aviso de
+  conflicto explícito queda pendiente). La recarga aplica el contenido como cambio
+  "remoto" (marca `brokerApplyRef` para no ensuciar la nota) y actualiza el caché
+  de IndexedDB. Cada instancia abierta de la misma nota se recarga por su cuenta.
+
+**No hay bucle de realimentación (clave del diseño).** Cuando la propia app escribe
+una nota (fase 4), el watcher dispara igual, pero el frontend solo llama a
+`indexarVault`, que **SOLO lee** archivos y actualiza el índice —nunca escribe
+archivos— y es **incremental por `mtime`**. Así "app escribe → watcher dispara →
+reindexa" termina en un reindex idempotente (a lo sumo una relectura del archivo
+recién escrito), sin realimentación. Por eso **no hace falta** rastrear los propios
+escritos de la app.
+
+**Carpetas en la nube (Dropbox/OneDrive/Drive).** Generan ráfagas de eventos y
+posibles reindexados espurios. Los dos debounces (400 ms en Rust + 300 ms en el
+frontend) lo mitigan. No se ofrece todavía un interruptor para desactivar el
+watcher (queda para fase 6/7). Sigue siendo un escenario no recomendado (§5).
+
 ---
 
 ## 8. Cómo volver atrás (SQLite como fuente de verdad)
