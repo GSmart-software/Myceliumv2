@@ -8,8 +8,8 @@ Estados: ⬜ pendiente · 🔧 en curso · ✅ confirmado (desktop) · 🌐 refl
 
 | Bug | Descripción corta | Alcance | Estado |
 |---|---|---|---|
-| DEF-015 | Colapsar títulos `#` también en vista de lectura | ambas (frontend) | ✅ (falta 🌐 web) |
-| DEF-015b | Ícono de plegar/desplegar personalizado y centrado vertical | ambas (frontend) | ✅ (falta 🌐 web) |
+| DEF-015 | Colapsar títulos `#` también en vista de lectura | ambas (frontend) | ✅ 🌐 |
+| DEF-015b | Ícono de plegar/desplegar personalizado y centrado vertical | ambas (frontend) | ✅ 🌐 |
 | DEF-018 | Se pierde el progreso de exportar vault al cerrar el menú | ambas (frontend) | ⬜ |
 | DEF-021 | Callout con tipo "contamina" las `>` siguientes separadas | ambas (frontend) | ⬜ |
 | DEF-022 | No se renderizan callouts anidados en edición en vivo | ambas (frontend) | ⬜ |
@@ -17,12 +17,12 @@ Estados: ⬜ pendiente · 🔧 en curso · ✅ confirmado (desktop) · 🌐 refl
 | DEF-024 | Opciones al exportar PDF (fondo blanco, colores, callouts, estilos) | ambas | ⬜ |
 | DEF-026 | Caret no visible en el editor CSS | ambas (frontend) | ⬜ |
 | DEF-030 | El grafo no actualiza colores al cambiar de tema | ambas (frontend) | ⬜ |
-| DEF-031 | Problemas de selección/scroll al trabajar con tablas | ambas (frontend) | ⬜ |
+| DEF-031 | Problemas de selección/scroll al trabajar con tablas | ambas (frontend) | ✅ 🌐 |
 | DEF-032 | No se adjunta un `.excalidraw` externo en un markdown | ambas (frontend) | ⬜ |
 | DEF-034 | Falta "sombra" (ícono+nombre) siguiendo el puntero al arrastrar | ambas (frontend) | ⬜ |
 | DEF-036 | Import cae en el path seleccionado, no donde se soltó | ambas (frontend) | ⬜ |
 | DEF-036b | Falta feedback del lugar donde se sueltan los archivos | ambas (frontend) | ⬜ |
-| DEF-037 | Conflictos de scroll/selección al abrir el buscador en el archivo | ambas (frontend) | ⬜ |
+| DEF-037 | Conflictos de scroll/selección al abrir el buscador en el archivo | ambas (frontend) | ✅ 🌐 |
 | DEF-038 | Límite de zoom-out del grafo insuficiente con muchos nodos | ambas (frontend) | ⬜ |
 
 ## Notas por bug
@@ -36,3 +36,12 @@ Estados: ⬜ pendiente · 🔧 en curso · ✅ confirmado (desktop) · 🌐 refl
   lote en un checkpoint (para no alternar de rama en cada bug). Archivos divergentes a
   vigilar al reflejar: `NoteEditor.tsx` difiere entre ramas (aplicar el cambio a mano,
   no copiar el archivo).
+- **DEF-031/037** (desktop `97417f4`, web `e372ef4`): raíz = el widget de tabla en vivo
+  espaciaba con `margin`, que CodeMirror NO mide (offsetHeight excluye márgenes) → el
+  height-map quedaba más corto que el layout real por cada tabla, y ese desfase
+  acumulado rompía gutter, selección con clic/flechas (DEF-031) y scroll del buscador
+  (DEF-037). Fix: espaciado por `padding` + neutralizar height/overflow heredados +
+  `estimatedHeight` en el widget. **Reflejo web** hecho vía worktree temporal (sin
+  tocar el checkout desktop), verificado con tsc + next build; los 3 archivos
+  compartidos eran idénticos al baseline → se trajeron enteros; en `NoteEditor.tsx`
+  (divergente) se aplicó solo la línea `className="mic-preview-body"` a mano.
