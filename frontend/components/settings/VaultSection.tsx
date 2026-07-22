@@ -1,24 +1,29 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { exportVaultZip } from "@/lib/export";
 import { collectFromFileList, collectFromZip } from "@/lib/import";
+import { useExportStore } from "@/stores/exportStore";
 import { useImportStore } from "@/stores/importStore";
 import { useVaultStore } from "@/stores/vaultStore";
 import styles from "./Settings.module.css";
 
+const T_ZIP = "Comprimiendo ZIP";
+
 /** Sección Vault: exportar todo el vault como ZIP (HU-09) e importar Obsidian (HU-11). */
 export function VaultSection() {
-  const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
+  // Progreso GLOBAL (DEF-018): no se pierde al cerrar el menú de opciones.
+  const progreso = useExportStore((s) => s.progreso);
+  const setProgreso = useExportStore((s) => s.setProgreso);
   const folderRef = useRef<HTMLInputElement>(null);
   const zipRef = useRef<HTMLInputElement>(null);
 
   const handleZip = async () => {
-    setProgress({ done: 0, total: 1 });
+    setProgreso({ done: 0, total: 1, titulo: T_ZIP });
     try {
-      await exportVaultZip((done, total) => setProgress({ done, total }));
+      await exportVaultZip((done, total) => setProgreso({ done, total, titulo: T_ZIP }));
     } finally {
-      setProgress(null);
+      setProgreso(null);
     }
   };
 
@@ -35,11 +40,11 @@ export function VaultSection() {
           <button
             type="button"
             className={styles.primaryBtn}
-            disabled={progress !== null}
+            disabled={progreso !== null}
             onClick={() => void handleZip()}
           >
-            {progress
-              ? `Comprimiendo… ${progress.done}/${progress.total}`
+            {progreso?.titulo === T_ZIP
+              ? `Comprimiendo… ${progreso.done}/${progreso.total}`
               : "Exportar vault como ZIP"}
           </button>
         </div>
