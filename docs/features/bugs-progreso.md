@@ -23,7 +23,7 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-036 | Import cae en el path seleccionado, no donde se soltó | ambas (frontend) | ⬜ |
 | DEF-036b | Falta feedback del lugar donde se sueltan los archivos | ambas (frontend) | ⬜ |
 | DEF-037 | Conflictos de scroll/selección al abrir el buscador en el archivo | ambas (frontend) | ✅ 🌐 |
-| DEF-038 | Límite de zoom-out del grafo insuficiente con muchos nodos | ambas (frontend) | ⬜ |
+| DEF-038 | Límite de zoom-out del grafo insuficiente con muchos nodos | ambas (frontend) | ✅ 🌐 |
 
 ## Notas por bug
 - **DEF-015/015b** (desktop `5705f0d`): DEF-015 ya estaba implementado; el bug real
