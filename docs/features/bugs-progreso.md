@@ -16,7 +16,7 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-023 | Explorer estilo Obsidian: paneles compartidos/archivos redimensionables con scroll propio | ambas (frontend) | ⬜ |
 | DEF-024 | Opciones al exportar PDF (fondo blanco, colores, callouts, estilos) | ambas | ⬜ |
 | DEF-026 | Caret no visible en el editor CSS | ambas (frontend) | ✅ 🌐 |
-| DEF-030 | El grafo no actualiza colores al cambiar de tema | ambas (frontend) | ⬜ |
+| DEF-030 | El grafo no actualiza colores al cambiar de tema | ambas (frontend) | ✅ 🌐 |
 | DEF-031 | Problemas de selección/scroll al trabajar con tablas | ambas (frontend) | ✅ 🌐 |
 | DEF-032 | No se adjunta un `.excalidraw` externo en un markdown | ambas (frontend) | ⬜ |
 | DEF-034 | Falta "sombra" (ícono+nombre) siguiendo el puntero al arrastrar | ambas (frontend) | ⬜ |
