@@ -4,13 +4,13 @@ Flujo: se arregla **uno a la vez**, primero en `desktop-tauri` (versión en uso)
 el usuario **confirma en la app**, luego se refleja en `web-cloud` (salvo que el
 bug sea específico de un sistema). No se avanza al siguiente hasta confirmar.
 
-Estados: ⬜ pendiente · 🔧 en curso · ✅ confirmado (desktop) · 🌐 reflejado en web
+Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) · ⏳ pend. evaluación · ✅ confirmado (desktop) · 🌐 reflejado en web
 
 | Bug | Descripción corta | Alcance | Estado |
 |---|---|---|---|
 | DEF-015 | Colapsar títulos `#` también en vista de lectura | ambas (frontend) | ✅ 🌐 |
 | DEF-015b | Ícono de plegar/desplegar personalizado y centrado vertical | ambas (frontend) | ✅ 🌐 |
-| DEF-018 | Se pierde el progreso de exportar vault al cerrar el menú | ambas (frontend) | ⬜ |
+| DEF-018 | Se pierde el progreso de exportar vault al cerrar el menú | ambas (frontend) | 🛠️🌐 ⏳ pend. evaluación |
 | DEF-021 | Callout con tipo "contamina" las `>` siguientes separadas | ambas (frontend) | ⬜ |
 | DEF-022 | No se renderizan callouts anidados en edición en vivo | ambas (frontend) | ⬜ |
 | DEF-023 | Explorer estilo Obsidian: paneles compartidos/archivos redimensionables con scroll propio | ambas (frontend) | ⬜ |
@@ -36,6 +36,12 @@ Estados: ⬜ pendiente · 🔧 en curso · ✅ confirmado (desktop) · 🌐 refl
   lote en un checkpoint (para no alternar de rama en cada bug). Archivos divergentes a
   vigilar al reflejar: `NoteEditor.tsx` difiere entre ramas (aplicar el cambio a mano,
   no copiar el archivo).
+- **DEF-018** (desktop `ae3f3df`, web `c3109c1`) — ⏳ PENDIENTE DE EVALUACIÓN (el
+  usuario aún no confirmó en runtime): el progreso de export pasó de estado local de
+  `VaultSection` a `exportStore` (global) mostrado por `ImportDialogs` a nivel de app.
+  `VaultSection.tsx` diverge entre ramas (desktop tiene export-a-carpeta + toggle
+  abrir-último; web solo ZIP) → se aplicó a mano en cada una; `exportStore.ts` (nuevo)
+  e `ImportDialogs.tsx` son compartidos. Reflejo web verificado con tsc + next build.
 - **DEF-031/037** (desktop `97417f4`, web `e372ef4`): raíz = el widget de tabla en vivo
   espaciaba con `margin`, que CodeMirror NO mide (offsetHeight excluye márgenes) → el
   height-map quedaba más corto que el layout real por cada tabla, y ese desfase
