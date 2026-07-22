@@ -12,7 +12,7 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-015b | Ícono de plegar/desplegar personalizado y centrado vertical | ambas (frontend) | ✅ 🌐 |
 | DEF-018 | Se pierde el progreso de exportar vault al cerrar el menú | ambas (frontend) | 🛠️🌐 ⏳ pend. evaluación |
 | DEF-021 | Callout con tipo "contamina" las `>` siguientes separadas | ambas (frontend) | ✅ 🌐 |
-| DEF-022 | No se renderizan callouts anidados en edición en vivo | ambas (frontend) | ⬜ |
+| DEF-022 | No se renderizan callouts anidados en edición en vivo | ambas (frontend) | ✅ 🌐 |
 | DEF-023 | Explorer estilo Obsidian: paneles compartidos/archivos redimensionables con scroll propio | ambas (frontend) | ⬜ |
 | DEF-024 | Opciones al exportar PDF (fondo blanco, colores, callouts, estilos) | ambas | ⬜ |
 | DEF-026 | Caret no visible en el editor CSS | ambas (frontend) | ⬜ |
