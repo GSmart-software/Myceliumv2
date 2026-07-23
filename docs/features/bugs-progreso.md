@@ -18,14 +18,23 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-026 | Caret no visible en el editor CSS | ambas (frontend) | ✅ 🌐 |
 | DEF-030 | El grafo no actualiza colores al cambiar de tema | ambas (frontend) | ✅ 🌐 |
 | DEF-031 | Problemas de selección/scroll al trabajar con tablas | ambas (frontend) | ✅ 🌐 |
-| DEF-032 | No se adjunta un `.excalidraw` externo en un markdown | ambas (frontend) | ⬜ |
-| DEF-034 | Falta "sombra" (ícono+nombre) siguiendo el puntero al arrastrar | ambas (frontend) | ⬜ |
-| DEF-036 | Import cae en el path seleccionado, no donde se soltó | ambas (frontend) | ⬜ |
-| DEF-036b | Falta feedback del lugar donde se sueltan los archivos | ambas (frontend) | ⬜ |
+| DEF-032 | No se adjunta un `.excalidraw` externo en un markdown | ambas (frontend) | ✅ 🌐 (ya estaba) |
+| DEF-034 | Falta "sombra" (ícono+nombre) siguiendo el puntero al arrastrar | ambas (frontend) | ✅ 🌐 (ya estaba) |
+| DEF-036 | Import cae en el path seleccionado, no donde se soltó | ambas (frontend) | ✅ 🌐 |
+| DEF-036b | Falta feedback del lugar donde se sueltan los archivos | ambas (frontend) | ✅ 🌐 |
 | DEF-037 | Conflictos de scroll/selección al abrir el buscador en el archivo | ambas (frontend) | ✅ 🌐 |
 | DEF-038 | Límite de zoom-out del grafo insuficiente con muchos nodos | ambas (frontend) | ✅ 🌐 |
 
 ## Notas por bug
+- **Cluster drag&drop**: DEF-032 y DEF-034 **ya estaban implementados** (doc
+  desactualizada) — confirmado por el usuario en la app; no requirieron cambios.
+  DEF-036/036b (desktop `3ef835f`, web `9c9a53e`): cada carpeta pasa a ser zona de
+  drop del SO (la más interna gana con `stopPropagation`) e importa ahí, con
+  resaltado del destino. CLAVE desktop: Tauri interceptaba los drops de archivos a
+  nivel nativo → hubo que poner `dragDropEnabled: false` en `tauri.conf.json` (su
+  doc dice que es *necesario* para usar HTML5 drag&drop en Windows); sin eso el
+  webview nunca recibía `dragover`/`drop` y la importación por arrastre no
+  funcionaba en desktop (bug preexistente). Ese ajuste es solo-desktop.
 - **DEF-015/015b** (desktop `5705f0d`): DEF-015 ya estaba implementado; el bug real
   era que la flecha en lectura apuntaba al div del título del documento (no al de
   contenido) y era invisible (opacity 0). Ícono rehecho como chevron CSS centrado.
