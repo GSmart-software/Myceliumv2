@@ -26,6 +26,14 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-038 | Límite de zoom-out del grafo insuficiente con muchos nodos | ambas (frontend) | ✅ 🌐 |
 
 ## Notas por bug
+- **Ajuste extra (no numerado) — zona de drop de carpeta** (desktop `aaa2143`, web
+  `2269f7f`): pedido del usuario tras DEF-036. El arrastre interno solo tenía como
+  droppable la LÍNEA de la carpeta, así que soltar en el hueco de su contenido caía
+  en la raíz. Ahora cada carpeta tiene `FolderDropZone` (fila + contenido expandido)
+  y un `collisionDetection` propio que elige la zona MÁS PEQUEÑA bajo el puntero (la
+  carpeta más profunda); la raíz solo fuera de toda carpeta. `FolderRow` ya no crea
+  su droppable: recibe `dropOver` de la zona (sirve para el resaltado interno y el
+  del SO).
 - **Cluster drag&drop**: DEF-032 y DEF-034 **ya estaban implementados** (doc
   desactualizada) — confirmado por el usuario en la app; no requirieron cambios.
   DEF-036/036b (desktop `3ef835f`, web `9c9a53e`): cada carpeta pasa a ser zona de
