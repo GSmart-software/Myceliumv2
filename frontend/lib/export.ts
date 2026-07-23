@@ -4,9 +4,10 @@ import { getCachedNote } from "@/lib/idb";
 import { renderMarkdown } from "@/lib/markdown";
 import { renderMermaidIn } from "@/lib/mermaid";
 import { renderExcalidrawIn } from "@/lib/excalidraw";
-import { PRINT_CSS } from "@/lib/printStyles";
+import { buildPrintCss, type PdfPrintOpts } from "@/lib/printStyles";
 import { useAuthStore } from "@/stores/authStore";
 import { usePreferencesStore } from "@/stores/preferencesStore";
+import { usePdfExportStore } from "@/stores/pdfExportStore";
 import { useVaultStore } from "@/stores/vaultStore";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5279";
@@ -134,9 +135,11 @@ export async function exportNotePdf(
   notaId: string,
   titulo: string,
   pageSize: "A4" | "Letter",
-  tema: string,
-  modoOscuro: boolean,
+  opts: PdfPrintOpts,
 ): Promise<void> {
+  // Con fondo blanco se ignora el modo oscuro (blanco + negro); el estilo (fondo,
+  // colores, callouts) viaja en el CSS que compone buildPrintCss (DEF-024).
+  const { tema, modoOscuro } = usePreferencesStore.getState();
   const html = await renderNoteHtml(notaId);
   const res = await fetch(`${API_URL}/notas/${notaId}/exportar-pdf`, {
     method: "POST",
@@ -147,7 +150,13 @@ export async function exportNotePdf(
         ? { Authorization: `Bearer ${useAuthStore.getState().accessToken}` }
         : {}),
     },
-    body: JSON.stringify({ pageSize, tema, modoOscuro, html, css: PRINT_CSS }),
+    body: JSON.stringify({
+      pageSize,
+      tema,
+      modoOscuro: !opts.fondoBlanco && modoOscuro,
+      html,
+      css: buildPrintCss(opts),
+    }),
   });
   if (!res.ok) {
     const err = await res.json().catch(() => null);
@@ -156,16 +165,10 @@ export async function exportNotePdf(
   downloadBlob(await res.blob(), `${safeName(titulo)}.pdf`);
 }
 
-/** Atajo de exportación a PDF con el tema activo de preferencias (HU-10). */
-export async function exportNotePdfActive(
-  notaId: string,
-  titulo: string,
-  pageSize: "A4" | "Letter",
-): Promise<void> {
-  const { tema, modoOscuro } = usePreferencesStore.getState();
-  try {
-    await exportNotePdf(notaId, titulo, pageSize, tema, modoOscuro);
-  } catch (error) {
-    if (typeof window !== "undefined") window.alert((error as Error).message);
-  }
+/**
+ * Punto de entrada desde la UI (DEF-024): abre el diálogo de opciones de PDF para
+ * la nota; la exportación real la dispara el diálogo con las opciones elegidas.
+ */
+export function exportNotePdfActive(notaId: string, titulo: string): void {
+  usePdfExportStore.getState().abrir({ notaId, titulo });
 }
