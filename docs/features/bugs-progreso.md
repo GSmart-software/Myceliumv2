@@ -13,7 +13,7 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-018 | Se pierde el progreso de exportar vault al cerrar el menú | ambas (frontend) | 🛠️🌐 ⏳ pend. evaluación |
 | DEF-021 | Callout con tipo "contamina" las `>` siguientes separadas | ambas (frontend) | ✅ 🌐 |
 | DEF-022 | No se renderizan callouts anidados en edición en vivo | ambas (frontend) | ✅ 🌐 |
-| DEF-023 | Explorer estilo Obsidian: paneles compartidos/archivos redimensionables con scroll propio | ambas (frontend) | ⬜ |
+| DEF-023 | Explorer estilo Obsidian: paneles redimensionables (P1) + arrastrar ventanas al explorador (P2) | ambas (frontend) | ⚙️ P1 ✅🌐 · P2 ⬜ (por definir) |
 | DEF-024 | Opciones al exportar PDF (fondo blanco, colores, callouts, estilos) | ambas | ⬜ |
 | DEF-026 | Caret no visible en el editor CSS | ambas (frontend) | ✅ 🌐 |
 | DEF-030 | El grafo no actualiza colores al cambiar de tema | ambas (frontend) | ✅ 🌐 |
@@ -26,6 +26,13 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-038 | Límite de zoom-out del grafo insuficiente con muchos nodos | ambas (frontend) | ✅ 🌐 |
 
 ## Notas por bug
+- **DEF-023 Parte 1** (desktop `ac5d214`, web `4d1152d`): división Archivos/Compartido
+  redimensionable con scroll propio (divisor arrastrable persistido en
+  `mic-split-compartido`; alto de Compartido inline). El colapso de Compartido se
+  elevó de `SharedSection` a props del `ExplorerPanel`. `ExplorerPanel.tsx` diverge
+  (a mano); `SharedSection.tsx` + CSS traídos enteros. **Parte 2** (arrastrar
+  ventanas/archivos al explorador para verlos como panel dividido) = feature grande
+  aparte, PENDIENTE de definir con el usuario.
 - **Ajuste extra (no numerado) — zona de drop de carpeta** (desktop `aaa2143`, web
   `2269f7f`): pedido del usuario tras DEF-036. El arrastre interno solo tenía como
   droppable la LÍNEA de la carpeta, así que soltar en el hueco de su contenido caía
