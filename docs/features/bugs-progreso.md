@@ -14,7 +14,7 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-021 | Callout con tipo "contamina" las `>` siguientes separadas | ambas (frontend) | ✅ 🌐 |
 | DEF-022 | No se renderizan callouts anidados en edición en vivo | ambas (frontend) | ✅ 🌐 |
 | DEF-023 | Explorer estilo Obsidian: paneles redimensionables (P1) + arrastrar ventanas al explorador (P2) | ambas (frontend) | ⚙️ P1 ✅🌐 · P2 ⬜ (por definir) |
-| DEF-024 | Opciones al exportar PDF (fondo blanco, colores, callouts, estilos) | ambas | ⬜ |
+| DEF-024 | Opciones al exportar PDF (fondo blanco, colores, callouts, estilos) | ambas (difiere) | ✅🌐 |
 | DEF-026 | Caret no visible en el editor CSS | ambas (frontend) | ✅ 🌐 |
 | DEF-030 | El grafo no actualiza colores al cambiar de tema | ambas (frontend) | ✅ 🌐 |
 | DEF-031 | Problemas de selección/scroll al trabajar con tablas | ambas (frontend) | ✅ 🌐 |
@@ -26,6 +26,16 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-038 | Límite de zoom-out del grafo insuficiente con muchos nodos | ambas (frontend) | ✅ 🌐 |
 
 ## Notas por bug
+- **DEF-024** (desktop `8fa7e55`, web `4be8562`): diálogo de opciones al exportar PDF
+  (tamaño + fondo blanco/texto negro por defecto, incluir colores, estilar callouts,
+  estilos de Mycelium; se recuerdan en `pdfExportStore`). `buildPrintCss(opts)` en
+  `printStyles.ts` compone el CSS por capas (compartido). **Diverge la salida**:
+  desktop imprime en cliente (iframe + `window.print()`, `@page margin: 16mm`; el
+  encabezado/pie del navegador se quita en el diálogo de impresión — perfeccionar con
+  export nativo = follow-up); web envía `css: buildPrintCss(opts)` al backend .NET
+  (PuppeteerSharp), sin encabezado de navegador. Con fondo blanco se ignora el modo
+  oscuro. `export.ts` diverge (a mano); `ExportMenu`/`TabBar`/`EditorToolbar`/
+  `ImportDialogs` + `PdfExportDialog`/`pdfExportStore`/`printStyles` traídos enteros.
 - **DEF-023 Parte 1** (desktop `ac5d214`, web `4d1152d`): división Archivos/Compartido
   redimensionable con scroll propio (divisor arrastrable persistido en
   `mic-split-compartido`; alto de Compartido inline). El colapso de Compartido se
