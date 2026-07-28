@@ -10,6 +10,7 @@ import { EditorSection } from "@/components/settings/EditorSection";
 import { GraphSection } from "@/components/settings/GraphSection";
 import { TypographySection } from "@/components/settings/TypographySection";
 import { VaultSection } from "@/components/settings/VaultSection";
+import { APP_VERSION } from "@/lib/version";
 import { useAuthStore } from "@/stores/authStore";
 import { useUiStore } from "@/stores/uiStore";
 import styles from "./SettingsDrawer.module.css";
@@ -135,6 +136,8 @@ export function SettingsDrawer() {
         >
           <LogOut size={15} aria-hidden /> Cerrar sesión
         </button>
+
+        <footer className={styles.footer}>Mycelium v{APP_VERSION}</footer>
       </aside>
     </>
   );
