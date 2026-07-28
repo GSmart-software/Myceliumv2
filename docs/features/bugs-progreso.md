@@ -50,16 +50,16 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
   **eliminó** la inserción de `[[enlace]]` al soltar sobre el editor (a pedido del
   usuario: se puede escribir a mano y chocaba con abrir/dividir; el ghost DEF-034 se
   mantiene). Núcleo técnico: el explorador arrastra con **@dnd-kit** (por puntero) y
-  no alcanza a los panes; puente por **hit-test** (`document.elementFromPoint` en
-  `onDragEnd`) contra zonas `data-pane-drop`/`data-edge` (bordes) y la sección
-  `data-pane-id` (resto). **Bug corregido**: el `setDraggingNota(null)` estaba al
-  inicio de `onDragEnd` y, por `useSyncExternalStore`, desmontaba las zonas de forma
-  síncrona ANTES del hit-test → `elementFromPoint` fallaba y caía en el enlace. Ahora
-  se limpia DESPUÉS del hit-test. Además zona central visible (feedback en todo el
-  pane). Lógica en compartido: `tabsStore` (`draggingNota`, `openNotaInPane`,
-  `splitPaneWithNota`), `EditorPane` (zonas + `data-pane-id`), `TabBar` (feedback);
-  en `ExplorerPanel` (divergente) solo el cableado. `tsc` verde; pendiente de prueba
-  del usuario y reflejo a web.
+  no alcanza a los panes. **`document.elementFromPoint` NO sirve** en el WebView de
+  Tauri (devuelve el ghost/editor, no la zona). En cambio los eventos de puntero SÍ
+  llegan a las zonas de drop durante el drag, así que las zonas **registran el
+  objetivo** (`notaDropTarget = {paneId, edge|center}`) en sus `onPointerEnter`/
+  `onPointerLeave`; al soltar, `onDragEnd` lee ese objetivo (borde = `splitPaneWithNota`,
+  centro = `openNotaInPane`). Lógica en compartido: `tabsStore` (`draggingNota`,
+  `notaDropTarget`, `openNotaInPane`, `splitPaneWithNota`), `EditorPane` (zonas
+  bordes+centro que fijan `notaDropTarget`), `TabBar` (feedback); en `ExplorerPanel`
+  (divergente) solo el cableado (`abrirNotaEnObjetivo` + `limpiarDragNota`). `tsc`
+  verde; pendiente de prueba del usuario y reflejo a web.
 - **Ajuste extra (no numerado) — zona de drop de carpeta** (desktop `aaa2143`, web
   `2269f7f`): pedido del usuario tras DEF-036. El arrastre interno solo tenía como
   droppable la LÍNEA de la carpeta, así que soltar en el hueco de su contenido caía
