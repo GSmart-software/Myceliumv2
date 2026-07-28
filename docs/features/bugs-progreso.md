@@ -13,7 +13,7 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-018 | Se pierde el progreso de exportar vault al cerrar el menú | ambas (frontend) | 🛠️🌐 ⏳ pend. evaluación |
 | DEF-021 | Callout con tipo "contamina" las `>` siguientes separadas | ambas (frontend) | ✅ 🌐 |
 | DEF-022 | No se renderizan callouts anidados en edición en vivo | ambas (frontend) | ✅ 🌐 |
-| DEF-023 | Explorer estilo Obsidian: paneles redimensionables (P1) + arrastrar al área de trabajo (P2) + explorador como visor con pestañas (P3) | ambas (frontend) | P1 ✅🌐 · P2 ✅🌐 · P3 🛠️ (sin confirmar) |
+| DEF-023 | Explorer estilo Obsidian: paneles redimensionables (P1) + arrastrar al área de trabajo (P2) + explorador como visor con pestañas (P3) | ambas (frontend) | P1 ✅🌐 · P2 ✅🌐 · P3 ✅🌐 |
 | DEF-024 | Opciones al exportar PDF (fondo blanco, colores, callouts, estilos) | ambas (difiere) | ✅🌐 |
 | DEF-026 | Caret no visible en el editor CSS | ambas (frontend) | ✅ 🌐 |
 | DEF-030 | El grafo no actualiza colores al cambiar de tema | ambas (frontend) | ✅ 🌐 |
@@ -81,7 +81,10 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
   seleccionada ocupa todo. El árbol (`ExplorerPanel`) se mantiene montado en el mismo
   lugar en ambos modos. **Devolver al workspace**: se arrastra la pestaña del documento
   del sidebar a un pane (`draggingSidebarNota` + zona `sidebarReturnZone` en
-  `EditorPane`; al soltar `openNotaInPane` + `cerrar`). `tsc` verde; pendiente de prueba.
+  `EditorPane`; al soltar `openNotaInPane` + `cerrar`). Confirmado en desktop
+  (`612dd0a`) y reflejado en web (`814508e`, verificado con `tsc` + `next build`; todos
+  los archivos son nuevos/compartidos → se trajeron enteros, sin conflictos). Con esto
+  DEF-023 (P1+P2+P3) queda **completo** en ambas versiones.
   **Ajuste**: al soltar contra el explorador se hacían dos acciones (abrir + mover),
   porque la colisión de dnd-kit marca carpeta por el rect del ghost, no por el
   puntero. Corregido: `dropMasProfundo` devuelve `[]` (sin colisión) cuando
