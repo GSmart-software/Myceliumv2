@@ -50,20 +50,20 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
   **eliminó** la inserción de `[[enlace]]` al soltar sobre el editor (a pedido del
   usuario: se puede escribir a mano y chocaba con abrir/dividir; el ghost DEF-034 se
   mantiene). Núcleo técnico: el explorador arrastra con **@dnd-kit** (por puntero) y
-  no alcanza a los panes. **Causa raíz de los intentos fallidos**: al mover el
-  puntero al centro del pane llegaba a **CodeMirror**, que iniciaba una selección y
-  disparaba `pointercancel`, **abortando el drag de dnd-kit** (el resaltado se veía y
-  desaparecía en <1s; al soltar, nada). Además `document.elementFromPoint` no sirve
-  en el WebView de Tauri (devuelve el ghost/editor). **Solución**: al arrastrar una
-  nota, `EditorPane` monta un **overlay único** (`.noteDropOverlay`, `inset:0`,
-  `z-index:30`) por ENCIMA del editor, así el puntero nunca llega a CodeMirror; su
-  `onPointerMove` calcula borde/centro por posición (`zonaEn`, umbral 56px) y registra
-  `notaDropTarget = {paneId, edge|center}`. Al soltar, `onDragEnd` del explorador lee
-  ese objetivo (borde = `splitPaneWithNota`, centro/barra = `openNotaInPane`). Lógica
-  en compartido: `tabsStore` (`draggingNota`, `notaDropTarget`, `openNotaInPane`,
-  `splitPaneWithNota`), `EditorPane` (overlay), `TabBar` (objetivo "abrir"); en
-  `ExplorerPanel` (divergente) solo el cableado (`abrirNotaEnObjetivo` +
-  `limpiarDragNota`). `tsc` verde; pendiente de prueba del usuario y reflejo a web.
+  no alcanza a los panes. **Causa raíz de los intentos fallidos**: el ghost del
+  `DragOverlay` de dnd-kit tapa el DOM bajo el puntero y bloquea los `pointermove`/
+  `elementFromPoint` sobre los panes (por eso el resaltado se veía y desaparecía en
+  <1s y al soltar no había objetivo). **Solución final**: no depender de eventos de
+  puntero sobre los panes; usar el **tracking propio de dnd-kit** (el mismo que hace
+  funcionar el drop en carpetas). El explorador computa el punto con
+  `activatorEvent + delta` y ubica el pane por **geometría** (`getBoundingClientRect`
+  de los cuerpos `[data-pane-id]`, umbral 56px para borde vs centro): en `onDragMove`
+  publica `notaDropTarget` (para el previo visual) y en `onDragEnd` recalcula y abre
+  (borde = `splitPaneWithNota`, centro = `openNotaInPane`). Compartido: `tabsStore`
+  (`draggingNota`, `notaDropTarget`, `openNotaInPane`, `splitPaneWithNota`),
+  `EditorPane` (cuerpo con `data-pane-id` + previo `.noteDropHint`); en `ExplorerPanel`
+  (divergente) el cableado (`objetivoEnPunto` + `onDragMove` + `limpiarDragNota`).
+  `tsc` verde; pendiente de prueba del usuario y reflejo a web.
 - **Ajuste extra (no numerado) — zona de drop de carpeta** (desktop `aaa2143`, web
   `2269f7f`): pedido del usuario tras DEF-036. El arrastre interno solo tenía como
   droppable la LÍNEA de la carpeta, así que soltar en el hueco de su contenido caía
