@@ -13,7 +13,7 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-018 | Se pierde el progreso de exportar vault al cerrar el menú | ambas (frontend) | 🛠️🌐 ⏳ pend. evaluación |
 | DEF-021 | Callout con tipo "contamina" las `>` siguientes separadas | ambas (frontend) | ✅ 🌐 |
 | DEF-022 | No se renderizan callouts anidados en edición en vivo | ambas (frontend) | ✅ 🌐 |
-| DEF-023 | Explorer estilo Obsidian: paneles redimensionables (P1) + arrastrar archivos del explorador al área de trabajo (P2) | ambas (frontend) | P1 ✅🌐 · P2 🛠️ (sin confirmar) |
+| DEF-023 | Explorer estilo Obsidian: paneles redimensionables (P1) + arrastrar archivos del explorador al área de trabajo (P2) | ambas (frontend) | P1 ✅🌐 · P2 ✅🌐 |
 | DEF-024 | Opciones al exportar PDF (fondo blanco, colores, callouts, estilos) | ambas (difiere) | ✅🌐 |
 | DEF-026 | Caret no visible en el editor CSS | ambas (frontend) | ✅ 🌐 |
 | DEF-030 | El grafo no actualiza colores al cambiar de tema | ambas (frontend) | ✅ 🌐 |
@@ -63,6 +63,9 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
   (`draggingNota`, `notaDropTarget`, `openNotaInPane`, `splitPaneWithNota`),
   `EditorPane` (cuerpo con `data-pane-id` + previo `.noteDropHint`); en `ExplorerPanel`
   (divergente) el cableado (`paneObjetivoEnPunto` + `onDragMove` + `limpiarDragNota`).
+  Confirmado por el usuario en desktop (`73a6f42`) y reflejado en web (`91180e9`,
+  verificado con `tsc` + `next build`; conflicto solo en el import de
+  `insertRefAtPoint`, resuelto quitándolo como en desktop).
   **Ajuste**: al soltar contra el explorador se hacían dos acciones (abrir + mover),
   porque la colisión de dnd-kit marca carpeta por el rect del ghost, no por el
   puntero. Corregido: `dropMasProfundo` devuelve `[]` (sin colisión) cuando
