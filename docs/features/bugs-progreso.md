@@ -62,7 +62,12 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
   (borde = `splitPaneWithNota`, centro = `openNotaInPane`). Compartido: `tabsStore`
   (`draggingNota`, `notaDropTarget`, `openNotaInPane`, `splitPaneWithNota`),
   `EditorPane` (cuerpo con `data-pane-id` + previo `.noteDropHint`); en `ExplorerPanel`
-  (divergente) el cableado (`objetivoEnPunto` + `onDragMove` + `limpiarDragNota`).
+  (divergente) el cableado (`paneObjetivoEnPunto` + `onDragMove` + `limpiarDragNota`).
+  **Ajuste**: al soltar contra el explorador se hacían dos acciones (abrir + mover),
+  porque la colisión de dnd-kit marca carpeta por el rect del ghost, no por el
+  puntero. Corregido: `dropMasProfundo` devuelve `[]` (sin colisión) cuando
+  `pointerCoordinates` cae sobre un pane, así la decisión sigue al PUNTERO —
+  puntero sobre pane = solo abrir/dividir; sobre explorador = solo mover.
   `tsc` verde; pendiente de prueba del usuario y reflejo a web.
 - **Ajuste extra (no numerado) — zona de drop de carpeta** (desktop `aaa2143`, web
   `2269f7f`): pedido del usuario tras DEF-036. El arrastre interno solo tenía como
