@@ -13,7 +13,7 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-018 | Se pierde el progreso de exportar vault al cerrar el menú | ambas (frontend) | 🛠️🌐 ⏳ pend. evaluación |
 | DEF-021 | Callout con tipo "contamina" las `>` siguientes separadas | ambas (frontend) | ✅ 🌐 |
 | DEF-022 | No se renderizan callouts anidados en edición en vivo | ambas (frontend) | ✅ 🌐 |
-| DEF-023 | Explorer estilo Obsidian: paneles redimensionables (P1) + arrastrar ventanas al explorador (P2) | ambas (frontend) | ⚙️ P1 ✅🌐 · P2 ⬜ (por definir) |
+| DEF-023 | Explorer estilo Obsidian: paneles redimensionables (P1) + arrastrar archivos del explorador al área de trabajo (P2) | ambas (frontend) | P1 ✅🌐 · P2 🛠️ (sin confirmar) |
 | DEF-024 | Opciones al exportar PDF (fondo blanco, colores, callouts, estilos) | ambas (difiere) | ✅🌐 |
 | DEF-026 | Caret no visible en el editor CSS | ambas (frontend) | ✅ 🌐 |
 | DEF-030 | El grafo no actualiza colores al cambiar de tema | ambas (frontend) | ✅ 🌐 |
@@ -42,7 +42,20 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
   elevó de `SharedSection` a props del `ExplorerPanel`. `ExplorerPanel.tsx` diverge
   (a mano); `SharedSection.tsx` + CSS traídos enteros. **Parte 2** (arrastrar
   ventanas/archivos al explorador para verlos como panel dividido) = feature grande
-  aparte, PENDIENTE de definir con el usuario.
+  aparte (ver abajo la **Parte 2**).
+- **DEF-023 Parte 2** (desktop `pendiente-commit`): arrastrar un archivo del
+  explorador al área de trabajo (paridad Obsidian). Modelo elegido con el usuario:
+  **borde de un pane = dividir** (abre la nota en un pane nuevo a ese lado) ·
+  **barra de pestañas = abrir como pestaña** en ese pane · **cuerpo del editor =
+  insertar `[[enlace]]`** (se conserva DEF-034). Núcleo técnico: el explorador
+  arrastra con **@dnd-kit** (por puntero) y no alcanza a los panes; se tiende un
+  puente por **hit-test** (`document.elementFromPoint` en `onDragEnd`, mismo patrón
+  que DEF-034) contra zonas marcadas con `data-pane-drop`/`data-edge` (bordes) y
+  `data-tabbar-drop` (barra). Lógica en compartido: `tabsStore`
+  (`draggingNota`, `openNotaInPane`, `splitPaneWithNota`), `EditorPane` (zonas de
+  drop también con nota), `TabBar` (objetivo "abrir"). En `ExplorerPanel`
+  (divergente) solo el cableado (`setDraggingNota` en start/cancel + `abrirNotaEnPunto`
+  antes del enlace). `tsc` verde; pendiente de prueba del usuario y reflejo a web.
 - **Ajuste extra (no numerado) — zona de drop de carpeta** (desktop `aaa2143`, web
   `2269f7f`): pedido del usuario tras DEF-036. El arrastre interno solo tenía como
   droppable la LÍNEA de la carpeta, así que soltar en el hueco de su contenido caía
