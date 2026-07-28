@@ -73,8 +73,12 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
   `tabsStore.dragging`); no se arrastra del árbol al árbol. Visor en **solo lectura**
   (patrón `LinkedPreviewPane`) con toggle **Ver/Editar** (monta `NoteEditor`). Todo en
   archivos NUEVOS/compartidos (`sidebarViewerStore`, `ExplorerDock`, `SidebarNoteView`)
-  + `LeftPanel`; **NO toca `ExplorerPanel`** (divergente) → reflejo trivial. `tsc`
-  verde; pendiente de prueba del usuario.
+  + `LeftPanel`; **NO toca `ExplorerPanel`** (divergente) → reflejo trivial. Se puede
+  anclar cualquier archivo visible, **incluido el grafo**. Layout: **división vertical
+  redimensionable** (árbol arriba siempre + docs abajo con divisor, alto persistido en
+  `docsHeight`). **Devolver al workspace**: se arrastra la pestaña del documento del
+  sidebar a un pane (`draggingSidebarNota` + zona `sidebarReturnZone` en `EditorPane`;
+  al soltar `openNotaInPane` + `cerrar`). `tsc` verde; pendiente de prueba del usuario.
   **Ajuste**: al soltar contra el explorador se hacían dos acciones (abrir + mover),
   porque la colisión de dnd-kit marca carpeta por el rect del ghost, no por el
   puntero. Corregido: `dropMasProfundo` devuelve `[]` (sin colisión) cuando
