@@ -50,16 +50,20 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
   **eliminó** la inserción de `[[enlace]]` al soltar sobre el editor (a pedido del
   usuario: se puede escribir a mano y chocaba con abrir/dividir; el ghost DEF-034 se
   mantiene). Núcleo técnico: el explorador arrastra con **@dnd-kit** (por puntero) y
-  no alcanza a los panes. **`document.elementFromPoint` NO sirve** en el WebView de
-  Tauri (devuelve el ghost/editor, no la zona). En cambio los eventos de puntero SÍ
-  llegan a las zonas de drop durante el drag, así que las zonas **registran el
-  objetivo** (`notaDropTarget = {paneId, edge|center}`) en sus `onPointerEnter`/
-  `onPointerLeave`; al soltar, `onDragEnd` lee ese objetivo (borde = `splitPaneWithNota`,
-  centro = `openNotaInPane`). Lógica en compartido: `tabsStore` (`draggingNota`,
-  `notaDropTarget`, `openNotaInPane`, `splitPaneWithNota`), `EditorPane` (zonas
-  bordes+centro que fijan `notaDropTarget`), `TabBar` (feedback); en `ExplorerPanel`
-  (divergente) solo el cableado (`abrirNotaEnObjetivo` + `limpiarDragNota`). `tsc`
-  verde; pendiente de prueba del usuario y reflejo a web.
+  no alcanza a los panes. **Causa raíz de los intentos fallidos**: al mover el
+  puntero al centro del pane llegaba a **CodeMirror**, que iniciaba una selección y
+  disparaba `pointercancel`, **abortando el drag de dnd-kit** (el resaltado se veía y
+  desaparecía en <1s; al soltar, nada). Además `document.elementFromPoint` no sirve
+  en el WebView de Tauri (devuelve el ghost/editor). **Solución**: al arrastrar una
+  nota, `EditorPane` monta un **overlay único** (`.noteDropOverlay`, `inset:0`,
+  `z-index:30`) por ENCIMA del editor, así el puntero nunca llega a CodeMirror; su
+  `onPointerMove` calcula borde/centro por posición (`zonaEn`, umbral 56px) y registra
+  `notaDropTarget = {paneId, edge|center}`. Al soltar, `onDragEnd` del explorador lee
+  ese objetivo (borde = `splitPaneWithNota`, centro/barra = `openNotaInPane`). Lógica
+  en compartido: `tabsStore` (`draggingNota`, `notaDropTarget`, `openNotaInPane`,
+  `splitPaneWithNota`), `EditorPane` (overlay), `TabBar` (objetivo "abrir"); en
+  `ExplorerPanel` (divergente) solo el cableado (`abrirNotaEnObjetivo` +
+  `limpiarDragNota`). `tsc` verde; pendiente de prueba del usuario y reflejo a web.
 - **Ajuste extra (no numerado) — zona de drop de carpeta** (desktop `aaa2143`, web
   `2269f7f`): pedido del usuario tras DEF-036. El arrastre interno solo tenía como
   droppable la LÍNEA de la carpeta, así que soltar en el hueco de su contenido caía
