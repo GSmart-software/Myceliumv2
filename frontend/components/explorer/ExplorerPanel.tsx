@@ -12,6 +12,7 @@ import {
   useSensors,
   type CollisionDetection,
   type DragEndEvent,
+  type DragMoveEvent,
   type DragStartEvent,
 } from "@dnd-kit/core";
 import {
@@ -27,7 +28,6 @@ import {
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { insertRefAtPoint } from "@/lib/editor/viewRegistry";
 import { exportNoteMd, exportNotePdfActive } from "@/lib/export";
 import { collectFromDataTransfer, collectFromFileList } from "@/lib/import";
 import { useAuthStore } from "@/stores/authStore";
@@ -45,13 +45,50 @@ import { ContextMenu, type MenuItem } from "./ContextMenu";
 import styles from "./ExplorerPanel.module.css";
 
 /**
+ * DEF-023 P2: pane y zona (borde = dividir / centro = abrir) bajo un punto de
+ * pantalla, por geometría de los cuerpos de pane (`[data-pane-id]`). Se usa el
+ * punto REAL del puntero (no `elementFromPoint`, que en el WebView de Tauri
+ * devuelve el ghost). `null` si el punto no cae en ningún pane.
+ */
+function paneObjetivoEnPunto(
+  x: number,
+  y: number,
+): { paneId: string; edge: "top" | "bottom" | "left" | "right" | "center" } | null {
+  const UMBRAL = 56; // px desde el borde para dividir; más adentro = centro
+  for (const el of document.querySelectorAll<HTMLElement>("[data-pane-id]")) {
+    const r = el.getBoundingClientRect();
+    if (x < r.left || x > r.right || y < r.top || y > r.bottom) continue;
+    const d = { top: y - r.top, bottom: r.bottom - y, left: x - r.left, right: r.right - x };
+    const min = Math.min(d.top, d.bottom, d.left, d.right);
+    const edge =
+      min > UMBRAL
+        ? "center"
+        : min === d.top
+          ? "top"
+          : min === d.bottom
+            ? "bottom"
+            : min === d.left
+              ? "left"
+              : "right";
+    return { paneId: el.dataset.paneId!, edge };
+  }
+  return null;
+}
+
+/**
  * Colisión para el arrastre interno: como la zona de cada carpeta cubre también
  * su contenido, varias zonas anidadas (y la raíz) se solapan bajo el puntero.
  * Gana la MÁS PEQUEÑA, que es la carpeta más profunda; la raíz (la mayor) solo
  * si el puntero no está dentro de ninguna carpeta. Así, soltar en el hueco de
  * una carpeta deja el archivo DENTRO de ella y no en la raíz.
+ *
+ * DEF-023 P2: si el PUNTERO está sobre un pane del área de trabajo, no colisiona
+ * con ninguna carpeta (devuelve []), para que soltar ahí solo abra/divida y NO
+ * mueva el archivo en el explorador (la decisión sigue al puntero, no al ghost).
  */
 const dropMasProfundo: CollisionDetection = (args) => {
+  const p = args.pointerCoordinates;
+  if (p && paneObjetivoEnPunto(p.x, p.y)) return [];
   const dentro = pointerWithin(args);
   if (dentro.length === 0) return rectIntersection(args);
   const area = (id: string | number) => {
@@ -197,15 +234,43 @@ export function ExplorerPanel() {
     { kind: "nota" | "carpeta"; nombre: string; tipo?: NotaTipo } | null
   >(null);
 
+  /**
+   * DEF-023 P2: coordenada de pantalla del puntero durante un drag de dnd-kit. Se
+   * calcula con el evento activador + el desplazamiento acumulado (mismo cálculo
+   * que usa la detección de colisiones de dnd-kit, fiable aunque el ghost del
+   * `DragOverlay` tape el DOM y bloquee `pointermove`/`elementFromPoint`).
+   */
+  function puntoDelDrag(event: DragMoveEvent | DragEndEvent): { x: number; y: number } {
+    const act = event.activatorEvent as MouseEvent | null;
+    return { x: (act?.clientX ?? 0) + event.delta.x, y: (act?.clientY ?? 0) + event.delta.y };
+  }
+
+  /** Limpia el estado transitorio del arrastre de una nota (DEF-023 P2). */
+  function limpiarDragNota() {
+    useTabsStore.getState().setDraggingNota(null);
+    useTabsStore.getState().setNotaDropTarget(null);
+  }
+
   function onDragStart(event: DragStartEvent) {
     const id = String(event.active.id);
     if (id.startsWith("nota:")) {
-      const nota = store.notas.find((n) => n.id === id.replace("nota:", ""));
+      const notaId = id.replace("nota:", "");
+      const nota = store.notas.find((n) => n.id === notaId);
       if (nota) setDragGhost({ kind: "nota", nombre: nota.titulo, tipo: nota.tipo });
+      // DEF-023 P2: avisa a los panes para que muestren el previo de drop.
+      useTabsStore.getState().setDraggingNota(notaId);
     } else if (id.startsWith("carpeta:")) {
       const carpeta = store.carpetas.find((c) => c.id === id.replace("carpeta:", ""));
       if (carpeta) setDragGhost({ kind: "carpeta", nombre: carpeta.nombre });
     }
+  }
+
+  // DEF-023 P2: mientras se arrastra una nota, publica la zona bajo el puntero
+  // (usando el tracking fiable de dnd-kit) para que el pane muestre el previo.
+  function onDragMove(event: DragMoveEvent) {
+    if (!String(event.active.id).startsWith("nota:")) return;
+    const { x, y } = puntoDelDrag(event);
+    useTabsStore.getState().setNotaDropTarget(paneObjetivoEnPunto(x, y));
   }
 
   function onDragEnd(event: DragEndEvent) {
@@ -213,21 +278,26 @@ export function ExplorerPanel() {
     const dragged = String(event.active.id);
     const over = event.over ? String(event.over.id) : null;
 
-    // Soltar una nota sobre un markdown abierto inserta su vínculo en el punto de
-    // soltado (los archivos .excalidraw se insertan como embed para verse inline).
+    // Soltar una nota FUERA del explorador la abre en un pane (DEF-023 P2): borde
+    // = dividir, centro = abrir como pestaña. La zona se recalcula por geometría
+    // desde el punto final del drag (fiable pese al ghost del DragOverlay).
     if (!over && dragged.startsWith("nota:")) {
       const nota = store.notas.find((n) => n.id === dragged.replace("nota:", ""));
-      if (nota) {
-        const act = event.activatorEvent as MouseEvent | null;
-        const x = (act?.clientX ?? 0) + event.delta.x;
-        const y = (act?.clientY ?? 0) + event.delta.y;
-        const ref =
-          nota.tipo === "excalidraw"
-            ? `![[${nota.titulo}.excalidraw]]`
-            : `[[${nota.titulo}]]`;
-        if (insertRefAtPoint(x, y, ref)) return;
+      const { x, y } = puntoDelDrag(event);
+      const objetivo = nota ? paneObjetivoEnPunto(x, y) : null;
+      if (nota && objetivo) {
+        if (objetivo.edge === "center") {
+          useTabsStore.getState().openNotaInPane(nota.id, objetivo.paneId);
+        } else {
+          useTabsStore.getState().splitPaneWithNota(nota.id, objetivo.paneId, objetivo.edge);
+        }
+        router.push(`/workspace?note=${nota.id}`);
       }
+      limpiarDragNota();
+      return;
     }
+
+    limpiarDragNota();
     if (!over) return;
 
     const destinoId = over === "root" ? null : over.replace("folder:", "");
@@ -546,8 +616,12 @@ export function ExplorerPanel() {
         sensors={sensors}
         collisionDetection={dropMasProfundo}
         onDragStart={onDragStart}
+        onDragMove={onDragMove}
         onDragEnd={onDragEnd}
-        onDragCancel={() => setDragGhost(null)}
+        onDragCancel={() => {
+          setDragGhost(null);
+          limpiarDragNota();
+        }}
       >
         {/* Panel "Archivos": ocupa el espacio libre y tiene su propio scroll. */}
         <div className={styles.paneArchivos}>

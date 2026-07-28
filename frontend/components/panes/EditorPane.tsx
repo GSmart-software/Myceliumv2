@@ -16,6 +16,8 @@ export function EditorPane({ pane }: { pane: LeafPane }) {
   const router = useRouter();
   const activePaneId = useTabsStore((s) => s.activePaneId);
   const dragging = useTabsStore((s) => s.dragging);
+  const draggingNota = useTabsStore((s) => s.draggingNota);
+  const notaDropTarget = useTabsStore((s) => s.notaDropTarget);
   const setActivePane = useTabsStore((s) => s.setActivePane);
   const splitWithTab = useTabsStore((s) => s.splitWithTab);
 
@@ -33,7 +35,9 @@ export function EditorPane({ pane }: { pane: LeafPane }) {
       }}
     >
       <TabBar pane={pane} />
-      <div className={styles.paneBody}>
+      {/* data-pane-id: el explorador ubica este cuerpo por geometría al arrastrar
+          una nota (DEF-023 P2), usando el tracking de puntero de dnd-kit. */}
+      <div className={styles.paneBody} data-pane-id={pane.id}>
         {pane.linkedTo !== null ? (
           <LinkedPreviewPane pane={pane} />
         ) : activeTab && activeTab.notaId === GRAPH_TAB_ID ? (
@@ -57,15 +61,26 @@ export function EditorPane({ pane }: { pane: LeafPane }) {
           </div>
         )}
 
-        {/* Zonas de drop en los bordes para crear splits (HU-25 CA9 / HU-26 CA1-2) */}
+        {/* Zonas de drop en los bordes para crear splits al arrastrar una PESTAÑA
+            (drag nativo HTML5, HU-25 CA9 / HU-26 CA1-2). */}
         {dragging && (
           <DropZones
             onDrop={(edge) => {
-              splitWithTab(dragging.srcPaneId, dragging.tabId, pane.id, edge);
+              const drag = useTabsStore.getState().dragging;
+              if (!drag) return;
+              splitWithTab(drag.srcPaneId, drag.tabId, pane.id, edge);
               const nid = useTabsStore.getState().activeNotaId();
               router.push(nid ? `/workspace?note=${nid}` : "/workspace");
             }}
           />
+        )}
+
+        {/* Al arrastrar una NOTA del explorador (DEF-023 P2): previo visual de la
+            zona objetivo (mitad para dividir, todo para abrir como pestaña). Es
+            solo visual (pointer-events:none); el explorador calcula la zona por
+            geometría con el tracking de dnd-kit y la publica en `notaDropTarget`. */}
+        {draggingNota && notaDropTarget?.paneId === pane.id && (
+          <div className={`${styles.noteDropHint} ${styles[`nd_${notaDropTarget.edge}`]}`} />
         )}
       </div>
     </section>

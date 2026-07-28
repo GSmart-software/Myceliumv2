@@ -57,6 +57,21 @@ type TabsState = {
   closedHistory: string[];
   /** Tab en drag activo (para mostrar las zonas de split). */
   dragging: { srcPaneId: string; tabId: string } | null;
+  /**
+   * Nota en drag DESDE el explorador (DEF-023 P2): mientras está activa, los panes
+   * muestran sus zonas de drop (bordes = dividir, barra de pestañas = abrir). El
+   * drop real lo resuelve el explorador leyendo `notaDropTarget` (dnd-kit no llega
+   * a los panes).
+   */
+  draggingNota: string | null;
+  /**
+   * Pane/zona bajo el puntero mientras se arrastra una nota (DEF-023 P2). Lo fijan
+   * las propias zonas de drop con sus `onPointerEnter`/`onPointerLeave` (los eventos
+   * de puntero SÍ llegan a las zonas durante el drag de dnd-kit, a diferencia de
+   * `document.elementFromPoint`, que en el WebView devuelve el ghost/editor). Al
+   * soltar, el explorador lee esto para dividir (borde) o abrir (centro).
+   */
+  notaDropTarget: { paneId: string; edge: SplitEdge | "center" } | null;
 
   openNote: (notaId: string) => void;
   /** Abre la nota en una pestaña nueva sin robar el foco (clic con la rueda). */
@@ -77,10 +92,28 @@ type TabsState = {
   linkPane: (paneId: string, sourcePaneId: string | null) => void;
   toggleLinkedScrollSync: (paneId: string) => void;
   setDragging: (dragging: TabsState["dragging"]) => void;
+  setDraggingNota: (notaId: string | null) => void;
+  setNotaDropTarget: (target: TabsState["notaDropTarget"]) => void;
+  /** Abre una nota como pestaña en un pane concreto (drop en su barra de pestañas). */
+  openNotaInPane: (notaId: string, paneId: string) => void;
+  /** Divide un pane abriendo una nota en un pane nuevo a un lado (drop en un borde). */
+  splitPaneWithNota: (notaId: string, dstPaneId: string, edge: SplitEdge) => void;
   /** Nota activa del pane activo (para sincronizar la URL). */
   activeNotaId: () => string | null;
   /** Cierra las pestañas de una nota en todos los panes (al ir a papelera). */
   closeNotaEverywhere: (notaId: string) => void;
+  /**
+   * Reapunta las pestañas (y el historial de cerradas) de una nota a su id nuevo.
+   * En modo carpeta la identidad es la ruta, así que renombrar/mover una nota
+   * cambia su id: la pestaña abierta debe seguir a la nota, no quedar huérfana.
+   */
+  remapNota: (oldId: string, newId: string) => void;
+  /**
+   * Reapunta las pestañas cuyo id cuelga de una carpeta renombrada/movida
+   * (prefijo `oldPrefix` → `newPrefix`): al cambiar la ruta de la carpeta cambian
+   * los ids (=ruta) de todas las notas de su subárbol.
+   */
+  remapCarpeta: (oldPrefix: string, newPrefix: string) => void;
   /**
    * Tras restaurar el layout persistido, descarta las pestañas cuyas notas ya
    * no existen en el vault (borradas mientras estaba cerrado). Se llama una vez
@@ -154,6 +187,8 @@ export const useTabsStore = create<TabsState>()(
   activePaneId: initialRoot.id,
   closedHistory: [],
   dragging: null,
+  draggingNota: null,
+  notaDropTarget: null,
 
   openNote(notaId) {
     const { root, activePaneId } = get();
@@ -411,6 +446,62 @@ export const useTabsStore = create<TabsState>()(
     set({ dragging });
   },
 
+  setDraggingNota(notaId) {
+    set({ draggingNota: notaId });
+  },
+
+  setNotaDropTarget(target) {
+    set({ notaDropTarget: target });
+  },
+
+  openNotaInPane(notaId, paneId) {
+    const { root } = get();
+    const target = findLeaf(root, paneId);
+    if (!target) return;
+    const existing = target.tabs.find((t) => t.notaId === notaId);
+    // Pestaña permanente (arrastrar es una acción deliberada, no un preview).
+    const newTab: Tab = existing ?? { id: newId(), notaId, preview: false };
+    set({
+      root: mapTree(root, (leaf) =>
+        leaf.id === paneId
+          ? {
+              ...leaf,
+              tabs: existing ? leaf.tabs : [...leaf.tabs, newTab],
+              activeTabId: newTab.id,
+            }
+          : leaf,
+      ),
+      activePaneId: paneId,
+      draggingNota: null,
+    });
+  },
+
+  splitPaneWithNota(notaId, dstPaneId, edge) {
+    const newTab: Tab = { id: newId(), notaId, preview: false };
+    const newLeaf = makeLeaf([newTab], newTab.id);
+    const direction: SplitPane["direction"] =
+      edge === "left" || edge === "right" ? "row" : "column";
+    const before = edge === "left" || edge === "top";
+
+    function insert(node: PaneNode): PaneNode {
+      if (node.type === "leaf") {
+        if (node.id !== dstPaneId) return node;
+        const split: SplitPane = {
+          id: newId(),
+          type: "split",
+          direction,
+          children: before ? [newLeaf, node] : [node, newLeaf],
+          sizes: [0.5, 0.5],
+        };
+        return split;
+      }
+      return { ...node, children: node.children.map(insert) };
+    }
+
+    const root = cleanLinks(pruneEmpty(insert(get().root)));
+    set({ root, activePaneId: newLeaf.id, draggingNota: null });
+  },
+
   activeNotaId() {
     const leaf = findLeaf(get().root, get().activePaneId);
     if (!leaf || !leaf.activeTabId) return null;
@@ -433,6 +524,35 @@ export const useTabsStore = create<TabsState>()(
     set({
       root,
       activePaneId: activeStillExists ? get().activePaneId : firstLeaf(root).id,
+    });
+  },
+
+  remapNota(oldId, newId) {
+    if (oldId === newId) return;
+    const map = (id: string) => (id === oldId ? newId : id);
+    set({
+      root: mapTree(get().root, (leaf) => ({
+        ...leaf,
+        tabs: leaf.tabs.map((t) => (t.notaId === oldId ? { ...t, notaId: newId } : t)),
+      })),
+      closedHistory: get().closedHistory.map(map),
+    });
+  },
+
+  remapCarpeta(oldPrefix, newPrefix) {
+    if (oldPrefix === newPrefix) return;
+    const map = (id: string) =>
+      id === oldPrefix
+        ? newPrefix
+        : id.startsWith(`${oldPrefix}/`)
+          ? newPrefix + id.slice(oldPrefix.length)
+          : id;
+    set({
+      root: mapTree(get().root, (leaf) => ({
+        ...leaf,
+        tabs: leaf.tabs.map((t) => ({ ...t, notaId: map(t.notaId) })),
+      })),
+      closedHistory: get().closedHistory.map(map),
     });
   },
 
