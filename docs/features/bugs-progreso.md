@@ -74,11 +74,14 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
   (patrón `LinkedPreviewPane`) con toggle **Ver/Editar** (monta `NoteEditor`). Todo en
   archivos NUEVOS/compartidos (`sidebarViewerStore`, `ExplorerDock`, `SidebarNoteView`)
   + `LeftPanel`; **NO toca `ExplorerPanel`** (divergente) → reflejo trivial. Se puede
-  anclar cualquier archivo visible, **incluido el grafo**. Layout: **división vertical
-  redimensionable** (árbol arriba siempre + docs abajo con divisor, alto persistido en
-  `docsHeight`). **Devolver al workspace**: se arrastra la pestaña del documento del
-  sidebar a un pane (`draggingSidebarNota` + zona `sidebarReturnZone` en `EditorPane`;
-  al soltar `openNotaInPane` + `cerrar`). `tsc` verde; pendiente de prueba del usuario.
+  anclar cualquier archivo visible, **incluido el grafo**. Dos disposiciones con toggle
+  (persistido en `mode`): **split** = árbol arriba siempre (NO como pestaña) + docs
+  abajo con sus pestañas, divisor redimensionable (`docsHeight`); **full** = barra de
+  pestañas arriba con el **Explorador como pestaña** (carpeta) + documentos, la
+  seleccionada ocupa todo. El árbol (`ExplorerPanel`) se mantiene montado en el mismo
+  lugar en ambos modos. **Devolver al workspace**: se arrastra la pestaña del documento
+  del sidebar a un pane (`draggingSidebarNota` + zona `sidebarReturnZone` en
+  `EditorPane`; al soltar `openNotaInPane` + `cerrar`). `tsc` verde; pendiente de prueba.
   **Ajuste**: al soltar contra el explorador se hacían dos acciones (abrir + mover),
   porque la colisión de dnd-kit marca carpeta por el rect del ghost, no por el
   puntero. Corregido: `dropMasProfundo` devuelve `[]` (sin colisión) cuando
