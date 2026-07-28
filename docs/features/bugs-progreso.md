@@ -13,7 +13,7 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-018 | Se pierde el progreso de exportar vault al cerrar el menú | ambas (frontend) | 🛠️🌐 ⏳ pend. evaluación |
 | DEF-021 | Callout con tipo "contamina" las `>` siguientes separadas | ambas (frontend) | ✅ 🌐 |
 | DEF-022 | No se renderizan callouts anidados en edición en vivo | ambas (frontend) | ✅ 🌐 |
-| DEF-023 | Explorer estilo Obsidian: paneles redimensionables (P1) + arrastrar archivos del explorador al área de trabajo (P2) | ambas (frontend) | P1 ✅🌐 · P2 ✅🌐 |
+| DEF-023 | Explorer estilo Obsidian: paneles redimensionables (P1) + arrastrar al área de trabajo (P2) + explorador como visor con pestañas (P3) | ambas (frontend) | P1 ✅🌐 · P2 ✅🌐 · P3 🛠️ (sin confirmar) |
 | DEF-024 | Opciones al exportar PDF (fondo blanco, colores, callouts, estilos) | ambas (difiere) | ✅🌐 |
 | DEF-026 | Caret no visible en el editor CSS | ambas (frontend) | ✅ 🌐 |
 | DEF-030 | El grafo no actualiza colores al cambiar de tema | ambas (frontend) | ✅ 🌐 |
@@ -66,6 +66,15 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
   Confirmado por el usuario en desktop (`73a6f42`) y reflejado en web (`91180e9`,
   verificado con `tsc` + `next build`; conflicto solo en el import de
   `insertRefAtPoint`, resuelto quitándolo como en desktop).
+- **DEF-023 Parte 3** (objetivo real del bug; spec en `def-023-visor-sidebar.md`):
+  el explorador funciona como visor con **pestañas arriba** (estilo Obsidian): pestaña
+  permanente "Explorador" (árbol, no cerrable) + documentos anclados. Se ancla
+  arrastrando una **pestaña del área de trabajo** al panel (drag nativo,
+  `tabsStore.dragging`); no se arrastra del árbol al árbol. Visor en **solo lectura**
+  (patrón `LinkedPreviewPane`) con toggle **Ver/Editar** (monta `NoteEditor`). Todo en
+  archivos NUEVOS/compartidos (`sidebarViewerStore`, `ExplorerDock`, `SidebarNoteView`)
+  + `LeftPanel`; **NO toca `ExplorerPanel`** (divergente) → reflejo trivial. `tsc`
+  verde; pendiente de prueba del usuario.
   **Ajuste**: al soltar contra el explorador se hacían dos acciones (abrir + mover),
   porque la colisión de dnd-kit marca carpeta por el rect del ghost, no por el
   puntero. Corregido: `dropMasProfundo` devuelve `[]` (sin colisión) cuando
