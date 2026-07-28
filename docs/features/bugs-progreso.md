@@ -43,19 +43,23 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
   (a mano); `SharedSection.tsx` + CSS traídos enteros. **Parte 2** (arrastrar
   ventanas/archivos al explorador para verlos como panel dividido) = feature grande
   aparte (ver abajo la **Parte 2**).
-- **DEF-023 Parte 2** (desktop `pendiente-commit`): arrastrar un archivo del
-  explorador al área de trabajo (paridad Obsidian). Modelo elegido con el usuario:
-  **borde de un pane = dividir** (abre la nota en un pane nuevo a ese lado) ·
-  **barra de pestañas = abrir como pestaña** en ese pane · **cuerpo del editor =
-  insertar `[[enlace]]`** (se conserva DEF-034). Núcleo técnico: el explorador
-  arrastra con **@dnd-kit** (por puntero) y no alcanza a los panes; se tiende un
-  puente por **hit-test** (`document.elementFromPoint` en `onDragEnd`, mismo patrón
-  que DEF-034) contra zonas marcadas con `data-pane-drop`/`data-edge` (bordes) y
-  `data-tabbar-drop` (barra). Lógica en compartido: `tabsStore`
-  (`draggingNota`, `openNotaInPane`, `splitPaneWithNota`), `EditorPane` (zonas de
-  drop también con nota), `TabBar` (objetivo "abrir"). En `ExplorerPanel`
-  (divergente) solo el cableado (`setDraggingNota` en start/cancel + `abrirNotaEnPunto`
-  antes del enlace). `tsc` verde; pendiente de prueba del usuario y reflejo a web.
+- **DEF-023 Parte 2** (desktop `8ad81ed` + fix `pendiente-commit`): arrastrar un
+  archivo del explorador al área de trabajo (paridad Obsidian). Modelo final:
+  **borde de un pane = dividir** (abre la nota en un pane nuevo a ese lado) · **resto
+  del pane (barra de pestañas o cuerpo) = abrir como pestaña** en ese pane. Se
+  **eliminó** la inserción de `[[enlace]]` al soltar sobre el editor (a pedido del
+  usuario: se puede escribir a mano y chocaba con abrir/dividir; el ghost DEF-034 se
+  mantiene). Núcleo técnico: el explorador arrastra con **@dnd-kit** (por puntero) y
+  no alcanza a los panes; puente por **hit-test** (`document.elementFromPoint` en
+  `onDragEnd`) contra zonas `data-pane-drop`/`data-edge` (bordes) y la sección
+  `data-pane-id` (resto). **Bug corregido**: el `setDraggingNota(null)` estaba al
+  inicio de `onDragEnd` y, por `useSyncExternalStore`, desmontaba las zonas de forma
+  síncrona ANTES del hit-test → `elementFromPoint` fallaba y caía en el enlace. Ahora
+  se limpia DESPUÉS del hit-test. Además zona central visible (feedback en todo el
+  pane). Lógica en compartido: `tabsStore` (`draggingNota`, `openNotaInPane`,
+  `splitPaneWithNota`), `EditorPane` (zonas + `data-pane-id`), `TabBar` (feedback);
+  en `ExplorerPanel` (divergente) solo el cableado. `tsc` verde; pendiente de prueba
+  del usuario y reflejo a web.
 - **Ajuste extra (no numerado) — zona de drop de carpeta** (desktop `aaa2143`, web
   `2269f7f`): pedido del usuario tras DEF-036. El arrastre interno solo tenía como
   droppable la LÍNEA de la carpeta, así que soltar en el hueco de su contenido caía
