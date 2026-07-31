@@ -18,6 +18,7 @@ y qué principio general dejó.
 | [[Estado con Zustand]] | `persist`, `partialize` y el efecto de `set()` sobre el DOM en el mismo handler |
 | [[Tauri y el WebView]] | ConPTY, `dragDropEnabled`, `elementFromPoint`, límites del WebView2 |
 | [[Compilacion y entorno de desarrollo]] | `cargo` sin memoria, `tee` que oculta fallos, procesos huérfanos en `:3000` |
+| [[Rendimiento del grafo]] | Dónde se va el tiempo por frame (repulsión O(n²), `shadowBlur`) y cómo mejorarlo |
 
 ## Principios que se repiten
 

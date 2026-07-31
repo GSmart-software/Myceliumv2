@@ -58,6 +58,7 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
 - [[Aprendizajes tecnicos]] — **mapa del área** (leer primero).
 - [[CodeMirror y la vista en vivo]] · [[Drag and drop en Mycelium]] · [[Estado con Zustand]]
 - [[Tauri y el WebView]] · [[Terminal integrada - PTY y xterm]] · [[Compilacion y entorno de desarrollo]]
+- [[Rendimiento del grafo]] — análisis del costo por frame y propuestas de optimización.
 
 ## Producto y planificación
 
