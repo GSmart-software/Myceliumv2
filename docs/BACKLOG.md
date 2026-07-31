@@ -499,3 +499,14 @@ Tentativo, ordenado por relación valor/esfuerzo (primero las S). **A definir ju
   `FUN-L-02` (públicos globales), `FUN-L-07` (terminal integrada).
 - **`2.0.0` (major)** — XL / rearquitectura y nube: `FUN-XL-01` (storage local‑first),
   `FUN-XL-03` (Cloudflare), `FUN-XL-02` (colaboración en tiempo real).
+
+---
+
+## Relacionadas
+
+- [[Mapa de documentacion]] — índice general de la documentación.
+- [[Estado del proyecto]] — qué de este backlog ya está hecho y qué sigue.
+- [[Versionado del sistema]] — cómo se traduce el tamaño (`S/M/L/XL`) en versiones.
+- [[Ideas Mycelium]] — las notas originales del usuario que dieron origen a esta lista.
+- [[Diferencias funcionales aceptadas entre versiones]] — por qué algunas entradas son de una sola versión.
+- [[Mycelium como memoria de la IA]] — el objetivo detrás de `FUN-L-07`, `FUN-L-08` y `FUN-L-09`.

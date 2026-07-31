@@ -359,3 +359,11 @@ Antes de revertir del todo, se puede mantener el modelo de archivos pero **cache
 agresivamente**: contenido en memoria para las notas abiertas, indexado incremental en
 segundo plano y watcher desactivable por configuración. Es mucho menos costoso que
 volver atrás.
+
+## Relacionadas
+
+- [[Capa de datos del desktop]] — cómo quedó la capa de datos tras estas fases.
+- [[fs-nativo-desktop]] — la integración con el sistema de archivos que lo habilitó.
+- [[mycignore]] — qué entra al índice del vault y qué no.
+- [[Tauri y el WebView]] — watcher, escrituras atómicas y rutas validadas.
+- [[Mapa de documentacion]] — índice general.

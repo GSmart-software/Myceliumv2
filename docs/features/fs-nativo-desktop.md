@@ -96,3 +96,9 @@ con un error. Hay un test unitario (`rechaza_escapes_de_la_carpeta_destino`).
   operaciones puntuales de export/import, la fuente de verdad sigue siendo SQLite.
 - Los adjuntos binarios (imágenes, PDF) siguen sin almacenarse en el vault; el
   export solo emite `.md` y `.excalidraw`.
+
+## Relacionadas
+
+- [[vault-en-carpeta]] — el modelo que habilitó esta integración.
+- [[Capa de datos del desktop]] — dónde encaja en la arquitectura.
+- [[Tauri y el WebView]] — límites del WebView y comandos nativos.

@@ -455,3 +455,12 @@ Puntos clave de la composición:
 | `raw` | Ctrl+4 | Solo CodeMirror sin decoraciones. Markdown puro visible. | Edición avanzada, depuración de sintaxis |
 
 En mobile (`<768px`) solo se muestran `live`, `read` — split y raw se ocultan.
+
+---
+
+## Relacionadas
+
+- [[Arquitectura de Mycelium]] — dónde encaja el sistema de diseño.
+- [[CodeMirror y la vista en vivo]] — las decoraciones del editor que consumen estos tokens.
+- [[Terminal integrada - PTY y xterm]] — caso de un componente que **copia** los tokens y debe re-leerlos al cambiar de tema.
+- [[Mapa de documentacion]] — índice general.

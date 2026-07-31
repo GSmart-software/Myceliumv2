@@ -61,3 +61,11 @@ diferencia funcional entre versiones es aceptada). Idea y decisiones: `docs/BACK
   `web-cloud`; queda registrado en `docs/RAMAS.md`.
 - **Limitación conocida**: el cwd restaurado es el **inicial** de cada terminal (no se
   rastrea el `cd` posterior del usuario).
+
+## Relacionadas
+
+- [[Terminal integrada - PTY y xterm]] — aprendizajes de implementación (PTY, tema, layout).
+- [[Mycelium como memoria de la IA]] — para qué existe esta terminal.
+- [[ia-framework-vault]] — lo que corre dentro de ella.
+- [[Diferencias funcionales aceptadas entre versiones]] — por qué es solo-desktop.
+- [[RAMAS]] — archivos que hizo divergir.

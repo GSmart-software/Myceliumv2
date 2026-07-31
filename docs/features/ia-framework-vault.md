@@ -99,3 +99,11 @@ disco); en SQLite clásico se muestra el motivo.
 La IA **entiende** Mycelium (documentos, vínculos, extensiones, metadatos y
 funciones) pero **no lo controla**. Control de la app, MCP y demás quedan como
 extensiones futuras (ver BACKLOG `FUN-L-08`/`FUN-L-09`).
+
+## Relacionadas
+
+- [[Mycelium como memoria de la IA]] — la decisión de producto que lo motiva.
+- [[Generar el framework de IA en un vault]] — el procedimiento y la política de conflictos.
+- [[terminal-integrada]] — dónde corre el asistente.
+- [[mycignore]] — por qué `.claude/` no se ve en la app por defecto.
+- [[Versionado del sistema]] — cómo se versiona el framework (independiente de la app).

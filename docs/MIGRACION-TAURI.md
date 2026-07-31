@@ -279,3 +279,13 @@ Esquema portado ya presente: `frontend/src-tauri/migrations/001_init.sql`
 ## Congelado (no se toca en esta migración)
 - `backend/` (todo .NET), deploy web (`render.yaml`, `wrangler.toml`), colaboración Yjs activa,
   sharing real. Se conservan como referencia y para el build web congelado.
+
+---
+
+## Relacionadas
+
+- [[Capa de datos del desktop]] — el resultado de esta migración.
+- [[vault-en-carpeta]] — la evolución posterior del modelo de datos.
+- [[Tauri y el WebView]] — aprendizajes técnicos de la plataforma.
+- [[Arquitectura de Mycelium]] — visión general.
+- [[Mapa de documentacion]] — índice general.

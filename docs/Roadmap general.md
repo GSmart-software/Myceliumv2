@@ -1,8 +1,15 @@
+
+> [!warning] Documento histórico — brainstorming previo
+> Notas de planificación anteriores al proyecto actual (algunas líneas quedaron
+> truncadas). Útil como contexto, **no** como referencia. El estado real está en
+> [[Estado del proyecto]]; el plan vivo, en [[BACKLOG]]; la arquitectura resultante, en
+> [[Arquitectura de Mycelium]].
+
 Roadmap general — Micelio (migración al stack de las HUs)
 
 Contexto
 
-El repo actual es un prototipo vanilla (HTML + CSS + JS, sin build, sin backend): árbol de archivos vía File System Access API, editor <textarea>, splitpanes, grafo en canvas y render markdown básico. Las 39 HUs de HUs.md describen un producto distinto: frontend Next.js/React + CodeMirror 6 + unified/rehype + Yjs, backend .NET 9 con Cloudflare D1/R2/Durable Objects.
+El repo actual es un prototipo vanilla (HTML + CSS + JS, sin build, sin backend): árbol de archivos vía File System Access API, editor <textarea>, splitpanes, grafo en canvas y render markdown básico. Las 39 HUs de [[HUs]] describen un producto distinto: frontend Next.js/React + CodeMirror 6 + unified/rehype + Yjs, backend .NET 9 con Cloudflare D1/R2/Durable Objects.
 
 Decisión del usuario: migrar al stack de las HUs, pero sin integración Cloudflare por ahora. El backend gestiona todo localmente (SQLite + disco) detrás de puertos con dependency injection (ID1Client, IBlobStorage, selección por config Storage:Provider), de modo que enchufar Cloudflare después sea solo agregar adaptadores. Esto es exactamente el patrón que las HU-39 y HU-04 ya especifican.
 
@@ -32,7 +39,7 @@ Mycelium/
 │   ├── DESIGN_SYSTEM.md       # mover el actual aquí (las HUs lo referencian en docs/)
 │   └── BACKLOG.md                # ideas, tamaños y versionado
 ├── legacy/                    # (opcional) prototipo vanilla actual, como referencia
-└── HUs.md
+└── docs/HUs.md
 
 Qué se porta del prototipo: la ed (js/graph.js) como base paraHU-30 (mini-grafo D3/canvas) y el grafo global del rail; conceptos del parser de wikilinks
 (js/markdown.js). El resto (pane sobre React/CodeMirror — portarlo costaría más que rehacerlo.

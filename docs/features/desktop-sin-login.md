@@ -46,3 +46,10 @@ al cargar:
   local dentro de la misma página: "No se pudo abrir el vault local.", el
   detalle del error (campo `error` del store) y un botón **Reintentar** que
   vuelve a llamar `restore()`.
+
+## Relacionadas
+
+- [[Arquitectura de Mycelium]] — el lugar de esta decisión en el conjunto.
+- [[Diferencias funcionales aceptadas entre versiones]] — el login existe solo en web.
+- [[Capa de datos de la web]] — la contraparte con usuarios.
+- [[RAMAS]] — archivos que divergen por esto.

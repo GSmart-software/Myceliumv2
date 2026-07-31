@@ -43,3 +43,10 @@ ahí). Esta P3 es independiente: fuente = pestaña del workspace; destino = expl
 3. La pestaña Explorador nunca se cierra; las de documentos sí.
 4. El documento anclado se ve en solo lectura y permite alternar a edición.
 5. Cambiar de pestaña alterna entre árbol y documento. Se recuerda al reabrir.
+
+## Relacionadas
+
+- [[Drag and drop en Mycelium]] — los tres intentos y la causa raíz del arrastre al área de trabajo.
+- [[Estado con Zustand]] — ids sentinela y qué se persiste del layout.
+- [[Version 1.0.0]] — release donde entró.
+- [[bugs-progreso]] — trazabilidad de `DEF-023`.

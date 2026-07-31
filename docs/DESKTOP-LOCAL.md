@@ -1,5 +1,12 @@
 # Mycelium como app local (un ejecutable, datos en Cloudflare)
 
+> [!warning] Documento histórico — desactualizado
+> Describe el empaquetado de la era **pre-Tauri**: un ejecutable que apuntaba a datos en
+> Cloudflare, con instalador de Inno Setup. Hoy el escritorio es una app Tauri con datos
+> locales ([[Capa de datos del desktop]]) y se empaqueta como MSI/NSIS — ver
+> [[Generar instaladores desktop]]. Se conserva como registro.
+
+
 Este modo corre **todo en tu máquina** desde un **solo ejecutable**: el backend
 .NET sirve a la vez la interfaz y la API en `http://localhost:5279`, y guarda los
 datos en **Cloudflare (D1 + R2)**. No usa Render ni Pages.

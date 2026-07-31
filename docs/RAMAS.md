@@ -84,3 +84,12 @@ git push origin web-cloud          # sube la rama renombrada
 git push origin --delete desktop-cloud   # borra la antigua (acción destructiva: confirmar)
 git push origin desktop-tauri      # sube la rama de escritorio (aún local)
 ```
+
+## Relacionadas
+
+- [[Dos ramas en vez de monorepo]] — por qué existe esta estructura.
+- [[Implementacion independiente por rama]] — la regla de oro que la sostiene.
+- [[Reflejar cambios de desktop a web]] — el procedimiento para cruzar cambios.
+- [[Diferencias funcionales aceptadas entre versiones]] — divergencias intencionales.
+- [[Convenciones de commits]] — reglas del remoto (`origin` desalineado a propósito).
+- [[Mapa de documentacion]] — índice general.

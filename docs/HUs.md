@@ -836,3 +836,14 @@ repositorios, use cases ni endpoints existentes.
   adaptadores local (disco) y Cloudflare R2 seleccionados por la misma config
   `Storage:Provider`.
 - Frontend para probar contra el backend local: `NEXT_PUBLIC_API_URL=http://localhost:5279`.
+
+
+---
+
+## Relacionadas
+
+- [[Arquitectura de Mycelium]] — cómo se implementaron estas historias.
+- [[BACKLOG]] — lo que quedó fuera de alcance o surgió después.
+- [[Estado del proyecto]] — grado de avance actual.
+- [[Roadmap general]] — el plan de fases con el que se abordaron (histórico).
+- [[Mapa de documentacion]] — índice general.

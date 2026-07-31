@@ -133,3 +133,13 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
   tocar el checkout desktop), verificado con tsc + next build; los 3 archivos
   compartidos eran idénticos al baseline → se trajeron enteros; en `NoteEditor.tsx`
   (divergente) se aplicó solo la línea `className="mic-preview-body"` a mano.
+
+---
+
+## Relacionadas
+
+- [[Bugs_errores_y_defectos]] — el reporte original de cada `DEF-*`.
+- [[Aprendizajes tecnicos]] — las causas raíz que salieron de resolverlos.
+- [[Version 1.0.0]] — el release que cerró este backlog.
+- [[Reflejar cambios de desktop a web]] — el proceso con el que se reflejó cada fix.
+- [[Mapa de documentacion]] — índice general.

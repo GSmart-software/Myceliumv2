@@ -51,3 +51,10 @@ sería: (a) patrones de ignore al **importar** un vault de Obsidian (hoy `.obsid
 está hardcodeado) y (b) filtro de visualización del árbol, con la config guardada
 como preferencia del vault en el backend. Queda registrado en el BACKLOG
 (`FUN-M-11`, parte web) porque requiere tocar el backend .NET.
+
+## Relacionadas
+
+- [[Capa de datos del desktop]] — el indexado y el watcher que consumen estos patrones.
+- [[vault-en-carpeta]] — el modelo de vault donde aplica.
+- [[Generar el framework de IA en un vault]] — por qué `.claude/` no se ve por defecto.
+- [[BACKLOG]] — la parte web pendiente (`FUN-M-11`).
