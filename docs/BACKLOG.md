@@ -307,12 +307,15 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   programa corriendo muere al cerrar Mycelium; mantenerlo vivo requeriría procesos en
   segundo plano — fuera de alcance, igual que en VS Code). Esta restauración será
   **configurable** en Opciones (activarla/desactivarla; con o sin scrollback).
-- **Shell por defecto** (definido): configurable en Opciones, estilo perfiles de VS
-  Code — en Windows: PowerShell / cmd / Git Bash / WSL; en Unix: bash / zsh / fish. Si
-  no se configura, se usa la shell del sistema.
-- **A definir**: ítem del menú contextual de carpetas ("Abrir terminal aquí");
-  detalles del selector de perfiles (¿elegir shell por terminal individual además del
-  default?).
+- **Shell por defecto** (definido): configurable en Opciones — se elige **qué shell se
+  inicia** al abrir una terminal, estilo perfiles de VS Code — en Windows: PowerShell /
+  cmd / Git Bash / WSL; en Unix: bash / zsh / fish. Si no se configura, se usa la shell
+  del sistema.
+- **Menú contextual** (definido): se incluye el ítem **"Abrir terminal aquí"** en el
+  clic derecho de las carpetas del explorador — abre una terminal nueva con el
+  directorio de trabajo en esa carpeta.
+- **A definir**: si además del default se puede elegir la shell por terminal individual
+  al abrirla (selector puntual).
 
 ### Pendientes — tamaño XL
 
