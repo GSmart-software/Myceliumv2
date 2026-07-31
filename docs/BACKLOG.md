@@ -66,6 +66,8 @@ y **priorizar** qué implementar antes.
 | `FUN-L-03` | `FILES-BASES-TABLA` | Tipo de archivo tipo "bases" (tabla) que agrega notas por metadatos, con filtros y columnas configurables. Depende de `FUN-M-04` | ambas | C-I-07b |
 | `FUN-L-04` | `VAULT-MULTIPLE` | Un usuario con varios vaults, seleccionables en Configuración → Vault | ambas | C-G-01 |
 | `FUN-L-07` 🛠️ | `TERMINAL-INTEGRADA` | Consola nativa integrada (estilo VS Code): abre en la raíz del vault (o en la carpeta elegida), como pestaña normal del workspace (dividir, varias instancias). **Implementada** (sin confirmar); spec en `docs/features/terminal-integrada.md` | desktop | — |
+| `FUN-L-08` 🛠️ | `IA-FRAMEWORK-VAULT` | Framework IA versionado generado en el vault (CLAUDE.md + skill + comandos en `.claude/`) para que Claude Code navegue la documentación por vínculos; botón opt‑in en Configuración → Vault. **Implementada** (sin confirmar); spec en `docs/features/ia-framework-vault.md` | desktop | — |
+| `FUN-L-09` | `IA-MCP-MYCELIUM` | Servidor MCP de Mycelium: exponer a la IA el índice del vault (búsqueda, backlinks, grafo, metadatos) como herramientas estructuradas, en vez de grep sobre archivos | desktop | — |
 
 ### 1.4 Muy grandes — tamaño XL
 
@@ -317,6 +319,42 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 - **Selector por terminal** (definido): además del default, al abrir una terminal se
   puede elegir puntualmente **otra shell** para esa instancia (como el desplegable "+"
   de VS Code); las demás terminales siguen usando la shell por defecto.
+
+#### `FUN-L-08` · `IA-FRAMEWORK-VAULT` (—) — 🛠️
+- **Qué es**: un conjunto **versionado** de instrucciones para asistentes de IA por
+  terminal (Claude Code) que se genera DENTRO del vault: `CLAUDE.md` (convenciones y
+  reglas), una skill de referencia (`.claude/skills/mycelium-vault/`) y comandos
+  (`/vault-mapa`, `/vault-vincular`, `/vault-huerfanas`, `/vault-nota`). Le enseñan a
+  la IA a navegar la documentación **aprovechando los vínculos `[[...]]`** (la
+  "memoria" que visualiza el grafo), la estructura, extensiones y metadatos, y a
+  conocer las funciones de Mycelium (sin controlarlas). Botón **opt‑in** en
+  Configuración → Vault que genera/actualiza los archivos (muestra versión instalada
+  vs disponible); `FRAMEWORK_IA_VERSION` evoluciona junto con Mycelium.
+- **Objetivo**: que Mycelium sea el entorno de documentación de proyectos de IA:
+  el asistente corre en la terminal integrada (`FUN-L-07`) y trabaja la documentación
+  markdown con las mismas convenciones que el usuario ve en la app.
+- **Alcance actual** (definido): la IA **entiende**, no controla. Solo desktop
+  (vault en carpeta). Spec: `docs/features/ia-framework-vault.md`.
+- **Futuras extensiones del framework** (ideas):
+  - Aviso automático al abrir un vault con framework desactualizado ("hay v1.1").
+  - Comandos adicionales: `/vault-resumen` (responder con evidencia citando
+    `[[notas]]`), `/vault-canvas` (generar `.excalidraw` desde texto), auditoría
+    periódica estilo `/emerge`.
+  - Integración con metadatos YAML (`FUN-M-04`) y archivos tabla (`FUN-L-03`)
+    cuando existan: enseñar a la IA a consultarlos/llenarlos.
+  - Plantillas Esporas (`FUN-M-03`) utilizables por la IA al crear notas.
+  - Control de la app (abrir notas/grafo desde la IA) — versión posterior, junto a
+    `FUN-L-09`.
+
+#### `FUN-L-09` · `IA-MCP-MYCELIUM` (—)
+- **Qué es**: un **servidor MCP** (Model Context Protocol) provisto por Mycelium que
+  expone el vault a la IA como herramientas estructuradas: búsqueda en el índice,
+  backlinks de una nota, vecindario del grafo, metadatos, tags. La IA deja de
+  depender de `grep` sobre archivos y consulta el mismo índice que usa la app.
+- **Objetivo**: respuestas más precisas y baratas (menos lectura bruta), y el paso
+  previo natural a que la IA pueda **operar** Mycelium de forma controlada.
+- **A definir**: transporte (stdio local), qué herramientas expone la v1, y cómo se
+  registra en `.claude/` (el generador de `FUN-L-08` añadiría la config MCP).
 
 ### Pendientes — tamaño XL
 

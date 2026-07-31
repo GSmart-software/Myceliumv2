@@ -56,6 +56,10 @@ entre ramas):
   espacio de pestañas, con cualquier sección activa); en web sigue existiendo
   `ExplorerDock` (solo explorador). Al reflejar features a web, aplicar los cambios
   a mano en esos archivos (no traerlos enteros).
+- **Framework IA del vault (FUN-L-08, solo-desktop)**: `frontend/lib/ia/*` no existe
+  en web; usa el comando Rust `leer_archivo_texto` (`src-tauri/src/vault_fs.rs`) y
+  una sección nueva en `frontend/components/settings/VaultSection.tsx` (archivo ya
+  divergente de por sí).
 
 ### Artefactos solo-web (no existen en `desktop-tauri`)
 
