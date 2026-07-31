@@ -65,6 +65,7 @@ y **priorizar** qué implementar antes.
 | `FUN-L-02` | `SHARING-PUBLICOS-GLOBALES` | Carpeta "Estado Mycelium" con 3 archivos públicos (Ayudas / Bugs / Ideas): editables por autorizados, visibles por todos | web | C-I-06 |
 | `FUN-L-03` | `FILES-BASES-TABLA` | Tipo de archivo tipo "bases" (tabla) que agrega notas por metadatos, con filtros y columnas configurables. Depende de `FUN-M-04` | ambas | C-I-07b |
 | `FUN-L-04` | `VAULT-MULTIPLE` | Un usuario con varios vaults, seleccionables en Configuración → Vault | ambas | C-G-01 |
+| `FUN-L-07` | `TERMINAL-INTEGRADA` | Consola nativa integrada (estilo VS Code): abre en la raíz del vault (o en la carpeta elegida), como pestaña normal del workspace (dividir, varias instancias) | desktop | — |
 
 ### 1.4 Muy grandes — tamaño XL
 
@@ -282,6 +283,27 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 - **A definir**: granularidad (por sesión, por intervalo), retención, y la UI para
   comparar/restaurar.
 
+#### `FUN-L-07` · `TERMINAL-INTEGRADA` (—)
+- **Qué es**: una consola **totalmente funcional y nativa** integrada en Mycelium, al
+  estilo de la terminal de VS Code. No es una consola simulada: es la shell real del
+  sistema, así que sirve para trabajar con el sistema de archivos del vault, gestionar
+  un repositorio **git** si el vault lo es, o correr herramientas de línea de comandos
+  (por ejemplo, usar **Claude Code** desde adentro de Mycelium). El directorio de
+  trabajo inicial es la **raíz del vault**; si se abre desde el clic derecho sobre una
+  carpeta del explorador, abre en la ruta de **esa carpeta**.
+- **Cómo se integra**: un botón nuevo en la barra lateral de herramientas (el rail,
+  donde está el botón del grafo general) abre la consola. La consola vive como una
+  **pestaña más del workspace**: se puede mover de panel, dividir la pantalla con ella,
+  y abrir **varias consolas** a la vez (cada una con su propia sesión).
+- **Objetivo**: convertir a Mycelium en un entorno de trabajo completo para usuarios
+  técnicos — versionar el vault con git, automatizar con scripts o asistentes de IA por
+  terminal, sin salir de la aplicación.
+- **A definir**: qué shell usar por defecto (la del sistema: PowerShell/cmd en Windows,
+  bash/zsh en Unix) y si es configurable; alcance **solo desktop** (una shell nativa
+  requiere acceso al sistema que el navegador no da — confirmar si en web se omite o se
+  ofrece alguna alternativa); ítem del menú contextual de carpetas ("Abrir terminal
+  aquí"); persistencia o no de las sesiones al cerrar/reabrir la app.
+
 ### Pendientes — tamaño XL
 
 #### `FUN-XL-01` · `STORAGE-LOCAL-FIRST-NUBE` (C-G-03)
@@ -400,6 +422,6 @@ Tentativo, ordenado por relación valor/esfuerzo (primero las S). **A definir ju
   `FUN-M-01` (preview papelera), `FUN-M-05` (tags panel), `FUN-M-07` (daily note).
 - **`1.3.0`+ (minor)** — L: `FUN-L-03` (bases/tablas), `FUN-L-01` (macros),
   `FUN-M-08` (reescritura de enlaces), `FUN-L-05` (adjuntos), `FUN-L-04` (vaults múltiples),
-  `FUN-L-02` (públicos globales).
+  `FUN-L-02` (públicos globales), `FUN-L-07` (terminal integrada).
 - **`2.0.0` (major)** — XL / rearquitectura y nube: `FUN-XL-01` (storage local‑first),
   `FUN-XL-03` (Cloudflare), `FUN-XL-02` (colaboración en tiempo real).
