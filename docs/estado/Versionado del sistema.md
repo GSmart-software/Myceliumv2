@@ -2,8 +2,12 @@
 
 ## La versión de la app
 
-Se muestra al pie del drawer de Configuración ("Mycelium v1.0.0") y sale de una
-constante compartida: `frontend/lib/version.ts` → `APP_VERSION`.
+Se muestra al pie del drawer de Configuración y sale de una constante compartida:
+`frontend/lib/version.ts` → `APP_VERSION`.
+
+> [!info] Estado actual
+> **desktop `1.1.0`** ([[Version 1.1.0]]) · **web `1.0.0`** ([[Version 1.0.0]]).
+> Las líneas se separaron en el release 1.1.0 porque todo lo que entró es solo-desktop.
 
 Al subir de versión hay que tocar **todos** estos lugares:
 
@@ -36,9 +40,15 @@ El [[BACKLOG]] clasifica cada idea por **tamaño** (`FUN-S-*`, `FUN-M-*`, `FUN-L
 
 ## Las versiones de las dos líneas pueden separarse
 
-Web y desktop se consolidaron juntas en [[Version 1.0.0]], pero desde entonces desktop
-sumó terminal, framework de IA y `.mycignore`. Ver
+Web y desktop se consolidaron juntas en [[Version 1.0.0]] y **se separaron** en
+[[Version 1.1.0]]: todo lo que entró (terminal, framework de IA, `.mycignore`, mejoras
+del grafo, devtools) es solo-desktop, así que web se quedó en `1.0.0`. Ver
 [[Diferencias funcionales aceptadas entre versiones]].
+
+> [!tip] Al versionar, mirá qué recibió cada rama
+> `git log --oneline <commit-de-la-version-anterior>..HEAD` en cada rama. Si una no
+> recibió cambios funcionales, **no se le sube la versión**: un número nuevo sin
+> contenido nuevo es ruido.
 
 ## Versión del framework de IA (independiente)
 

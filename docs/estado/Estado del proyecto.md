@@ -6,12 +6,19 @@ Foto de dónde está Mycelium hoy. Para el detalle de cada tema, seguir los enla
 
 ## Resumen
 
-- [[Version 1.0.0]] liberada en **ambas** versiones, con instaladores de escritorio
-  generados.
+- **Versión: desktop `1.1.0`** ([[Version 1.1.0]]) · **web `1.0.0`** ([[Version 1.0.0]]).
+  Las líneas se separaron: todo lo nuevo es solo-desktop.
+- [[Version 1.0.0]] fue el primer release final en **ambas** versiones, con instaladores
+  de escritorio generados.
 - **Todos los bugs `DEF-*`** del reporte original cerrados y reflejados
   ([[bugs-progreso]]).
 - Desde entonces, el foco está en la línea de **IA sobre el vault**
   ([[Mycelium como memoria de la IA]]), que avanza **solo en desktop**.
+
+> [!info] Los instaladores publicados siguen siendo los de 1.0.0
+> La versión ya está en `1.1.0` en los cuatro archivos, pero todavía **no se
+> empaquetó**: `installers/` contiene los binarios de 1.0.0. Ver
+> [[Generar instaladores desktop]].
 
 ## Implementado después de 1.0.0 (solo desktop)
 

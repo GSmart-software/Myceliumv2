@@ -71,7 +71,8 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
 ## Estado y releases
 
 - [[Estado del proyecto]] — situación actual, pendientes y deuda.
-- [[Version 1.0.0]] — el primer release final.
+- [[Version 1.1.0]] — release actual de desktop (línea de IA, grafo, devtools).
+- [[Version 1.0.0]] — el primer release final, común a las dos versiones.
 - [[Versionado del sistema]] — dónde vive la versión y con qué criterio se sube.
 
 ## Documentos históricos
