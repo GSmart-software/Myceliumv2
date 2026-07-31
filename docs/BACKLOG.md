@@ -314,8 +314,9 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 - **Menú contextual** (definido): se incluye el ítem **"Abrir terminal aquí"** en el
   clic derecho de las carpetas del explorador — abre una terminal nueva con el
   directorio de trabajo en esa carpeta.
-- **A definir**: si además del default se puede elegir la shell por terminal individual
-  al abrirla (selector puntual).
+- **Selector por terminal** (definido): además del default, al abrir una terminal se
+  puede elegir puntualmente **otra shell** para esa instancia (como el desplegable "+"
+  de VS Code); las demás terminales siguen usando la shell por defecto.
 
 ### Pendientes — tamaño XL
 
