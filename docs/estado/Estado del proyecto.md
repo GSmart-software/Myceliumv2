@@ -15,10 +15,9 @@ Foto de dónde está Mycelium hoy. Para el detalle de cada tema, seguir los enla
 - Desde entonces, el foco está en la línea de **IA sobre el vault**
   ([[Mycelium como memoria de la IA]]), que avanza **solo en desktop**.
 
-> [!info] Los instaladores publicados siguen siendo los de 1.0.0
-> La versión ya está en `1.1.0` en los cuatro archivos, pero todavía **no se
-> empaquetó**: `installers/` contiene los binarios de 1.0.0. Ver
-> [[Generar instaladores desktop]].
+- **Instaladores de 1.1.0 generados** (MSI 9.8 MB y NSIS 8.4 MB, preservados en
+  `installers/v1.1.0/`). Son los primeros que incluyen las **devtools en producción**.
+  Ver [[Generar instaladores desktop]].
 
 ## Implementado después de 1.0.0 (solo desktop)
 

@@ -63,11 +63,20 @@ El eje del release (ver [[Mycelium como memoria de la IA]]):
 La documentación del proyecto pasó a mantenerse **en Mycelium**, como red de notas
 enlazadas: ver [[Mapa de documentacion]].
 
-## Al empaquetar
+## Instaladores
 
-Los instaladores saldrán como `Mycelium_1.1.0_x64_*` — ver
-[[Generar instaladores desktop]]. Recordar `CARGO_BUILD_JOBS=2` y preservar los
-artefactos antes de limpiar `target/`.
+Generados y preservados en `installers/v1.1.0/` (ver
+[[Generar instaladores desktop]]):
+
+| Archivo | Tamaño |
+|---|---|
+| `Mycelium_1.1.0_x64_en-US.msi` | 9.8 MB |
+| `Mycelium_1.1.0_x64-setup.exe` | 8.4 MB |
+
+Build en release: **13 m 30 s** con `CARGO_BUILD_JOBS=2` (desde cero, sin cache de
+`target/release`), sin incidentes de memoria. Son los primeros instaladores con
+**devtools disponibles en producción**, así que son también la forma de verificar esa
+funcionalidad.
 
 ## Relacionadas
 
