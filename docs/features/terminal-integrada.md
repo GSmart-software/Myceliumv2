@@ -9,13 +9,18 @@ diferencia funcional entre versiones es aceptada). Idea y decisiones: `docs/BACK
 
 ## Criterios de aceptación
 
-1. **CA1 — Abrir desde el rail**: un botón nuevo en el rail (junto al del grafo) abre
-   una terminal nueva como **pestaña del workspace**. Clic = shell por defecto;
-   **clic derecho** = menú para elegir la shell de ESA terminal (selector puntual).
+1. **CA1 — Panel de consolas**: el botón del rail (junto al del grafo) abre el panel
+   **Consolas** en la barra lateral (como el explorador). Desde ahí se **crean**
+   consolas nuevas ("Nueva terminal": clic = shell por defecto; clic derecho = elegir
+   shell), se **reabren** las iniciadas y se **finalizan**. Cerrar la **pestaña** de
+   una consola solo la oculta (el shell sigue corriendo de fondo y aparece en el
+   panel); **Finalizar** desde el panel es lo que termina el proceso y la quita de la
+   lista. Un punto indica si el proceso está corriendo.
 2. **CA2 — Pestaña como cualquier otra**: la terminal vive en el área de panes: se
    puede mover entre paneles, dividir la pantalla con ella y abrir **varias terminales**
    a la vez (cada una con su sesión independiente). Mover la pestaña de panel NO
-   reinicia la sesión.
+   reinicia la sesión. También puede **anclarse en el visor del explorador**
+   (DEF-023 P3) y sigue funcionando como consola.
 3. **CA3 — Shell real (PTY)**: es la shell nativa del SO vía pseudo‑terminal
    (ConPTY en Windows): programas interactivos, colores, Ctrl+C, etc.
 4. **CA4 — Directorio de trabajo**: abre en la **raíz del vault** (modo carpeta). En el
@@ -32,8 +37,10 @@ diferencia funcional entre versiones es aceptada). Idea y decisiones: `docs/BACK
    proceso NO sobrevive al cierre (se recrea una shell nueva). Dos opciones en
    Configuración: "Restaurar terminales al abrir" y "Restaurar el historial".
    Desactivada la primera, las pestañas de terminal persistidas se cierran al arrancar.
-7. **CA7 — Cierre**: cerrar la pestaña termina el proceso de la shell; si el proceso
-   termina por sí mismo (`exit`), la pestaña se cierra sola.
+7. **CA7 — Cierre**: cerrar la pestaña NO termina la shell (solo la oculta; se reabre
+   desde el panel de Consolas). El proceso termina al **Finalizar** desde el panel o
+   si muere por sí mismo (`exit`), en cuyo caso la pestaña se cierra sola y la consola
+   desaparece de la lista.
 
 ## Notas de implementación
 

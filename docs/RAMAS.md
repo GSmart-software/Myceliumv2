@@ -45,10 +45,14 @@ entre ramas):
   `frontend/stores/terminalStore.ts`, `frontend/components/terminal/*`,
   `frontend/components/settings/TerminalSection.tsx` no existen en web, y además
   hicieron divergir archivos antes compartidos: `frontend/stores/tabsStore.ts`
-  (sentinel `terminal:` en preview/reconcile), `frontend/components/panes/TabBar.tsx`
-  y `EditorPane.tsx` (render/títulos de terminal), `frontend/components/workspace/Rail.tsx`
-  (botón terminal) y `SettingsDrawer.tsx` (sección Terminal). Al reflejar features a
-  web, aplicar los cambios a mano en esos archivos (no traerlos enteros).
+  (sentinel `terminal:` en preview/reconcile), `frontend/stores/panelLayoutStore.ts`
+  (sección `terminal`), `frontend/stores/sidebarViewerStore.ts` (reconcile),
+  `frontend/components/panes/TabBar.tsx` y `EditorPane.tsx` (render/títulos de
+  terminal), `frontend/components/workspace/Rail.tsx` (botón Consolas),
+  `LeftPanel.tsx` (panel Consolas), `SettingsDrawer.tsx` (sección Terminal) y
+  `frontend/components/explorer/ExplorerDock.tsx`/`SidebarNoteView.tsx` (consolas
+  ancladas en el visor). Al reflejar features a web, aplicar los cambios a mano en
+  esos archivos (no traerlos enteros).
 
 ### Artefactos solo-web (no existen en `desktop-tauri`)
 
