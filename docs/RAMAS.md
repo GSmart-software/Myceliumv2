@@ -49,10 +49,13 @@ entre ramas):
   (sección `terminal`), `frontend/stores/sidebarViewerStore.ts` (reconcile),
   `frontend/components/panes/TabBar.tsx` y `EditorPane.tsx` (render/títulos de
   terminal), `frontend/components/workspace/Rail.tsx` (botón Consolas),
-  `LeftPanel.tsx` (panel Consolas), `SettingsDrawer.tsx` (sección Terminal) y
-  `frontend/components/explorer/ExplorerDock.tsx`/`SidebarNoteView.tsx` (consolas
-  ancladas en el visor). Al reflejar features a web, aplicar los cambios a mano en
-  esos archivos (no traerlos enteros).
+  `LeftPanel.tsx` (dock genérico + panel Consolas), `SettingsDrawer.tsx` (sección
+  Terminal) y `frontend/components/explorer/SidebarNoteView.tsx` (consolas ancladas
+  en el visor). Además, en desktop el `ExplorerDock` de DEF-023 P3 se generalizó a
+  `frontend/components/workspace/SidebarDock.tsx` (el panel lateral entero es un
+  espacio de pestañas, con cualquier sección activa); en web sigue existiendo
+  `ExplorerDock` (solo explorador). Al reflejar features a web, aplicar los cambios
+  a mano en esos archivos (no traerlos enteros).
 
 ### Artefactos solo-web (no existen en `desktop-tauri`)
 
