@@ -61,6 +61,66 @@ cp frontend/src-tauri/target/release/bundle/msi/*.msi installers/v1.0.0/
 cp frontend/src-tauri/target/release/bundle/nsis/*-setup.exe installers/v1.0.0/
 ```
 
+## Instalar una versión nueva sobre una anterior
+
+Verificado contra el schema de la CLI de Tauri y la config del proyecto (que **no**
+define bloques `wix`/`nsis`, así que aplican los defaults).
+
+### Se trata como una actualización, no como otra app
+
+- **MSI (WiX)**: el `upgradeCode` no está seteado, así que Tauri lo genera de forma
+  **determinística** (UUID v5 sobre `"<productName>.exe.app.x64"`). Como `productName`
+  sigue siendo `Mycelium`, el código es **el mismo** entre versiones → Windows hace una
+  *major upgrade*: desinstala la anterior e instala la nueva. No quedan duplicados.
+- **NSIS**: detecta la instalación previa por su clave de registro y actualiza en el
+  sitio. Su `installMode` por defecto es **`currentUser`**, así que instala en
+  `%LOCALAPPDATA%` sin pedir permisos de administrador.
+
+> [!warning] No mezclar MSI y NSIS
+> Son mecanismos distintos con ubicaciones distintas (MSI per-machine en
+> `Program Files`, NSIS por usuario en `%LOCALAPPDATA%`). Si instalás una versión con
+> uno y la siguiente con el otro, **pueden coexistir** y aparecer dos Mycelium
+> instalados. Usá siempre el mismo tipo de instalador.
+
+### Los datos del usuario se conservan
+
+Ninguno de los dos instaladores toca:
+
+- **El vault**: vive en la carpeta que eligió el usuario, fuera de la instalación
+  (ver [[vault-en-carpeta]]), con su índice en `<vault>/.mycelium/`.
+- **`AppData/Roaming/com.mycelium.desktop/`**: la base del modo SQLite clásico, la
+  lista de vaults conocidos y el `localStorage` del WebView2 (donde viven los stores
+  persistidos: pestañas, layout, preferencias, terminales…).
+- Tampoco se borran al **desinstalar**: `deleteAppDataOnUninstall` no está configurado
+  y su default es `false`.
+
+Las **asociaciones de archivo** (`.md`, `.excalidraw`) se re-registran apuntando al
+ejecutable nuevo.
+
+### Lo único que se resetea al pasar de 1.0.0 a 1.1.0
+
+`sidebarViewerStore` subió su versión de persistencia (`1` → `2`, al sumar el alto y el
+modo del dock) y **no tiene `migrate`**. Zustand, ante una versión distinta sin
+migración, **descarta** el estado guardado y usa los valores por defecto. Efecto
+concreto: **las pestañas que estuvieran ancladas en el panel lateral vuelven a vacío**.
+Todo lo demás (pestañas del workspace, layout de paneles, preferencias, tema, vaults)
+se conserva.
+
+> [!tip] Si en el futuro un cambio de estructura persistida no debe perder datos
+> Escribir un `migrate` en el `persist` (como hace `panelLayoutStore`) en vez de solo
+> subir la versión. Ver [[Estado con Zustand]].
+
+### Recomendación pendiente: fijar el `upgradeCode`
+
+La doc de Tauri recomienda **declarar** `bundle.windows.wix.upgradeCode` en la config,
+porque hoy se deriva del `productName`: si algún día se renombra el producto, el código
+cambiaría y las actualizaciones dejarían de reconocerse (quedarían dos apps instaladas).
+Se obtiene con:
+
+```sh
+npx tauri inspect wix-upgrade-code
+```
+
 ## Limpiar el cache después
 
 `target/` llegó a **8.6 GB**. Para liberar espacio:
