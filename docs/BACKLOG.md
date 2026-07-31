@@ -65,7 +65,7 @@ y **priorizar** qué implementar antes.
 | `FUN-L-02` | `SHARING-PUBLICOS-GLOBALES` | Carpeta "Estado Mycelium" con 3 archivos públicos (Ayudas / Bugs / Ideas): editables por autorizados, visibles por todos | web | C-I-06 |
 | `FUN-L-03` | `FILES-BASES-TABLA` | Tipo de archivo tipo "bases" (tabla) que agrega notas por metadatos, con filtros y columnas configurables. Depende de `FUN-M-04` | ambas | C-I-07b |
 | `FUN-L-04` | `VAULT-MULTIPLE` | Un usuario con varios vaults, seleccionables en Configuración → Vault | ambas | C-G-01 |
-| `FUN-L-07` | `TERMINAL-INTEGRADA` | Consola nativa integrada (estilo VS Code): abre en la raíz del vault (o en la carpeta elegida), como pestaña normal del workspace (dividir, varias instancias) | desktop | — |
+| `FUN-L-07` 🛠️ | `TERMINAL-INTEGRADA` | Consola nativa integrada (estilo VS Code): abre en la raíz del vault (o en la carpeta elegida), como pestaña normal del workspace (dividir, varias instancias). **Implementada** (sin confirmar); spec en `docs/features/terminal-integrada.md` | desktop | — |
 
 ### 1.4 Muy grandes — tamaño XL
 

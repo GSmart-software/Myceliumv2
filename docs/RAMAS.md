@@ -41,6 +41,14 @@ entre ramas):
   `frontend/components/editor/NoteEditor.tsx` (reenrutado de `fetch` → dispatcher)
 - `frontend/app/page.tsx` (redirección directa al workspace en desktop)
 - `frontend/src-tauri/*`, `scripts/migrate-legacy.py`, `.github/workflows/desktop-build.yml`
+- **Terminal integrada (FUN-L-07, solo-desktop)**: `frontend/lib/terminal.ts`,
+  `frontend/stores/terminalStore.ts`, `frontend/components/terminal/*`,
+  `frontend/components/settings/TerminalSection.tsx` no existen en web, y además
+  hicieron divergir archivos antes compartidos: `frontend/stores/tabsStore.ts`
+  (sentinel `terminal:` en preview/reconcile), `frontend/components/panes/TabBar.tsx`
+  y `EditorPane.tsx` (render/títulos de terminal), `frontend/components/workspace/Rail.tsx`
+  (botón terminal) y `SettingsDrawer.tsx` (sección Terminal). Al reflejar features a
+  web, aplicar los cambios a mano en esos archivos (no traerlos enteros).
 
 ### Artefactos solo-web (no existen en `desktop-tauri`)
 
