@@ -116,6 +116,81 @@ Medir antes/después con el mismo vault: nodos visibles, ms por frame de `simula
 de `draw()` por separado (dos `performance.now()`), y fps sostenido mientras se arrastra
 un nodo (el peor caso: mantiene `alpha` alto).
 
+---
+
+## Estado: A + B + E implementadas
+
+Aplicadas en `MiniGraph.tsx` (beneficia al grafo global **y** al mini-grafo del panel
+derecho, que comparten el componente). **Sin cambios en la simulación** (`D` sigue
+pendiente) y sin cambios visuales buscados.
+
+### A · Sprites cacheados en vez de `shadowBlur`
+
+`nodeSprite(fill, shadow, rPix, blurPix)` mantiene un `Map` a nivel de módulo con
+canvas offscreen donde el círculo y su glow ya están rasterizados; el dibujo por nodo
+pasa a ser un `drawImage`. El blur gaussiano se calcula **una vez por combinación**
+(color × radio × estado) en lugar de una vez por nodo y por frame.
+
+> [!important] Por qué el sprite se genera en píxeles de PANTALLA
+> `shadowBlur` **no** se transforma con la matriz del contexto (es espacio de
+> dispositivo). Por eso el glow del código original medía 12 px de pantalla a
+> cualquier zoom. El sprite replica eso: se rasteriza con `rPix = r · scale · dpr` y
+> `blurPix` sin escalar, y luego se coloca en coordenadas de mundo con
+> `ladoMundo = sprite.width / (scale · dpr)` — relación **1:1** con los píxeles
+> reales, sin resampleo ni cambio de aspecto.
+
+Detalles:
+- `rPix` se redondea a 0.5 px para acotar cuántas variantes genera el zoom continuo.
+- Caché con techo (`SPRITE_CACHE_MAX = 400`, `clear()` al superarlo): el zoom crea
+  radios nuevos y sin techo crecería indefinidamente. Al cambiar de tema, los colores
+  nuevos generan claves nuevas (los viejos se descartan en el próximo `clear`).
+- Es **global al módulo** a propósito: dos grafos montados a la vez comparten sprites.
+
+> [!warning] Único efecto visual posible
+> El sprite se coloca en coordenadas de mundo, así que su origen puede caer en
+> **subpíxel** y el navegador interpola. Sobre un glow difuso es imperceptible; si
+> alguna vez se notara falta de nitidez en el disco, la alternativa es dibujar los
+> nodos **fuera de la transformación** (posición de pantalla redondeada a entero), a
+> costa de más código.
+
+### B · Culling por viewport
+
+Se calcula el rectángulo visible en coordenadas de mundo (`visL/visR/visT/visB`, con
+40 px de margen para el glow y la etiqueta) y se descarta lo que queda afuera:
+
+- **Nodos y etiquetas**: test de punto (`dentro(x, y)`).
+- **Aristas**: test de caja envolvente de sus dos extremos contra la vista.
+
+Sin cambio visual: solo se deja de rasterizar lo que no se ve. La ganancia crece con el
+zoom (que es justo cuando más nodos quedan fuera de pantalla).
+
+### E · Micro-optimizaciones
+
+- **Radio precalculado**: `r` pasa a ser un campo de `SimNode`, calculado una vez al
+  construir la simulación. Antes `radius(n)` se recalculaba **dos veces por nodo y por
+  frame** (dibujo + etiqueta) y una vez por nodo en cada `pick()`.
+- **`pick()` sin raíz cuadrada** en el descarte: compara distancias **al cuadrado**
+  (este bucle corre en cada `mousemove`).
+- **`Math.hypot` → `Math.sqrt`** en el bucle de aristas de `simulate()` (`hypot` es
+  notablemente más lento en bucles calientes).
+
+### Bug corregido de paso
+
+`ctx.font` usaba `var(--mic-font-sans, sans-serif)`, que el canvas **no resuelve**: las
+etiquetas caían siempre al `sans-serif` del sistema. Ahora la familia se lee
+**computada** del canvas (`getComputedStyle(canvas).fontFamily`, heredada de `body`,
+que sí usa el token), así que las etiquetas usan por fin la tipografía de Mycelium.
+
+### Cómo medir la mejora
+
+Con las devtools —ahora disponibles también en producción, ver
+[[Generar instaladores desktop]]— grabar un *Performance profile* mientras se arrastra
+un nodo (peor caso: mantiene `alpha` alto y fuerza simulación + dibujo cada frame) y
+comparar el tiempo en `draw` vs `simulate`. Si `draw` ya no domina, el techo restante es
+la repulsión O(n²) → propuesta **D**.
+
+## Relacionadas
+
 ## Relacionadas
 
 - [[Aprendizajes tecnicos]] — mapa del área.
