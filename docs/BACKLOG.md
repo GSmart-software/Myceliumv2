@@ -298,11 +298,21 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 - **Objetivo**: convertir a Mycelium en un entorno de trabajo completo para usuarios
   técnicos — versionar el vault con git, automatizar con scripts o asistentes de IA por
   terminal, sin salir de la aplicación.
-- **A definir**: qué shell usar por defecto (la del sistema: PowerShell/cmd en Windows,
-  bash/zsh en Unix) y si es configurable; alcance **solo desktop** (una shell nativa
-  requiere acceso al sistema que el navegador no da — confirmar si en web se omite o se
-  ofrece alguna alternativa); ítem del menú contextual de carpetas ("Abrir terminal
-  aquí"); persistencia o no de las sesiones al cerrar/reabrir la app.
+- **Alcance por versión** (definido): **solo desktop**. Web no incluye esta
+  funcionalidad — genera una diferencia funcional entre versiones y es aceptable/normal.
+- **Persistencia de sesión** (definido): al reabrir la app se **restauran las
+  terminales** como estaban — cantidad, posición (panel/pestaña) y **directorio de
+  trabajo** de cada una; opcionalmente también el texto de la última sesión
+  (*scrollback*) como historial. El **proceso** en sí no sobrevive al cierre (un
+  programa corriendo muere al cerrar Mycelium; mantenerlo vivo requeriría procesos en
+  segundo plano — fuera de alcance, igual que en VS Code). Esta restauración será
+  **configurable** en Opciones (activarla/desactivarla; con o sin scrollback).
+- **Shell por defecto** (definido): configurable en Opciones, estilo perfiles de VS
+  Code — en Windows: PowerShell / cmd / Git Bash / WSL; en Unix: bash / zsh / fish. Si
+  no se configura, se usa la shell del sistema.
+- **A definir**: ítem del menú contextual de carpetas ("Abrir terminal aquí");
+  detalles del selector de perfiles (¿elegir shell por terminal individual además del
+  default?).
 
 ### Pendientes — tamaño XL
 
