@@ -1,9 +1,10 @@
 # Backlog de funcionalidades — Mycelium
 
-Consolidación de las ideas de [`Ideas Mycelium.md`](Ideas%20Mycelium.md) y las
-implementaciones diferidas de [`FUTURE_IMPLEMENTATIONS.md`](FUTURE_IMPLEMENTATIONS.md),
-con **IDs descriptivas** y **clasificación por tamaño**. El objetivo es planificar el
-**versionado** (qué entra en cada release) y **priorizar** qué implementar antes.
+Consolidación de las ideas de [`Ideas Mycelium.md`](Ideas%20Mycelium.md) y de las
+implementaciones diferidas (antes en `FUTURE_IMPLEMENTATIONS.md`, ahora integradas
+aquí — ese documento fue eliminado), con **IDs descriptivas** y **clasificación por
+tamaño**. El objetivo es planificar el **versionado** (qué entra en cada release) y
+**priorizar** qué implementar antes.
 
 > Este documento no reemplaza a `Roadmap general.md` (roadmap de HUs del producto);
 > es el backlog vivo de mejoras/ideas post‑1.0.
@@ -85,8 +86,9 @@ con **IDs descriptivas** y **clasificación por tamaño**. El objetivo es planif
 
 ## 3. Diferidas — referenciadas por HUs (🔵)
 
-De `FUTURE_IMPLEMENTATIONS.md`. Varias son **solo web** (login/nube/colaboración no
-aplican al desktop local sin login).
+Implementaciones referenciadas por las HUs y diferidas fuera del alcance actual (antes
+en `FUTURE_IMPLEMENTATIONS.md`, hoy consolidadas aquí). Varias son **solo web**
+(login/nube/colaboración no aplican al desktop local sin login).
 
 | ID | Descripción | Tamaño | Aplica | HU |
 |---|---|---|---|---|
@@ -106,8 +108,8 @@ aplican al desktop local sin login).
 
 ## 4. Implementadas (registro) 🟢
 
-De `Ideas Mycelium.md` → "Completados", más dos que `FUTURE_IMPLEMENTATIONS.md`
-listaba como pendientes pero **ya están hechas** (ver §6).
+De `Ideas Mycelium.md` → "Completados", más dos que el antiguo
+`FUTURE_IMPLEMENTATIONS.md` listaba como pendientes pero **ya están hechas** (ver §6).
 
 | ID | Descripción | Orig. |
 |---|---|---|
@@ -173,10 +175,12 @@ estilo propio (negrita/cursiva/color/link). Hoy el color pisa esos estilos.
   **dos veces** — para "añadir extensiones de archivos" (pendiente) y para "persistencia
   de pestañas" (completado). Acá se separaron en `EXPLORER-EXTENSIONES` y
   `TABS-PERSISTENCIA` respectivamente.
-- **`FUTURE_IMPLEMENTATIONS.md` desactualizado**: listaba como pendientes dos ítems que
-  **ya están implementados** — la **persistencia de pestañas/splits al recargar**
-  (`TABS-PERSISTENCIA`, el store usa `persist`) y el **pinning de pestañas**
-  (`TABS-PINNING`, `pinTab` + pestañas de preview). Conviene actualizar ese documento.
+- **Ítems ya implementados que el antiguo `FUTURE_IMPLEMENTATIONS.md` listaba como
+  pendientes**: la **persistencia de pestañas/splits al recargar** (`TABS-PERSISTENCIA`,
+  el store usa `persist`) y el **pinning de pestañas** (`TABS-PINNING`, `pinTab` +
+  pestañas de preview). Ya reflejados como 🟢 en §4.
+- **`FUTURE_IMPLEMENTATIONS.md` eliminado**: su contenido quedó consolidado en este
+  backlog (§3). Las referencias de otros documentos se repuntaron a `BACKLOG.md`.
 - **Aplicabilidad por versión**: colaboración, OAuth GitHub, export ZIP server‑side e
   infraestructura Cloudflare son de la línea **web**; el desktop es local sin login.
 

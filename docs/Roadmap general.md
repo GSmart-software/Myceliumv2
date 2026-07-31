@@ -30,7 +30,7 @@ Mycelium/
 │   └── migrations/local/local_schema.sql
 ├── docs/
 │   ├── DESIGN_SYSTEM.md       # mover el actual aquí (las HUs lo referencian en docs/)
-│   └── FUTURE_IMPLEMENTATIONS.ote, pinning, persistencia de tabs
+│   └── BACKLOG.md                # ideas, tamaños y versionado
 ├── legacy/                    # (opcional) prototipo vanilla actual, como referencia
 └── HUs.md
 

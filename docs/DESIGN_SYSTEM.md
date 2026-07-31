@@ -442,7 +442,7 @@ Puntos clave de la composición:
 - Las carpetas compartidas muestran un ícono de personas (`Users` de Lucide) junto al nombre. Cada nota dentro de una carpeta compartida también muestra el ícono.
 - El panel derecho inicia colapsado; al activar el ícono de grafo en el rail se expande con las tabs Grafo / Salientes / Retro. Debajo de los tabs: sección fija de metadatos (Creada, Modificada, Ruta, Tamaño).
 - Los modos del editor viven en la barra de herramientas de HU-02 como iconos Lucide: `PenLine` (live) · `Columns2` (split) · `Eye` (read) · `Code` (raw).
-- El rail tiene **dos grupos**: superior (🗂 Explorer · 🔍 Búsqueda vault · 📊 Grafo · 🏷 Tags) y fondo (🗑 Papelera · ⚙ Configuración). Daily Note (`📅`) NO está en el rail actual — ver `docs/FUTURE_IMPLEMENTATIONS.md`.
+- El rail tiene **dos grupos**: superior (🗂 Explorer · 🔍 Búsqueda vault · 📊 Grafo · 🏷 Tags) y fondo (🗑 Papelera · ⚙ Configuración). Daily Note (`📅`) NO está en el rail actual — ver `docs/BACKLOG.md`.
 - La barra de búsqueda del topbar busca en la **nota activa** (in-note search, equivalente a Ctrl+F). La búsqueda del vault se activa desde el ícono 🔍 del rail.
 
 ## Modos del editor
