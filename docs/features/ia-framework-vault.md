@@ -10,7 +10,7 @@ Referencias estudiadas: `claude-obsidian` (AgriciDaniel) y el enfoque minimalist
 de D. Rowse. Este framework toma el punto medio: convenciones claras + pocos
 comandos de alto valor.
 
-## Qué genera (v1.0.0)
+## Qué genera (v1.1.0)
 
 | Archivo en el vault | Rol |
 |---|---|
@@ -29,13 +29,31 @@ renombrar NO reescribe enlaces (FUN-M-08) — la IA debe actualizarlos con grep.
 
 ## Versionado
 
-- `FRAMEWORK_IA_VERSION` en `frontend/lib/ia/framework.ts` (hoy `1.0.0`),
+- `FRAMEWORK_IA_VERSION` en `frontend/lib/ia/framework.ts` (hoy `1.1.0`),
   independiente de la versión de la app. **Al agregar funciones a Mycelium que la
   IA deba conocer, subir la versión y actualizar los templates.**
+  - `1.0.0` — primera versión.
+  - `1.1.0` — `.mycignore` (visibilidad configurable) + política de no pisar
+    archivos del usuario.
 - Cada archivo generado lleva el marcador `<!-- mycelium-ia vX -->`; la versión
   instalada vive en `.claude/mycelium-ia.json`.
 - Configuración → Vault muestra instalada vs disponible y ofrece
   Generar / Actualizar / Regenerar. **Solo se genera si el usuario lo pide.**
+
+## Conflictos: nunca se pisa un archivo del usuario
+
+Un `CLAUDE.md` (o cualquier destino) **preexistente y ajeno al framework NO se
+sobrescribe**. La detección es por la marca `<!-- mycelium-ia v` en el contenido:
+
+| Situación | Acción |
+|---|---|
+| La ruta está libre | Se escribe normalmente |
+| Existe y **tiene** la marca (lo generó el framework) | Se sobrescribe (es la actualización esperada) |
+| Existe y **no** tiene la marca (es del usuario) | **No se toca**: la versión nueva se escribe al lado como `nombre (mycelium-ia vX).md`; si también existe, `… (1)`, `… (2)`, … |
+
+Cuando hay conflictos: la UI los lista en su mensaje y se escribe un reporte
+resumido en la raíz del vault, `Conflictos instrucciones IA.md`, con archivo
+original → archivo generado.
 
 ## UI
 

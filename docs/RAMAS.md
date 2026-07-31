@@ -60,6 +60,10 @@ entre ramas):
   en web; usa el comando Rust `leer_archivo_texto` (`src-tauri/src/vault_fs.rs`) y
   una sección nueva en `frontend/components/settings/VaultSection.tsx` (archivo ya
   divergente de por sí).
+- **`.mycignore` (FUN-M-11)**: en desktop vive en `src-tauri/src/mycignore.rs` +
+  los walkers de `archivos.rs` + el watcher, con editor en `VaultSection.tsx`. En
+  **web** la funcionalidad es distinta por naturaleza (no hay carpeta en disco):
+  filtro de importación/visualización con la config en el backend — pendiente.
 
 ### Artefactos solo-web (no existen en `desktop-tauri`)
 

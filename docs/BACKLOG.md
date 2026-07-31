@@ -56,6 +56,7 @@ y **priorizar** qué implementar antes.
 | `FUN-M-02` | `GRAPH-BUSCADOR-FILTRO` | Buscar por nombre en el grafo: atenúa los nodos que no coinciden | ambas | C-I-03 |
 | `FUN-M-03` | `TEMPLATES-ESPORAS` | Plantillas ("Esporas") para crear notas rápido: botón en el rail + selección de plantilla al crear archivo | ambas | C-I-04 |
 | `FUN-M-04` | `METADATA-YAML` | Manejar metadatos YAML (frontmatter `---`) de las notas (prerequisito de `FUN-L-03`) | ambas | C-I-07a |
+| `FUN-M-11` 🛠️ | `VAULT-MYCIGNORE` | `.mycignore` por vault (estilo `.gitignore`) para decidir qué archivos/carpetas ignora Mycelium; por defecto `.*/`. **Implementado en desktop** (sin confirmar); parte **web** pendiente (otra semántica). Spec en `docs/features/mycignore.md` | ambas | — |
 
 ### 1.3 Grandes — tamaño L
 
@@ -224,6 +225,22 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   filtros y el panel de metadatos ya existente.
 - **A definir**: qué claves son "conocidas" vs libres; cómo se muestran/editan;
   validación mínima del YAML.
+
+#### `FUN-M-11` · `VAULT-MYCIGNORE` (—) — 🛠️ desktop
+- **Qué es**: un archivo `.mycignore` en la raíz de cada vault, con sintaxis tipo
+  `.gitignore`, que decide qué archivos y carpetas **ignora Mycelium**. Antes la
+  regla era fija (ignorar todo directorio que empiece con `.`); ahora eso es el
+  **valor por defecto** (`.*/`) y el usuario puede cambiarlo por vault.
+- **Objetivo**: poder ver en la app documentación que hoy queda oculta (p. ej.
+  `.claude/`, `.github/`) o esconder carpetas de trabajo que no son notas — decisión
+  del usuario, no del sistema.
+- **Estado**: implementado en **desktop** (indexado + watcher + editor en
+  Configuración → Vault; parser con tests). Spec: `docs/features/mycignore.md`.
+- **Parte web (pendiente)**: en web no hay carpeta en disco (las notas viven en la
+  DB), así que no hay árbol de archivos que ignorar al indexar. El equivalente sería
+  (a) patrones de ignore al **importar** un vault de Obsidian — hoy `.obsidian/` está
+  fijo — y (b) filtro de visualización del árbol, con la configuración guardada como
+  preferencia del vault en el backend. **Requiere tocar el backend .NET.**
 
 ### Pendientes — tamaño L
 
