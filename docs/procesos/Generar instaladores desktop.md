@@ -110,16 +110,29 @@ se conserva.
 > Escribir un `migrate` en el `persist` (como hace `panelLayoutStore`) en vez de solo
 > subir la versión. Ver [[Estado con Zustand]].
 
-### Recomendación pendiente: fijar el `upgradeCode`
+### El `upgradeCode` está fijado (hecho)
 
-La doc de Tauri recomienda **declarar** `bundle.windows.wix.upgradeCode` en la config,
-porque hoy se deriva del `productName`: si algún día se renombra el producto, el código
-cambiaría y las actualizaciones dejarían de reconocerse (quedarían dos apps instaladas).
-Se obtiene con:
+`bundle.windows.wix.upgradeCode` se declara **explícitamente** en `tauri.conf.json`:
+
+```
+6e50c446-8815-5802-95d7-35ac80282d7f
+```
+
+Es **exactamente el mismo** valor que Tauri venía derivando de `productName`, así que la
+continuidad con los instaladores ya distribuidos (1.0.0 y 1.1.0) está garantizada y **no
+hace falta regenerar nada**. Se verifica con:
 
 ```sh
 npx tauri inspect wix-upgrade-code
+# Default WiX Upgrade Code, derived from Mycelium: 6e50c446-…
+# Application Upgrade Code override:              6e50c446-…   ← deben coincidir
 ```
+
+> [!danger] Nunca cambiar este GUID
+> Es la identidad de la app para el instalador de Windows. Si cambia, las versiones
+> nuevas **no** reconocerán a las instaladas: el usuario terminaría con dos Mycelium en
+> paralelo. Fijarlo protege justamente contra un cambio accidental si algún día se
+> renombra `productName` (antes el código se derivaba de ese nombre).
 
 ## Limpiar el cache después
 
