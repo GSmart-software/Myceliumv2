@@ -67,7 +67,7 @@ y **priorizar** qué implementar antes.
 | `FUN-L-03` | `FILES-BASES-TABLA` | Tipo de archivo tipo "bases" (tabla) que agrega notas por metadatos, con filtros y columnas configurables. Depende de `FUN-M-04` | ambas | C-I-07b |
 | `FUN-L-04` | `VAULT-MULTIPLE` | Un usuario con varios vaults, seleccionables en Configuración → Vault | ambas | C-G-01 |
 | `FUN-L-07` 🛠️ | `TERMINAL-INTEGRADA` | Consola nativa integrada (estilo VS Code): abre en la raíz del vault (o en la carpeta elegida), como pestaña normal del workspace (dividir, varias instancias). **Implementada** (sin confirmar); spec en `docs/features/terminal-integrada.md` | desktop | — |
-| `FUN-L-08` 🛠️ | `IA-FRAMEWORK-VAULT` | Framework IA versionado generado en el vault (CLAUDE.md + skill + comandos en `.claude/`) para que Claude Code navegue la documentación por vínculos; botón opt‑in en Configuración → Vault. **Implementada** (sin confirmar); spec en `docs/features/ia-framework-vault.md` | desktop | — |
+| `FUN-L-08` 🛠️ | `IA-FRAMEWORK-VAULT` | Framework IA versionado generado en el vault (CLAUDE.md + 2 skills + 6 comandos en `.claude/`) para que Claude Code use el vault como **memoria**: recuperar antes de responder y consolidar lo que valga recordar, navegando por vínculos. Botón opt‑in en Configuración → Vault. **Implementada** (sin confirmar); spec en `docs/features/ia-framework-vault.md` | desktop | — |
 | `FUN-L-09` | `IA-MCP-MYCELIUM` | Servidor MCP de Mycelium: exponer a la IA el índice del vault (búsqueda, backlinks, grafo, metadatos) como herramientas estructuradas, en vez de grep sobre archivos | desktop | — |
 
 ### 1.4 Muy grandes — tamaño XL
@@ -339,17 +339,22 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 
 #### `FUN-L-08` · `IA-FRAMEWORK-VAULT` (—) — 🛠️
 - **Qué es**: un conjunto **versionado** de instrucciones para asistentes de IA por
-  terminal (Claude Code) que se genera DENTRO del vault: `CLAUDE.md` (convenciones y
-  reglas), una skill de referencia (`.claude/skills/mycelium-vault/`) y comandos
-  (`/vault-mapa`, `/vault-vincular`, `/vault-huerfanas`, `/vault-nota`). Le enseñan a
-  la IA a navegar la documentación **aprovechando los vínculos `[[...]]`** (la
-  "memoria" que visualiza el grafo), la estructura, extensiones y metadatos, y a
-  conocer las funciones de Mycelium (sin controlarlas). Botón **opt‑in** en
-  Configuración → Vault que genera/actualiza los archivos (muestra versión instalada
+  terminal (Claude Code) que se genera DENTRO del vault: `CLAUDE.md`, dos skills
+  (`mycelium-vault` = sintaxis y exploración; `mycelium-memoria` = técnicas de
+  recuperación y consolidación) y seis comandos (`/vault-buscar`, `/vault-recordar`,
+  `/vault-mapa`, `/vault-vincular`, `/vault-huerfanas`, `/vault-nota`). Botón
+  **opt‑in** en Configuración → Vault que genera/actualiza (muestra versión instalada
   vs disponible); `FRAMEWORK_IA_VERSION` evoluciona junto con Mycelium.
-- **Objetivo**: que Mycelium sea el entorno de documentación de proyectos de IA:
-  el asistente corre en la terminal integrada (`FUN-L-07`) y trabaja la documentación
-  markdown con las mismas convenciones que el usuario ve en la app.
+- **Eje**: el vault **es la memoria de largo plazo de la IA**, no un cajón de
+  documentos. Se le imponen dos obligaciones: **recuperar antes de responder**
+  (buscar en la red, expandir por backlinks, citar procedencia, admitir lo que no
+  está) y **consolidar lo que valga recordar** (escribir autosuficiente, enlazado y
+  sin duplicar). El `CLAUDE.md` incluye el mapa de **cuándo usar cada
+  skill/comando**.
+- **Objetivo**: que Mycelium sea el entorno de documentación de proyectos de IA: el
+  asistente corre en la terminal integrada (`FUN-L-07`), usa la documentación como
+  memoria persistente entre sesiones y la mantiene navegable (grafo) con las mismas
+  convenciones que el usuario ve en la app.
 - **Alcance actual** (definido): la IA **entiende**, no controla. Solo desktop
   (vault en carpeta). Spec: `docs/features/ia-framework-vault.md`.
 - **Futuras extensiones del framework** (ideas):

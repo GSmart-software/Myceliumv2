@@ -3,22 +3,43 @@
 **HU:** Como usuario que desarrolla proyectos (de IA u otros) documentándolos en
 Mycelium, quiero generar en mi vault un conjunto de instrucciones para asistentes
 de IA por terminal (Claude Code, corriendo en la terminal integrada FUN-L-07), para
-que la IA entienda cómo navegar y mantener mi documentación aprovechando los
-vínculos `[[...]]` — la "memoria" navegable que visualiza el grafo.
+que la IA **use el vault como su memoria de largo plazo**: que busque en él antes de
+responder y que consolide en él lo que valga recordar, aprovechando los vínculos
+`[[...]]` — la red navegable que visualiza el grafo.
 
 Referencias estudiadas: `claude-obsidian` (AgriciDaniel) y el enfoque minimalista
 de D. Rowse. Este framework toma el punto medio: convenciones claras + pocos
 comandos de alto valor.
 
-## Qué genera (v1.1.0)
+## Eje: el vault es memoria, no un cajón de documentos
+
+El framework enseña dos **protocolos** y los hace obligatorios:
+
+- **RECUPERAR antes de responder**: entradas (mapas/MOCs) → búsqueda léxica en
+  contenido y nombres de archivo → lectura completa de candidatas → **expansión por
+  asociación** (enlaces salientes + backlinks, 1–2 saltos) → facetas (`#tags`) →
+  respuesta **citando procedencia** con `[[enlaces]]`, y decir explícitamente lo que
+  la memoria NO contiene.
+- **CONSOLIDAR lo que valga recordar**: buscar antes de crear (ampliar > duplicar),
+  una idea por nota, título pensado como consulta futura, contenido autosuficiente
+  (fecha, contexto, **por qué**), asociaciones explicadas y entrada a la red desde su
+  mapa/nota madre (nada huérfano).
+
+Además, el `CLAUDE.md` incluye un **mapa de cuándo usar cada skill/comando**, para
+que la IA sepa qué herramienta corresponde a cada situación.
+
+## Qué genera (v1.2.0)
 
 | Archivo en el vault | Rol |
 |---|---|
-| `CLAUDE.md` | Instrucciones base: qué es Mycelium, estructura, vínculos, reglas para la IA, funciones del sistema (conocer, no controlar) |
-| `.claude/skills/mycelium-vault/SKILL.md` | Referencia completa: sintaxis verificada (wikilinks/alias/embeds/tags/callouts/Mermaid/KaTeX), cómo explorar (backlinks por grep), flujos (crear/renombrar/documentar/responder con evidencia), precauciones |
-| `.claude/commands/vault-mapa.md` | `/vault-mapa`: genera/actualiza el MOC "Mapa del vault" |
-| `.claude/commands/vault-vincular.md` | `/vault-vincular <nota>`: agrega `[[enlaces]]` a notas relacionadas |
-| `.claude/commands/vault-huerfanas.md` | `/vault-huerfanas`: audita huérfanas + enlaces rotos (reporte, no aplica solo) |
+| `CLAUDE.md` | Eje de memoria: obligaciones (recuperar/consolidar), anatomía de la memoria (nota/enlace/tag/carpeta/grafo/MOC), los dos protocolos, **tabla de herramientas y cuándo usarlas**, reglas duras, y qué es Mycelium por fuera (conocer, no controlar) |
+| `.claude/skills/mycelium-vault/SKILL.md` | Referencia **técnica**: sintaxis verificada (wikilinks/alias/embeds/tags/callouts/Mermaid/KaTeX), estructura, recetas de `grep` para recorrer el vault (backlinks, salientes, tags), `.mycignore`, precauciones |
+| `.claude/skills/mycelium-memoria/SKILL.md` | **Técnicas de memoria**: recuperación en cinco movimientos, señales de que falta recuperar más, cuándo crear vs ampliar (tabla de decisión), cómo redactar para recuperación futura, mantenimiento (huérfanas, enlaces rotos, hubs) y antipatrones |
+| `.claude/commands/vault-buscar.md` | `/vault-buscar <pregunta>`: responde con evidencia del vault y citas (solo lee) |
+| `.claude/commands/vault-recordar.md` | `/vault-recordar <qué>`: consolida un hecho/decisión/aprendizaje (crea o amplía + enlaza) |
+| `.claude/commands/vault-mapa.md` | `/vault-mapa`: genera/actualiza el MOC "Mapa del vault" (puerta de entrada de la memoria) |
+| `.claude/commands/vault-vincular.md` | `/vault-vincular <nota>`: refuerza asociaciones (con la razón de cada vínculo) |
+| `.claude/commands/vault-huerfanas.md` | `/vault-huerfanas`: audita salud de la memoria — huérfanas + enlaces rotos (reporta, no aplica solo) |
 | `.claude/commands/vault-nota.md` | `/vault-nota <título>`: crea una nota siguiendo las convenciones (sin dejarla huérfana) |
 | `.claude/mycelium-ia.json` | Marcador de versión del framework |
 
@@ -29,12 +50,15 @@ renombrar NO reescribe enlaces (FUN-M-08) — la IA debe actualizarlos con grep.
 
 ## Versionado
 
-- `FRAMEWORK_IA_VERSION` en `frontend/lib/ia/framework.ts` (hoy `1.1.0`),
+- `FRAMEWORK_IA_VERSION` en `frontend/lib/ia/framework.ts` (hoy `1.2.0`),
   independiente de la versión de la app. **Al agregar funciones a Mycelium que la
   IA deba conocer, subir la versión y actualizar los templates.**
   - `1.0.0` — primera versión.
   - `1.1.0` — `.mycignore` (visibilidad configurable) + política de no pisar
     archivos del usuario.
+  - `1.2.0` — reenfoque a **memoria**: protocolos de recuperación/consolidación,
+    skill `mycelium-memoria`, comandos `/vault-buscar` y `/vault-recordar`, y mapa
+    de cuándo usar cada herramienta.
 - Cada archivo generado lleva el marcador `<!-- mycelium-ia vX -->`; la versión
   instalada vive en `.claude/mycelium-ia.json`.
 - Configuración → Vault muestra instalada vs disponible y ofrece
