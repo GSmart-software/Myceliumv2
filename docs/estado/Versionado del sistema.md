@@ -6,7 +6,7 @@ Se muestra al pie del drawer de Configuración y sale de una constante compartid
 `frontend/lib/version.ts` → `APP_VERSION`.
 
 > [!info] Estado actual
-> **desktop `1.1.0`** ([[Version 1.1.0]]) · **web `1.0.0`** ([[Version 1.0.0]]).
+> **desktop `1.1.1`** ([[Version 1.1.1]]) · **web `1.0.0`** ([[Version 1.0.0]]).
 > Las líneas se separaron en el release 1.1.0 porque todo lo que entró es solo-desktop.
 
 Al subir de versión hay que tocar **todos** estos lugares:
@@ -27,11 +27,22 @@ Al subir de versión hay que tocar **todos** estos lugares:
 | Tipo de cambio | Impacto |
 |---|---|
 | Corrección o ajuste trivial | **patch** (`1.0.x`) |
+| **Optimización o mejora de lo existente, sin funcionalidad nueva** | **patch** (`1.0.x`) |
 | Funcionalidad nueva compatible (S/M/L) | **minor** (`1.x.0`) |
 | Rearquitectura, cambio de almacenamiento o nube (XL) | **major** (`x.0.0`) |
 
-El [[BACKLOG]] clasifica cada idea por **tamaño** (`FUN-S-*`, `FUN-M-*`, `FUN-L-*`,
-`FUN-XL-*`) justamente para poder decidir esto: el ID comunica el impacto esperado.
+La pregunta que decide entre patch y minor es una sola: **¿el usuario puede hacer algo
+que antes no podía?** Si la respuesta es no —lo mismo, más rápido, mejor comunicado o
+sin un defecto—, es **patch**, por más trabajo que haya costado.
+
+> [!warning] El tamaño del BACKLOG mide ESFUERZO, no impacto de versión
+> Los IDs `FUN-S/M/L/XL` del [[BACKLOG]] dicen **cuánto cuesta** implementar algo, no
+> cuánto cambia para el usuario. Un `FUN-M` o incluso un `FUN-L` puede no agregar
+> ninguna capacidad nueva y ser **patch** igual. El caso testigo es
+> [[Version 1.1.1]] (`FUN-M-12`): tocó Rust, el indexador, la UI y el framework de IA,
+> y aun así es patch, porque nadie puede hacer nada que no pudiera antes.
+>
+> Usá el tamaño para planificar; usá la pregunta de arriba para versionar.
 
 > [!info] El secuenciado del BACKLOG es tentativo
 > Está pensado como borrador a acordar. Ya se desvió: `FUN-L-07` (terminal) estaba
@@ -59,12 +70,18 @@ app: versiona el contenido de las instrucciones que se generan en el vault.
 > Si Mycelium gana una función que la IA deba conocer → **subir
 > `FRAMEWORK_IA_VERSION` y actualizar los templates**. La UI detecta la versión
 > instalada en el vault y ofrece actualizar.
+>
+> Vale también al revés: si un cambio deja **desactualizado** un texto de los
+> templates (no agrega instrucciones, corrige las que hay), se sube igual — en
+> **patch**. Si el texto no acompaña al cambio, el framework miente.
 
 Historial: `1.0.0` inicial · `1.1.0` `.mycignore` + política de conflictos · `1.2.0`
-reenfoque a memoria. Ver [[Generar el framework de IA en un vault]].
+reenfoque a memoria · `1.2.1` default de `.mycignore` corregido en los templates.
+Ver [[Generar el framework de IA en un vault]].
 
 ## Relacionadas
 
+- [[Version 1.1.1]] — el release más reciente (y el caso testigo de "grande ≠ minor").
 - [[Version 1.0.0]] — el primer release consolidado.
 - [[Generar instaladores desktop]] — dónde impacta la versión.
 - [[BACKLOG]] — tamaños e impacto por funcionalidad.

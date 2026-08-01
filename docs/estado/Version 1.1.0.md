@@ -80,6 +80,7 @@ funcionalidad.
 
 ## Relacionadas
 
+- [[Version 1.1.1]] — el release siguiente (rendimiento de la apertura del vault).
 - [[Version 1.0.0]] — el release anterior.
 - [[Versionado del sistema]] — criterio y los cuatro archivos a sincronizar.
 - [[Estado del proyecto]] — situación actual.
