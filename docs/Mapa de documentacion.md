@@ -53,6 +53,7 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
 - [[terminal-integrada]] — consola nativa integrada (`FUN-L-07`).
 - [[ia-framework-vault]] — framework de IA versionado (`FUN-L-08`).
 - [[mycignore]] — qué ignora Mycelium, configurable por vault (`FUN-M-11`).
+- [[rendimiento-apertura-vault]] — optimización del indexado al abrir (`FUN-M-12`).
 
 ## Aprendizajes técnicos
 
@@ -60,6 +61,7 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
 - [[CodeMirror y la vista en vivo]] · [[Drag and drop en Mycelium]] · [[Estado con Zustand]]
 - [[Tauri y el WebView]] · [[Terminal integrada - PTY y xterm]] · [[Compilacion y entorno de desarrollo]]
 - [[Rendimiento del grafo]] — análisis del costo por frame y propuestas de optimización.
+- [[Rendimiento de la apertura del vault]] — por qué tarda abrir un vault grande y cómo acelerarlo.
 
 ## Producto y planificación
 
