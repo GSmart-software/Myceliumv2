@@ -32,9 +32,11 @@ Foto de dónde está Mycelium hoy. Para el detalle de cada tema, seguir los enla
 ## Pendiente / próximos pasos
 
 1. **Verificar 1.1.1 en la app**: abrir un vault grande y comprobar que el indexado es
-   más rápido y que se ve el avance. Y **agregar `node_modules/` al `.mycignore` de este
-   vault**: el archivo ya existe, así que el default nuevo no lo alcanza (ver
-   [[mycignore]]).
+   más rápido y que se ve el avance. El `.mycignore` de este vault **ya se amplió**
+   (2026-08-01) con `node_modules/`, `target/`, `out/`, `dist/`, `installers/`,
+   `installer/`, `backend/` y `scripts/`: pasó de 1830 archivos indexados a **63**, de
+   4020 directorios a **110** y de 14 MB a **495 KB**. Hacía falta a mano porque el
+   archivo ya existía y un `.mycignore` presente reemplaza al default (ver [[mycignore]]).
 2. **Probar** `/vault-buscar` y `/vault-recordar` del framework v1.2.1 en un vault real.
 3. **`.mycignore` en web** — requiere decidir la semántica (filtro de importación +
    visualización) y tocar el backend .NET. Registrado en [[BACKLOG]].
