@@ -54,6 +54,7 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
 - [[ia-framework-vault]] — framework de IA versionado (`FUN-L-08`).
 - [[mycignore]] — qué ignora Mycelium, configurable por vault (`FUN-M-11`).
 - [[rendimiento-apertura-vault]] — optimización del indexado al abrir (`FUN-M-12`).
+- [[navegacion-por-pestana]] — scroll, historial por pestaña y previsualización (`DEF-039/040/041`).
 
 ## Aprendizajes técnicos
 
