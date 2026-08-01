@@ -12,6 +12,14 @@ usado como vault (el peor caso real: documentación + código). Parte de
 > y encima **tres problemas estructurales** en el indexador que hacen que ese trabajo
 > cueste más de lo que debería.
 
+> [!success] Estado: las propuestas 0, 1, 2, 3 y 6 están implementadas
+> Salieron en [[Version 1.1.1]] como `FUN-M-12` · `VAULT-INDEX-PERF` (spec:
+> `docs/features/rendimiento-apertura-vault.md`). Las mediciones de abajo son las
+> **previas** al arreglo y se conservan como referencia; **no** se volvieron a medir.
+> Quedan pendientes la 4 (parcialmente: se hicieron sus micro-optimizaciones, no la
+> fusión de comandos → `FUN-M-13`), la 5 (`FUN-L-10`) y el reindex dirigido del watcher
+> (`FUN-M-14`). Ver [[BACKLOG]].
+
 ## Las mediciones (2026-08-01, este repo como vault)
 
 | Métrica | Valor |
@@ -103,18 +111,26 @@ un caché reconstruible por definición, eso es durabilidad que no se necesita p
 
 ## Propuestas, por impacto sobre esfuerzo
 
-| # | Cambio | Impacto | Esfuerzo |
-|---|---|---|---|
-| 0 | **`.mycignore`**: sumar `node_modules/`, `target/`, `out/`, `dist/` — en este vault y en el **default** de `mycignore.rs` | ~40× en vaults sobre repos | Trivial |
-| 1 | **Separar metadatos de contenido**: `listar_archivos_meta` sin `contenido` + `leer_archivos(rutas)` | 14 MB → ~0 por IPC en caliente | Bajo |
-| 2 | **Carpetas incrementales**: upsert solo de las nuevas | 4020 → 0 statements en caliente | Bajo |
-| 3 | **`PRAGMA journal_mode=WAL`** al abrir el índice | Menos fsync en frío | Trivial |
-| 4 | **Un solo recorrido**: fusionar `listar_archivos_meta` + `listar_directorios` en un comando que devuelva `{archivos, directorios}`; usar `entrada.file_type()` en vez de `ruta.is_dir()` (evita un `stat` extra por entrada en Windows) y calcular `rel_posix` una sola vez por entrada en vez de dos | Mitad de trabajo de disco | Medio |
-| 5 | **Indexar en Rust**: que el walker lea y escriba el índice en el mismo proceso, en **una** transacción, sin pasar contenido por IPC | Resuelve 1, 3 y 4 de raíz | Alto |
-| 6 | **Conectar `onProgress`**: el parámetro existe en `indexarVault` y **ningún llamador lo usa**; hoy el usuario ve un spinner sin información | Percepción, no velocidad | Trivial |
+| # | Cambio | Impacto | Esfuerzo | Estado |
+|---|---|---|---|---|
+| 0 | **`.mycignore`**: sumar `node_modules/`, `target/`, `out/`, `dist/` — en este vault y en el **default** de `mycignore.rs` | ~40× en vaults sobre repos | Trivial | ✅ 1.1.1 |
+| 1 | **Separar metadatos de contenido**: `listar_archivos_meta` sin `contenido` + `leer_archivos(rutas)` | 14 MB → ~0 por IPC en caliente | Bajo | ✅ 1.1.1 |
+| 2 | **Carpetas incrementales**: upsert solo de las nuevas | 4020 → 0 statements en caliente | Bajo | ✅ 1.1.1 |
+| 3 | **`PRAGMA journal_mode=WAL`** al abrir el índice | Menos fsync en frío | Trivial | ✅ 1.1.1 |
+| 4 | **Un solo recorrido**: fusionar `listar_archivos_meta` + `listar_directorios` en un comando que devuelva `{archivos, directorios}`; usar `entrada.file_type()` en vez de `ruta.is_dir()` (evita un `stat` extra por entrada en Windows) y calcular `rel_posix` una sola vez por entrada en vez de dos | Mitad de trabajo de disco | Medio | ⚠️ parcial: las micro-optimizaciones sí, la fusión no → `FUN-M-13` |
+| 5 | **Indexar en Rust**: que el walker lea y escriba el índice en el mismo proceso, en **una** transacción, sin pasar contenido por IPC | Resuelve 1, 3 y 4 de raíz | Alto | ⬜ `FUN-L-10` |
+| 6 | **Conectar `onProgress`**: el parámetro existe en `indexarVault` y **ningún llamador lo usa**; hoy el usuario ve un spinner sin información | Percepción, no velocidad | Trivial | ✅ 1.1.1 |
 
 El orden natural es 0 → 1 → 2 → 3 (barato y resuelve el caso reportado) y dejar 4/5 para
-cuando haya un vault genuinamente grande de *notas*, no de ruido.
+cuando haya un vault genuinamente grande de *notas*, no de ruido. Fue exactamente lo que
+se hizo en `FUN-M-12`.
+
+> [!warning] El default nuevo no rescata a los vaults que YA tienen `.mycignore`
+> Un `.mycignore` presente **reemplaza al default por completo** (la sintaxis no tiene
+> negaciones). Este mismo vault es el caso: su archivo lista `.git/` y `.github/`, así
+> que sigue indexando `node_modules` hasta que se le agreguen las líneas a mano. No se
+> implementó migración automática: reescribir un archivo del usuario sin pedirlo va
+> contra la política del proyecto. Ver [[mycignore]].
 
 ## Un problema hermano: el watcher reindexa todo ante cualquier cambio
 
@@ -124,7 +140,8 @@ además es un repo de código, un `npm install` o un `cargo build` desde la
 [[terminal-integrada]] dispara ráfagas de eventos y **cada una** paga los dos recorridos
 + los 14 MB + los 4020 upserts. Es probable que buena parte de la lentitud percibida
 *después* de abrir venga de acá. Un reindex dirigido por las rutas del evento es la
-mejora natural, y el arreglo 0 ya lo alivia mucho.
+mejora natural, y el arreglo 0 ya lo alivia mucho. Registrado como `FUN-M-14` en
+[[BACKLOG]]: sigue pendiente después de 1.1.1.
 
 ## Nota al margen: los índices se acumulan
 
@@ -134,6 +151,8 @@ apertura, pero conviene tenerlo en el radar. Ver [[Capa de datos del desktop]].
 
 ## Relacionadas
 
+- [[Version 1.1.1]] — el release que implementó las propuestas 0, 1, 2, 3 y 6.
+- [[BACKLOG]] — `FUN-M-12` (hecho) y sus continuaciones `FUN-M-13`, `FUN-M-14`, `FUN-L-10`.
 - [[Capa de datos del desktop]] — la carpeta como verdad y el índice como caché derivado.
 - [[vault-en-carpeta]] — la spec donde se decidió esta arquitectura.
 - [[mycignore]] — qué ignora el indexador y cómo se configura.

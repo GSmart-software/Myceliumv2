@@ -31,8 +31,15 @@ y **priorizar** qué implementar antes.
 | Tamaño / tipo | Impacto de versión sugerido |
 |---|---|
 | Corrección (🟡) o ajuste trivial | **patch** (`1.0.x`) |
+| Optimización o mejora de lo existente, sin funcionalidad nueva | **patch** (`1.0.x`) |
 | Funcionalidad nueva compatible (S/M/L) | **minor** (`1.x.0`) |
 | Rearquitectura / cambio de almacenamiento / nube (XL) | **major** (`x.0.0`) |
+
+> [!warning] El tamaño mide ESFUERZO, no impacto de versión
+> `S/M/L/XL` dice cuánto cuesta implementar algo, no cuánto cambia para el usuario. Un
+> `FUN-M` puede ser **patch** si nadie puede hacer nada que antes no pudiera — es el
+> caso de `FUN-M-12`, que salió en [[Version 1.1.1]]. Criterio completo en
+> [[Versionado del sistema]].
 
 ---
 
@@ -56,7 +63,10 @@ y **priorizar** qué implementar antes.
 | `FUN-M-02` | `GRAPH-BUSCADOR-FILTRO` | Buscar por nombre en el grafo: atenúa los nodos que no coinciden | ambas | C-I-03 |
 | `FUN-M-03` | `TEMPLATES-ESPORAS` | Plantillas ("Esporas") para crear notas rápido: botón en el rail + selección de plantilla al crear archivo | ambas | C-I-04 |
 | `FUN-M-04` | `METADATA-YAML` | Manejar metadatos YAML (frontmatter `---`) de las notas (prerequisito de `FUN-L-03`) | ambas | C-I-07a |
-| `FUN-M-11` 🛠️ | `VAULT-MYCIGNORE` | `.mycignore` por vault (estilo `.gitignore`) para decidir qué archivos/carpetas ignora Mycelium; por defecto `.*/`. **Implementado en desktop** (sin confirmar); parte **web** pendiente (otra semántica). Spec en `docs/features/mycignore.md` | ambas | — |
+| `FUN-M-11` 🛠️ | `VAULT-MYCIGNORE` | `.mycignore` por vault (estilo `.gitignore`) para decidir qué archivos/carpetas ignora Mycelium; por defecto `.*/` + carpetas de build. **Implementado en desktop** (sin confirmar); parte **web** pendiente (otra semántica). Spec en `docs/features/mycignore.md` | ambas | — |
+| `FUN-M-12` 🛠️ | `VAULT-INDEX-PERF` | Rendimiento de la apertura del vault: default de `.mycignore` con `node_modules/`/`target/`/`dist/`/`out/`, metadatos sin contenido + `leer_archivos` en tandas, carpetas incrementales, WAL y progreso visible. **Implementado en desktop** (sin confirmar); spec en `docs/features/rendimiento-apertura-vault.md`. Salió en [[Version 1.1.1]] | desktop | — |
+| `FUN-M-13` | `VAULT-INDEX-UN-RECORRIDO` | Fusionar `listar_archivos_meta` y `listar_directorios` en un solo comando que devuelva `{archivos, directorios}`: hoy el vault se recorre **dos veces** por apertura. Continuación de `FUN-M-12` | desktop | — |
+| `FUN-M-14` | `VAULT-WATCH-REINDEX-DIRIGIDO` | El watcher emite `vault-cambios` **con las rutas afectadas** y `lib/vaultWatch.ts` las descarta: reindexa el vault entero ante cualquier cambio. Usar esas rutas para reindexar solo lo tocado. Continuación de `FUN-M-12` | desktop | — |
 
 ### 1.3 Grandes — tamaño L
 
@@ -69,6 +79,7 @@ y **priorizar** qué implementar antes.
 | `FUN-L-07` 🛠️ | `TERMINAL-INTEGRADA` | Consola nativa integrada (estilo VS Code): abre en la raíz del vault (o en la carpeta elegida), como pestaña normal del workspace (dividir, varias instancias). **Implementada** (sin confirmar); spec en `docs/features/terminal-integrada.md` | desktop | — |
 | `FUN-L-08` 🛠️ | `IA-FRAMEWORK-VAULT` | Framework IA versionado generado en el vault (CLAUDE.md + 2 skills + 6 comandos en `.claude/`) para que Claude Code use el vault como **memoria**: recuperar antes de responder y consolidar lo que valga recordar, navegando por vínculos. Botón opt‑in en Configuración → Vault. **Implementada** (sin confirmar); spec en `docs/features/ia-framework-vault.md` | desktop | — |
 | `FUN-L-09` | `IA-MCP-MYCELIUM` | Servidor MCP de Mycelium: exponer a la IA el índice del vault (búsqueda, backlinks, grafo, metadatos) como herramientas estructuradas, en vez de grep sobre archivos | desktop | — |
+| `FUN-L-10` | `VAULT-INDEX-EN-RUST` | Mover el indexado entero a Rust: el walker lee y escribe el índice en el mismo proceso, en **una** transacción, sin pasar contenido por IPC. Resuelve de raíz lo que `FUN-M-12` mitigó desde el frontend (incluido el `BEGIN`/`COMMIT` que el pool de `tauri-plugin-sql` impide). Continuación de `FUN-M-12` | desktop | — |
 
 ### 1.4 Muy grandes — tamaño XL
 
@@ -242,6 +253,45 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   fijo — y (b) filtro de visualización del árbol, con la configuración guardada como
   preferencia del vault en el backend. **Requiere tocar el backend .NET.**
 
+#### `FUN-M-12` · `VAULT-INDEX-PERF` (—) — 🛠️ desktop
+- **Qué es**: la apertura de un vault grande tardaba porque el indexador hacía mucho
+  más trabajo del necesario. Medido sobre este mismo repo usado como vault: 1830
+  archivos indexados (1577 de `node_modules`), **14 MB por IPC en cada apertura**, 4020
+  upserts de carpeta aunque no cambiara nada y ~11.340 statements SQL en frío, cada uno
+  con su transacción implícita. Diagnóstico en
+  [[Rendimiento de la apertura del vault]].
+- **Qué entró** (cinco cambios): default de `.mycignore` con `node_modules/`, `target/`,
+  `dist/` y `out/` · `listar_archivos_meta` sin `contenido` + comando nuevo
+  `leer_archivos(rutas)` pedido en tandas de 250 · upsert de carpetas solo si son nuevas
+  · `PRAGMA journal_mode=WAL` en el índice · `onProgress` conectado a la UI del selector
+  de vaults.
+- **Estado**: implementado en **desktop** (sin confirmar). Spec:
+  `docs/features/rendimiento-apertura-vault.md`. Release: [[Version 1.1.1]] — **patch**,
+  porque no agrega funcionalidad.
+- **Solo desktop**: en web no hay carpeta que recorrer ni índice derivado; no hay nada
+  que reflejar. Ver [[Diferencias funcionales aceptadas entre versiones]].
+- **Continuaciones**: `FUN-M-13` (un solo recorrido), `FUN-M-14` (reindex dirigido por
+  el watcher) y `FUN-L-10` (indexado en Rust).
+
+#### `FUN-M-13` · `VAULT-INDEX-UN-RECORRIDO` (—)
+- **Qué es**: `indexarVault` llama a `listar_archivos_meta` y a `listar_directorios`,
+  que recorren **el mismo árbol dos veces** (4020 directorios × 2 en el vault medido).
+  Fusionarlos en un comando que devuelva `{archivos, directorios}` de una pasada.
+- **Objetivo**: la mitad del trabajo de disco por apertura. Quedó fuera de `FUN-M-12`
+  por esfuerzo: cambia la firma de dos comandos y su llamador.
+- **A definir**: si el comando nuevo reemplaza a los dos o convive con ellos (el watcher
+  y otras rutas también los usan).
+
+#### `FUN-M-14` · `VAULT-WATCH-REINDEX-DIRIGIDO` (—)
+- **Qué es**: el watcher nativo emite `vault-cambios` **con las rutas afectadas**, pero
+  `lib/vaultWatch.ts` las ignora y llama a `indexarVault(ruta)` entero. En un vault que
+  además es un repo, un `npm install` desde la [[terminal-integrada]] dispara ráfagas y
+  cada una paga el recorrido completo.
+- **Objetivo**: reindexar solo lo que cambió. Probablemente buena parte de la lentitud
+  percibida *después* de abrir viene de acá; `FUN-M-12` lo alivió pero no lo resolvió.
+- **A definir**: cómo se agrupan las ráfagas y qué hacer con renombres/borrados de
+  carpetas enteras (donde el reindex completo es más simple).
+
 ### Pendientes — tamaño L
 
 #### `FUN-L-01` · `MACROS-HOTKEYS` (C-I-05)
@@ -378,6 +428,18 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 - **A definir**: transporte (stdio local), qué herramientas expone la v1, y cómo se
   registra en `.claude/` (el generador de `FUN-L-08` añadiría la config MCP).
 
+#### `FUN-L-10` · `VAULT-INDEX-EN-RUST` (—)
+- **Qué es**: mover el indexado del vault del frontend a **Rust**: que el walker lea los
+  archivos y escriba el índice SQLite en el mismo proceso, en **una sola transacción**,
+  sin que el contenido cruce el puente IPC.
+- **Objetivo**: resolver de raíz lo que `FUN-M-12` mitigó desde el frontend. Es la única
+  forma de tener una transacción real: `tauri-plugin-sql` 2.4.0 mantiene un
+  `Pool<Sqlite>` de hasta 10 conexiones, así que un `BEGIN` desde JS puede acabar en una
+  conexión y los `INSERT` en otra (ver [[Rendimiento de la apertura del vault]]).
+- **A definir**: qué crate SQLite usa (el `sqlx` del plugin o `rusqlite` propio), cómo
+  convive con el esquema que hoy declara `lib/db/indexer.ts`, y cómo reporta progreso al
+  frontend (eventos Tauri).
+
 ### Pendientes — tamaño XL
 
 #### `FUN-XL-01` · `STORAGE-LOCAL-FIRST-NUBE` (C-G-03)
@@ -510,3 +572,5 @@ Tentativo, ordenado por relación valor/esfuerzo (primero las S). **A definir ju
 - [[Ideas Mycelium]] — las notas originales del usuario que dieron origen a esta lista.
 - [[Diferencias funcionales aceptadas entre versiones]] — por qué algunas entradas son de una sola versión.
 - [[Mycelium como memoria de la IA]] — el objetivo detrás de `FUN-L-07`, `FUN-L-08` y `FUN-L-09`.
+- [[Rendimiento de la apertura del vault]] — el diagnóstico detrás de `FUN-M-12` y sus continuaciones.
+- [[Version 1.1.1]] — el release donde salió `FUN-M-12`.

@@ -130,11 +130,20 @@ En `abrirIndiceDeVault` (`lib/db/client.ts`), tras abrir la base: `PRAGMA journa
 
 | Qué | De | A |
 |---|---|---|
-| App desktop (`APP_VERSION` + `package.json` + `Cargo.toml` + `tauri.conf.json`) | 1.1.0 | **1.2.0** |
-| `FRAMEWORK_IA_VERSION` (`lib/ia/framework.ts`) | 1.2.0 | **1.3.0** |
+| App desktop (`APP_VERSION` + `package.json` + `Cargo.toml` + `tauri.conf.json`) | 1.1.0 | **1.1.1** |
+| `FRAMEWORK_IA_VERSION` (`lib/ia/framework.ts`) | 1.2.0 | **1.2.1** |
 
-Minor, no patch: cambia comportamiento observable (qué se indexa por defecto) y suma
-progreso en la UI. Web permanece en **1.0.0**. Ver [[Versionado del sistema]].
+**Patch, no minor.** La pregunta que decide es "¿el usuario puede hacer algo que antes
+no podía?", y la respuesta es no: es la misma funcionalidad, más rápida. El cambio del
+default de `.mycignore` no agrega una capacidad sino que **corrige un defecto** (indexar
+1577 README de `node_modules`), y el progreso en la UI es la misma operación mejor
+comunicada. El framework de IA sube igual —sus templates describían el default viejo—,
+también en patch: corrige un texto, no suma instrucciones. Web permanece en **1.0.0**.
+
+> [!warning] Que el trabajo sea grande no lo hace minor
+> `FUN-M-12` toca Rust, el indexador, la UI y el framework, y aun así es patch. El
+> tamaño del [[BACKLOG]] (`FUN-S/M/L/XL`) mide **esfuerzo**, no impacto de versión.
+> Criterio y tabla en [[Versionado del sistema]].
 
 > [!important] El framework de IA **debe** subir de versión
 > Sus templates documentan el default de `.mycignore` en dos lugares —la regla 9 de
@@ -149,8 +158,7 @@ progreso en la UI. Web permanece en **1.0.0**. Ver [[Versionado del sistema]].
   tres continuaciones que quedan fuera de alcance.
 - [[Rendimiento de la apertura del vault]] — marcar qué propuestas quedaron hechas.
 - [[Versionado del sistema]] y [[Estado del proyecto]] — versiones nuevas.
-- `docs/estado/Version 1.2.0.md` — nota de release, con la estructura de
-  [[Version 1.1.0]].
+- [[Version 1.1.1]] — nota de release, con la estructura de [[Version 1.1.0]].
 - [[mycignore]] — el default nuevo.
 
 ## Verificación
