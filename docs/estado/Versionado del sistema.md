@@ -35,6 +35,38 @@ La pregunta que decide entre patch y minor es una sola: **¿el usuario puede hac
 que antes no podía?** Si la respuesta es no —lo mismo, más rápido, mejor comunicado o
 sin un defecto—, es **patch**, por más trabajo que haya costado.
 
+## Cuántas unidades sube: una por funcionalidad
+
+> [!important] Regla del proyecto: cada funcionalidad nueva suma **un** minor
+> Si en un mismo release entran **dos** funcionalidades, la versión sube **dos** minors.
+> No se agrupan en un solo salto. El número cuenta cuánto se agregó, no cuántas veces se
+> publicó.
+
+**Al subir un dígito, los de la derecha vuelven a `0`.**
+
+Partiendo de `1.1.1`:
+
+| Qué entra | Queda en |
+|---|---|
+| 1 funcionalidad | `1.2.0` |
+| 2 funcionalidades | **`1.3.0`** (no `1.2.0`) |
+| 3 funcionalidades | `1.4.0` |
+| 1 funcionalidad + 2 correcciones | `1.2.0` — el minor sube y el patch **se resetea**: las correcciones quedan absorbidas |
+| 2 correcciones sueltas | `1.1.3` |
+
+> [!note] Qué cuenta como "una funcionalidad"
+> Una entrada del [[BACKLOG]] (`FUN-*`) o, si no estaba registrada, una capacidad nueva
+> que el usuario podría nombrar por separado. Un refactor que habilita otra cosa **no**
+> cuenta aparte: se versiona por lo que el usuario recibe, no por los pasos internos.
+> Ante la duda, contá lo que pondrías en la nota de release como ítems distintos.
+>
+> La misma lógica aplica a las correcciones: **cada corrección suma un patch**. Esto es
+> una extensión del criterio a lo que el usuario enunció para las funcionalidades; si no
+> es lo que se busca, corregir esta línea.
+
+Consecuencia esperada y aceptada: los números crecen rápido y `1.9.0 → 1.10.0` es
+normal. No son decimales.
+
 > [!warning] El tamaño del BACKLOG mide ESFUERZO, no impacto de versión
 > Los IDs `FUN-S/M/L/XL` del [[BACKLOG]] dicen **cuánto cuesta** implementar algo, no
 > cuánto cambia para el usuario. Un `FUN-M` o incluso un `FUN-L` puede no agregar
