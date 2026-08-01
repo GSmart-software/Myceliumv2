@@ -22,7 +22,8 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
 - [[Arquitectura de Mycelium]] — dos versiones, capas, frontend compartido, modelo de contenido.
 - [[Capa de datos del desktop]] — la carpeta como verdad, SQLite como índice, reparto TS/Rust.
 - [[Capa de datos de la web]] — backend .NET, puertos y adaptadores, colaboración latente.
-- [[RAMAS]] — ramas, archivos divergentes y artefactos exclusivos de cada versión.
+- [[RAMAS]] — ramas (incluidas las históricas), archivos divergentes y artefactos exclusivos de cada versión.
+- [[Despliegue de la web en Cloudflare]] — D1/R2 + Render + Pages: qué se preparó, dónde vive y en qué quedó.
 - [[DESIGN_SYSTEM]] — tokens, temas, layout y estados visuales.
 - [[MIGRACION-TAURI]] — desglose por fases de la migración a Tauri (historia).
 

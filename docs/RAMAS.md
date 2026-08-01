@@ -74,15 +74,68 @@ entre ramas):
 (`backend/src/Micelio.Api/micelio.local.db` y `.local-storage/`) están fuera de
 git — viven solo en el directorio de trabajo; no borrar del disco.
 
+## Ramas históricas en local (`local`, `main`, `deploy/cloudflare`)
+
+Además de las dos ramas de trabajo existen tres etiquetas viejas. **Auditadas el
+2026-08-01: ninguna tiene commits propios.** Las tres son *ancestros estrictos* de
+`web-cloud` **y** de `desktop-tauri`, o sea que todo su contenido ya está integrado y
+borrarlas no pierde absolutamente nada.
+
+| Rama | Punta | Fecha | Commits propios | Qué era |
+|---|---|---|---|---|
+| `local` | `ad14407` | 2026-06-17 | **0** | Etiqueta de trabajo previa a los renombres. Apunta **al mismo commit que `main`**: es un duplicado exacto, sin significado propio. |
+| `main` | `ad14407` | 2026-06-17 | **0** | La rama por defecto original del repo, congelada en *"preparación despliegue"*. 176 commits por detrás de `desktop-tauri`. |
+| `deploy/cloudflare` | `e2b19fc` | 2026-06-17 | **0** | La línea de despliegue (adaptadores D1/R2, Render, Pages). **Ya integrada en `web-cloud`** — ver [[Despliegue de la web en Cloudflare]]. |
+
+Verificación (devuelve `N 0`: nada exclusivo de la rama vieja):
+
+```sh
+git rev-list --left-right --count desktop-tauri...local          # 176  0
+git rev-list --left-right --count web-cloud...deploy/cloudflare  #  77  0
+git merge-base --is-ancestor deploy/cloudflare web-cloud && echo integrada
+```
+
+> [!tip] Qué pasa si se borran
+> Nada: los commits siguen siendo alcanzables desde `web-cloud`/`desktop-tauri`, así que
+> Git no los recolecta. Lo único que desaparece es la **etiqueta**. Por eso conviene
+> usar `git branch -d` (minúscula), que **se niega** a borrar una rama no integrada: es
+> la red de seguridad. Los SHA quedan anotados en esta tabla y en
+> [[Despliegue de la web en Cloudflare]] por si hace falta volver a mirarlos.
+
+### Qué se decidió (2026-08-01)
+
+- ✅ **`local` borrada** — era un duplicado exacto de `main`, cero información.
+- ✅ **`deploy/cloudflare` borrada** — su contenido vive en `web-cloud` y su conocimiento
+  quedó documentado en [[Despliegue de la web en Cloudflare]] antes de borrarla.
+
+`git branch -d` aceptó las dos sin protestar, que es la prueba de que estaban
+integradas. **Quedan tres ramas locales: `desktop-tauri`, `web-cloud` y `main`.**
+
+- ⏸️ **`main` se mantiene, por ahora.** Borrarla en local sería igual de inocuo, pero
+  sigue siendo la rama por defecto del repo en GitHub y `origin/main` está aún más atrás
+  (`a4374bd`, 2026-06-11). Antes de tocarla hay que resolver qué muestra el remoto (ver
+  abajo) — es la cara pública del proyecto.
+
 ## Pendiente en el remoto (`origin`)
 
-`origin` tiene `desktop-cloud`, `main`, `deploy/cloudflare`. Los renombres se
-hicieron **en local**. Para alinear el remoto (opcional):
+`origin` (`GSmart-software/Myceliumv2`) tiene `desktop-cloud`, `main` y
+`deploy/cloudflare`. Los renombres se hicieron **en local**. Las tres remotas también
+están **contenidas en `web-cloud`** (cero commits propios), así que el remoto no guarda
+trabajo que no esté acá: está simplemente **desactualizado**, no divergente.
+
+> [!warning] El remoto muestra una foto vieja del proyecto
+> `origin/main` está en `a4374bd` (2026-06-11, HU-16/HU-17), **204 commits** por detrás
+> de `desktop-tauri`. Nada de lo hecho desde entonces (Tauri, 1.0.0, 1.1.0, terminal,
+> framework de IA) está publicado.
+
+Para alinear el remoto (opcional, **nada de esto se hace sin pedirlo** — ver
+[[Convenciones de commits]]):
 
 ```sh
 git push origin web-cloud          # sube la rama renombrada
 git push origin --delete desktop-cloud   # borra la antigua (acción destructiva: confirmar)
 git push origin desktop-tauri      # sube la rama de escritorio (aún local)
+git push origin --delete deploy/cloudflare   # ya integrada en web-cloud
 ```
 
 ## Relacionadas

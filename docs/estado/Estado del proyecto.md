@@ -52,10 +52,17 @@ Foto de dónde está Mycelium hoy. Para el detalle de cada tema, seguir los enla
 >   `legacy/`), que no existen en `desktop-tauri`.
 
 > [!info] Pendientes operativos
+> - **Ramas históricas limpiadas (2026-08-01)**: `local` y `deploy/cloudflare` se
+>   **borraron** tras verificar que no tenían commits propios (eran ancestros de las dos
+>   ramas de trabajo). `main` se mantiene porque es la rama por defecto en GitHub.
+>   Detalle y verificación en [[RAMAS]]; el contenido de la línea de despliegue quedó
+>   documentado en [[Despliegue de la web en Cloudflare]].
 > - **`origin` desalineado a propósito**: tiene `desktop-cloud`, `main`,
->   `deploy/cloudflare`; los renombres se hicieron en local. Los comandos para alinearlo
->   están en [[RAMAS]], **pendientes de confirmación** del usuario (nada de `push` sin
->   pedirlo — ver [[Convenciones de commits]]).
+>   `deploy/cloudflare`; los renombres se hicieron en local. Ninguna remota tiene trabajo
+>   exclusivo, pero `origin/main` está **204 commits** por detrás: el repo público es una
+>   foto de junio. Los comandos para alinearlo están en [[RAMAS]], **pendientes de
+>   confirmación** del usuario (nada de `push` sin pedirlo — ver
+>   [[Convenciones de commits]]).
 > - **`DEF-018`** quedó marcado como evaluado y correcto por el usuario.
 > - `frontend/src-tauri/Cargo.toml` puede aparecer como modificado por diferencia de
 >   fin de línea (CRLF/LF): es ruido del working tree, no un cambio real.
