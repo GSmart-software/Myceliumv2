@@ -24,8 +24,26 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-036b | Falta feedback del lugar donde se sueltan los archivos | ambas (frontend) | ✅ 🌐 |
 | DEF-037 | Conflictos de scroll/selección al abrir el buscador en el archivo | ambas (frontend) | ✅ 🌐 |
 | DEF-038 | Límite de zoom-out del grafo insuficiente con muchos nodos | ambas (frontend) | ✅ 🌐 |
+| DEF-039 | Al volver a una pestaña se pierde la posición de lectura | ambas (frontend) | 🛠️ desktop (1.1.5), sin confirmar |
+| DEF-040 | El historial de atrás/adelante es global en vez de por pestaña | ambas (frontend) | 🛠️ desktop (1.1.5), sin confirmar |
+| DEF-041 | La pestaña de previsualización no reemplaza, abre una nueva | ambas (frontend) | 🛠️ desktop (1.1.5), **endurecido sin causa raíz confirmada** |
 
 ## Notas por bug
+
+- **DEF-039 / DEF-040 / DEF-041** (desktop, merge `05ebc0a`, [[Version 1.1.5]]):
+  reportados por el usuario al leer varias notas largas en paralelo. Spec y criterios en
+  [[navegacion-por-pestana]].
+  - `DEF-039` — la causa raíz **no era la restauración sino el guardado**: el scroll se
+    leía en la limpieza del `useEffect` y React 18+ la ejecuta después de desprender el
+    nodo, así que `scrollTop` valía siempre `0`. Ahora se captura en vivo con
+    `EditorView.scrollSnapshot()` y se restaura por el `scrollTo` del constructor.
+  - `DEF-040` — **no existía historial propio**: el botón del ratón navegaba el del
+    WebView, alimentado por los `router.push` de cada apertura. Ahora cada pestaña lleva
+    su línea, heredada al reemplazar una pestaña de previsualización.
+  - `DEF-041` — **sin causa raíz confirmada**. Se corrigió que `splitWithTab` perdiera el
+    flag `preview` al duplicar, se comparó la preferencia con `=== true` y se evita
+    reabrir la nota ya activa. Si el defecto persiste, volver acá.
+  - **Reflejo a web diferido** hasta que el usuario confirme en la app.
 - **DEF-024** (desktop `8fa7e55`, web `4be8562`): diálogo de opciones al exportar PDF
   (tamaño + fondo blanco/texto negro por defecto, incluir colores, estilar callouts,
   estilos de Mycelium; se recuerdan en `pdfExportStore`). `buildPrintCss(opts)` en

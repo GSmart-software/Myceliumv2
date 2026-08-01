@@ -6,7 +6,7 @@ Foto de dónde está Mycelium hoy. Para el detalle de cada tema, seguir los enla
 
 ## Resumen
 
-- **Versión: desktop `1.1.1`** ([[Version 1.1.1]]) · **web `1.0.0`** ([[Version 1.0.0]]).
+- **Versión: desktop `1.1.5`** ([[Version 1.1.5]]) · **web `1.0.0`** ([[Version 1.0.0]]).
   Las líneas se separaron: todo lo nuevo es solo-desktop.
 - [[Version 1.0.0]] fue el primer release final en **ambas** versiones, con instaladores
   de escritorio generados.
@@ -27,11 +27,15 @@ Foto de dónde está Mycelium hoy. Para el detalle de cada tema, seguir los enla
 | [[ia-framework-vault]] (`FUN-L-08`) | Implementada, framework en **v1.2.1**; pendiente de prueba de los comandos nuevos |
 | [[mycignore]] (`FUN-M-11`) | Implementada en desktop (parser con tests); **parte web pendiente**. Su default se amplió en 1.1.1 |
 | Rendimiento de la apertura del vault (`FUN-M-12`) | Implementada en desktop (1.1.1), **sin confirmar por el usuario**: no se pudo medir el efecto real. Ver [[Rendimiento de la apertura del vault]] |
+| Navegación por pestaña (`DEF-039/040/041`) | Implementada en desktop (1.1.5), **sin confirmar**: scroll conservado, historial propio por pestaña con botones. `DEF-041` quedó endurecido sin causa raíz confirmada. Ver [[Version 1.1.5]] |
 | Dock de pestañas del panel lateral | Generalizado a cualquier sección (`SidebarDock`) |
 
 ## Pendiente / próximos pasos
 
-1. **Verificar 1.1.1 en la app**: abrir un vault grande y comprobar que el indexado es
+1. **Comprobar 1.1.5 en la app** (`DEF-039/040/041`): el paso a paso está en
+   [[Version 1.1.5]]. `DEF-041` es el que más riesgo tiene de seguir vivo: se endureció
+   sin haber reproducido la causa raíz. Después, **reflejar a web**.
+2. **Verificar 1.1.1 en la app**: abrir un vault grande y comprobar que el indexado es
    más rápido y que se ve el avance. El `.mycignore` de este vault **ya se amplió**
    (2026-08-01) con `node_modules/`, `target/`, `out/`, `dist/`, `installers/`,
    `installer/`, `backend/` y `scripts/`: pasó de 1830 archivos indexados a **63**, de

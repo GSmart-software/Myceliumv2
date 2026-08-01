@@ -56,6 +56,16 @@ entre ramas):
   espacio de pestañas, con cualquier sección activa); en web sigue existiendo
   `ExplorerDock` (solo explorador). Al reflejar features a web, aplicar los cambios
   a mano en esos archivos (no traerlos enteros).
+- **Navegación por pestaña (`DEF-039/040/041`, desktop 1.1.5, pendiente de reflejo)**:
+  aleja todavía más los archivos que la terminal ya había hecho divergir.
+  `frontend/stores/tabsStore.ts` (historial por pestaña en `Tab`, `navegarHistorial`,
+  depuración de las líneas en renombres/papelera/reconcile),
+  `frontend/components/panes/TabBar.tsx` + `panes.module.css` (botones atrás/adelante),
+  `frontend/app/(workspace)/workspace/page.tsx` (botones 3/4 del ratón y `Alt+←/→`) y
+  `frontend/components/editor/NoteEditor.tsx` (captura del scroll en vivo). Además,
+  **todos** los `router.push('/workspace?note=…')` pasaron a `router.replace` en una
+  decena de archivos: al reflejar, ese cambio sí es mecánico y aplica igual en web.
+  Ver [[navegacion-por-pestana]] y [[Version 1.1.5]].
 - **Framework IA del vault (FUN-L-08, solo-desktop)**: `frontend/lib/ia/*` no existe
   en web; usa el comando Rust `leer_archivo_texto` (`src-tauri/src/vault_fs.rs`) y
   una sección nueva en `frontend/components/settings/VaultSection.tsx` (archivo ya

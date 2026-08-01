@@ -6,7 +6,7 @@ Se muestra al pie del drawer de Configuración y sale de una constante compartid
 `frontend/lib/version.ts` → `APP_VERSION`.
 
 > [!info] Estado actual
-> **desktop `1.1.1`** ([[Version 1.1.1]]) · **web `1.0.0`** ([[Version 1.0.0]]).
+> **desktop `1.1.5`** ([[Version 1.1.5]]) · **web `1.0.0`** ([[Version 1.0.0]]).
 > Las líneas se separaron en el release 1.1.0 porque todo lo que entró es solo-desktop.
 
 Al subir de versión hay que tocar **todos** estos lugares:
@@ -113,7 +113,8 @@ Ver [[Generar el framework de IA en un vault]].
 
 ## Relacionadas
 
-- [[Version 1.1.1]] — el release más reciente (y el caso testigo de "grande ≠ minor").
+- [[Version 1.1.5]] — el release más reciente (y el primero que salta varios patches de una).
+- [[Version 1.1.1]] — el caso testigo de "grande ≠ minor".
 - [[Version 1.0.0]] — el primer release consolidado.
 - [[Generar instaladores desktop]] — dónde impacta la versión.
 - [[BACKLOG]] — tamaños e impacto por funcionalidad.
