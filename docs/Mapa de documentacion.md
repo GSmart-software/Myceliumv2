@@ -56,6 +56,7 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
 - [[rendimiento-apertura-vault]] — optimización del indexado al abrir (`FUN-M-12`).
 - [[navegacion-por-pestana]] — scroll, historial por pestaña y previsualización (`DEF-039/040/041`).
 - [[metadata-yaml]] — frontmatter YAML como propiedades: ver, editar e indexar (`FUN-M-04`).
+- [[esporas-plantillas]] — plantillas de notas ("Esporas") con variables (`FUN-M-03`).
 
 ## Aprendizajes técnicos
 

@@ -236,8 +236,15 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   "ninguna"). Nombre propuesto para las plantillas: **"Esporas"**.
 - **Objetivo**: acelerar la creación de notas recurrentes (reuniones, diario, fichas) y
   mantener consistencia de formato en el vault.
-- **A definir**: validar el nombre "Esporas"; si las plantillas admiten variables
-  (fecha, título); dónde se almacenan; relación con `FUN-M-07` (Daily Note usaría una).
+- **Definido** (spec en [[esporas-plantillas]]): se valida el nombre **"Esporas"**. Cada
+  plantilla es una **nota normal** en una carpeta del vault (`Esporas/` por defecto,
+  configurable en Configuración → Vault). Admiten variables `{{titulo}}`, `{{fecha}}`,
+  `{{hora}}` y `{{fecha:FORMATO}}` con tokens en español (`AAAA-MM-DD hh:mm`); un token
+  desconocido se deja tal cual. **Se descartó el diálogo al crear una nota**: crear sigue
+  siendo un clic, y la plantilla se elige por tres vías — panel del rail (un clic crea la
+  nota), "Insertar Espora" en la barra del editor (única vía que sirve para notas ya
+  existentes, y fusiona el frontmatter) y submenú "Nueva desde Espora" en el clic derecho
+  del explorador. `FUN-M-07` (Daily Note) reutiliza la lista y la sustitución.
 
 #### `FUN-M-04` · `METADATA-YAML` (C-I-07a) — 🛠️ desktop
 - **Qué es**: manejar el frontmatter YAML al inicio de una nota (bloque entre `---`)
