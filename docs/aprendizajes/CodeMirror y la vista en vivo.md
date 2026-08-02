@@ -33,6 +33,15 @@ Aun con el `margin` corregido, conviene declarar `estimatedHeight` en widgets qu
 tardan en renderizar: reduce el reflow inicial. **No** resuelve por sí solo un
 desfase (fue la hipótesis #2 del caso anterior), pero ayuda al primer pintado.
 
+> [!tip] Checklist para un widget de bloque nuevo
+> Lo aplicado al de propiedades del frontmatter (`FUN-M-04`, ver [[metadata-yaml]]):
+> decoración desde un **StateField** (nunca un `ViewPlugin`); `estimatedHeight`
+> estimado por número de filas; espaciado con `padding` y `margin: 0` también en el
+> contenido interno (si el widget reusa `.mic-preview` hay que neutralizar además su
+> `height: 100%` y su `overflow-y: auto`, que no son de contenido sino de panel); y
+> **de solo lectura**: la interacción que edite el documento va fuera del editor, que
+> es de donde salieron `DEF-031`/`DEF-037`.
+
 ## Decoraciones que dependen de la profundidad
 
 **Caso**: `DEF-021` y `DEF-022` — callouts. Dos problemas distintos con la misma

@@ -54,6 +54,7 @@ y **priorizar** qué implementar antes.
 | `FUN-S-03` | `EXPLORER-EXTENSIONES` | Mostrar la extensión de los archivos no‑markdown para poder identificarlos | ambas | C-M-12 |
 | `FUN-S-04` | `TRASH-MULTISELECT` | Seleccionar varios archivos para borrar en la papelera | ambas | C-M-14 |
 | `FUN-S-05` | `VAULT-EJEMPLO-DEFAULT` | Al crear un vault nuevo, generar un archivo de ejemplo por defecto | ambas | C-G-02 |
+| `FUN-S-08` | `NOTE-CSSCLASSES` | Aplicar a la nota las clases CSS que declare su propiedad `cssclasses`: hoy se parsea e indexa pero **no tiene comportamiento**. Continuación de `FUN-M-04` | ambas | — |
 
 ### 1.2 Intermedias — tamaño M
 
@@ -62,11 +63,12 @@ y **priorizar** qué implementar antes.
 | `FUN-M-01` | `TRASH-PREVIEW` | Visualizar el contenido de los archivos en la papelera | ambas | C-M-13 |
 | `FUN-M-02` | `GRAPH-BUSCADOR-FILTRO` | Buscar por nombre en el grafo: atenúa los nodos que no coinciden | ambas | C-I-03 |
 | `FUN-M-03` | `TEMPLATES-ESPORAS` | Plantillas ("Esporas") para crear notas rápido: botón en el rail + selección de plantilla al crear archivo | ambas | C-I-04 |
-| `FUN-M-04` | `METADATA-YAML` | Manejar metadatos YAML (frontmatter `---`) de las notas (prerequisito de `FUN-L-03`) | ambas | C-I-07a |
+| `FUN-M-04` 🛠️ | `METADATA-YAML` | Manejar metadatos YAML (frontmatter `---`) de las notas como **propiedades** consultables (prerequisito de `FUN-L-03`). **Implementado en desktop** (sin confirmar); spec en `docs/features/metadata-yaml.md`. Salió en [[Version 1.2.0]] | ambas | C-I-07a |
 | `FUN-M-11` 🛠️ | `VAULT-MYCIGNORE` | `.mycignore` por vault (estilo `.gitignore`) para decidir qué archivos/carpetas ignora Mycelium; por defecto `.*/` + carpetas de build. **Implementado en desktop** (sin confirmar); parte **web** pendiente (otra semántica). Spec en `docs/features/mycignore.md` | ambas | — |
 | `FUN-M-12` 🛠️ | `VAULT-INDEX-PERF` | Rendimiento de la apertura del vault: default de `.mycignore` con `node_modules/`/`target/`/`dist/`/`out/`, metadatos sin contenido + `leer_archivos` en tandas, carpetas incrementales, WAL y progreso visible. **Implementado en desktop** (sin confirmar); spec en `docs/features/rendimiento-apertura-vault.md`. Salió en [[Version 1.1.1]] | desktop | — |
 | `FUN-M-13` | `VAULT-INDEX-UN-RECORRIDO` | Fusionar `listar_archivos_meta` y `listar_directorios` en un solo comando que devuelva `{archivos, directorios}`: hoy el vault se recorre **dos veces** por apertura. Continuación de `FUN-M-12` | desktop | — |
 | `FUN-M-14` | `VAULT-WATCH-REINDEX-DIRIGIDO` | El watcher emite `vault-cambios` **con las rutas afectadas** y `lib/vaultWatch.ts` las descarta: reindexa el vault entero ante cualquier cambio. Usar esas rutas para reindexar solo lo tocado. Continuación de `FUN-M-12` | desktop | — |
+| `FUN-M-15` | `LINKS-POR-ALIAS` | Resolver `[[enlaces]]` por la propiedad `aliases` de la nota destino: hoy se parsea e indexa pero **no tiene comportamiento**. Toca la resolución de wikilinks, el autocompletado y el grafo. Continuación de `FUN-M-04` | ambas | — |
 
 ### 1.3 Grandes — tamaño L
 
@@ -198,6 +200,16 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 - **A definir**: contenido de esa nota (mini‑guía de Mycelium); si es una sola o un
   pequeño set de ejemplo.
 
+#### `FUN-S-08` · `NOTE-CSSCLASSES` (—)
+- **Qué es**: que la propiedad `cssclasses` de una nota aplique esas clases al contenedor
+  de la nota (edición y lectura), para que un snippet CSS del usuario pueda darle un
+  aspecto propio. Hoy `FUN-M-04` la parsea y la indexa como cualquier otra clave, pero
+  **no tiene comportamiento**: quedó reservada a propósito para no darle otro significado
+  después.
+- **Objetivo**: notas con estilo propio (fichas, portadas, diarios) sin tocar el código.
+- **A definir**: dónde se cuelgan las clases (`.mic-preview`, el host de CodeMirror, o
+  ambos) y si se saneen los nombres de clase.
+
 ### Pendientes — tamaño M
 
 #### `FUN-M-01` · `TRASH-PREVIEW` (C-M-13)
@@ -227,19 +239,26 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 - **A definir**: validar el nombre "Esporas"; si las plantillas admiten variables
   (fecha, título); dónde se almacenan; relación con `FUN-M-07` (Daily Note usaría una).
 
-#### `FUN-M-04` · `METADATA-YAML` (C-I-07a)
+#### `FUN-M-04` · `METADATA-YAML` (C-I-07a) — 🛠️ desktop
 - **Qué es**: manejar el frontmatter YAML al inicio de una nota (bloque entre `---`)
-  como **metadatos** estructurados (pares clave/valor), con un estilo visual propio en
-  edición y lectura. Hoy Mycelium no interpreta ese bloque.
+  como **propiedades** estructuradas (pares clave/valor), con un estilo visual propio en
+  edición y lectura.
 - **Objetivo**: dar a las notas atributos consultables (autor, fecha, estado, tags,
   imagen, etc.). Es la **base** de `FUN-L-03` (archivos tabla) y potencia búsqueda,
   filtros y el panel de metadatos ya existente.
-- **Definido** (spec en [[metadata-yaml]]): se adopta el subconjunto de *Propiedades* de
-  Obsidian (mapa plano; texto, número, casilla, fecha, fecha-hora y listas). `tags` es la
-  única clave con comportamiento (se une a los `#tag` del cuerpo); `aliases` y `cssclasses`
-  quedan **reservadas sin comportamiento**; el resto son libres. Se editan en una pestaña
-  **PROPIEDADES** del panel de la nota; el widget de la vista en vivo es de solo lectura.
-  Lo que cae fuera del subconjunto se muestra crudo y **no se reescribe nunca**.
+- **Implementado en desktop** (sin confirmar en la app) — spec en [[metadata-yaml]],
+  release en [[Version 1.2.0]]. Se adopta el subconjunto de *Propiedades* de Obsidian
+  (mapa plano; texto, número, casilla, fecha, fecha-hora y listas), con parser propio en
+  `lib/frontmatter.ts` para poder editar sin reescribir el bloque. `tags` es la única
+  clave con comportamiento (se une a los `#tag` del cuerpo); `aliases` y `cssclasses`
+  quedan **reservadas sin comportamiento** → continuaciones `FUN-M-15` y `FUN-S-08`. Se
+  editan en la pestaña **PROPIEDADES** del panel de la nota; el widget de la vista en
+  vivo es de solo lectura. Lo que cae fuera del subconjunto se muestra crudo y **no se
+  reescribe nunca**. Las propiedades se indexan en la tabla `propiedades` y se filtran
+  desde el buscador con `clave:valor`.
+- **Pendiente**: confirmación del usuario en la app y **reflejo a `web-cloud`** (el
+  parseo, el render y el panel son compartidos; el índice diverge — allá toca el backend
+  .NET). Ver [[Reflejar cambios de desktop a web]].
 
 #### `FUN-M-11` · `VAULT-MYCIGNORE` (—) — 🛠️ desktop
 - **Qué es**: un archivo `.mycignore` en la raíz de cada vault, con sintaxis tipo
@@ -296,6 +315,18 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 - **A definir**: cómo se agrupan las ráfagas y qué hacer con renombres/borrados de
   carpetas enteras (donde el reindex completo es más simple).
 
+#### `FUN-M-15` · `LINKS-POR-ALIAS` (—)
+- **Qué es**: que `[[Otro nombre]]` resuelva a la nota que declara `Otro nombre` en su
+  propiedad `aliases`. Hoy `FUN-M-04` la parsea y la indexa como cualquier otra clave,
+  pero **no tiene comportamiento**: quedó reservada a propósito.
+- **Objetivo**: poder renombrar o referirse a una nota por varios nombres sin romper la
+  memoria (es el mecanismo que en Obsidian evita los enlaces rotos por sinónimos).
+- **Por qué es M y no S**: no alcanza con el parser — toca la **resolución** de wikilinks
+  (`lib/editor/wikilink.ts`), el autocompletado de `[[`, el feedback de "archivo
+  inexistente" y la construcción del grafo (`lib/db/grafo.ts` resuelve por título).
+- **A definir**: qué gana si un alias colisiona con el título real de otra nota, y si el
+  autocompletado ofrece el alias o el título.
+
 ### Pendientes — tamaño L
 
 #### `FUN-L-01` · `MACROS-HOTKEYS` (C-I-05)
@@ -327,7 +358,10 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 - **Objetivo**: convertir el vault en algo consultable como una base de datos ligera
   (índices, catálogos, seguimientos) sin salir de Markdown.
 - **A definir**: el nombre del tipo de archivo; sintaxis de filtros; vista de **tarjetas**
-  queda fuera de alcance salvo que resulte barata. Depende de `FUN-M-04`.
+  queda fuera de alcance salvo que resulte barata.
+- **Desbloqueada**: `FUN-M-04` ya dejó las propiedades indexadas en la tabla
+  `propiedades` (una fila por elemento de lista, filtrable con `=`) y consultables desde
+  `lib/db/propiedades.ts`. Es de ahí de donde leería la tabla.
 
 #### `FUN-L-04` · `VAULT-MULTIPLE` (C-G-01)
 - **Qué es**: que un usuario tenga varios vaults y pueda alternar entre ellos desde

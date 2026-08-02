@@ -66,6 +66,20 @@ entre ramas):
   **todos** los `router.push('/workspace?note=…')` pasaron a `router.replace` en una
   decena de archivos: al reflejar, ese cambio sí es mecánico y aplica igual en web.
   Ver [[navegacion-por-pestana]] y [[Version 1.1.5]].
+- **Metadatos YAML (`FUN-M-04`, desktop 1.2.0, pendiente de reflejo)**: la mayor parte
+  es **compartida** y se puede traer entera con `git checkout desktop-tauri -- <archivo>`
+  — `frontend/lib/frontmatter.ts` (parser puro, sin dependencias),
+  `frontend/scripts/test-frontmatter.mjs`, `frontend/components/editor/PropiedadesTab.tsx`,
+  `frontend/lib/editor/livePreview.ts` (widget de bloque), `frontend/lib/markdown.ts`
+  (`renderNota` + tarjeta), `frontend/lib/printStyles.ts`, `frontend/styles/editor.css`,
+  `frontend/components/editor/NotePanel.module.css` y `frontend/lib/search.ts`.
+  Lo que **diverge de verdad es el índice**: `frontend/lib/db/propiedades.ts`,
+  `indexer.ts`, `contenido.ts`, `grafo.ts`, `buscar.ts` y `fts.ts` son solo-desktop, y en
+  web hay que llevar la tabla `propiedades`, el cambio de contenido del FTS (cuerpo +
+  valores, sin claves), las etiquetas del grafo y el filtro `clave:valor` **al backend
+  .NET**. `frontend/lib/api.ts`, `NoteEditor.tsx` y `NotePanel.tsx` ya divergían: aplicar
+  a mano (el panel recibe `paneId`, `reloadFromDisk` publica en el `docBroker`).
+  Ver [[metadata-yaml]] y [[Version 1.2.0]].
 - **Framework IA del vault (FUN-L-08, solo-desktop)**: `frontend/lib/ia/*` no existe
   en web; usa el comando Rust `leer_archivo_texto` (`src-tauri/src/vault_fs.rs`) y
   una sección nueva en `frontend/components/settings/VaultSection.tsx` (archivo ya
