@@ -25,7 +25,7 @@ Foto de dónde está Mycelium hoy. Para el detalle de cada tema, seguir los enla
 |---|---|
 | [[terminal-integrada]] (`FUN-L-07`) | Implementada y confirmada por el usuario en lo esencial; pasó por varias iteraciones (panel de consolas, shells de fondo, renombrar, selector de shell, tema reactivo) |
 | [[ia-framework-vault]] (`FUN-L-08`) | Implementada, framework en **v1.3.0** (describe las propiedades del frontmatter); pendiente de prueba de los comandos nuevos. **El vault de este repo tiene instalada la v1.2.0**: hay que regenerar desde Configuración → Vault |
-| [[metadata-yaml]] (`FUN-M-04`) | Implementada en desktop (1.2.0), **sin confirmar**: el frontmatter pasa a ser propiedades (tarjeta en lectura y en vivo, pestaña PROPIEDADES, tabla `propiedades` en el índice, filtro `clave:valor`). Ver [[Version 1.2.0]] |
+| [[metadata-yaml]] (`FUN-M-04`) | **Confirmada** en desktop (1.2.0) el 2026-08-02, pendiente de reflejo a web: el frontmatter pasa a ser propiedades (tarjeta en lectura y en vivo, pestaña PROPIEDADES, tabla `propiedades` en el índice, filtro `clave:valor`). Ver [[Version 1.2.0]] |
 | [[mycignore]] (`FUN-M-11`) | Implementada en desktop (parser con tests); **parte web pendiente**. Su default se amplió en 1.1.1 |
 | Rendimiento de la apertura del vault (`FUN-M-12`) | Implementada en desktop (1.1.1), **sin confirmar por el usuario**: no se pudo medir el efecto real. Ver [[Rendimiento de la apertura del vault]] |
 | Navegación por pestaña (`DEF-039/040/041`) | Implementada en desktop (1.1.5), **sin confirmar**: scroll conservado, historial propio por pestaña con botones. `DEF-041` quedó endurecido sin causa raíz confirmada. Ver [[Version 1.1.5]] |

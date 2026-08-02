@@ -5,10 +5,14 @@
 Un solo tema: **el frontmatter YAML deja de ser texto y pasa a ser propiedades**. Spec
 en [[metadata-yaml]] (`FUN-M-04` · `METADATA-YAML`).
 
-> [!warning] Pendiente de comprobación del usuario
-> `tsc` quedó en verde y el parser tiene 36 tests, pero **`tsc` no prueba
-> comportamiento** y ni el render ni el panel tienen tests. Todo lo visible está **sin
-> confirmar en la app**. El paso a paso de los 12 criterios está más abajo.
+> [!success] Confirmado por el usuario el 2026-08-02
+> El usuario probó los metadatos YAML en la app y **funcionan**. Se deja el paso a paso de
+> los 12 criterios más abajo como guía de regresión para el reflejo a web y para cualquier
+> cambio futuro sobre esta funcionalidad.
+>
+> Queda pendiente el **reflejo a `web-cloud`** (ver [[Reflejar cambios de desktop a web]]).
+> El usuario dejó dicho que hará ajustes más adelante si los ve pertinentes: si aparecen,
+> se registran como `DEF-*` en [[Bugs_errores_y_defectos]], no como retoques sueltos.
 
 ## Por qué sube un minor y no un patch
 

@@ -63,7 +63,7 @@ y **priorizar** qué implementar antes.
 | `FUN-M-01` | `TRASH-PREVIEW` | Visualizar el contenido de los archivos en la papelera | ambas | C-M-13 |
 | `FUN-M-02` | `GRAPH-BUSCADOR-FILTRO` | Buscar por nombre en el grafo: atenúa los nodos que no coinciden | ambas | C-I-03 |
 | `FUN-M-03` | `TEMPLATES-ESPORAS` | Plantillas ("Esporas") para crear notas rápido: botón en el rail + selección de plantilla al crear archivo | ambas | C-I-04 |
-| `FUN-M-04` 🛠️ | `METADATA-YAML` | Manejar metadatos YAML (frontmatter `---`) de las notas como **propiedades** consultables (prerequisito de `FUN-L-03`). **Implementado en desktop** (sin confirmar); spec en `docs/features/metadata-yaml.md`. Salió en [[Version 1.2.0]] | ambas | C-I-07a |
+| `FUN-M-04` 🟢 | `METADATA-YAML` | Manejar metadatos YAML (frontmatter `---`) de las notas como **propiedades** consultables (prerequisito de `FUN-L-03`). **Confirmado en desktop** el 2026-08-02; spec en `docs/features/metadata-yaml.md`. Salió en [[Version 1.2.0]]. Pendiente el reflejo a web | ambas | C-I-07a |
 | `FUN-M-11` 🛠️ | `VAULT-MYCIGNORE` | `.mycignore` por vault (estilo `.gitignore`) para decidir qué archivos/carpetas ignora Mycelium; por defecto `.*/` + carpetas de build. **Implementado en desktop** (sin confirmar); parte **web** pendiente (otra semántica). Spec en `docs/features/mycignore.md` | ambas | — |
 | `FUN-M-12` 🛠️ | `VAULT-INDEX-PERF` | Rendimiento de la apertura del vault: default de `.mycignore` con `node_modules/`/`target/`/`dist/`/`out/`, metadatos sin contenido + `leer_archivos` en tandas, carpetas incrementales, WAL y progreso visible. **Implementado en desktop** (sin confirmar); spec en `docs/features/rendimiento-apertura-vault.md`. Salió en [[Version 1.1.1]] | desktop | — |
 | `FUN-M-13` | `VAULT-INDEX-UN-RECORRIDO` | Fusionar `listar_archivos_meta` y `listar_directorios` en un solo comando que devuelva `{archivos, directorios}`: hoy el vault se recorre **dos veces** por apertura. Continuación de `FUN-M-12` | desktop | — |
@@ -246,7 +246,7 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 - **Objetivo**: dar a las notas atributos consultables (autor, fecha, estado, tags,
   imagen, etc.). Es la **base** de `FUN-L-03` (archivos tabla) y potencia búsqueda,
   filtros y el panel de metadatos ya existente.
-- **Implementado en desktop** (sin confirmar en la app) — spec en [[metadata-yaml]],
+- **Confirmado en desktop** el 2026-08-02 — spec en [[metadata-yaml]],
   release en [[Version 1.2.0]]. Se adopta el subconjunto de *Propiedades* de Obsidian
   (mapa plano; texto, número, casilla, fecha, fecha-hora y listas), con parser propio en
   `lib/frontmatter.ts` para poder editar sin reescribir el bloque. `tags` es la única

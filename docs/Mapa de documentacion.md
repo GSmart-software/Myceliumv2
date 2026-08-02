@@ -76,7 +76,7 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
 ## Estado y releases
 
 - [[Estado del proyecto]] — situación actual, pendientes y deuda.
-- [[Version 1.2.0]] — release actual de desktop (metadatos YAML), **sin confirmar en la app**.
+- [[Version 1.2.0]] — release actual de desktop (metadatos YAML), **confirmado en la app**.
 - [[Version 1.1.5]] — navegación por pestaña, **sin confirmar en la app**.
 - [[Version 1.1.1]] — rendimiento de la apertura del vault.
 - [[Version 1.1.0]] — línea de IA, grafo, devtools.

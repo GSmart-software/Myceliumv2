@@ -7,8 +7,9 @@ al inicio de un archivo deja de ser texto suelto y pasa a ser un conjunto de
 Es la base de [[BACKLOG|`FUN-L-03`]] (archivos tabla): sin propiedades consultables no
 hay nada que agregar en una tabla.
 
-> [!success] Implementado en desktop — [[Version 1.2.0]]
-> Todo lo que describe esta spec está en `desktop-tauri` y **sin confirmar en la app**.
+> [!success] Confirmado en desktop el 2026-08-02 — [[Version 1.2.0]]
+> Todo lo que describe esta spec está en `desktop-tauri` y el usuario lo **confirmó en la
+> app**: los metadatos YAML funcionan. Queda pendiente el **reflejo a `web-cloud`**.
 > El paso a paso de los 12 criterios, con las notas de prueba, está en [[Version 1.2.0]].
 > Diferencias con lo especificado, todas por el lado de leer de más antes que descartar
 > en silencio: un `#` solo abre comentario si va **precedido de espacio** (así
