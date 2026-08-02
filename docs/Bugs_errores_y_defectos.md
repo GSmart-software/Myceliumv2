@@ -1,3 +1,13 @@
+> [!important] Este documento es el catálogo de defectos, no su seguimiento
+> Acá se escribe **qué sucede**: el síntoma, tal como se observa al usar Mycelium. Todo
+> `DEF-*` se registra acá **en cuanto se detecta**, sin importar si ya se está
+> corrigiendo, si está pendiente o si se decidió no corregirlo. Un defecto que solo
+> existe en el historial de commits o en una spec no está documentado.
+>
+> El **estado** de cada uno (implementado, confirmado, reflejado en web) y su
+> trazabilidad viven en [[bugs-progreso]]. Las **causas raíz** encontradas al resolverlos
+> van a [[Aprendizajes tecnicos]]. Acá no: acá va el problema.
+
 # DEF-015
 Los títulos marcados con # se pueden colapsar en la vista de edición pero no en la de lectura. 
 
@@ -67,6 +77,20 @@ Parece estar relacionado con el error `DEF-031`
 # DEF-038
 El grafo se puede alejar pero con un límite, no es que esto esté mal, pero si hay mucha cantidad de nodos, no se puede ver el grafo completo. Debería ampliarse ese límite para poder visualizar el grafo completo cuando hay mucha cantidad de nodos
 
+# DEF-039
+Al cambiar entre pestañas, el documento siempre se vuelve a cargar desde el principio. Por ejemplo, si estoy mirando una `FUN-TIER-NN` concreta del BACKLOG, cambio a otro documento y vuelvo al BACKLOG, me muestra otra vez el inicio del documento en lugar de dejarme donde estaba leyendo.
+Esto entorpece la experiencia y la lectura de múltiples documentos en paralelo.
+
+# DEF-040
+El "historial" o "secuencia" de documentos abiertos es **general**, no propio de cada pestaña. Al volver hacia atrás (con el botón extra del ratón o con las teclas correspondientes) se recorre el orden en que se abrieron las notas en todo el sistema, sin relación con la pestaña en la que estoy.
+
+Ejemplo: tengo abiertos dos documentos, `RAMAS` y `HUs`. Estoy en `RAMAS` y cambio a `BACKLOG` (como no estoy haciendo modificaciones, no abre una pestaña nueva, solo la reemplaza). Luego miro `HUs` y lo reemplazo por `DESIGN_SYSTEM`. Si ahora vuelvo a `BACKLOG` y doy al botón de atrás, me muestra `DESIGN_SYSTEM`, cuando debería mostrarme `RAMAS`, que era el archivo previo **de esa pestaña**.
+
+Cada pestaña debería tener su propia línea de historial.
+
+# DEF-041
+A pesar de tener activa la opción de pestaña de previsualización, siempre se abre una pestaña nueva en lugar de reemplazar la que estoy viendo y no modifiqué.
+
 
 ---
 
@@ -74,4 +98,7 @@ El grafo se puede alejar pero con un límite, no es que esto esté mal, pero si 
 
 - [[bugs-progreso]] — estado y trazabilidad de cada `DEF-*` de esta lista.
 - [[Aprendizajes tecnicos]] — causas raíz encontradas al resolverlos.
-- [[Version 1.0.0]] — el release que cerró este backlog de bugs.
+- [[Version 1.0.0]] — el release que cerró los defectos hasta el `DEF-038`. Los
+  posteriores se detectaron usando el sistema y se registran acá igual.
+- [[navegacion-por-pestana]] — spec de `DEF-039`, `DEF-040` y `DEF-041`.
+- [[Mapa de documentacion]] — índice general.
