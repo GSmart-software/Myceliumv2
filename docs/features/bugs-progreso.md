@@ -10,7 +10,9 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 |---|---|---|---|
 | DEF-015 | Colapsar títulos `#` también en vista de lectura | ambas (frontend) | ✅ 🌐 |
 | DEF-015b | Ícono de plegar/desplegar personalizado y centrado vertical | ambas (frontend) | ✅ 🌐 |
+| DEF-017 | El embed `.excalidraw` no se dibuja en la vista en vivo; crear diagrama abre pestaña | ambas (frontend) | ✅ 🌐 (pre-separación) |
 | DEF-018 | Se pierde el progreso de exportar vault al cerrar el menú | ambas (frontend) | 🛠️🌐 ⏳ pend. evaluación |
+| DEF-020 | El panel de Configuración se cierra de golpe, sin animación de salida | ambas (frontend) | ✅ 🌐 (pre-separación) |
 | DEF-021 | Callout con tipo "contamina" las `>` siguientes separadas | ambas (frontend) | ✅ 🌐 |
 | DEF-022 | No se renderizan callouts anidados en edición en vivo | ambas (frontend) | ✅ 🌐 |
 | DEF-023 | Explorer estilo Obsidian: paneles redimensionables (P1) + arrastrar al área de trabajo (P2) + explorador como visor con pestañas (P3) | ambas (frontend) | P1 ✅🌐 · P2 ✅🌐 · P3 ✅🌐 |
@@ -19,7 +21,9 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-030 | El grafo no actualiza colores al cambiar de tema | ambas (frontend) | ✅ 🌐 |
 | DEF-031 | Problemas de selección/scroll al trabajar con tablas | ambas (frontend) | ✅ 🌐 |
 | DEF-032 | No se adjunta un `.excalidraw` externo en un markdown | ambas (frontend) | ✅ 🌐 (ya estaba) |
+| DEF-033 | En "Compartido" el clic con la rueda no abre en pestaña nueva | ambas (frontend) | ✅ 🌐 (pre-separación) |
 | DEF-034 | Falta "sombra" (ícono+nombre) siguiendo el puntero al arrastrar | ambas (frontend) | ✅ 🌐 (ya estaba) |
+| DEF-035 | La búsqueda solo encuentra la palabra exacta, no por coincidencia | ambas (difiere) | ✅ 🌐 (pre-separación) |
 | DEF-036 | Import cae en el path seleccionado, no donde se soltó | ambas (frontend) | ✅ 🌐 |
 | DEF-036b | Falta feedback del lugar donde se sueltan los archivos | ambas (frontend) | ✅ 🌐 |
 | DEF-037 | Conflictos de scroll/selección al abrir el buscador en el archivo | ambas (frontend) | ✅ 🌐 |
@@ -30,6 +34,25 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 
 ## Notas por bug
 
+- **DEF-017 / DEF-020 / DEF-033 / DEF-035 — corregidos antes de existir el catálogo**
+  (auditoría del 2026-08-02): estaban resueltos y con commit, pero **el defecto en sí
+  nunca se había escrito** en [[Bugs_errores_y_defectos]]; se registró ahí a partir del
+  commit y de los comentarios del código. Los cuatro son **anteriores a la separación de
+  ramas** (1.1.0), así que están en `desktop-tauri` y en `web-cloud` por herencia, no por
+  reflejo.
+  - `DEF-017` (`aed1d0b`) — el embed `![[x.excalidraw]]` solo se dibujaba en lectura/
+    dividido. Widget inline en `livePreview` (las block deben venir de un `StateField`, no
+    de un plugin) + `renderExcalidrawInto` compartido; "Insertar diagrama" pasa a abrir el
+    `ExcalidrawModal` embebido en vez de una pestaña.
+  - `DEF-020` (`d0c159f`) — el `SettingsDrawer` se desmontaba al instante al cerrar. Ahora
+    se mantiene montado durante la animación de salida y se desmonta en `onAnimationEnd`.
+  - `DEF-033` (`e87406a`) — las filas de `SharedSection` solo tenían `onClick`; les
+    faltaban el `onMouseDown` (que evita el auto-scroll del navegador) y el `onAuxClick` →
+    `openNoteBackground` que sí tienen las del explorador.
+  - `DEF-035` (`e9903e7`) — la query FTS5 entrecomillaba cada término, forzando palabra
+    completa. Ahora cada término va como prefijo (`"perr"*`) y el toggle "Búsqueda exacta"
+    (apagado por defecto) restringe. **Diverge**: `BuildFtsQuery(raw, prefix)` en el
+    backend .NET (web) y `lib/db/fts.ts` + `lib/db/buscar.ts` en desktop.
 - **DEF-039 / DEF-040 / DEF-041** (desktop, merge `05ebc0a`, [[Version 1.1.5]]):
   reportados por el usuario al leer varias notas largas en paralelo. Spec y criterios en
   [[navegacion-por-pestana]].

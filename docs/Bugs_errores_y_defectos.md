@@ -14,8 +14,19 @@ Los títulos marcados con # se pueden colapsar en la vista de edición pero no e
 ## DEF-015b
 Me gustaría que el ícono para plegar y desplegar (tanto de los títulos como los callouts) tenga un estilo especial personalizado para el sistema. Actualmente es un v medio oscurecido que no es que esté mal, pero no es muy visible. Es importante que este símbolo aparezca en el centro de la línea donde se está escribiendo (alineado en vertical, no centro horizontal)
 
+# DEF-017
+Un embed de un dibujo (`![[archivo.excalidraw]]`) no se dibuja en la vista de edición en vivo: ahí se ve el texto del embed y el dibujo recién aparece en la vista de lectura o en la dividida.
+Además, el botón "Insertar diagrama" saca del markdown: crea el archivo y lo abre en una pestaña aparte, en lugar de dejar dibujar sin salir de la nota que se está escribiendo.
+
+*Reconstruido a posteriori — ver el aviso al pie sobre los defectos sin reporte original.*
+
 # DEF-018
 En el servicio web (desconozco si sucede en el desktop) cuando se cierrra el menú de opciones, se pierde la visual de progreso al exportar un vault
+
+# DEF-020
+El panel de Configuración entra con una animación de despliegue, pero al cerrarlo desaparece de golpe, sin la animación de salida. El corte se nota y queda inconsistente con la entrada.
+
+*Reconstruido a posteriori — ver el aviso al pie sobre los defectos sin reporte original.*
 
 # DEF-021
 En la visualización en vivo, cuando se escribe un callout con un tipo, por ejemplo "question", todas las notas siguientes que tengan > tendrán el mismo estilo del callout previo. Esto no debería suceder, cada vez que pongo > debería tener su estilo por defecto ya que no es un callout y no eredar el estilo de un Callout previo si tiene un espacio vacío entre medias que separa el callout de la nota >, ya que la nota no forma parte de ese Callout
@@ -55,11 +66,21 @@ Parace estar relacionado con el error `DEF-037`
 No se peude añadir un archivo excalidraw como multimedia en los markdowns si este excalidraw se generó fuera del propio markdown.
 Esto parecía estar arreglado pero parece haberse roto, quizas al intentar aplicar una solución para `DEF-034`
 
+# DEF-033
+En la sección "Compartido" del panel lateral, el clic con la rueda del ratón no abre la nota en una pestaña nueva en segundo plano, como sí pasa en el explorador normal. En Compartido la rueda no hace nada (y encima dispara el auto-scroll del navegador).
+
+*Reconstruido a posteriori — ver el aviso al pie sobre los defectos sin reporte original.*
+
 # DEF-034
 Cuando se arrastra un archivo/carpeta, este se oscurece como feedback de que se está arrastrando/interactuando, sin embargo, no hay feedback de a donde se está desplazando el archivo/carpeta. Me gustaría que, como en sistemas tradicionales, se viera la "sombra" del archivo/carpeta siguiendo el puntero, tomando como sombra el ícono y el nombre del archivo/carpeta.
 *Este defecto ya se intentó corregir anteriormente, pero pareciera que rompió el sistema de arrastrar archivo al markdown para vincularlo*
 
 - Se está marcando bien el lugar a donde se arrastra el archivo, pero no existe esta "sombra" del archivo
+
+# DEF-035
+La búsqueda del vault solo encuentra la palabra completa: si escribo "perr" no aparece "perro". Debería encontrar por coincidencia mientras se escribe, y dejar la búsqueda exacta como una opción que se pueda activar.
+
+*Reconstruido a posteriori — ver el aviso al pie sobre los defectos sin reporte original.*
 
 # DEF-036
 Al importar archivo, este se importa en el path seleccionado, no al lugar exacto donde se arrastró el archivo.
@@ -93,6 +114,19 @@ A pesar de tener activa la opción de pestaña de previsualización, siempre se 
 
 
 ---
+
+> [!warning] Defectos sin reporte original
+> El catálogo nació incompleto: se creó con los defectos que estaban abiertos en ese
+> momento, así que varios `DEF-*` ya corregidos nunca llegaron a escribirse acá.
+> `DEF-017`, `DEF-020`, `DEF-033` y `DEF-035` se **reconstruyeron a posteriori** (2026-08-02)
+> a partir del commit que los corrigió (`aed1d0b`, `d0c159f`, `e87406a`, `e9903e7`
+> respectivamente) y de los comentarios que dejaron en el código: describen el síntoma tal
+> como se deduce del arreglo, no las palabras del reporte, que se perdió.
+>
+> **Sin ningún rastro** quedan `DEF-001` a `DEF-014`, `DEF-016`, `DEF-019`, `DEF-025`,
+> `DEF-027`, `DEF-028` y `DEF-029`: no aparecen en ninguna nota, commit ni comentario del
+> repo. Se dan por cerrados antes de que existiera este catálogo y sus números **no se
+> reutilizan**. Si alguno reaparece, se registra con un `DEF-*` nuevo.
 
 ## Relacionadas
 
