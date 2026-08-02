@@ -234,8 +234,12 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 - **Objetivo**: dar a las notas atributos consultables (autor, fecha, estado, tags,
   imagen, etc.). Es la **base** de `FUN-L-03` (archivos tabla) y potencia búsqueda,
   filtros y el panel de metadatos ya existente.
-- **A definir**: qué claves son "conocidas" vs libres; cómo se muestran/editan;
-  validación mínima del YAML.
+- **Definido** (spec en [[metadata-yaml]]): se adopta el subconjunto de *Propiedades* de
+  Obsidian (mapa plano; texto, número, casilla, fecha, fecha-hora y listas). `tags` es la
+  única clave con comportamiento (se une a los `#tag` del cuerpo); `aliases` y `cssclasses`
+  quedan **reservadas sin comportamiento**; el resto son libres. Se editan en una pestaña
+  **PROPIEDADES** del panel de la nota; el widget de la vista en vivo es de solo lectura.
+  Lo que cae fuera del subconjunto se muestra crudo y **no se reescribe nunca**.
 
 #### `FUN-M-11` · `VAULT-MYCIGNORE` (—) — 🛠️ desktop
 - **Qué es**: un archivo `.mycignore` en la raíz de cada vault, con sintaxis tipo
