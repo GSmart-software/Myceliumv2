@@ -45,12 +45,13 @@ que la IA sepa qué herramienta corresponde a cada situación.
 
 Contenido **verificado contra el código real** de Mycelium: `[[Título|alias]]`,
 `![[embed]]`, `![[X.excalidraw]]`, `#tag`, callouts (10 tipos, plegables `-/+`,
-anidados), `.mycelium/.trash`, frontmatter YAML aún NO interpretado (FUN-M-04),
-renombrar NO reescribe enlaces (FUN-M-08) — la IA debe actualizarlos con grep.
+anidados), `.mycelium/.trash`, **propiedades del frontmatter** con su subconjunto
+soportado (`FUN-M-04`, desde la v1.3.0 del framework), renombrar NO reescribe
+enlaces (FUN-M-08) — la IA debe actualizarlos con grep.
 
 ## Versionado
 
-- `FRAMEWORK_IA_VERSION` en `frontend/lib/ia/framework.ts` (hoy `1.2.0`),
+- `FRAMEWORK_IA_VERSION` en `frontend/lib/ia/framework.ts` (hoy `1.3.0`),
   independiente de la versión de la app. **Al agregar funciones a Mycelium que la
   IA deba conocer, subir la versión y actualizar los templates.**
   - `1.0.0` — primera versión.
@@ -58,7 +59,15 @@ renombrar NO reescribe enlaces (FUN-M-08) — la IA debe actualizarlos con grep.
     archivos del usuario.
   - `1.2.0` — reenfoque a **memoria**: protocolos de recuperación/consolidación,
     skill `mycelium-memoria`, comandos `/vault-buscar` y `/vault-recordar`, y mapa
-    de cuándo usar cada herramienta.
+    de cuándo usar cada herramienta. **Es la instalada en el vault de este repo.**
+  - `1.2.1` — corrección de texto: el default de `.mycignore` había cambiado
+    (`FUN-M-12`) y los templates lo describían mal. Patch, sin instrucciones nuevas.
+  - `1.3.0` — **propiedades del frontmatter** (`FUN-M-04`): hasta acá los templates
+    afirmaban que "el frontmatter YAML todavía no se interpreta (se ve como
+    texto)", en la regla dura 6 del `CLAUDE.md` y en las precauciones de la skill
+    `mycelium-vault`. Ahora describen el subconjunto soportado, que `tags:` son
+    etiquetas de la nota, que hay que reusar las claves que ya existen en el vault
+    y que los valores se consultan con `clave:valor`. Ver [[metadata-yaml]].
 - Cada archivo generado lleva el marcador `<!-- mycelium-ia vX -->`; la versión
   instalada vive en `.claude/mycelium-ia.json`.
 - Configuración → Vault muestra instalada vs disponible y ofrece

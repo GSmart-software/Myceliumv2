@@ -56,8 +56,13 @@ Detalle por versión: [[Capa de datos del desktop]] · [[Capa de datos de la web
   `[[enlaces]]` resuelven **por título**, no por ruta.
 - `[[destino|alias]]`, embeds `![[nota]]` y `![[dibujo.excalidraw]]`, `#tags`.
 - **Callouts** `> [!tipo]` con 10 tipos, plegables (`-`/`+`) y anidables.
-- El **frontmatter YAML** todavía **no se interpreta** (pendiente: `FUN-M-04` en
-  [[BACKLOG]]).
+- El **frontmatter YAML** del inicio de la nota se interpreta como **propiedades**
+  (`FUN-M-04`, ver [[metadata-yaml]]): un **mapa plano** cuyos valores pueden ser texto,
+  número, casilla, fecha, fecha y hora o lista. `tags:` son etiquetas de la nota, igual
+  que los `#tag` del cuerpo. Lo que cae fuera del subconjunto (mapas anidados, escalares
+  multilínea, anclas, listas de mapas) se muestra **crudo** y no se reescribe nunca. El
+  parseo vive en `lib/frontmatter.ts` —propio, sin dependencia de YAML— y las
+  propiedades se indexan en la tabla `propiedades` del índice del vault.
 
 ## Estructura del repo
 

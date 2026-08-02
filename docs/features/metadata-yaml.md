@@ -7,6 +7,17 @@ al inicio de un archivo deja de ser texto suelto y pasa a ser un conjunto de
 Es la base de [[BACKLOG|`FUN-L-03`]] (archivos tabla): sin propiedades consultables no
 hay nada que agregar en una tabla.
 
+> [!success] Implementado en desktop — [[Version 1.2.0]]
+> Todo lo que describe esta spec está en `desktop-tauri` y **sin confirmar en la app**.
+> El paso a paso de los 12 criterios, con las notas de prueba, está en [[Version 1.2.0]].
+> Diferencias con lo especificado, todas por el lado de leer de más antes que descartar
+> en silencio: un `#` solo abre comentario si va **precedido de espacio** (así
+> `tags: #idea` y `- #idea` son etiquetas), el espacio tras los dos puntos es **opcional**
+> (`clave:valor` se lee igual que `clave: valor`), y una lista conserva el estilo que ya
+> tenía en el archivo (en bloque sigue en bloque, en línea sigue en línea) en vez de
+> normalizarse. El comentario al final de la línea de una propiedad **sí** se conserva al
+> editar su valor.
+
 > [!info] Alcance: **desktop primero, reflejo a web después**
 > Aplica a las dos versiones por naturaleza (es el formato de las notas, no la capa de
 > datos). Se implementa en `desktop-tauri`, **el usuario lo confirma en la app** y recién

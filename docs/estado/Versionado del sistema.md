@@ -6,7 +6,7 @@ Se muestra al pie del drawer de Configuración y sale de una constante compartid
 `frontend/lib/version.ts` → `APP_VERSION`.
 
 > [!info] Estado actual
-> **desktop `1.1.5`** ([[Version 1.1.5]]) · **web `1.0.0`** ([[Version 1.0.0]]).
+> **desktop `1.2.0`** ([[Version 1.2.0]]) · **web `1.0.0`** ([[Version 1.0.0]]).
 > Las líneas se separaron en el release 1.1.0 porque todo lo que entró es solo-desktop.
 
 Al subir de versión hay que tocar **todos** estos lugares:
@@ -108,12 +108,21 @@ app: versiona el contenido de las instrucciones que se generan en el vault.
 > **patch**. Si el texto no acompaña al cambio, el framework miente.
 
 Historial: `1.0.0` inicial · `1.1.0` `.mycignore` + política de conflictos · `1.2.0`
-reenfoque a memoria · `1.2.1` default de `.mycignore` corregido en los templates.
-Ver [[Generar el framework de IA en un vault]].
+reenfoque a memoria · `1.2.1` default de `.mycignore` corregido en los templates ·
+`1.3.0` propiedades del frontmatter (`FUN-M-04`) — minor, porque no corrige un texto:
+enseña una capacidad nueva del vault. Ver [[Generar el framework de IA en un vault]].
+
+> [!info] `1.1.5 → 1.2.0`, el caso inverso al de 1.1.1
+> [[Version 1.2.0]] (`FUN-M-04`) es un `FUN-M` igual que `FUN-M-12`, y sin embargo sube
+> **minor**: el usuario puede hacer algo que antes no podía (dar atributos a sus notas y
+> consultarlos). Al subir el minor, el patch vuelve a `0` — de ahí que de `1.1.5` se pase
+> a `1.2.0` y no a `1.2.5`.
 
 ## Relacionadas
 
-- [[Version 1.1.5]] — el release más reciente (y el primero que salta varios patches de una).
+- [[Version 1.2.0]] — el release más reciente (metadatos YAML) y el caso testigo de
+  "un `FUN-M` puede ser minor".
+- [[Version 1.1.5]] — el primero que saltó varios patches de una.
 - [[Version 1.1.1]] — el caso testigo de "grande ≠ minor".
 - [[Version 1.0.0]] — el primer release consolidado.
 - [[Generar instaladores desktop]] — dónde impacta la versión.
