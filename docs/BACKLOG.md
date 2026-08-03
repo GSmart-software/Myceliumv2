@@ -58,7 +58,7 @@ y **priorizar** qué implementar antes.
 | ID | Nombre | Descripción | Aplica | Orig. |
 |---|---|---|---|---|
 | `FUN-S-01` | `EDITOR-CHECKBOX-ESTILOS` | Estilos de checkbox según el símbolo: `x`=X, `-`=tachado, `*`=estrella, `+`=check | ambas | C-M-06 |
-| `FUN-S-02` | `EDITOR-TAB-WIDTH` | Configurar cuánto espacio ocupa una tabulación | ambas | C-M-10 |
+| `FUN-S-02` 🛠️ | `EDITOR-TAB-WIDTH` | Configurar cuánto espacio ocupa una tabulación: 2, 4 u 8, aplicado a la vez a lo que inserta <kbd>Tab</kbd> y a cómo se ve un tabulador del archivo. **Implementado en desktop** (sin confirmar). Salió en [[Version 1.5.0]] | ambas | C-M-10 |
 | `FUN-S-03` | `EXPLORER-EXTENSIONES` | Mostrar la extensión de los archivos no‑markdown para poder identificarlos | ambas | C-M-12 |
 | `FUN-S-04` | `TRASH-MULTISELECT` | Seleccionar varios archivos para borrar en la papelera | ambas | C-M-14 |
 | `FUN-S-05` | `VAULT-EJEMPLO-DEFAULT` | Al crear un vault nuevo, generar un archivo de ejemplo por defecto | ambas | C-G-02 |
@@ -886,6 +886,9 @@ No tienen parentesco suficiente con nada: cada una es su propio release.
 | `FUN-XL-01` `STORAGE-LOCAL-FIRST-NUBE` | Rearquitectura de almacenamiento del desktop. Necesita que exista infraestructura de nube, pero es trabajo aparte del bloque I | major |
 
 ### Las dos que pueden viajar de acompañantes
+
+*(`FUN-S-02` salió sola en la [[Version 1.5.0]], sin acompañar a ningún bloque: se
+implementó para tener una segunda versión con la que verificar la autoactualización.)*
 
 `FUN-S-02` (ancho de tabulación) y `FUN-S-08` (`cssclasses`) no tienen parentesco con nada,
 pero son **de un archivo y un rato**. Forzarles un bloque sería agrupar por agrupar; darles

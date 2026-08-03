@@ -84,7 +84,8 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
 ## Estado y releases
 
 - [[Estado del proyecto]] — situación actual, pendientes y deuda.
-- [[Version 1.4.0]] — release actual de desktop (autoactualización), **sin confirmar y
+- [[Version 1.5.0]] — release actual de desktop (ancho de tabulación), **sin confirmar en la app**.
+- [[Version 1.4.0]] — autoactualización y selección de versión.
   sin probar de extremo a extremo**: falta crear el bucket y la clave de firma.
 - [[Version 1.3.0]] — Esporas, **sin confirmar en la app**.
 - [[Version 1.2.0]] — metadatos YAML, **confirmado en la app**.
