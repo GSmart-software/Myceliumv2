@@ -136,14 +136,21 @@ descargue.
 
 ```
 mycelium-releases/
-├── latest.json                       ← el manifiesto que consulta la app
+├── latest.json                       ← el manifiesto que consulta la app cada día
 ├── versions.json                     ← índice de todo lo publicado (FUN-M-16)
 ├── 1.4.0/
+│   ├── latest.json                   ← el MISMO manifiesto, copiado acá
 │   ├── Mycelium_1.4.0_x64-setup.exe
 │   └── Mycelium_1.4.0_x64-setup.exe.sig
 └── 1.3.0/
-    └── …                             ← las versiones viejas se conservan
+    └── …                             ← las versiones viejas se conservan enteras
 ```
+
+> [!important] Cada versión necesita **su propia copia** de `latest.json`
+> El plugin solo sabe leer **un manifiesto por URL**: para instalar la 1.2.0 cuando la
+> última es la 1.4.0, tiene que existir un manifiesto que anuncie la 1.2.0. Sin esa copia,
+> `FUN-M-16` listaría versiones que después no se pueden instalar. Es el mismo JSON subido
+> dos veces; sin coste, pero **no se puede olvidar** al publicar.
 
 `latest.json` con el formato que espera el plugin:
 
@@ -238,7 +245,9 @@ comprueba que el circuito completo funciona. La continuación es `FUN-L-15` en e
 ### 4.1 Cuándo comprueba
 
 - Al arrancar, **si la última comprobación no fue hoy**. La fecha se guarda en
-  `Preferencias` (`preferencesStore`), como el resto.
+  `actualizador.json`, en el config-dir de la app — **no** en `Preferencias`, que viven
+  dentro del índice de cada vault. El motivo está en el § 5 bis y es de fondo: estas
+  decisiones son **de la instalación**, no del vault.
 - **En segundo plano y sin bloquear** el arranque: si tarda o falla, Mycelium abre igual.
 - **Sin conexión: silencio absoluto.** Ni aviso, ni icono de error, ni entrada en el log
   visible. Se reintenta al día siguiente.

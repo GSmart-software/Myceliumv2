@@ -74,9 +74,16 @@ todo, la clave privada.
 
 Desde `frontend/`:
 
-```sh
-npx tauri signer generate -w %USERPROFILE%\.tauri\mycelium.key
+En **PowerShell**:
+
+```powershell
+npx tauri signer generate -w "$env:USERPROFILE\.tauri\mycelium.key"
 ```
+
+> [!warning] No copies este comando con `%USERPROFILE%`
+> Esa forma solo funciona en `cmd.exe`. En PowerShell y en Git Bash **no se expande**, y en
+> vez de escribir en tu perfil te crea una carpeta llamada literalmente `%USERPROFILE%`.
+> Si te pasó, borrá esa carpeta y repetí el comando de arriba.
 
 Te va a pedir una contraseña. **Ponela** y anotala donde guardes tus contraseñas: sin ella
 la clave privada no sirve.
