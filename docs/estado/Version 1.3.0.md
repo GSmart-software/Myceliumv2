@@ -115,6 +115,13 @@ tenía).
 | `frontend/components/editor/EsporaMenu.tsx` | La lista para insertar, en un portal a `<body>`. |
 | `frontend/components/explorer/ContextMenu.tsx` | Gana submenús, entradas deshabilitadas y `title` propio. |
 
+> [!note] Listar es una consulta al árbol, no al índice
+> Una Espora es "una nota cuya carpeta es exactamente la configurada", y en desktop el
+> **id de una carpeta es su ruta**, así que la lista sale del árbol que `vaultStore` ya
+> tiene en memoria: sin query nueva, sin tabla nueva y reactiva a cualquier cambio del
+> vault. Es también lo único que **no** se puede copiar tal cual a web, donde el id de
+> una carpeta es un UUID (ver [[RAMAS]]).
+
 `crearNota` (`lib/db/notas.ts`) **no cambió de forma**: sigue creando el archivo vacío y
 el contenido se escribe después con `putContenido`. Es a propósito — web tiene el mismo
 endpoint en .NET y cambiar la firma alejaría las dos versiones sin necesidad.

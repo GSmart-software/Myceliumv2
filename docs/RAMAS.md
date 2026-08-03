@@ -99,6 +99,12 @@ entre ramas):
   desktop). `frontend/stores/vaultStore.ts` (`createNota` acepta un título) y
   `frontend/stores/preferencesStore.ts` (`carpetaEsporas`) son cambios de una línea que
   aplican igual en las dos. Ver [[esporas-plantillas]] y [[Version 1.3.0]].
+  > [!warning] Al reflejar: en desktop el id de una carpeta **es su ruta**
+  > `listarEsporas` busca las notas cuya `carpetaId` sea exactamente la ruta
+  > configurada (`Esporas`). En **web** el id de una carpeta es un **UUID**, así que
+  > esa comparación no encuentra nada: hay que resolver la ruta configurada a su id
+  > recorriendo el árbol (segmento a segmento desde la raíz) antes de filtrar. Es el
+  > único punto de las Esporas donde las dos capas de datos no son intercambiables.
 - **Framework IA del vault (FUN-L-08, solo-desktop)**: `frontend/lib/ia/*` no existe
   en web; usa el comando Rust `leer_archivo_texto` (`src-tauri/src/vault_fs.rs`) y
   una sección nueva en `frontend/components/settings/VaultSection.tsx` (archivo ya
