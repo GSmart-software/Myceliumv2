@@ -524,13 +524,27 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   sistema de pestañas y panes tiene que saber renderizar algo que no es un editor; y en
   **web** los archivos viven en el backend, así que servir un PDF o un binario es trabajo
   aparte del de desktop.
-- **A definir**: qué tipos entran en la primera versión y cuáles quedan fuera; si los
-  archivos no soportados se listan igual (en gris, sin poder abrirlos) o se siguen
-  ocultando; cómo se relaciona con `.mycignore` ([[mycignore]]) y con `FUN-S-03`
-  (mostrar la extensión); si un binario grande se abre o se avisa; y si los PDF se
-  visualizan embebidos o se delegan al sistema operativo.
-- **Relación**: `FUN-S-09` (resaltado de sintaxis) depende de esta; `FUN-L-05`
-  (adjuntos en la importación) toca el mismo terreno desde el otro lado.
+- **Decidido** (usuario, 2026-08-03):
+  - **Nada se oculta por no tener visor.** Los tipos que Mycelium no sabe mostrar se
+    listan igual en el explorador, **atenuados en gris**. El usuario tiene que ver que el
+    archivo está ahí.
+  - **Abrirlos abre una pestaña igual**, y esa pestaña dice que el documento no se puede
+    visualizar. Ni un error, ni un clic que no hace nada.
+  - **`.mycignore` sigue mandando.** Ver el callout de abajo.
+- **A definir**: qué tipos tienen visor propio en la primera versión; si los PDF se
+  muestran embebidos o se delegan al sistema operativo; y qué se hace con un binario muy
+  grande (abrirlo o avisar antes).
+- **Relación**: `FUN-S-09` (resaltado de sintaxis) depende de esta; `FUN-S-03` (mostrar la
+  extensión) se vuelve prácticamente necesaria en cuanto el explorador lista PDF, código y
+  texto plano; `FUN-L-05` (adjuntos en la importación) toca el mismo terreno desde el otro
+  lado.
+
+> [!warning] Soportar un tipo **no** es motivo para saltarse `.mycignore`
+> Que Mycelium aprenda a leer y mostrar un tipo de archivo no lo exime de la regla del
+> usuario: lo que esté ignorado en `.mycignore` **sigue sin aparecer**, tenga visor o no.
+> Son dos preguntas distintas — *¿sé mostrarlo?* y *¿el usuario quiere verlo?*— y la
+> segunda gana siempre. Es una tentación real al implementar esto ("ya que soportamos PDF,
+> indexémoslos todos"): no. Ver [[mycignore]].
 
 #### `FUN-L-12` · `EDITOR-CORRECTOR-ORTOGRAFICO` (—)
 - **Qué es**: subrayar las palabras mal escritas mientras se escribe, con la posibilidad
@@ -555,11 +569,13 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 - **Es L por volumen, no por dificultad**: hoy **todos** los textos están escritos en
   español directamente dentro de los componentes. Hay que extraerlos a claves, montar la
   capa de traducción y revisar cada pantalla. Mecánico, pero toca casi todo el frontend.
+- **Decidido** (usuario, 2026-08-03): **se traduce la interfaz y nada más**. No se tocan
+  los documentos del usuario ni lo que produce la IA sobre el vault — el framework
+  (`FRAMEWORK_IA_VERSION`) genera texto en el idioma del vault, no en el de la interfaz, y
+  cambiar el idioma de la UI no debe alterar una sola letra del contenido.
 - **A definir**: qué librería (o si alcanza un diccionario propio, dado que no hay SSR en
-  desktop); cómo se manejan plurales y fechas; si el idioma sale del sistema operativo la
-  primera vez; y **qué NO se traduce** — los documentos del usuario y el vault son suyos,
-  y el framework de IA (`FRAMEWORK_IA_VERSION`) genera texto en el idioma del vault, no en
-  el de la interfaz.
+  desktop); cómo se manejan plurales y fechas; y si el idioma sale del sistema operativo
+  la primera vez.
 
 ### Pendientes — tamaño XL
 
@@ -746,11 +762,17 @@ receta de [[Reflejar cambios de desktop a web]] y una única verificación con
 pública con contenido editable solo por autorizados). El modelo de roles que necesita
 `FUN-L-02` se apoya en la identidad que trae `FUN-M-10`; al revés no tiene sentido.
 
-#### J · El vault deja de ser solo markdown — `FUN-L-11` + `FUN-S-09` · minor · ambas
+#### J · El vault deja de ser solo markdown — `FUN-L-11` + `FUN-S-09` + `FUN-S-03` · minor · ambas
 `FUN-S-09` **no existe sin** `FUN-L-11`: sin visor de código no hay nada que colorear.
 Y al revés, un visor de código sin resaltado es un `<pre>` gris que nadie va a querer usar,
 así que separarlas obliga a entregar media funcionalidad. Además el motor de resaltado se
 elige **al construir el visor**, no después.
+
+`FUN-S-03` (mostrar la extensión de los archivos no markdown) **se sumó acá el 2026-08-03**,
+al decidirse que los tipos sin visor se listan en gris en vez de ocultarse: en cuanto el
+explorador muestra PDF, código y texto plano —soportados o no—, la extensión deja de ser
+un detalle cómodo y pasa a ser la única forma de distinguirlos. Estaba clasificada como
+acompañante suelta y ahora tiene un parentesco real.
 
 #### K · Idiomas — `FUN-L-12` + `FUN-L-13` · minor · ambas
 Las dos introducen la misma noción, que hoy no existe: **qué idiomas conoce Mycelium**.
@@ -782,15 +804,16 @@ No tienen parentesco suficiente con nada: cada una es su propio release.
 | `FUN-M-09` `EXPORT-ZIP-SERVIDOR` (web) | Exportación en servidor; independiente de identidad y de colaboración | minor |
 | `FUN-XL-01` `STORAGE-LOCAL-FIRST-NUBE` | Rearquitectura de almacenamiento del desktop. Necesita que exista infraestructura de nube, pero es trabajo aparte del bloque I | major |
 
-### Las tres que pueden viajar de acompañantes
+### Las dos que pueden viajar de acompañantes
 
-`FUN-S-02` (ancho de tabulación), `FUN-S-03` (extensiones en el explorador) y `FUN-S-08`
-(`cssclasses`) no tienen parentesco con nada, pero son **de un archivo y un rato**.
-Forzarles un bloque sería agrupar por agrupar; darles un release propio a cada una es
-correcto pero desproporcionado. Lo natural es que **se sumen a cualquier release que ya
-esté saliendo** — el dígito no cambia por llevarlas: `FUN-S-02` y `FUN-S-08` aportan
-capacidad nueva (minor) y `FUN-S-03` es mejora de lo existente (patch), así que quedan
-absorbidas por cualquier bloque de su tamaño o mayor.
+`FUN-S-02` (ancho de tabulación) y `FUN-S-08` (`cssclasses`) no tienen parentesco con nada,
+pero son **de un archivo y un rato**. Forzarles un bloque sería agrupar por agrupar; darles
+un release propio a cada una es correcto pero desproporcionado. Lo natural es que **se
+sumen a cualquier release que ya esté saliendo**: las dos aportan capacidad nueva (minor),
+así que quedan absorbidas por cualquier bloque de su tamaño o mayor.
+
+*(`FUN-S-03` estaba acá y pasó al bloque J el 2026-08-03: al listarse los archivos sin
+visor, ver la extensión dejó de ser un extra.)*
 
 > [!note] Lo que no entra en esta agrupación
 > **Defectos**: solo hay uno abierto, `DEF-042`, y está en el bloque A. Los otros 23
