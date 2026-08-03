@@ -124,6 +124,9 @@ Al pulsar "abrir", la pantalla de selección de vault debería desaparecer y dar
 
 Esa pantalla de carga también debe aparecer cuando el vault se abre **automáticamente** por configuración.
 
+# DEF-043
+El ícono de las Esporas (plantillas) es una planta o un brote de planta, y no es representativo de una espora. Un círculo, o algo del estilo del ícono de un virus, comunicaría mejor la idea — aunque no sea literalmente una espora, se parece más que una planta.
+
 
 ---
 

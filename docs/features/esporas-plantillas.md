@@ -123,7 +123,7 @@ que cambia es qué se hace con el resultado.
 
 ### 3.1 Panel de Esporas: un clic crea la nota
 
-Botón nuevo en el rail (icono `Sprout` de lucide; si no existiera, `FileStack`) que abre el
+Botón nuevo en el rail (icono `CircleDot` de lucide — ver `DEF-043`) que abre el
 panel **Esporas** en el panel lateral, como cualquier otra sección.
 
 - Lista las plantillas de la carpeta configurada, por nombre.

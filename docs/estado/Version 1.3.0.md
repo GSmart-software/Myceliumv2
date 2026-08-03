@@ -2,6 +2,14 @@
 
 **Solo desktop** (`desktop-tauri`) · 2026-08-03 · un minor sobre [[Version 1.2.0]]
 
+> [!note] `DEF-043` entró en esta misma versión, sin subir el número
+> Al probarla, el usuario reportó que el ícono de las Esporas (`Sprout`, un brote de
+> planta) no evocaba una espora; se cambió a `CircleDot`. **No se subió a `1.3.1`** porque
+> `1.3.0` nunca se distribuyó: no se generó instalador y el usuario la está probando en
+> desarrollo. Quemar un número en una compilación que no salió no aporta nada — la regla
+> de un release, un incremento, aplica a lo que se **publica**. Ver
+> [[Versionado del sistema]].
+
 Un solo tema: **las Esporas**, las plantillas de notas. Spec en [[esporas-plantillas]]
 (`FUN-M-03` · `TEMPLATES-ESPORAS`).
 
@@ -60,7 +68,7 @@ una lleva su propio título dentro.
 Las tres comparten el mismo núcleo —listar las Esporas + sustituir variables—; lo que
 cambia es qué se hace con el resultado.
 
-1. **Panel de Esporas** (icono `Sprout` en el rail). Un clic en una Espora **crea la
+1. **Panel de Esporas** (icono `CircleDot` en el rail). Un clic en una Espora **crea la
    nota** en la carpeta activa del explorador, con el nombre de la plantilla, y la abre.
    Sin diálogo. Cada fila trae además editar, renombrar y borrar (a la papelera), y hay
    un botón "Nueva Espora". Si la carpeta no existe o está vacía, el panel **explica qué
