@@ -62,7 +62,7 @@ y **priorizar** qué implementar antes.
 |---|---|---|---|---|
 | `FUN-M-01` | `TRASH-PREVIEW` | Visualizar el contenido de los archivos en la papelera | ambas | C-M-13 |
 | `FUN-M-02` | `GRAPH-BUSCADOR-FILTRO` | Buscar por nombre en el grafo: atenúa los nodos que no coinciden | ambas | C-I-03 |
-| `FUN-M-03` | `TEMPLATES-ESPORAS` | Plantillas ("Esporas") para crear notas rápido: botón en el rail + selección de plantilla al crear archivo | ambas | C-I-04 |
+| `FUN-M-03` 🛠️ | `TEMPLATES-ESPORAS` | Plantillas ("Esporas") para crear notas rápido: panel en el rail, "Insertar Espora" en la barra del editor y submenú en el clic derecho de una carpeta. **Implementado en desktop** (sin confirmar); spec en `docs/features/esporas-plantillas.md`. Salió en [[Version 1.3.0]]. Pendiente el reflejo a web | ambas | C-I-04 |
 | `FUN-M-04` 🟢 | `METADATA-YAML` | Manejar metadatos YAML (frontmatter `---`) de las notas como **propiedades** consultables (prerequisito de `FUN-L-03`). **Confirmado en desktop** el 2026-08-02; spec en `docs/features/metadata-yaml.md`. Salió en [[Version 1.2.0]]. Pendiente el reflejo a web | ambas | C-I-07a |
 | `FUN-M-11` 🛠️ | `VAULT-MYCIGNORE` | `.mycignore` por vault (estilo `.gitignore`) para decidir qué archivos/carpetas ignora Mycelium; por defecto `.*/` + carpetas de build. **Implementado en desktop** (sin confirmar); parte **web** pendiente (otra semántica). Spec en `docs/features/mycignore.md` | ambas | — |
 | `FUN-M-12` 🛠️ | `VAULT-INDEX-PERF` | Rendimiento de la apertura del vault: default de `.mycignore` con `node_modules/`/`target/`/`dist/`/`out/`, metadatos sin contenido + `leer_archivos` en tandas, carpetas incrementales, WAL y progreso visible. **Implementado en desktop** (sin confirmar); spec en `docs/features/rendimiento-apertura-vault.md`. Salió en [[Version 1.1.1]] | desktop | — |
@@ -228,7 +228,7 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 - **A definir**: coincidencia parcial vs exacta; si además centra/hace zoom al
   resultado; si permite buscar por tag o path además del nombre.
 
-#### `FUN-M-03` · `TEMPLATES-ESPORAS` (C-I-04)
+#### `FUN-M-03` · `TEMPLATES-ESPORAS` (C-I-04) — 🛠️ desktop
 - **Qué es**: plantillas reutilizables para crear notas ya con una estructura base. Un
   botón nuevo en el rail izquierdo permite ver/gestionar (crear, editar, borrar) las
   plantillas. Al crear un archivo, aparece un menú (como el de crear carpeta) con el
@@ -236,7 +236,9 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   "ninguna"). Nombre propuesto para las plantillas: **"Esporas"**.
 - **Objetivo**: acelerar la creación de notas recurrentes (reuniones, diario, fichas) y
   mantener consistencia de formato en el vault.
-- **Definido** (spec en [[esporas-plantillas]]): se valida el nombre **"Esporas"**. Cada
+- **Implementado en desktop** — spec en [[esporas-plantillas]], release en
+  [[Version 1.3.0]]. Pendiente la confirmación del usuario en la app y el reflejo a web.
+  Lo que se construyó: se valida el nombre **"Esporas"**. Cada
   plantilla es una **nota normal** en una carpeta del vault (`Esporas/` por defecto,
   configurable en Configuración → Vault). Admiten variables `{{titulo}}`, `{{fecha}}`,
   `{{hora}}` y `{{fecha:FORMATO}}` con tokens en español (`AAAA-MM-DD hh:mm`); un token
@@ -534,6 +536,12 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   fecha), opcionalmente a partir de una plantilla (`FUN-M-03`). Hoy es placeholder.
 - **Objetivo**: registro diario / bitácora rápida (journaling), un patrón central en
   herramientas tipo Obsidian.
+- **Ya tiene de dónde tomar la plantilla**: `FUN-M-03` ([[Version 1.3.0]]) dejó hechas las
+  dos mitades que esta unidad necesitaba. `lib/esporasVault.ts` lista las Esporas de la
+  carpeta configurada y crea una nota a partir de una (`crearNotaDesdeEspora`), y
+  `lib/esporas.ts` sustituye `{{titulo}}`, `{{fecha}}`, `{{hora}}` y `{{fecha:FORMATO}}`
+  — que es exactamente lo que hace falta para nombrar la nota del día y rellenarla. Lo que
+  queda es la preferencia de qué Espora usar, la carpeta destino y el formato del nombre.
 - **A definir**: formato de nombre/fecha, carpeta destino y plantilla por defecto.
 
 #### `FUN-M-08` · `LINKS-REESCRITURA-RENOMBRAR` (HU-23)

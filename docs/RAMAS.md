@@ -80,6 +80,31 @@ entre ramas):
   .NET**. `frontend/lib/api.ts`, `NoteEditor.tsx` y `NotePanel.tsx` ya divergían: aplicar
   a mano (el panel recibe `paneId`, `reloadFromDisk` publica en el `docBroker`).
   Ver [[metadata-yaml]] y [[Version 1.2.0]].
+- **Esporas (`FUN-M-03`, desktop 1.3.0, pendiente de reflejo)**: casi todo es
+  **compartido** y se puede traer entero con `git checkout desktop-tauri -- <archivo>`,
+  porque las plantillas son **notas del vault** y no tocan la capa de datos:
+  `frontend/lib/esporas.ts` (lógica pura, sin dependencias),
+  `frontend/scripts/test-esporas.mjs`, `frontend/lib/esporasVault.ts`,
+  `frontend/components/explorer/EsporasPanel.tsx` + su `.module.css`,
+  `frontend/components/editor/EsporaMenu.tsx` + su `.module.css`,
+  `frontend/components/explorer/ContextMenu.tsx` + su `.module.css` (submenús, entradas
+  deshabilitadas) y `frontend/components/editor/EditorToolbar.tsx`.
+  Lo que hay que **aplicar a mano** en cada rama, por ser archivos ya divergentes:
+  `frontend/components/settings/VaultSection.tsx` (el campo de la carpeta: desktop tiene
+  export-a-carpeta, framework IA y `.mycignore`; web solo ZIP),
+  `frontend/components/workspace/LeftPanel.tsx` (en desktop la sección va dentro del
+  `SidebarDock` genérico; en **web** el panel lateral sigue siendo `ExplorerDock`),
+  `frontend/components/workspace/Rail.tsx` (desktop tiene además el botón de consolas) y
+  `frontend/stores/panelLayoutStore.ts` (`RailSection` incluye `terminal` solo en
+  desktop). `frontend/stores/vaultStore.ts` (`createNota` acepta un título) y
+  `frontend/stores/preferencesStore.ts` (`carpetaEsporas`) son cambios de una línea que
+  aplican igual en las dos. Ver [[esporas-plantillas]] y [[Version 1.3.0]].
+  > [!warning] Al reflejar: en desktop el id de una carpeta **es su ruta**
+  > `listarEsporas` busca las notas cuya `carpetaId` sea exactamente la ruta
+  > configurada (`Esporas`). En **web** el id de una carpeta es un **UUID**, así que
+  > esa comparación no encuentra nada: hay que resolver la ruta configurada a su id
+  > recorriendo el árbol (segmento a segmento desde la raíz) antes de filtrar. Es el
+  > único punto de las Esporas donde las dos capas de datos no son intercambiables.
 - **Framework IA del vault (FUN-L-08, solo-desktop)**: `frontend/lib/ia/*` no existe
   en web; usa el comando Rust `leer_archivo_texto` (`src-tauri/src/vault_fs.rs`) y
   una sección nueva en `frontend/components/settings/VaultSection.tsx` (archivo ya

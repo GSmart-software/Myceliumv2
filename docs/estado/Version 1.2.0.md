@@ -227,6 +227,7 @@ lista de archivos está en [[RAMAS]]; la receta, en [[Reflejar cambios de deskto
 
 ## Relacionadas
 
+- [[Version 1.3.0]] — el release siguiente (Esporas), que usa estas propiedades.
 - [[Version 1.1.5]] — el release anterior.
 - [[metadata-yaml]] — la spec, con los 12 criterios de aceptación completos.
 - [[CodeMirror y la vista en vivo]] — el height-map: por qué el widget lleva
