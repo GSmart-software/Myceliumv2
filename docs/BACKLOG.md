@@ -96,7 +96,7 @@ y **priorizar** qué implementar antes.
 | `FUN-L-12` | `EDITOR-CORRECTOR-ORTOGRAFICO` | Corrector ortográfico activable en Configuración, con **varios idiomas simultáneos** (p. ej. español e inglés) y arquitectura preparada para sumar idiomas | ambas | — |
 | `FUN-L-13` | `UI-IDIOMAS` | La interfaz en varios idiomas (español, inglés, italiano) y preparada para agregar más. Hoy todos los textos están escritos en español dentro de los componentes | ambas | — |
 | `FUN-L-14` 🛠️ | `UPDATER-AUTOACTUALIZACION` | Mycelium comprueba una vez al día si hay versión nueva, muestra su changelog y ofrece instalarla con un clic. Nunca obliga ni bloquea. `tauri-plugin-updater` + instaladores firmados en Cloudflare R2. **Implementado en desktop** (sin confirmar y **sin probar de extremo a extremo**: falta crear el bucket y generar la clave, ver [[Publicar una version]] § 1). Spec en `docs/features/autoactualizacion.md`. Salió en [[Version 1.4.0]] | desktop | — |
-| `FUN-L-15` | `RELEASE-SCRIPT-PUBLICACION` | Un `npm run publicar` que compile, firme, suba a R2 con `wrangler` y escriba `latest.json` y `versions.json`, en vez de hacer esos cuatro pasos a mano. **Script local, no CI**: usar el workflow obligaría a alinear `origin` y a poner la clave de firma como secreto de GitHub. Continuación de `FUN-L-14` | desktop | — |
+| `FUN-L-15` 🛠️ | `RELEASE-SCRIPT-PUBLICACION` | Un `npm run publicar` que compruebe, compile, firme, suba a R2 con `wrangler`, escriba los tres manifiestos y **verifique lo publicado**, en vez de hacer esos cuatro pasos a mano. Tiene modo `--simulacro`. **Script local, no CI**: usar el workflow obligaría a alinear `origin` y a poner la clave de firma como secreto de GitHub. **Implementado en desktop** (sin confirmar); el proceso, en [[Publicar una version]] § 2 | desktop | — |
 
 ### 1.4 Muy grandes — tamaño XL
 
@@ -613,13 +613,26 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   alinear `origin`, hoy 204 commits por detrás y público (ver [[RAMAS]])— y exige meter la
   clave privada de firma como secreto de GitHub. El script consigue lo que importa sin tocar
   el remoto y sin que la clave salga de la máquina.
-- **A definir**: si el script publica también las versiones anteriores que ya están en
-  `installers/`, y qué hace si `wrangler` no está autenticado.
-- **Depende de `FUN-L-14`**: primero el circuito a mano, comprobado de extremo a extremo.
-  `FUN-L-14` ya salió en [[Version 1.4.0]] y dejó el proceso manual escrito paso a paso en
-  [[Publicar una version]] § 2 — que es literalmente lo que este script tiene que
-  automatizar. **Todavía no toca**: ese circuito no se ha ejecutado ni una vez, y
-  automatizar un proceso que no se sabe si funciona es multiplicar el fallo.
+- **Lo que estaba "a definir", resuelto al implementarlo (2026-08-03)**:
+  - **No** publica las versiones anteriores que están en `installers/`. Nunca hizo falta:
+    solo la `1.4.0` en adelante puede autoactualizarse, y las anteriores no tienen manifiesto
+    ni firma que subir.
+  - Si `wrangler` no está instalado o no está autenticado, **falla en las comprobaciones
+    previas** con el comando exacto que hay que ejecutar. Todo lo que puede fallar se
+    comprueba **antes de compilar**: descubrir que falta una variable de entorno después de
+    diez minutos de `tauri build` es el peor momento posible.
+- **Implementado** (2026-08-03, sin confirmar). Además de lo pedido, el script **verifica lo
+  publicado**: que los tres JSON respondan y parseen, que la firma del manifiesto sea la del
+  `.sig` generado y que el `.exe` **descargado del bucket** tenga el mismo SHA-256 que el que
+  se firmó — la única comprobación que atrapa una subida truncada, que a la vista deja un
+  archivo perfectamente válido y solo falla cuando un usuario intenta actualizar. Tiene
+  `--simulacro` (todo menos subir), `--sin-compilar` (rehacer un manifiesto sin esperar diez
+  minutos) y `--forzar` (republicar encima de una versión existente, que por defecto aborta).
+  El changelog sale de una sección delimitada de la nota de release. Todo en
+  [[Publicar una version]] § 2.
+- **Dependía de `FUN-L-14`**: primero el circuito a mano, comprobado de extremo a extremo.
+  Se respetó el orden — la `1.4.0` se publicó a mano el 2026-08-03 y recién después se
+  automatizó lo que ya se sabía que funcionaba.
 
 > [!note] Lo que se pierde al no usar CI, para tenerlo presente
 > El instalador sale de la compilación local en vez de una máquina limpia, y se renuncia a
@@ -837,6 +850,10 @@ entregan en ese orden**: primero el circuito a mano, y solo cuando está comprob
 extremo a extremo se automatiza. Automatizar un proceso que todavía no se sabe si funciona
 es multiplicar el fallo, y acá un fallo rompe la actualización de todos los usuarios a la vez.
 *Si el bloque se hace muy grande*, `FUN-L-14` sola ya es entregable y útil.
+
+**El bloque está completo** (2026-08-03): `FUN-L-14` y `FUN-M-16` salieron en
+[[Version 1.4.0]], esa versión se publicó a mano para comprobar el circuito de punta a punta,
+y con eso comprobado se implementó `FUN-L-15`. El orden previsto se cumplió tal cual.
 
 #### K · Idiomas — `FUN-L-12` + `FUN-L-13` · minor · ambas
 Las dos introducen la misma noción, que hoy no existe: **qué idiomas conoce Mycelium**.
