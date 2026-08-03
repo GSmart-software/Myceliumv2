@@ -117,6 +117,13 @@ Cada pestaña debería tener su propia línea de historial.
 # DEF-041
 A pesar de tener activa la opción de pestaña de previsualización, siempre se abre una pestaña nueva en lugar de reemplazar la que estoy viendo y no modifiqué.
 
+# DEF-042
+Al abrir Mycelium y seleccionar un vault, **todos** los botones de abrir reemplazan su contenido con el progreso del indexado (cuántos archivos van, etc.). No tiene sentido: si elijo abrir el vault 1, el botón del vault 2 no debería mostrar ese feedback.
+
+Al pulsar "abrir", la pantalla de selección de vault debería desaparecer y dar paso a una **pantalla de carga** con el feedback de qué está haciendo Mycelium. Lo más descriptivo posible: en qué etapa está, cómo va el progreso y si se congeló.
+
+Esa pantalla de carga también debe aparecer cuando el vault se abre **automáticamente** por configuración.
+
 
 ---
 

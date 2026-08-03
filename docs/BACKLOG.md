@@ -63,6 +63,7 @@ y **priorizar** qué implementar antes.
 | `FUN-S-04` | `TRASH-MULTISELECT` | Seleccionar varios archivos para borrar en la papelera | ambas | C-M-14 |
 | `FUN-S-05` | `VAULT-EJEMPLO-DEFAULT` | Al crear un vault nuevo, generar un archivo de ejemplo por defecto | ambas | C-G-02 |
 | `FUN-S-08` | `NOTE-CSSCLASSES` | Aplicar a la nota las clases CSS que declare su propiedad `cssclasses`: hoy se parsea e indexa pero **no tiene comportamiento**. Continuación de `FUN-M-04` | ambas | — |
+| `FUN-S-09` | `CODE-RESALTADO-SINTAXIS` | Colorear los archivos de código al visualizarlos según su lenguaje (palabras reservadas, tipos, cadenas). **Depende de `FUN-L-11`**: sin visor de código no hay nada que colorear | ambas | — |
 
 ### 1.2 Intermedias — tamaño M
 
@@ -90,6 +91,9 @@ y **priorizar** qué implementar antes.
 | `FUN-L-08` 🛠️ | `IA-FRAMEWORK-VAULT` | Framework IA versionado generado en el vault (CLAUDE.md + 2 skills + 6 comandos en `.claude/`) para que Claude Code use el vault como **memoria**: recuperar antes de responder y consolidar lo que valga recordar, navegando por vínculos. Botón opt‑in en Configuración → Vault. **Implementada** (sin confirmar); spec en `docs/features/ia-framework-vault.md` | desktop | — |
 | `FUN-L-09` | `IA-MCP-MYCELIUM` | Servidor MCP de Mycelium: exponer a la IA el índice del vault (búsqueda, backlinks, grafo, metadatos) como herramientas estructuradas, en vez de grep sobre archivos | desktop | — |
 | `FUN-L-10` | `VAULT-INDEX-EN-RUST` | Mover el indexado entero a Rust: el walker lee y escribe el índice en el mismo proceso, en **una** transacción, sin pasar contenido por IPC. Resuelve de raíz lo que `FUN-M-12` mitigó desde el frontend (incluido el `BEGIN`/`COMMIT` que el pool de `tauri-plugin-sql` impide). Continuación de `FUN-M-12` | desktop | — |
+| `FUN-L-11` | `FILES-OTROS-TIPOS` | Ver en Mycelium los archivos que hoy ignora: PDF, código de cualquier lenguaje y texto plano. Aparecen en el explorador y se abren en un visor propio, como una pestaña más | ambas | — |
+| `FUN-L-12` | `EDITOR-CORRECTOR-ORTOGRAFICO` | Corrector ortográfico activable en Configuración, con **varios idiomas simultáneos** (p. ej. español e inglés) y arquitectura preparada para sumar idiomas | ambas | — |
+| `FUN-L-13` | `UI-IDIOMAS` | La interfaz en varios idiomas (español, inglés, italiano) y preparada para agregar más. Hoy todos los textos están escritos en español dentro de los componentes | ambas | — |
 
 ### 1.4 Muy grandes — tamaño XL
 
@@ -217,6 +221,19 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 - **Objetivo**: notas con estilo propio (fichas, portadas, diarios) sin tocar el código.
 - **A definir**: dónde se cuelgan las clases (`.mic-preview`, el host de CodeMirror, o
   ambos) y si se saneen los nombres de clase.
+
+#### `FUN-S-09` · `CODE-RESALTADO-SINTAXIS` (—)
+- **Qué es**: que un archivo de código abierto en Mycelium se vea **coloreado según su
+  lenguaje** — palabras reservadas, tipos, cadenas, comentarios— en vez de como un bloque
+  de texto plano.
+- **Objetivo**: poder leer código dentro del vault sin abrir otro editor.
+- **Es S solo porque la infraestructura ya está**: el proyecto usa `highlight.js` (vía
+  `rehype-highlight`, para los bloques cercados) y tiene `@codemirror/language-data`, que
+  carga gramáticas de decenas de lenguajes bajo demanda. Lo que falta es el visor.
+- **A definir**: si el resaltado lo hace CodeMirror o `highlight.js` (conviene el mismo
+  motor que use el visor de `FUN-L-11`, para no mantener dos paletas), y de dónde sale el
+  lenguaje (extensión del archivo).
+- **Depende de `FUN-L-11`**: sin visor de código no hay nada que colorear.
 
 ### Pendientes — tamaño M
 
@@ -495,6 +512,55 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   convive con el esquema que hoy declara `lib/db/indexer.ts`, y cómo reporta progreso al
   frontend (eventos Tauri).
 
+#### `FUN-L-11` · `FILES-OTROS-TIPOS` (—)
+- **Qué es**: que Mycelium deje de ignorar los archivos que no son `.md` ni
+  `.excalidraw`. Hoy un PDF, un archivo de código o un `.txt` que estén en la carpeta del
+  vault **no aparecen en el explorador** y no hay forma de verlos. Deberían listarse y
+  abrirse en un visor propio, como una pestaña más del área de trabajo.
+- **Objetivo**: que el vault sea la carpeta de trabajo completa y no haya que salir a otro
+  programa para mirar un adjunto que ya está ahí.
+- **Es L porque cruza todas las capas**: el indexador decide hoy qué extensiones entran;
+  el explorador y el árbol asumen dos tipos (`markdown`/`excalidraw`, ver `NotaTipo`); el
+  sistema de pestañas y panes tiene que saber renderizar algo que no es un editor; y en
+  **web** los archivos viven en el backend, así que servir un PDF o un binario es trabajo
+  aparte del de desktop.
+- **A definir**: qué tipos entran en la primera versión y cuáles quedan fuera; si los
+  archivos no soportados se listan igual (en gris, sin poder abrirlos) o se siguen
+  ocultando; cómo se relaciona con `.mycignore` ([[mycignore]]) y con `FUN-S-03`
+  (mostrar la extensión); si un binario grande se abre o se avisa; y si los PDF se
+  visualizan embebidos o se delegan al sistema operativo.
+- **Relación**: `FUN-S-09` (resaltado de sintaxis) depende de esta; `FUN-L-05`
+  (adjuntos en la importación) toca el mismo terreno desde el otro lado.
+
+#### `FUN-L-12` · `EDITOR-CORRECTOR-ORTOGRAFICO` (—)
+- **Qué es**: subrayar las palabras mal escritas mientras se escribe, con la posibilidad
+  de activarlo o desactivarlo en Configuración. Debe admitir **varios idiomas a la vez**
+  (una palabra es correcta si lo es en alguno de los activos) y estar construido para
+  sumar idiomas después, no solo español.
+- **Objetivo**: escribir en el vault sin errores tipográficos, y sin que un vault
+  bilingüe se llene de subrayados falsos.
+- **A definir**: de dónde salen los diccionarios y con qué motor (un Hunspell en Rust del
+  lado desktop, o algo en JS que sirva también a web); cómo se descargan/empaquetan sin
+  inflar el instalador; si hay diccionario personal del usuario ("añadir palabra"); si
+  ofrece sugerencias al hacer clic derecho o solo marca; y qué pasa con el código, las
+  URLs y los `[[enlaces]]`, que no deben corregirse.
+- **Ojo con el rendimiento**: es análisis sobre el texto en vivo dentro de CodeMirror.
+  Vale la advertencia de [[CodeMirror y la vista en vivo]] sobre decorar documentos largos.
+
+#### `FUN-L-13` · `UI-IDIOMAS` (—)
+- **Qué es**: que la interfaz se pueda ver en **español, inglés e italiano**, elegible en
+  Configuración, y que agregar un idioma nuevo sea sumar un archivo de traducción y no
+  tocar componentes.
+- **Objetivo**: que Mycelium no dependa de saber español.
+- **Es L por volumen, no por dificultad**: hoy **todos** los textos están escritos en
+  español directamente dentro de los componentes. Hay que extraerlos a claves, montar la
+  capa de traducción y revisar cada pantalla. Mecánico, pero toca casi todo el frontend.
+- **A definir**: qué librería (o si alcanza un diccionario propio, dado que no hay SSR en
+  desktop); cómo se manejan plurales y fechas; si el idioma sale del sistema operativo la
+  primera vez; y **qué NO se traduce** — los documentos del usuario y el vault son suyos,
+  y el framework de IA (`FRAMEWORK_IA_VERSION`) genera texto en el idioma del vault, no en
+  el de la interfaz.
+
 ### Pendientes — tamaño XL
 
 #### `FUN-XL-01` · `STORAGE-LOCAL-FIRST-NUBE` (C-G-03)
@@ -626,11 +692,17 @@ tocar los mismos archivos dos veces y probar lo mismo dos veces.
 
 ### Bloques
 
-#### A · Rendimiento del indexado — `FUN-M-13` + `FUN-M-14` + `FUN-L-10` · patch · desktop
-Las tres son continuaciones de `FUN-M-12` sobre el mismo recorrido: walker en Rust,
-indexador en TS y watcher. **`FUN-L-10` absorbe a `FUN-M-13`**: si el indexado entero se
-mueve a Rust, el doble recorrido desaparece solo — hacerlas separadas es trabajo tirado.
-Ninguna agrega capacidad: el usuario obtiene lo mismo, más rápido → **patch**.
+#### A · Abrir el vault: rendimiento y feedback — `FUN-M-13` + `FUN-M-14` + `FUN-L-10` + `DEF-042` · patch · desktop
+Las tres `FUN-*` son continuaciones de `FUN-M-12` sobre el mismo recorrido: walker en
+Rust, indexador en TS y watcher. **`FUN-L-10` absorbe a `FUN-M-13`**: si el indexado
+entero se mueve a Rust, el doble recorrido desaparece solo — hacerlas separadas es trabajo
+tirado. Ninguna agrega capacidad: el usuario obtiene lo mismo, más rápido → **patch**.
+
+**`DEF-042` entra acá** aunque sea un defecto: la pantalla de carga que pide es la salida
+visible de este mismo código. El progreso lo emite `indexarVault` por su `onProgress`, que
+es justo lo que `FUN-L-10` va a reescribir para que lo emita Rust por eventos. Arreglar el
+feedback antes y volver a tocarlo después sería hacerlo dos veces — y al revés, mover el
+indexado sin rehacer la pantalla dejaría el defecto vivo.
 Ver [[Rendimiento de la apertura del vault]].
 
 #### B · Etiquetas — `FUN-M-05` + `FUN-M-06` · minor · ambas
@@ -674,6 +746,21 @@ receta de [[Reflejar cambios de desktop a web]] y una única verificación con
 pública con contenido editable solo por autorizados). El modelo de roles que necesita
 `FUN-L-02` se apoya en la identidad que trae `FUN-M-10`; al revés no tiene sentido.
 
+#### J · El vault deja de ser solo markdown — `FUN-L-11` + `FUN-S-09` · minor · ambas
+`FUN-S-09` **no existe sin** `FUN-L-11`: sin visor de código no hay nada que colorear.
+Y al revés, un visor de código sin resaltado es un `<pre>` gris que nadie va a querer usar,
+así que separarlas obliga a entregar media funcionalidad. Además el motor de resaltado se
+elige **al construir el visor**, no después.
+
+#### K · Idiomas — `FUN-L-12` + `FUN-L-13` · minor · ambas
+Las dos introducen la misma noción, que hoy no existe: **qué idiomas conoce Mycelium**.
+`FUN-L-13` traduce la interfaz y `FUN-L-12` corrige la ortografía del texto del usuario —
+distintas por dentro, pero comparten el registro de idiomas disponibles, el selector de
+Configuración y la decisión de qué idiomas se soportan, que conviene contestar una sola
+vez.
+*Son separables*: si una de las dos se vuelve urgente sola, no hay dependencia técnica
+que lo impida. Lo que se pierde es diseñar dos veces el mismo selector.
+
 #### I · Colaboración real — `FUN-XL-03` + `FUN-XL-02` + `FUN-L-06` + `FUN-S-07` · major · **web**
 `FUN-XL-03` (D1/R2/Durable Objects) es **prerrequisito duro** de `FUN-XL-02`: sin Durable
 Objects no hay edición simultánea. `FUN-L-06` (historial de quién cambió qué) y
@@ -706,9 +793,9 @@ capacidad nueva (minor) y `FUN-S-03` es mejora de lo existente (patch), así que
 absorbidas por cualquier bloque de su tamaño o mayor.
 
 > [!note] Lo que no entra en esta agrupación
-> **Defectos**: no hay ninguno abierto — los 23 `DEF-*` están implementados. `DEF-039`,
-> `DEF-040` y `DEF-041` esperan tu confirmación en la app, pero eso es verificación, no
-> trabajo pendiente. Ver [[bugs-progreso]].
+> **Defectos**: solo hay uno abierto, `DEF-042`, y está en el bloque A. Los otros 23
+> `DEF-*` están implementados; `DEF-039`, `DEF-040` y `DEF-041` esperan confirmación en la
+> app, que es verificación y no trabajo pendiente. Ver [[bugs-progreso]].
 > **`FUN-M-11`** aparece solo en el bloque G porque su parte desktop ya está hecha.
 
 ---

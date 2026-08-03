@@ -31,6 +31,7 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-039 | Al volver a una pestaña se pierde la posición de lectura | ambas (frontend) | 🛠️ desktop (1.1.5), sin confirmar |
 | DEF-040 | El historial de atrás/adelante es global en vez de por pestaña | ambas (frontend) | 🛠️ desktop (1.1.5), sin confirmar |
 | DEF-041 | La pestaña de previsualización no reemplaza, abre una nueva | ambas (frontend) | 🛠️ desktop (1.1.5), **endurecido sin causa raíz confirmada** |
+| DEF-042 | El progreso del indexado sale en todos los botones de vault; falta una pantalla de carga | ambas (frontend) | ⬜ pendiente |
 
 ## Notas por bug
 
