@@ -930,7 +930,12 @@ así que quedan absorbidas por cualquier bloque de su tamaño o mayor.
 visor, ver la extensión dejó de ser un extra.)*
 
 > [!note] Lo que no entra en esta agrupación
-> **Defectos**: hay dos abiertos, `DEF-042` (bloque A) y `DEF-044` (bloque F). Los otros 23
+> **Defectos**: hay tres abiertos. `DEF-042` va en el bloque A y `DEF-044` en el F, porque
+> comparten trabajo con las funcionalidades de esos bloques. **`DEF-045` va solo**: es un
+> arreglo pequeño y aislado (normalizar `\|` en los tres consumidores de texto crudo) que no
+> se emparenta con nada — y conviene hacerlo pronto, porque hoy limita cómo se pueden
+> escribir los enlaces dentro de tablas. Al arreglarlo hay que subir además
+> `FRAMEWORK_IA_VERSION`, para que las skills del vault documenten `\|`. Los otros 23
 > `DEF-*` están implementados; `DEF-039`, `DEF-040` y `DEF-041` esperan confirmación en la
 > app, que es verificación y no trabajo pendiente. Ver [[bugs-progreso]].
 > **`FUN-M-11`** aparece solo en el bloque G porque su parte desktop ya está hecha.
