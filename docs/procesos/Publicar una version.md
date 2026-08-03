@@ -113,6 +113,21 @@ Abrí `frontend/src-tauri/tauri.conf.json` y reemplazá los dos marcadores del b
 - `pubkey` es el contenido del `.pub` **tal cual**, sin comillas extra ni saltos de línea.
 - `endpoints` lleva la URL completa del `latest.json`, no la del bucket.
 
+> [!note] El `.pub` **ya viene en base64**: se pega tal cual, no hay que codificarlo
+> Al abrirlo se ve una sola línea larga que empieza por `dW50cnVzdGVk…` — eso ya es el
+> texto `untrusted comment: minisign public key: …` codificado. Copiala entera y pegala.
+>
+> Para comprobar que el `tauri.conf.json` quedó con la pareja correcta de tu clave privada,
+> comparalos **sin volver a codificar** (es el error fácil de cometer):
+>
+> ```powershell
+> $pub  = (Get-Content "$env:USERPROFILE\.tauri\mycelium.key.pub" -Raw).Trim()
+> $conf = ((Get-Content "frontend\src-tauri\tauri.conf.json" -Raw | ConvertFrom-Json).plugins.updater.pubkey).Trim()
+> $pub -eq $conf
+> ```
+>
+> Si da `False`, los usuarios no podrían verificar ninguna firma.
+
 > [!tip] Cómo saber que quedó bien
 > Compilá y abrí Mycelium: en Configuración → Vault → **Actualizaciones** ya no tiene que
 > aparecer el aviso de "Actualizaciones desactivadas". Mientras los marcadores sigan ahí,
