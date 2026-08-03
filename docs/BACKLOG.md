@@ -606,19 +606,107 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 
 ---
 
-## 7. Propuesta de secuenciado por versiones (borrador a acordar)
+## 7. Agrupación en releases
 
-Tentativo, ordenado por relación valor/esfuerzo (primero las S). **A definir juntos.**
+Cada bloque de abajo es **un release candidato**: lo que conviene trabajar junto porque
+comparte subsistema, diseño o código, de modo que hacerlo por separado significaría
+tocar los mismos archivos dos veces y probar lo mismo dos veces.
 
-- **`1.0.x` (patch)** — correcciones: `FUN-S-06` (`EDITOR-CALLOUT-TITULO-COLOR`).
-- **`1.1.0` (minor)** — quick wins S: `FUN-S-01`, `FUN-S-02`, `FUN-S-03`, `FUN-S-04`, `FUN-S-05`.
-- **`1.2.0` (minor)** — M: `FUN-M-02` (grafo buscador), `FUN-M-03` (Esporas), `FUN-M-04` (YAML),
-  `FUN-M-01` (preview papelera), `FUN-M-05` (tags panel), `FUN-M-07` (daily note).
-- **`1.3.0`+ (minor)** — L: `FUN-L-03` (bases/tablas), `FUN-L-01` (macros),
-  `FUN-M-08` (reescritura de enlaces), `FUN-L-05` (adjuntos), `FUN-L-04` (vaults múltiples),
-  `FUN-L-02` (públicos globales), `FUN-L-07` (terminal integrada).
-- **`2.0.0` (major)** — XL / rearquitectura y nube: `FUN-XL-01` (storage local‑first),
-  `FUN-XL-03` (Cloudflare), `FUN-XL-02` (colaboración en tiempo real).
+> [!important] Esto NO es un orden de trabajo
+> No hay prioridad implícita: el orden lo decide el usuario cuando toque. Por eso
+> **ningún bloque lleva número de versión** — el número depende de cuándo salga, no de
+> qué contiene. Lo que sí se puede saber de antemano es **qué dígito** movería, y eso sí
+> está anotado (ver [[Versionado del sistema]]).
+>
+> Y no se agrupa por agrupar: lo que no tiene parentesco real **va solo**, aunque sea
+> pequeño. Un release de una sola unidad es perfectamente válido.
+
+### Bloques
+
+#### A · Rendimiento del indexado — `FUN-M-13` + `FUN-M-14` + `FUN-L-10` · patch · desktop
+Las tres son continuaciones de `FUN-M-12` sobre el mismo recorrido: walker en Rust,
+indexador en TS y watcher. **`FUN-L-10` absorbe a `FUN-M-13`**: si el indexado entero se
+mueve a Rust, el doble recorrido desaparece solo — hacerlas separadas es trabajo tirado.
+Ninguna agrega capacidad: el usuario obtiene lo mismo, más rápido → **patch**.
+Ver [[Rendimiento de la apertura del vault]].
+
+#### B · Etiquetas — `FUN-M-05` + `FUN-M-06` · minor · ambas
+Las dos necesitan lo mismo y hoy inexistente: una **agregación de etiquetas del vault**
+(qué etiquetas hay, cuántas notas cada una). Esa es la parte difícil y es compartida; el
+panel del rail y los nodos del grafo son la superficie. Además `FUN-M-04` ya dejó las
+etiquetas del frontmatter unidas a las del cuerpo (`etiquetasDe`), así que el insumo está.
+*Alternativa razonable*: llevar `FUN-M-06` al bloque del grafo (`FUN-M-02`) si al
+diseñarlo pesa más el dibujado que la agregación.
+
+#### C · Los enlaces dejan de romperse — `FUN-M-08` + `FUN-M-15` · minor · ambas
+Las dos cambian **a qué apunta un `[[enlace]]`** y obligan a tocar la misma capa:
+resolución de wikilinks, autocompletado y grafo. `FUN-M-08` reescribe los enlaces al
+renombrar; `FUN-M-15` los resuelve por `aliases`. Separadas, esa capa se toca dos veces.
+
+#### D · Papelera — `FUN-S-04` + `FUN-M-01` · minor · ambas
+Mismo panel, misma sesión de trabajo: seleccionar varios para borrar y previsualizar
+antes de decidir. Las dos existen por el mismo motivo — decidir con información y sin
+ir de a uno.
+
+#### E · Estilos propios al renderizar markdown — `FUN-S-01` + `FUN-S-06` 🟡 · minor · ambas
+Las dos son la misma pregunta: **cuándo un elemento conserva su estilo propio y cuándo
+gana el del contenedor**. `FUN-S-01` da estilo al checkbox según su símbolo; `FUN-S-06`
+corrige que el título de un callout pierda su formato. Comparten `lib/markdown.ts`,
+`livePreview.ts` y `editor.css`. El minor de `FUN-S-01` **absorbe** la corrección.
+
+#### F · Gestión de vaults — `FUN-S-05` + `FUN-L-04` · minor · ambas
+Las dos son el ciclo de vida del vault: tener varios y poder alternar (`FUN-L-04`) y qué
+encuentra el usuario al crear uno nuevo (`FUN-S-05`). El archivo de ejemplo solo tiene
+sentido en el flujo de creación que `FUN-L-04` va a tocar igual.
+
+#### G · Poner la web al día — reflejos pendientes · minor · **web**
+El reflejo de `FUN-M-03` (Esporas) y `FUN-M-04` (metadatos YAML) más la **parte web de
+`FUN-M-11`** (`.mycignore`, que necesita decidir su semántica y tocar el backend .NET).
+Van juntas porque es **una sola sesión de trabajo**: un worktree de `web-cloud`, la misma
+receta de [[Reflejar cambios de desktop a web]] y una única verificación con
+`npm ci` + `tsc` + `next build`. Sube la versión **de web**, no la de desktop.
+
+#### H · Identidad y permisos — `FUN-M-10` + `FUN-L-02` · minor · **web**
+`FUN-M-10` resuelve *quién sos* (login con GitHub) y `FUN-L-02` *qué podés* (carpeta
+pública con contenido editable solo por autorizados). El modelo de roles que necesita
+`FUN-L-02` se apoya en la identidad que trae `FUN-M-10`; al revés no tiene sentido.
+
+#### I · Colaboración real — `FUN-XL-03` + `FUN-XL-02` + `FUN-L-06` + `FUN-S-07` · major · **web**
+`FUN-XL-03` (D1/R2/Durable Objects) es **prerrequisito duro** de `FUN-XL-02`: sin Durable
+Objects no hay edición simultánea. `FUN-L-06` (historial de quién cambió qué) y
+`FUN-S-07` (afinar presencia) son parte de la misma experiencia y carecen de sentido
+sueltas. Es rearquitectura → **major**.
+
+### Van solas
+
+No tienen parentesco suficiente con nada: cada una es su propio release.
+
+| ID | Por qué va sola | Dígito |
+|---|---|---|
+| `FUN-L-03` `FILES-BASES-TABLA` | Tipo de archivo nuevo y subsistema propio. Ya está desbloqueada (`FUN-M-04` hecho); consumirla no la emparenta con sus continuaciones | minor |
+| `FUN-L-09` `IA-MCP-MYCELIUM` | Único pendiente de la línea de IA; `FUN-L-07` y `FUN-L-08` ya salieron | minor |
+| `FUN-L-01` `MACROS-HOTKEYS` | Capa transversal de comandos: no comparte código con ninguna funcionalidad concreta | minor |
+| `FUN-L-05` `IMPORT-ADJUNTOS` | Subsistema de importación, aislado del resto | minor |
+| `FUN-M-02` `GRAPH-BUSCADOR-FILTRO` | Solo toca el grafo (ver la alternativa del bloque B) | minor |
+| `FUN-M-07` `DAILY-NOTE` | Ya tiene todo lo que necesitaba: `FUN-M-03` le dio plantillas y sustitución de variables | minor |
+| `FUN-M-09` `EXPORT-ZIP-SERVIDOR` (web) | Exportación en servidor; independiente de identidad y de colaboración | minor |
+| `FUN-XL-01` `STORAGE-LOCAL-FIRST-NUBE` | Rearquitectura de almacenamiento del desktop. Necesita que exista infraestructura de nube, pero es trabajo aparte del bloque I | major |
+
+### Las tres que pueden viajar de acompañantes
+
+`FUN-S-02` (ancho de tabulación), `FUN-S-03` (extensiones en el explorador) y `FUN-S-08`
+(`cssclasses`) no tienen parentesco con nada, pero son **de un archivo y un rato**.
+Forzarles un bloque sería agrupar por agrupar; darles un release propio a cada una es
+correcto pero desproporcionado. Lo natural es que **se sumen a cualquier release que ya
+esté saliendo** — el dígito no cambia por llevarlas: `FUN-S-02` y `FUN-S-08` aportan
+capacidad nueva (minor) y `FUN-S-03` es mejora de lo existente (patch), así que quedan
+absorbidas por cualquier bloque de su tamaño o mayor.
+
+> [!note] Lo que no entra en esta agrupación
+> **Defectos**: no hay ninguno abierto — los 23 `DEF-*` están implementados. `DEF-039`,
+> `DEF-040` y `DEF-041` esperan tu confirmación en la app, pero eso es verificación, no
+> trabajo pendiente. Ver [[bugs-progreso]].
+> **`FUN-M-11`** aparece solo en el bloque G porque su parte desktop ya está hecha.
 
 ---
 

@@ -55,7 +55,9 @@ Foto de dónde está Mycelium hoy. Para el detalle de cada tema, seguir los enla
 7. **Reflejar a web** lo que corresponda de la línea de IA: por naturaleza, poco o nada
    (ver [[Diferencias funcionales aceptadas entre versiones]]).
 8. **Backlog de funcionalidades**: [[BACKLOG]] tiene el inventario completo con tamaños
-   (`FUN-S/M/L/XL`) y un secuenciado tentativo por versiones. Con `FUN-M-04` hecho queda
+   (`FUN-S/M/L/XL`) y, en su § 7, **la agrupación en releases**: qué conviene trabajar
+   junto porque comparte subsistema, qué va solo y qué puede viajar de acompañante. No
+   impone orden — el orden lo decidís vos. Con `FUN-M-04` hecho queda
    **desbloqueado `FUN-L-03`** (archivos tabla): la tabla `propiedades` del índice es de
    donde leería. Sus dos continuaciones directas son `FUN-M-15` (enlaces por `aliases`) y
    `FUN-S-08` (`cssclasses`), que la spec dejó fuera a propósito. Con `FUN-M-03` hecho,
