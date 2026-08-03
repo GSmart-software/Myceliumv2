@@ -92,9 +92,12 @@ necesita una URL que devuelva JSON.
 ```
 mycelium-releases/
 ├── latest.json                       ← el manifiesto que consulta la app
-└── 1.4.0/
-    ├── Mycelium_1.4.0_x64-setup.exe
-    └── Mycelium_1.4.0_x64-setup.exe.sig
+├── versions.json                     ← índice de todo lo publicado (FUN-M-16)
+├── 1.4.0/
+│   ├── Mycelium_1.4.0_x64-setup.exe
+│   └── Mycelium_1.4.0_x64-setup.exe.sig
+└── 1.3.0/
+    └── …                             ← las versiones viejas se conservan
 ```
 
 `latest.json` con el formato que espera el plugin:
@@ -187,6 +190,15 @@ registra como continuación en el [[BACKLOG]].
 - Además, un botón **"Buscar actualizaciones"** en Configuración → Vault (o su propia
   sección), que comprueba en el momento e informa también cuando **no** hay nada nuevo —
   ahí sí, porque lo pidió el usuario explícitamente.
+
+> [!important] El botón manual no es una comodidad: tapa un agujero de la cadencia diaria
+> Si en un mismo día se publican **dos** versiones, lo que ve el usuario depende de a qué
+> hora arrancó: puede no ver ninguna (arrancó antes de las dos), ver solo la primera, o ver
+> solo la última. Con una comprobación al día no hay forma de cubrir eso, y subir la
+> frecuencia contradice lo que se pidió.
+>
+> El botón lo resuelve sin tocar la cadencia. Por eso **no se puede recortar** por
+> "poco usado": es lo que hace que la comprobación diaria sea aceptable.
 - Y un interruptor para **desactivar la comprobación automática**. "No obligar" incluye no
   obligar a que la app hable con un servidor.
 
@@ -226,6 +238,58 @@ registra como continuación en el [[BACKLOG]].
 > pendiente** y esperar a que termine. Perder la última frase que escribió el usuario por
 > actualizar sería el peor resultado posible de esta funcionalidad.
 
+### 4.3 Selección de versión — `FUN-M-16`, modo avanzado
+
+Poder elegir **cualquier versión publicada** e instalarla, incluida una anterior a la
+actual. Es una herramienta de desarrollo —para revisar cómo se comportaba algo, o volver
+atrás si una versión sale mal— **no** una función para el usuario normal.
+
+Se registra como **`FUN-M-16` · `UPDATER-SELECCION-VERSION`**, aparte de `FUN-L-14`: comparte
+toda la infraestructura pero es un entregable distinto, y si `FUN-L-14` se hace grande, esto
+se puede cortar sin dañarla.
+
+**Cómo se llega**: pulsando **siete veces sobre el número de versión** en el pie de
+Configuración se activa el **modo avanzado**, y con él aparece la sección de versiones. Es
+el gesto de Android y Chrome para el modo desarrollador: imposible de encontrar por
+accidente, trivial de recordar, y no agrega ninguna superficie visible. Queda activado de
+forma persistente hasta que se apague.
+
+**Qué hace**: lee `versions.json` del bucket (§ 3.2), lista lo publicado con su fecha y sus
+notas, y permite instalar la que se elija — **siempre con confirmación**, y con la
+advertencia visible si es anterior a la instalada.
+
+> [!warning] El updater de Tauri, por diseño, solo acepta subir
+> Su comprobación compara versiones: pedirle instalar la `1.2.0` desde la `1.3.0` le va a
+> parecer que ya estás al día, y no hará nada. Hay que **verificar en la implementación** si
+> su API admite un comparador propio; si no lo admite, este camino descarga el instalador y
+> lo ejecuta por fuera del plugin — que para el NSIS es simplemente lanzarlo. La firma se
+> verifica igual antes de ejecutar nada.
+
+**Elegir una versión la deja fijada.** La comprobación automática se apaga, el aviso diario
+deja de aparecer, y en Configuración se ve un indicador de que estás en una versión fijada
+con un botón para volver a seguir las actualizaciones. Si bajaste para investigar algo, que
+la app te empuje a subir cada día es exactamente lo contrario de lo que necesitás.
+
+> [!danger] Bajar de versión: qué se rompe y qué no
+> **Las notas están a salvo.** Son archivos de texto en disco: ninguna versión puede
+> corromperlas por ser vieja. El índice SQLite tampoco preocupa — es derivado y se
+> reconstruye solo desde la carpeta.
+>
+> **Lo que sí se pierde son las pestañas y parte de las preferencias.** Los stores usan
+> `persist` de Zustand con número de versión, y un desajuste sin `migrate` **descarta el
+> estado guardado**: ya pasó entre 1.0.0 y 1.1.0 (ver [[Estado con Zustand]]). Al bajar, una
+> app vieja se encuentra un estado más nuevo — el mismo caso al revés. Molesto, no
+> catastrófico, pero hay que **avisarlo en el diálogo de confirmación**, no descubrirlo
+> después.
+>
+> **El contenido nuevo se ve mal en una versión vieja**: una nota con propiedades vuelve a
+> mostrar la línea horizontal y el título fantasma en 1.1.5. No destruye nada. Es
+> precisamente por esto que la función va escondida.
+>
+> Todo esto se sostiene mientras **el vault siga siendo texto plano**. El día que una
+> versión cambie el formato en disco, bajar de versión dejará de ser seguro y habrá que
+> decirlo acá.
+
 ---
 
 ## 5. Criterios de aceptación
@@ -251,6 +315,23 @@ registra como continuación en el [[BACKLOG]].
 11. Con la comprobación automática desactivada, no se hace ninguna petición de red al
     arrancar. El botón manual sigue funcionando.
 12. El botón manual, cuando ya se está en la última versión, lo dice en vez de no hacer nada.
+13. Publicando **dos versiones el mismo día**, el botón manual encuentra la segunda sin
+    esperar al día siguiente. Es el escenario que justifica el botón.
+
+### De la selección de versión (`FUN-M-16`)
+
+14. La sección de versiones **no existe** hasta pulsar siete veces el número de versión.
+    Un usuario que no lo sepa no puede llegar ahí.
+15. Activado el modo avanzado, la lista muestra todas las versiones publicadas con su fecha,
+    y marca cuál está instalada.
+16. Elegir una versión **anterior** avisa de que puede perder las pestañas abiertas **antes**
+    de instalar, y exige confirmación.
+17. Tras instalar una versión elegida a mano, la app queda **fijada**: al día siguiente no
+    aparece el aviso de actualización, y Configuración muestra que está fijada con la forma
+    de volver a seguir las actualizaciones.
+18. Quitar la fijación devuelve el comportamiento normal: al día siguiente vuelve a ofrecer
+    la última.
+19. Bajar de versión y volver a subir **no pierde ni modifica ninguna nota** del vault.
 
 ---
 
