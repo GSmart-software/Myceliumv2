@@ -17,6 +17,7 @@ donde aplica**, y eso **no** se considera un defecto.
 | [[terminal-integrada]] (`FUN-L-07`) | Solo desktop | Una shell nativa necesita acceso al sistema; el navegador no lo da |
 | [[ia-framework-vault]] (`FUN-L-08`) | Solo desktop | Escribe archivos en la carpeta del vault; requiere vault en carpeta |
 | [[mycignore]] (`FUN-M-11`) | Solo desktop (por ahora) | En web no hay árbol de archivos que ignorar al indexar |
+| [[autoactualizacion]] (`FUN-L-14` + `FUN-M-16`) | Solo desktop | La web se actualiza sola al recargar: no hay nada que instalar, ni versión que elegir |
 | [[vault-en-carpeta]] | Solo desktop | El modelo "la carpeta es la verdad" no aplica a datos en servidor |
 | [[desktop-sin-login]] | Solo desktop | App local monousuario |
 | Login, OAuth, colaboración en tiempo real, export ZIP en servidor | Solo web | Requieren backend, usuarios y nube |

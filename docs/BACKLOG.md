@@ -78,7 +78,7 @@ y **priorizar** qué implementar antes.
 | `FUN-M-13` | `VAULT-INDEX-UN-RECORRIDO` | Fusionar `listar_archivos_meta` y `listar_directorios` en un solo comando que devuelva `{archivos, directorios}`: hoy el vault se recorre **dos veces** por apertura. Continuación de `FUN-M-12` | desktop | — |
 | `FUN-M-14` | `VAULT-WATCH-REINDEX-DIRIGIDO` | El watcher emite `vault-cambios` **con las rutas afectadas** y `lib/vaultWatch.ts` las descarta: reindexa el vault entero ante cualquier cambio. Usar esas rutas para reindexar solo lo tocado. Continuación de `FUN-M-12` | desktop | — |
 | `FUN-M-15` | `LINKS-POR-ALIAS` | Resolver `[[enlaces]]` por la propiedad `aliases` de la nota destino: hoy se parsea e indexa pero **no tiene comportamiento**. Toca la resolución de wikilinks, el autocompletado y el grafo. Continuación de `FUN-M-04` | ambas | — |
-| `FUN-M-16` | `UPDATER-SELECCION-VERSION` | Elegir e instalar **cualquier versión publicada**, incluida una anterior, desde un modo avanzado oculto (siete clics en el número de versión). Deja la app fijada en esa versión. Herramienta de desarrollo, no para el usuario normal. **Viabilidad verificada** contra el código de `tauri-plugin-updater` y la plantilla NSIS de la CLI instalada. Spec en `docs/features/autoactualizacion.md` § 4.3. Depende de `FUN-L-14` | desktop | — |
+| `FUN-M-16` 🛠️ | `UPDATER-SELECCION-VERSION` | Elegir e instalar **cualquier versión publicada**, incluida una anterior, desde un modo avanzado oculto (siete clics en el número de versión). Deja la app fijada en esa versión. Herramienta de desarrollo, no para el usuario normal. **Implementado en desktop** (sin confirmar y **sin probar de extremo a extremo**: falta el bucket). Spec en `docs/features/autoactualizacion.md` § 4.3. Salió en [[Version 1.4.0]] | desktop | — |
 
 ### 1.3 Grandes — tamaño L
 
@@ -95,7 +95,7 @@ y **priorizar** qué implementar antes.
 | `FUN-L-11` | `FILES-OTROS-TIPOS` | Ver en Mycelium los archivos que hoy ignora: PDF, código de cualquier lenguaje y texto plano. Aparecen en el explorador y se abren en un visor propio, como una pestaña más | ambas | — |
 | `FUN-L-12` | `EDITOR-CORRECTOR-ORTOGRAFICO` | Corrector ortográfico activable en Configuración, con **varios idiomas simultáneos** (p. ej. español e inglés) y arquitectura preparada para sumar idiomas | ambas | — |
 | `FUN-L-13` | `UI-IDIOMAS` | La interfaz en varios idiomas (español, inglés, italiano) y preparada para agregar más. Hoy todos los textos están escritos en español dentro de los componentes | ambas | — |
-| `FUN-L-14` | `UPDATER-AUTOACTUALIZACION` | Mycelium comprueba una vez al día si hay versión nueva, muestra su changelog y ofrece instalarla con un clic. Nunca obliga ni bloquea. `tauri-plugin-updater` + instaladores firmados en Cloudflare R2. Spec en `docs/features/autoactualizacion.md` | desktop | — |
+| `FUN-L-14` 🛠️ | `UPDATER-AUTOACTUALIZACION` | Mycelium comprueba una vez al día si hay versión nueva, muestra su changelog y ofrece instalarla con un clic. Nunca obliga ni bloquea. `tauri-plugin-updater` + instaladores firmados en Cloudflare R2. **Implementado en desktop** (sin confirmar y **sin probar de extremo a extremo**: falta crear el bucket y generar la clave, ver [[Publicar una version]] § 1). Spec en `docs/features/autoactualizacion.md`. Salió en [[Version 1.4.0]] | desktop | — |
 | `FUN-L-15` | `RELEASE-SCRIPT-PUBLICACION` | Un `npm run publicar` que compile, firme, suba a R2 con `wrangler` y escriba `latest.json` y `versions.json`, en vez de hacer esos cuatro pasos a mano. **Script local, no CI**: usar el workflow obligaría a alinear `origin` y a poner la clave de firma como secreto de GitHub. Continuación de `FUN-L-14` | desktop | — |
 
 ### 1.4 Muy grandes — tamaño XL
@@ -597,6 +597,10 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 - **A definir**: si se usa un dominio propio delante del bucket o se arranca con la URL
   `r2.dev` (**no bloquea**: se puede empezar sin dominio y migrar después; ver la spec) y
   dónde vive la copia de seguridad de la clave privada.
+- **Implementado** en [[Version 1.4.0]] (2026-08-03), junto con `FUN-M-16`. Lo que decía
+  "a definir" **sigue sin definirse y ahora es lo único que falta**: el código está y
+  degrada con elegancia sin claves, pero hasta que exista el bucket y la clave de firma el
+  circuito real no se ha ejecutado ni una vez. Los pasos, en [[Publicar una version]] § 1.
 
 #### `FUN-L-15` · `RELEASE-SCRIPT-PUBLICACION` (—)
 - **Qué es**: un `npm run publicar` que haga de una sola vez lo que `FUN-L-14` deja como
@@ -612,6 +616,10 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 - **A definir**: si el script publica también las versiones anteriores que ya están en
   `installers/`, y qué hace si `wrangler` no está autenticado.
 - **Depende de `FUN-L-14`**: primero el circuito a mano, comprobado de extremo a extremo.
+  `FUN-L-14` ya salió en [[Version 1.4.0]] y dejó el proceso manual escrito paso a paso en
+  [[Publicar una version]] § 2 — que es literalmente lo que este script tiene que
+  automatizar. **Todavía no toca**: ese circuito no se ha ejecutado ni una vez, y
+  automatizar un proceso que no se sabe si funciona es multiplicar el fallo.
 
 > [!note] Lo que se pierde al no usar CI, para tenerlo presente
 > El instalador sale de la compilación local en vez de una máquina limpia, y se renuncia a

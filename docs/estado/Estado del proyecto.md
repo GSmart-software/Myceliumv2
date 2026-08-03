@@ -6,7 +6,7 @@ Foto de dónde está Mycelium hoy. Para el detalle de cada tema, seguir los enla
 
 ## Resumen
 
-- **Versión: desktop `1.3.0`** ([[Version 1.3.0]]) · **web `1.0.0`** ([[Version 1.0.0]]).
+- **Versión: desktop `1.4.0`** ([[Version 1.4.0]]) · **web `1.0.0`** ([[Version 1.0.0]]).
   Las líneas se separaron: todo lo nuevo es solo-desktop.
 - [[Version 1.0.0]] fue el primer release final en **ambas** versiones, con instaladores
   de escritorio generados.
@@ -27,6 +27,7 @@ Foto de dónde está Mycelium hoy. Para el detalle de cada tema, seguir los enla
 | [[ia-framework-vault]] (`FUN-L-08`) | Implementada, framework en **v1.4.0** (describe las propiedades del frontmatter y las Esporas); pendiente de prueba de los comandos nuevos. **El vault de este repo tiene instalada la v1.2.0**: hay que regenerar desde Configuración → Vault |
 | [[metadata-yaml]] (`FUN-M-04`) | **Confirmada** en desktop (1.2.0) el 2026-08-02, pendiente de reflejo a web: el frontmatter pasa a ser propiedades (tarjeta en lectura y en vivo, pestaña PROPIEDADES, tabla `propiedades` en el índice, filtro `clave:valor`). Ver [[Version 1.2.0]] |
 | [[esporas-plantillas]] (`FUN-M-03`) | Implementada en desktop (1.3.0), **sin confirmar por el usuario**: las notas de una carpeta configurable son plantillas con variables, usables desde el panel del rail, la barra del editor y el clic derecho de una carpeta. Ver [[Version 1.3.0]] |
+| [[autoactualizacion]] (`FUN-L-14` + `FUN-M-16`) | Implementada en desktop (1.4.0), **sin confirmar y sin probar de extremo a extremo**: Mycelium comprueba una vez al día si hay versión nueva, muestra el changelog renderizado y ofrece instalarla; en modo avanzado (siete clics en el número de versión) se puede instalar cualquier versión publicada, incluida una anterior. **Falta lo único que no puede hacer el código: crear el bucket y generar la clave de firma** ([[Publicar una version]] § 1). Hasta entonces el updater está desactivado con su motivo a la vista. Ver [[Version 1.4.0]] |
 | [[mycignore]] (`FUN-M-11`) | Implementada en desktop (parser con tests); **parte web pendiente**. Su default se amplió en 1.1.1 |
 | Rendimiento de la apertura del vault (`FUN-M-12`) | Implementada en desktop (1.1.1), **sin confirmar por el usuario**: no se pudo medir el efecto real. Ver [[Rendimiento de la apertura del vault]] |
 | Navegación por pestaña (`DEF-039/040/041`) | Implementada en desktop (1.1.5), **sin confirmar**: scroll conservado, historial propio por pestaña con botones. `DEF-041` quedó endurecido sin causa raíz confirmada. Ver [[Version 1.1.5]] |
@@ -34,6 +35,14 @@ Foto de dónde está Mycelium hoy. Para el detalle de cada tema, seguir los enla
 
 ## Pendiente / próximos pasos
 
+0. **Poner en marcha la autoactualización** (`FUN-L-14`): es lo único de la lista que no
+   depende de escribir código. Crear el bucket de R2, generar el par de claves con
+   `npx tauri signer generate`, pegar la pública en `tauri.conf.json` y guardar la privada
+   fuera de la máquina. Paso a paso en [[Publicar una version]] § 1. Hasta que eso pase,
+   la 1.4.0 está implementada pero **no verificada**: el circuito real —publicar,
+   detectar, descargar, verificar firma, instalar, reiniciar— no se ha ejecutado nunca.
+   Ojo: desde ahora `tauri build` **falla sin la clave**, así que esto bloquea también
+   generar cualquier instalador.
 1. **Comprobar 1.3.0 en la app** (`FUN-M-03`, Esporas): el paso a paso de los 13
    criterios está en [[Version 1.3.0]]. Lo más delicado es la **fusión de propiedades**
    al insertar (criterios 8-10) y la **no-regresión** del criterio 13: crear una nota con

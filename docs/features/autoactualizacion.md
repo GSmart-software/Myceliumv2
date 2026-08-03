@@ -415,6 +415,74 @@ la app te empuje a subir cada día es exactamente lo contrario de lo que necesit
 
 ---
 
+## 5 bis. Cómo quedó implementado (2026-08-03)
+
+Salió en [[Version 1.4.0]], junto con `FUN-M-16`. Lo que sigue son las **tres cosas que no
+salieron como decía esta spec**, con el motivo; el resto se implementó tal cual.
+
+### El estado del updater NO vive en `Preferencias`
+
+La spec decía "la fecha se guarda en `Preferencias` (`preferencesStore`), como el resto"
+(§ 4.1). Al implementarlo apareció por qué no puede ser: las preferencias viven en la
+**fila del usuario dentro del índice SQLite de cada vault** (`lib/db/preferencias.ts`) y
+se hidratan **después** de abrir uno.
+
+- La comprobación ocurre **al arrancar**, cuando puede no haber ningún vault abierto.
+- "Omití la 1.4.0", "no busques actualizaciones" o "estoy fijado en la 1.2.0" son
+  decisiones **de la instalación**, no de un vault. Con preferencias por vault, omitir una
+  versión en uno y que otro te la siguiera ofreciendo sería un defecto, no una función.
+
+Van a **`actualizador.json` en el config-dir de la app**, con el mismo mecanismo y el
+mismo estilo que `vaults.json` (`vault_config.rs`) — que guarda exactamente el mismo tipo
+de ajuste global: la lista de vaults y "abrir el último al iniciar". El espíritu de la
+spec ("persistilo como el resto, no inventes un mecanismo") se cumple; lo que cambia es
+cuál de los dos mecanismos que ya existían es el que corresponde.
+
+### Todo el motor vive en Rust, no en el webview
+
+La spec no lo decía en un sentido ni en otro, pero solo hay un camino: el comando JS del
+plugin **no expone `version_comparator`**, que es lo único que permite instalar una
+versión anterior. Así que `updater_*` son comandos propios en
+`src-tauri/src/actualizador.rs` y el paquete npm `@tauri-apps/plugin-updater` **no se
+instala**. Efecto colateral bienvenido: la petición la hace `reqwest` y no `fetch`, así
+que el bucket no necesita CORS.
+
+### El bucket lleva un manifiesto por versión
+
+La estructura del § 3.2 gana un archivo: **`<version>/latest.json`**, que es el **mismo
+manifiesto** que la raíz, copiado dentro de la carpeta de su versión.
+
+```
+mycelium-releases/
+├── latest.json                       ← lo que consulta la app cada día
+├── versions.json                     ← el índice del modo avanzado
+└── 1.4.0/
+    ├── latest.json                   ← el MISMO manifiesto, para reinstalar esta versión
+    ├── Mycelium_1.4.0_x64-setup.exe
+    └── Mycelium_1.4.0_x64-setup.exe.sig
+```
+
+Hace falta porque el plugin solo sabe leer **un manifiesto por URL**: para instalar la
+`1.2.0` cuando la última es la `1.4.0`, tiene que existir un manifiesto que anuncie la
+`1.2.0`. Sin él, esa versión aparece en la lista pero no se puede instalar.
+
+`versions.json` quedó así (solo `version` es obligatorio; `manifest` es opcional y por
+defecto se asume `<version>/latest.json`):
+
+```json
+{
+  "versions": [
+    { "version": "1.4.0", "pub_date": "2026-08-10T12:00:00Z", "notes": "## Qué entra\n\n- …" }
+  ]
+}
+```
+
+### Y una cosa que la spec pedía y conviene subrayar que está
+
+El **endpoint configurable** del callout del § 3.2 no quedó como "mitigación que conviene
+igual": está implementado y es lo que hace posible el § 4 de [[Publicar una version]] —
+ensayar el circuito completo contra un bucket de pruebas sin arriesgar a nadie.
+
 ## 6. Riesgos y compromiso operativo
 
 Esta es la primera funcionalidad que le deja a Mycelium **cosas que mantener fuera del
@@ -456,20 +524,24 @@ actualizar desde la app). Los cuatro archivos de siempre más `Cargo.lock`.
 - Probar también el camino desgraciado: manifiesto inexistente, JSON mal formado, firma
   inválida, y descarga interrumpida a mitad.
 
-## 9. Documentación a actualizar
+## 9. Documentación actualizada (hecho)
 
 - [[Generar instaladores desktop]] — el proceso gana los pasos de firma y publicación.
 - [[BACKLOG]] — `FUN-L-14` y su continuación (automatizar la publicación en el workflow).
 - [[Arquitectura de Mycelium]] — Mycelium pasa a tener una dependencia externa propia.
 - [[Diferencias funcionales aceptadas entre versiones]] — solo-desktop por naturaleza.
-- [[Estado del proyecto]] y la nota de release correspondiente.
-- Un proceso nuevo en `docs/procesos/` para publicar una versión, con la custodia de la
-  clave escrita.
+- [[Estado del proyecto]] y la nota de release correspondiente ([[Version 1.4.0]]).
+- **[[Publicar una version]]** — el proceso nuevo, con la puesta en marcha del bucket, la
+  custodia de la clave, los cinco pasos de una publicación, cómo probarlo sin arriesgar a
+  nadie y qué hacer cuando algo sale mal.
 
 ## Relacionadas
 
 - [[Generar instaladores desktop]] — de dónde salen los artefactos que se publican.
 - [[Versionado del sistema]] — qué número lleva cada release que se publique.
 - [[Diferencias funcionales aceptadas entre versiones]] — por qué esto no va a web.
-- [[BACKLOG]] — `FUN-L-14` en la agrupación en releases.
+- [[Publicar una version]] — el proceso operativo que sostiene esta funcionalidad.
+- [[Version 1.4.0]] — el release en el que salió, con las decisiones de implementación.
+- [[Estado con Zustand]] — por qué bajar de versión pierde las pestañas.
+- [[BACKLOG]] — `FUN-L-14` en la agrupación en releases; `FUN-L-15`, la continuación.
 - [[Mapa de documentacion]] — índice general.

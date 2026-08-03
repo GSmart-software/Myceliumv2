@@ -36,6 +36,25 @@ HTTP. Todo lo que está por encima (UI y stores) es común.
 
 Detalle por versión: [[Capa de datos del desktop]] · [[Capa de datos de la web]].
 
+## La única dependencia externa del desktop
+
+Hasta la [[Version 1.3.0]], el desktop no hablaba con **nada**: todo eran archivos en la
+carpeta del usuario y un índice SQLite al lado. [[autoactualizacion]] (`FUN-L-14`) rompe
+eso, y conviene tenerlo delimitado porque es la primera y única grieta:
+
+- Es **una sola petición HTTP al día**, a una URL pública, desde el lado **Rust**
+  (`src-tauri/src/actualizador.rs`), para leer un JSON estático de un bucket de
+  Cloudflare R2. No hay servicio, ni sesión, ni base de datos remota.
+- **El cliente nunca lleva credenciales**: leer el manifiesto y el instalador es un `GET`
+  anónimo. Lo que protege la actualización no es el transporte, es la **firma**
+  verificada contra una clave pública compilada en el binario.
+- **Nada del vault sale de la máquina** ni se ve afectado: si el bucket desaparece, la
+  comprobación falla en silencio y Mycelium sigue funcionando exactamente igual.
+- Se puede **apagar** desde Configuración, y entonces no se hace ninguna petición.
+
+Lo nuevo de verdad no es técnico sino operativo: hay un bucket que mantener y una clave
+privada que custodiar durante toda la vida del producto. Ver [[Publicar una version]].
+
 ## Frontend compartido
 
 - **Next.js** (App Router, TypeScript). En desktop se exporta estático

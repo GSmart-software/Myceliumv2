@@ -67,8 +67,21 @@ vivo se recupera del caché.
 Ver [[Terminal integrada - PTY y xterm]] y
 [[CodeMirror y la vista en vivo]].
 
+## Consecuencia inesperada: bajar de versión
+
+Desde la [[Version 1.4.0]] se puede **instalar una versión anterior** desde el modo
+avanzado ([[autoactualizacion]] § 4.3). Una app vieja se encuentra entonces un estado
+persistido **más nuevo**, que es el mismo desajuste al revés: sin `migrate`, Zustand lo
+**descarta** y el usuario pierde las pestañas abiertas y parte de las preferencias.
+
+No es catastrófico —las notas son archivos de texto y el índice SQLite se reconstruye—,
+pero es la razón por la que el diálogo de confirmación lo **avisa antes** de instalar. Y
+es un argumento más para escribir `migrate` en vez de solo subir la versión: cada store
+que lo tenga es un store que sobrevive al viaje en las dos direcciones.
+
 ## Relacionadas
 
+- [[Version 1.4.0]] — donde esto pasó de ser un tropiezo entre releases a un aviso en la UI.
 - [[Aprendizajes tecnicos]] — mapa del área.
 - [[Drag and drop en Mycelium]] — donde se descubrió el problema de orden.
 - [[Arquitectura de Mycelium]] — qué stores existen y qué rol cumplen.
