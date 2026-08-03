@@ -3,6 +3,17 @@
 Spec de las **Esporas**: notas plantilla reutilizables para crear documentos ya con su
 estructura, o para insertar una estructura dentro de una nota que ya existe.
 
+> [!warning] Implementado en desktop el 2026-08-03 — [[Version 1.3.0]]
+> Todo lo que describe esta spec está en `desktop-tauri` y la verificación automática
+> quedó en verde, pero el usuario **todavía no lo confirmó en la app**. El paso a paso de
+> los 13 criterios, con la plantilla de prueba, está en [[Version 1.3.0]].
+> Decisiones que la spec no cubría y hubo que tomar al implementar: la lista del panel se
+> deriva del árbol que ya tiene `vaultStore` (una Espora es una nota cuya `carpetaId` es
+> exactamente la carpeta configurada), la plantilla nueva se llama `Nueva Espora` y se
+> renombra inline —no hay diálogo de nombre—, y al insertar se descartan los saltos de
+> línea iniciales del cuerpo, que son el separador del bloque de frontmatter y no
+> contenido del usuario.
+
 > [!info] Alcance: **desktop primero, reflejo a web después**
 > Aplica a las dos versiones. Se implementa en `desktop-tauri`, el usuario lo confirma en
 > la app y recién ahí se refleja a `web-cloud` con la receta de
@@ -242,6 +253,7 @@ que también lleva la versión del paquete. Ver [[Versionado del sistema]].
 
 ## Relacionadas
 
+- [[Version 1.3.0]] — el release donde salió, con el paso a paso de los 13 criterios.
 - [[metadata-yaml]] — las propiedades que las Esporas rellenan y fusionan (`FUN-M-04`).
 - [[BACKLOG]] — `FUN-M-03` y su consumidor `FUN-M-07` (Daily Note).
 - [[Reflejar cambios de desktop a web]] — cómo llegará a `web-cloud`.

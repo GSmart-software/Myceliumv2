@@ -28,7 +28,7 @@ El framework enseña dos **protocolos** y los hace obligatorios:
 Además, el `CLAUDE.md` incluye un **mapa de cuándo usar cada skill/comando**, para
 que la IA sepa qué herramienta corresponde a cada situación.
 
-## Qué genera (v1.2.0)
+## Qué genera (v1.4.0)
 
 | Archivo en el vault | Rol |
 |---|---|
@@ -46,12 +46,13 @@ que la IA sepa qué herramienta corresponde a cada situación.
 Contenido **verificado contra el código real** de Mycelium: `[[Título|alias]]`,
 `![[embed]]`, `![[X.excalidraw]]`, `#tag`, callouts (10 tipos, plegables `-/+`,
 anidados), `.mycelium/.trash`, **propiedades del frontmatter** con su subconjunto
-soportado (`FUN-M-04`, desde la v1.3.0 del framework), renombrar NO reescribe
+soportado (`FUN-M-04`, desde la v1.3.0 del framework), las **Esporas** y sus
+variables (`FUN-M-03`, desde la v1.4.0), renombrar NO reescribe
 enlaces (FUN-M-08) — la IA debe actualizarlos con grep.
 
 ## Versionado
 
-- `FRAMEWORK_IA_VERSION` en `frontend/lib/ia/framework.ts` (hoy `1.3.0`),
+- `FRAMEWORK_IA_VERSION` en `frontend/lib/ia/framework.ts` (hoy `1.4.0`),
   independiente de la versión de la app. **Al agregar funciones a Mycelium que la
   IA deba conocer, subir la versión y actualizar los templates.**
   - `1.0.0` — primera versión.
@@ -68,6 +69,13 @@ enlaces (FUN-M-08) — la IA debe actualizarlos con grep.
     `mycelium-vault`. Ahora describen el subconjunto soportado, que `tags:` son
     etiquetas de la nota, que hay que reusar las claves que ya existen en el vault
     y que los valores se consultan con `clave:valor`. Ver [[metadata-yaml]].
+  - `1.4.0` — **Esporas** (`FUN-M-03`): el vault puede tener una carpeta cuyas
+    notas no son conocimiento sino **moldes**. La IA tiene que saberlo para no
+    tratarlas como notas normales —no consolidar ahí, no citarlas como fuente, no
+    reportarlas como huérfanas— y para poder partir de una al crear una nota. Se
+    agregan la regla dura 10 del `CLAUDE.md`, una sección en la skill
+    `mycelium-vault` (qué es una Espora, dónde vive, sus variables) y ajustes en
+    `/vault-nota` y `/vault-huerfanas`. Ver [[esporas-plantillas]].
 - Cada archivo generado lleva el marcador `<!-- mycelium-ia vX -->`; la versión
   instalada vive en `.claude/mycelium-ia.json`.
 - Configuración → Vault muestra instalada vs disponible y ofrece

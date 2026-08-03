@@ -63,6 +63,13 @@ Detalle por versión: [[Capa de datos del desktop]] · [[Capa de datos de la web
   multilínea, anclas, listas de mapas) se muestra **crudo** y no se reescribe nunca. El
   parseo vive en `lib/frontmatter.ts` —propio, sin dependencia de YAML— y las
   propiedades se indexan en la tabla `propiedades` del índice del vault.
+- Una carpeta del vault —`Esporas/` por defecto, configurable— contiene **moldes** en
+  vez de conocimiento: sus notas son **Esporas** (`FUN-M-03`, ver [[esporas-plantillas]]).
+  No hay formato especial ni registro: si el archivo está en esa carpeta, es una
+  plantilla. Al usarla se sustituyen sus variables (`{{titulo}}`, `{{fecha}}`, `{{hora}}`,
+  `{{fecha:FORMATO}}`) sobre el **texto crudo**, así que la sustitución alcanza también
+  al frontmatter. Es el único concepto del modelo de contenido que depende de **dónde**
+  está la nota y no de lo que contiene.
 
 ## Estructura del repo
 
