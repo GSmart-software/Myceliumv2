@@ -594,9 +594,9 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   datos; la parte de infraestructura es un bucket con archivos estáticos. Lo que sí es nuevo
   es el **compromiso operativo**: un bucket que mantener y una clave privada que custodiar
   de por vida.
-- **A definir**: qué dominio propio se pone delante del bucket (queda compilado en cada
-  copia para siempre, así que se decide **antes** de la primera publicación) y dónde vive la
-  copia de seguridad de la clave privada.
+- **A definir**: si se usa un dominio propio delante del bucket o se arranca con la URL
+  `r2.dev` (**no bloquea**: se puede empezar sin dominio y migrar después; ver la spec) y
+  dónde vive la copia de seguridad de la clave privada.
 
 #### `FUN-L-15` · `RELEASE-SCRIPT-PUBLICACION` (—)
 - **Qué es**: un `npm run publicar` que haga de una sola vez lo que `FUN-L-14` deja como

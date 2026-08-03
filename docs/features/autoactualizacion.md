@@ -102,11 +102,33 @@ Ni D1, ni Pages, ni KV, ni Workers. Cada versión ocupa ~18 MB entre MSI y NSIS:
 entran cientos de versiones, y como R2 no cobra transferencia da igual cuánta gente
 descargue.
 
-> [!warning] El dominio es el único requisito que puede faltar
-> Para poner un dominio propio delante de un bucket de R2, el dominio tiene que estar
-> gestionado por el DNS de Cloudflare. Es la única pieza con coste y **hay que resolverla
-> antes** de publicar la primera versión con updater, por lo que dice el callout de abajo:
-> la URL queda compilada en cada copia para siempre.
+> [!info] Sin dominio propio también se puede empezar
+> El dominio es la única pieza con coste, y **no bloquea**. Se puede arrancar con la URL
+> `pub-<hash>.r2.dev` que da Cloudflare: el updater la consulta igual y todo el circuito
+> funciona. Lo que compra el dominio es **permanencia**, no funcionalidad.
+>
+> Cloudflare documenta que el acceso por `r2.dev` *"is rate-limited and should only be used
+> for development purposes"* — con la escala de este proyecto, el límite no es el problema;
+> la permanencia sí, porque la URL queda compilada en cada copia.
+>
+> **Qué pasa si algún día hay que cambiarla**: las copias instaladas dejan de detectar
+> actualizaciones y necesitan **una reinstalación manual, una sola vez** — o sea, se vuelve
+> a la situación de hoy. No se pierde nada ni se rompe nada.
+>
+> **Y migrar después es barato**: se publica una versión cuyo endpoint apunta al dominio
+> nuevo, se mantiene vivo el manifiesto viejo hasta que todos la recojan, y cada copia queda
+> apuntando sola a la URL nueva al instalarla. Solo quien no actualizó en esa ventana
+> reinstala a mano.
+>
+> Para el dominio **no hace falta transferir nada**: Cloudflare admite *partial (CNAME)
+> setup*, así que un dominio registrado en otro sitio se añade a la cuenta sin moverlo.
+
+> [!tip] Mitigación que conviene igual: endpoint configurable
+> El updater permite fijar los endpoints en tiempo de ejecución, así que Mycelium puede
+> leerlo de una preferencia con el valor compilado como defecto. Cambiar de URL pasa a ser
+> cambiar un ajuste en vez de reinstalar — y sirve además para **probar contra un bucket de
+> pruebas** antes de publicar de verdad, que es justo lo que hace falta para verificar
+> `FUN-L-14` de extremo a extremo sin arriesgar a los usuarios reales.
 
 > [!note] Acá no hay problema de CORS
 > Suele ser la primera preocupación y no aplica: la petición del manifiesto la hace el lado
@@ -146,13 +168,13 @@ mycelium-releases/
 - **R2 no cobra egress** y el nivel gratuito son 10 GB: con instaladores de ~9 MB esto no
   va a costar nada en mucho tiempo.
 
-> [!important] Usar un **dominio propio**, no la URL `r2.dev`
-> La URL del manifiesto queda **compilada dentro de cada copia de Mycelium, para siempre**:
-> las versiones ya instaladas seguirán consultando esa dirección pase lo que pase. Con un
-> dominio propio delante del bucket, mudar el almacenamiento el día de mañana es cambiar un
-> DNS; con la URL `r2.dev` por defecto, es abandonar a todo lo que ya está instalado.
-> Cloudflare además desaconseja `r2.dev` para producción. **Hay que decidirlo antes de
-> publicar la primera versión con updater.**
+> [!important] Preferir un **dominio propio** a la URL `r2.dev`
+> La URL del manifiesto queda **compilada dentro de cada copia de Mycelium**: las versiones
+> ya instaladas seguirán consultando esa dirección. Con un dominio propio delante del
+> bucket, mudar el almacenamiento el día de mañana es cambiar un DNS.
+>
+> No es bloqueante —ver el callout de abajo sobre empezar sin dominio— pero **si hay dominio
+> disponible, se usa desde el principio**: es la opción que no hay que deshacer después.
 
 > [!note] Un bucket público **no** expone ninguna credencial
 > Pregunta que surgió al revisar la spec, y conviene dejarla contestada porque va a volver:
