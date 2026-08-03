@@ -34,8 +34,25 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-042 | El progreso del indexado sale en todos los botones de vault; falta una pantalla de carga | ambas (frontend) | ⬜ pendiente |
 | DEF-043 | El ícono de las Esporas es un brote de planta, no evoca una espora | ambas (frontend) | 🛠️ desktop, sin confirmar — `Sprout` → `CircleDot` |
 | DEF-044 | Al cambiar de vault siguen abiertas las pestañas del vault anterior | ambas (frontend) | ⬜ pendiente — bloque F de la agrupación |
+| DEF-045 | `[[destino\|alias]]` dentro de una tabla: o rompe la tabla, o rompe el grafo | ambas (frontend) | ⬜ pendiente — causa raíz ya identificada |
 
 ## Notas por bug
+
+- **DEF-045 — causa raíz ya localizada** (2026-08-03, comprobada ejecutando el pipeline real):
+  hay **cuatro** sitios que interpretan `[[destino|alias]]`, y no leen lo mismo.
+  - `lib/markdown.ts` (lectura) corre **después** de `remark-gfm`, sobre el *text node*. GFM
+    ya resolvió el escape: el nodo contiene `[[Destino|alias]]` sin la barra invertida, así
+    que `indexOf("|")` parte bien y el destino sale `Destino`. **Acá `\|` funciona.**
+  - `lib/db/grafo.ts`, `lib/editor/wikilink.ts` y `lib/editor/livePreview.ts` corren sobre el
+    **texto crudo** del archivo, donde la barra invertida sigue ahí. Los tres hacen el mismo
+    `inner.indexOf("|")` + `slice(0, pipe)`, así que el destino sale **`Destino\`** y no
+    resuelve.
+  - **El arreglo es pequeño y compartido**: normalizar `\|` → `|` antes de partir, en los
+    tres consumidores de texto crudo. Conviene un helper único —hoy la lógica de partir
+    destino/alias está copiada cuatro veces— para que no vuelvan a divergir.
+  - **Hasta que se arregle, no documentar `\|` como solución**: en lectura se ve bien y el
+    grafo pierde la conexión en silencio, que es peor que el fallo visible. Dentro de tablas,
+    `[[Destino]]` sin alias funciona en los cuatro sitios.
 
 - **DEF-017 / DEF-020 / DEF-033 / DEF-035 — corregidos antes de existir el catálogo**
   (auditoría del 2026-08-02): estaban resueltos y con commit, pero **el defecto en sí

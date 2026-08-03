@@ -132,6 +132,13 @@ Al cambiar de vault se mantienen abiertas las pestañas del vault anterior. Como
 
 Cada vault debería tener su propio historial de pestañas abiertas. Ese registro no tendría que compartirse entre vaults.
 
+# DEF-045
+No hay forma de escribir un enlace con alias, `[[destino|alias]]`, **dentro de una tabla**. La barra vertical del alias se confunde con la que separa las celdas, así que la tabla se parte donde no debe.
+
+Escaparla (`[[destino\|alias]]`) arregla la tabla pero **rompe el enlace en el grafo y en la vista en vivo**, que se quedan con la barra invertida pegada al destino y no encuentran la nota. Lo peor es que en la vista de lectura se ve todo bien, así que el enlace parece correcto y la conexión no existe.
+
+Detectado al construir enlaces entre documentos que se referenciaban sin `[[wikilinks]]`.
+
 
 ---
 
