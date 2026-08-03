@@ -14,6 +14,32 @@ avanzado.
 > Hasta que eso pase, la funcionalidad **no está verificada**. Lo que falta hacer está en
 > [[Publicar una version]] § 1.
 
+## El changelog que ve el usuario
+
+Lo que sigue, y **solo** lo que sigue, es lo que `npm run publicar` copia al manifiesto y
+lo que Mycelium renderiza en el diálogo de actualización. Los delimitadores son
+comentarios HTML: no se ven al leer la nota. Sin ellos el script **no publica** — ver
+[[Publicar una version]] § 2.
+
+<!-- notas-release:inicio -->
+## Mycelium se actualiza solo
+
+- **Te avisa cuando hay una versión nueva**, una vez al día y sin interrumpir. Si no hay
+  conexión no pasa nada: se reintenta al día siguiente.
+- **Ves qué trae antes de decidir.** El resumen de cada versión aparece en el propio
+  diálogo, con el mismo formato que tus notas.
+- **Actualizás con un clic.** Se descarga con barra de progreso, se instala y Mycelium se
+  reinicia solo. Podés seguir trabajando mientras descarga.
+- **Nunca te obliga.** *Más tarde* vuelve a ofrecerla mañana; *Omitir esta versión* no la
+  vuelve a mencionar y espera a la siguiente.
+- En **Configuración → Vault → Actualizaciones** tenés un botón para buscar ahora mismo
+  —que también te dice cuando **no** hay nada nuevo— y un interruptor para apagar la
+  comprobación automática.
+
+> Esta es la primera versión que puede actualizarse sola. Es la última vez que hace falta
+> instalar Mycelium a mano.
+<!-- notas-release:fin -->
+
 ## Por qué sube un minor y no dos
 
 Un release, **un** incremento: el tamaño del salto lo decide el cambio más significativo,

@@ -4,8 +4,13 @@ Cómo hacer que una versión nueva de Mycelium **llegue sola** a quien ya lo tie
 instalado. Es el otro extremo de [[autoactualizacion]] (`FUN-L-14`): la app sabe
 preguntar, y acá está lo que hay que dejar preparado para que la respuesta exista.
 
-Este documento está escrito para seguirlo **paso a paso, con las manos**. No hace falta
-haber leído la spec.
+Este documento está escrito para seguirlo **paso a paso**. No hace falta haber leído la
+spec.
+
+> [!tip] El camino normal es `npm run publicar` (§ 2)
+> Desde `FUN-L-15` hay un script que compila, sube y verifica: la § 2. Los pasos a mano
+> siguen escritos en la **§ 2 bis** y no se van a borrar — son el respaldo cuando el script
+> falla, y la explicación de qué está haciendo.
 
 > [!success] La § 1 ya está hecha, y la 1.4.0 ya está publicada (2026-08-03)
 > Bucket `mycelium-releases` creado y público, claves generadas, clave pública compilada en
@@ -177,9 +182,9 @@ variables de entorno del usuario (PowerShell, una sola vez):
 
 ## 2. Publicar una versión
 
-Cinco pasos. El primero es el de siempre; los otros cuatro son lo que suma `FUN-L-14`.
+Dos pasos: uno a mano y uno que hace el script (`FUN-L-15`).
 
-### Paso 1 — Consolidar la versión
+### Paso 1 — Consolidar la versión (a mano)
 
 Subir el número en **cuatro archivos y el `Cargo.lock`** (ver [[Versionado del sistema]]):
 
@@ -189,8 +194,103 @@ Subir el número en **cuatro archivos y el `Cargo.lock`** (ver [[Versionado del 
 - `frontend/src-tauri/tauri.conf.json`
 - `frontend/src-tauri/Cargo.lock` (la entrada `name = "app"`)
 
-Y escribir la nota de release `docs/estado/Version X.Y.Z.md`: **de ahí sale el changelog**
-que va a ver el usuario en el diálogo.
+Y escribir la nota de release `docs/estado/Version X.Y.Z.md`, que además de documentar el
+release lleva dentro **el changelog que va a ver el usuario**, delimitado así:
+
+```markdown
+<!-- notas-release:inicio -->
+## Qué entra
+
+- Lo que el usuario puede hacer ahora y antes no…
+<!-- notas-release:fin -->
+```
+
+Solo eso sale al manifiesto. Son **comentarios HTML**: Mycelium no los muestra al leer la
+nota, así que no ensucian nada.
+
+> [!important] El changelog es un resumen curado, no la nota entera
+> La nota de `docs/estado/` tiene secciones internas —"Dónde vive el código", "Cómo
+> comprobarlo en la app"— que no le sirven a quien solo quiere decidir si actualiza.
+> Escribí diez líneas orientadas a eso, en segunda persona, hablando de lo que gana.
+>
+> Y **no anuncies ahí el modo avanzado** (`FUN-M-16`): es una función deliberadamente
+> oculta, y el script **rechaza** las notas que la mencionen.
+>
+> Si los delimitadores no están, el script **no publica** y te dice qué agregar. Es a
+> propósito: un changelog vacío deja al usuario decidiendo a ciegas, y volcar el documento
+> entero es peor todavía.
+
+### Paso 2 — `npm run publicar`
+
+```sh
+cd frontend
+npm run publicar -- --simulacro   # ensayo: hace todo menos subir
+npm run publicar                  # de verdad
+```
+
+> [!tip] Ensayá siempre primero
+> `--simulacro` corre las comprobaciones, compila, escribe los tres manifiestos en
+> `installers/v<version>/` e imprime los comandos de subida que se habrían ejecutado, sin
+> tocar el bucket. Con `--sin-compilar` además reutiliza los instaladores ya compilados,
+> que es la forma de ensayar en segundos en vez de en diez minutos.
+
+Lo que hace, en orden:
+
+1. **Comprueba antes de compilar** —para no gastar diez minutos y enterarse al final—:
+   que las dos variables de firma existen (nunca imprime su valor), que `wrangler` está
+   instalado y autenticado, que la versión coincide en los cinco archivos del paso 1, que
+   el `pubkey` no es el marcador de fábrica y que **esa versión no está ya publicada**.
+2. **Compila** con `CARGO_BUILD_JOBS=2`.
+3. **Preserva** los instaladores en `installers/v<version>/` —antes de subir, porque
+   `target/` se borra con cualquier `cargo clean`— y escribe ahí los manifiestos.
+4. **Sube** el `.exe`, su `.sig`, el `.msi` y los tres manifiestos.
+5. **Verifica lo publicado**: que los tres JSON respondan 200 y parseen, que la firma del
+   manifiesto sea idéntica al `.sig` generado y que **el `.exe` descargado del bucket
+   tenga el mismo SHA-256 que el que se firmó**. Ese último es el fallo que, sin esta
+   comprobación, solo aparecería cuando un usuario intenta actualizar.
+
+Opciones (`npm run publicar -- --ayuda`):
+
+| Opción | Para qué |
+|---|---|
+| `--simulacro` | Hace todo menos subir. |
+| `--sin-compilar` | Reutiliza los instaladores ya compilados. Es lo que permite **rehacer un manifiesto mal escrito sin recompilar** (§ 5). |
+| `--forzar` | Republicar encima de una versión que ya está en el bucket. Sin esto se aborta: ver la § 5. |
+| `--notas <archivo>` | Toma el changelog de un archivo suelto en vez de la nota de release. |
+
+> [!info] Dos cosas que el script hace y son fáciles de olvidar a mano
+> **`versions.json` se actualiza, no se reemplaza**: lo descarga, agrega la versión nueva
+> arriba y conserva las anteriores. Si se pisara, las versiones viejas desaparecerían del
+> modo avanzado y con ellas la posibilidad de volver atrás.
+>
+> **El `latest.json` de la raíz se sube el último.** Es el que dispara la actualización de
+> todo el mundo: si la subida se corta a la mitad, nadie se entera de una versión que
+> todavía no está entera en el bucket.
+
+> [!note] De dónde salen la base pública y el nombre del bucket
+> La **base** (`https://pub-…r2.dev`) se **deriva** del `endpoints` de `tauri.conf.json`,
+> que es la URL que la app lleva compilada. No se escribe en el script a propósito: dos
+> fuentes acabarían apuntando a sitios distintos y nadie lo notaría hasta que las
+> actualizaciones dejaran de llegar.
+>
+> El **nombre del bucket** sí es una constante (`mycelium-releases`), porque la URL
+> `pub-<hash>.r2.dev` no lo contiene. Se puede cambiar con la variable de entorno
+> `MYCELIUM_BUCKET_RELEASES`, que es lo que permite ensayar contra el bucket de pruebas
+> de la § 4.
+
+El script vive en `frontend/scripts/publicar.mjs`. Es Node puro, sin dependencias.
+
+---
+
+## 2 bis. El proceso a mano (respaldo)
+
+> [!info] Esto es lo que hace el script, paso a paso
+> Se conserva por dos motivos: **sirve cuando el script falla** —o cuando hay que reparar
+> media publicación, que es la § 5— y **explica qué está pasando**. Fue el camino que se
+> usó de verdad para publicar la `1.4.0`, antes de que el script existiera.
+
+El paso 1 es el mismo de arriba (consolidar la versión). Lo que sigue son los pasos 2 a 5,
+que a mano son cuatro y con el script es uno.
 
 ### Paso 2 — Compilar
 
@@ -288,10 +388,12 @@ Cuatro cosas que hay que hacer bien y son las que más se rompen:
 > ```
 
 > [!tip] Las notas son un resumen, **no la nota de release entera**
-> La nota de `docs/estado/` tiene secciones internas —"Dónde vive el código", "Cómo
-> comprobarlo en la app"— que no le sirven a quien solo quiere decidir si actualiza.
-> Escribí diez líneas orientadas a eso. Y no anuncies ahí el **modo avanzado**
-> (`FUN-M-16`): es una función deliberadamente oculta.
+> Con el script salen solas de la sección delimitada de la nota de release (§ 2, paso 1),
+> que existe justamente para esto. A mano hay que acordarse: la nota de `docs/estado/`
+> tiene secciones internas —"Dónde vive el código", "Cómo comprobarlo en la app"— que no
+> le sirven a quien solo quiere decidir si actualiza. Escribí diez líneas orientadas a
+> eso. Y no anuncies ahí el **modo avanzado** (`FUN-M-16`): es una función deliberadamente
+> oculta.
 
 El **mismo archivo** se sube a **dos** sitios:
 
@@ -406,6 +508,11 @@ Qué conviene probar, además del camino feliz:
    archivos de una versión ya publicada con contenido distinto: alguien puede tenerla a
    medio descargar, y la firma dejaría de coincidir.
 
+> [!note] Por eso `npm run publicar` aborta si la versión ya está en el bucket
+> Es la comprobación que impide el punto 3 por accidente. `--forzar` la salta, y solo tiene
+> sentido cuando lo que está mal es el **manifiesto**, no el instalador: ahí sí se
+> reescribe, porque el `.exe` firmado no cambia.
+
 ### "La actualización se rechazó" / firma inválida
 
 Es el sistema haciendo su trabajo: el instalador descargado no coincide con la firma que
@@ -417,8 +524,14 @@ verifica la clave pública compilada en la app. Causas, por frecuencia:
 3. Se subió el instalador de una compilación y el `.sig` de otra.
 4. La clave pública de `tauri.conf.json` no es la pareja de la privada que firmó.
 
-Solución: volver a generar el manifiesto desde los archivos de **esa** compilación
-(§ 2 paso 4) y volver a subirlo. No hace falta recompilar.
+Solución: volver a generar el manifiesto desde los archivos de **esa** compilación y
+volver a subirlo. No hace falta recompilar, y para eso están las dos opciones:
+
+```sh
+npm run publicar -- --sin-compilar --forzar
+```
+
+A mano, es el § 2 bis paso 4.
 
 ### Nadie detecta la actualización
 
@@ -448,16 +561,25 @@ la § 1.4 no es una formalidad.
 
 ## Lo que este proceso todavía no hace
 
-Los pasos 2 a 5 son manuales a propósito: primero se comprueba que el circuito funciona de
-extremo a extremo, y recién después se automatiza. Esa automatización es `FUN-L-15` en el
-[[BACKLOG]] — un `npm run publicar` que compile, firme, suba a R2 y escriba los dos JSON —
-y va a ser un **script local, no GitHub Actions**: usar el workflow obligaría a alinear
-`origin` (ver [[RAMAS]]) y a meter la clave privada como secreto de un repo público.
+La automatización (`FUN-L-15`) **ya está**: es la § 2. Se hizo en ese orden a propósito —
+primero el circuito a mano de extremo a extremo con la `1.4.0`, y recién después el
+script, porque automatizar un proceso que no se sabe si funciona es multiplicar el fallo.
+Y es un **script local, no GitHub Actions**: usar el workflow obligaría a alinear `origin`
+(ver [[RAMAS]]) y a meter la clave privada como secreto de un repo público.
+
+Lo que sigue sin hacer:
+
+- **Consolidar la versión** (el paso 1: los cinco archivos y la nota de release) sigue
+  siendo manual. El script lo **comprueba**, no lo escribe: decidir el número es un juicio
+  sobre qué cambia para el usuario, no una operación mecánica (ver [[Versionado del sistema]]).
+- **Publicar las versiones anteriores** que están en `installers/` pero no en el bucket.
+  Nunca hizo falta: solo la `1.4.0` en adelante puede autoactualizarse.
+- **Instalar la salida** en la máquina propia para probarla; eso sigue siendo un doble clic.
 
 ## Relacionadas
 
 - [[autoactualizacion]] — la spec: qué hace la app con todo esto.
 - [[Generar instaladores desktop]] — el empaquetado, que ahora emite también los `.sig`.
 - [[Versionado del sistema]] — qué número lleva cada release.
-- [[BACKLOG]] — `FUN-L-15`, la automatización de este proceso.
+- [[BACKLOG]] — `FUN-L-15`, la automatización de este proceso, ya implementada.
 - [[Mapa de documentacion]] — índice general.
