@@ -120,6 +120,36 @@ mycelium-releases/
 - **R2 no cobra egress** y el nivel gratuito son 10 GB: con instaladores de ~9 MB esto no
   va a costar nada en mucho tiempo.
 
+> [!important] Usar un **dominio propio**, no la URL `r2.dev`
+> La URL del manifiesto queda **compilada dentro de cada copia de Mycelium, para siempre**:
+> las versiones ya instaladas seguirán consultando esa dirección pase lo que pase. Con un
+> dominio propio delante del bucket, mudar el almacenamiento el día de mañana es cambiar un
+> DNS; con la URL `r2.dev` por defecto, es abandonar a todo lo que ya está instalado.
+> Cloudflare además desaconseja `r2.dev` para producción. **Hay que decidirlo antes de
+> publicar la primera versión con updater.**
+
+> [!note] Un bucket público **no** expone ninguna credencial
+> Pregunta que surgió al revisar la spec, y conviene dejarla contestada porque va a volver:
+> sin Worker, ¿no queda una API key pública?
+>
+> **No.** R2 tiene dos accesos y solo uno usa claves. **Leer** el manifiesto y el instalador
+> es un `GET` anónimo a una URL pública — la app no lleva token, no firma peticiones y no
+> habla con la API S3. **Escribir** en el bucket sí necesita un token de R2, pero ese vive
+> en la máquina de quien publica o como secreto del CI, y nunca viaja dentro de la app. Un
+> Worker sería igual de público y anónimo: no cambia nada en ese frente.
+>
+> **La protección no es el transporte, es la firma.** Si alguien reemplazara el instalador
+> dentro del bucket, Mycelium lo rechazaría igual: no coincidiría con la firma verificada
+> contra la clave pública compilada en la app (criterio de aceptación 10). Por eso el bucket
+> puede ser completamente público sin debilitar nada. Lo que hay que proteger es **escribir**
+> —el token de R2 y, sobre todo, la clave privada de firma—, no leer.
+>
+> Corolario para quien implemente: **el cliente nunca lleva credenciales**. Si una solución
+> las necesita para descargar, está mal diseñada.
+>
+> Un Worker tendrá sentido el día que se quieran canales beta/estable, despliegue gradual o
+> contar instalaciones. Para seguridad, no aporta.
+
 > [!important] El canal de actualización es **NSIS**, no MSI
 > Los dos se siguen generando, pero el manifiesto apunta al `-setup.exe`. El motivo es
 > concreto y está verificado en el schema de la CLI: el NSIS de Tauri instala por defecto

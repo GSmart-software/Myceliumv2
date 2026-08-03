@@ -593,7 +593,9 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   datos; la parte de infraestructura es un bucket con archivos estáticos. Lo que sí es nuevo
   es el **compromiso operativo**: un bucket que mantener y una clave privada que custodiar
   de por vida.
-- **A definir**: dominio del bucket; dónde se guarda la copia de seguridad de la clave.
+- **A definir**: qué dominio propio se pone delante del bucket (queda compilado en cada
+  copia para siempre, así que se decide **antes** de la primera publicación) y dónde vive la
+  copia de seguridad de la clave privada.
 
 #### `FUN-L-15` · `RELEASE-PUBLICACION-AUTOMATICA` (—)
 - **Qué es**: que `.github/workflows/desktop-build.yml` —que ya compila y crea releases con
