@@ -182,20 +182,34 @@ variables de entorno del usuario (PowerShell, una sola vez):
 
 ## 2. Publicar una versión
 
-Dos pasos: uno a mano y uno que hace el script (`FUN-L-15`).
+**Dos comandos y una redacción.** Ninguna edición manual de números.
 
-### Paso 1 — Consolidar la versión (a mano)
+### Paso 1 — Consolidar la versión
 
-Subir el número en **cuatro archivos y el `Cargo.lock`** (ver [[Versionado del sistema]]):
+```sh
+cd frontend
+npm run versionar -- 1.5.1
+```
 
-- `frontend/lib/version.ts` (`APP_VERSION`)
-- `frontend/package.json`
-- `frontend/src-tauri/Cargo.toml`
-- `frontend/src-tauri/tauri.conf.json`
-- `frontend/src-tauri/Cargo.lock` (la entrada `name = "app"`)
+Sube el número en los cinco sitios (`lib/version.ts`, `package.json`,
+`src-tauri/tauri.conf.json`, `src-tauri/Cargo.toml` y la entrada `name = "app"` del
+`Cargo.lock`), los **relee** para confirmar que quedaron, y crea el esqueleto de
+`docs/estado/Version 1.5.1.md` con los delimitadores del changelog ya puestos.
 
-Y escribir la nota de release `docs/estado/Version X.Y.Z.md`, que además de documentar el
-release lleva dentro **el changelog que va a ver el usuario**, delimitado así:
+- `--simulacro` muestra qué cambiaría sin escribir nada.
+- Se niega a bajar de versión o a repetir la actual salvo `--forzar`.
+- **No decide el número**: eso es tuyo, con el criterio de [[Versionado del sistema]].
+
+> [!warning] El script no escribe el changelog: eso lo escribís vos
+> Crea el hueco entre los delimitadores con instrucciones dentro. Si lo dejás vacío,
+> `npm run publicar` **aborta** antes de compilar — a propósito: publicar una versión sin
+> decirle a nadie qué trae es peor que no publicarla.
+>
+> Acordate también de añadir la entrada al comentario de historial de `lib/version.ts`; eso
+> es redacción y no lo automatiza nada.
+
+La nota de release, además de documentar el release para nosotros, lleva dentro **el
+changelog que va a ver el usuario**, delimitado así:
 
 ```markdown
 <!-- notas-release:inicio -->

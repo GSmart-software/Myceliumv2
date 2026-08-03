@@ -19,9 +19,22 @@ Al subir de versión hay que tocar **todos** estos lugares:
 | `frontend/src-tauri/tauri.conf.json` | Solo desktop (define el nombre del instalador) |
 | `frontend/src-tauri/Cargo.lock` (entrada `name = "app"`) | Solo desktop |
 
-> [!warning] Mantenerlos sincronizados a mano
-> No hay automatización. Si `tauri.conf.json` queda atrás, el instalador sale con el
-> número viejo aunque la app muestre el nuevo.
+> [!tip] No los toques a mano: `npm run versionar -- X.Y.Z`
+> Sube el número en los cinco de una vez, **relee** los cinco para confirmarlo, y crea el
+> esqueleto de `docs/estado/Version X.Y.Z.md` con los delimitadores del changelog que
+> `npm run publicar` exige. Con `--simulacro` muestra qué cambiaría sin escribir.
+>
+> No decide el número por vos: eso es el criterio de más abajo. Y se niega a bajar de
+> versión o a repetir la actual salvo `--forzar` — un número ya publicado identifica lo que
+> salió con él.
+>
+> Si `tauri.conf.json` quedara atrás, el instalador saldría con el número viejo aunque la
+> app muestre el nuevo, y desde la [[Version 1.4.0]] eso además mete la actualización en
+> bucle: la app se actualiza y sigue viendo que hay algo nuevo. Por eso `npm run publicar`
+> **comprueba** los cinco antes de compilar.
+>
+> Se llama `versionar` y no `version` porque ese nombre es un *lifecycle script* de npm
+> (lo ejecuta `npm version`) y la colisión daría sorpresas.
 
 > [!important] Desde la [[Version 1.4.0]], el número también viaja al bucket
 > La versión de `tauri.conf.json` es la que el updater compara con la del manifiesto: si
