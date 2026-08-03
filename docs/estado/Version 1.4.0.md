@@ -7,12 +7,21 @@ toda la infraestructura — [[autoactualizacion]] (`FUN-L-14` · `UPDATER-AUTOAC
 y la **selección de versión** (`FUN-M-16` · `UPDATER-SELECCION-VERSION`), que es su modo
 avanzado.
 
-> [!warning] Implementado, **sin confirmar por el usuario** y **sin probar de extremo a extremo**
-> La verificación automática está en verde, pero acá eso alcanza menos que nunca: **no
-> existe todavía el bucket ni la clave de firma**, así que el circuito real —publicar,
-> detectar, descargar, verificar, instalar, reiniciar— no se ha ejecutado ni una vez.
-> Hasta que eso pase, la funcionalidad **no está verificada**. Lo que falta hacer está en
-> [[Publicar una version]] § 1.
+> [!success] Publicada el 2026-08-03, con la mitad del circuito ya verificada
+> El bucket existe, las claves están generadas y **esta versión está publicada**: sus dos
+> instaladores, sus firmas y los tres manifiestos están en R2. Comprobado de verdad, no por
+> deducción: los manifiestos responden y parsean, la firma del manifiesto es idéntica al
+> `.sig`, y el `.exe` **descargado del bucket** tiene el mismo SHA-256 que el que se firmó
+> — que es el fallo que solo aparecería cuando alguien intentara actualizar.
+>
+> **Lo que falta verificar es la otra mitad**: que un Mycelium instalado *detecte* esta
+> versión, la descargue, verifique la firma, instale y reinicie. Eso no se puede probar
+> desde acá — hace falta una `1.4.0` instalada y una `1.4.1` publicada después.
+
+> [!warning] La 1.4.0 hay que instalarla a mano, una vez
+> Es la primera versión que lleva la clave pública, así que ninguna anterior puede
+> autoactualizarse a ella. El instalador está en `installers/v1.4.0/` y en el bucket. A
+> partir de ella, ya no hace falta.
 
 ## El changelog que ve el usuario
 

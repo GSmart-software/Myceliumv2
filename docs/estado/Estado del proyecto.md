@@ -27,7 +27,8 @@ Foto de dónde está Mycelium hoy. Para el detalle de cada tema, seguir los enla
 | [[ia-framework-vault]] (`FUN-L-08`) | Implementada, framework en **v1.4.0** (describe las propiedades del frontmatter y las Esporas); pendiente de prueba de los comandos nuevos. **El vault de este repo tiene instalada la v1.2.0**: hay que regenerar desde Configuración → Vault |
 | [[metadata-yaml]] (`FUN-M-04`) | **Confirmada** en desktop (1.2.0) el 2026-08-02, pendiente de reflejo a web: el frontmatter pasa a ser propiedades (tarjeta en lectura y en vivo, pestaña PROPIEDADES, tabla `propiedades` en el índice, filtro `clave:valor`). Ver [[Version 1.2.0]] |
 | [[esporas-plantillas]] (`FUN-M-03`) | Implementada en desktop (1.3.0), **sin confirmar por el usuario**: las notas de una carpeta configurable son plantillas con variables, usables desde el panel del rail, la barra del editor y el clic derecho de una carpeta. Ver [[Version 1.3.0]] |
-| [[autoactualizacion]] (`FUN-L-14` + `FUN-M-16`) | Implementada en desktop (1.4.0), **sin confirmar y sin probar de extremo a extremo**: Mycelium comprueba una vez al día si hay versión nueva, muestra el changelog renderizado y ofrece instalarla; en modo avanzado (siete clics en el número de versión) se puede instalar cualquier versión publicada, incluida una anterior. **Falta lo único que no puede hacer el código: crear el bucket y generar la clave de firma** ([[Publicar una version]] § 1). Hasta entonces el updater está desactivado con su motivo a la vista. Ver [[Version 1.4.0]] |
+| [[autoactualizacion]] (`FUN-L-14` + `FUN-M-16`) | **Publicada** el 2026-08-03: bucket `mycelium-releases` creado, claves generadas y la 1.4.0 en R2 con sus firmas y manifiestos, **verificada la publicación** (los tres JSON, la firma y el SHA-256 del instalador remoto). Mycelium comprueba una vez al día, muestra el changelog renderizado y ofrece instalar; en modo avanzado (siete clics en el número de versión) se instala cualquier versión publicada, incluida una anterior. **Falta probar la otra mitad del circuito**: que una instalación detecte y aplique una versión posterior — hace falta publicar una 1.4.1. Ver [[Version 1.4.0]] |
+| [[Publicar una version]] (`FUN-L-15`) | `npm run publicar` compila, firma, sube y **verifica** (incluido el SHA-256 del instalador ya publicado). Probado en modo simulacro; **su primera publicación real será la próxima versión** |
 | [[mycignore]] (`FUN-M-11`) | Implementada en desktop (parser con tests); **parte web pendiente**. Su default se amplió en 1.1.1 |
 | Rendimiento de la apertura del vault (`FUN-M-12`) | Implementada en desktop (1.1.1), **sin confirmar por el usuario**: no se pudo medir el efecto real. Ver [[Rendimiento de la apertura del vault]] |
 | Navegación por pestaña (`DEF-039/040/041`) | Implementada en desktop (1.1.5), **sin confirmar**: scroll conservado, historial propio por pestaña con botones. `DEF-041` quedó endurecido sin causa raíz confirmada. Ver [[Version 1.1.5]] |
@@ -35,12 +36,19 @@ Foto de dónde está Mycelium hoy. Para el detalle de cada tema, seguir los enla
 
 ## Pendiente / próximos pasos
 
-0. **Poner en marcha la autoactualización** (`FUN-L-14`): es lo único de la lista que no
-   depende de escribir código. Crear el bucket de R2, generar el par de claves con
-   `npx tauri signer generate`, pegar la pública en `tauri.conf.json` y guardar la privada
-   fuera de la máquina. Paso a paso en [[Publicar una version]] § 1. Hasta que eso pase,
-   la 1.4.0 está implementada pero **no verificada**: el circuito real —publicar,
-   detectar, descargar, verificar firma, instalar, reiniciar— no se ha ejecutado nunca.
+0. **Cerrar el circuito de la autoactualización** (`FUN-L-14`). La puesta en marcha está
+   hecha y la 1.4.0 publicada y verificada del lado del bucket. Falta la mitad del cliente,
+   y son tres cosas en este orden:
+   1. **Instalar la 1.4.0 a mano** (`installers/v1.4.0/`). Es la primera con clave pública:
+      ninguna anterior puede autoactualizarse a ella. Es la última instalación manual.
+   2. **Publicar una 1.4.1** con `npm run publicar` — será su primera ejecución real.
+   3. **Comprobar que la 1.4.0 instalada la detecta**, muestra el changelog, la instala y
+      reinicia. Recién ahí el circuito está verificado de punta a punta.
+
+   Dos cosas pendientes que no dependen de eso: la **copia de seguridad de la clave
+   privada** fuera de la máquina (si se pierde, nadie puede volver a actualizarse) y
+   decidir si el `pubkey` y el `endpoint` se commitean (hoy son una modificación local:
+   un checkout limpio compila con el updater apagado).
    Ojo: desde ahora `tauri build` **falla sin la clave**, así que esto bloquea también
    generar cualquier instalador.
 1. **Comprobar 1.3.0 en la app** (`FUN-M-03`, Esporas): el paso a paso de los 13
