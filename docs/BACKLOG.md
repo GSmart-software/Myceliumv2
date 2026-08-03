@@ -94,6 +94,8 @@ y **priorizar** qué implementar antes.
 | `FUN-L-11` | `FILES-OTROS-TIPOS` | Ver en Mycelium los archivos que hoy ignora: PDF, código de cualquier lenguaje y texto plano. Aparecen en el explorador y se abren en un visor propio, como una pestaña más | ambas | — |
 | `FUN-L-12` | `EDITOR-CORRECTOR-ORTOGRAFICO` | Corrector ortográfico activable en Configuración, con **varios idiomas simultáneos** (p. ej. español e inglés) y arquitectura preparada para sumar idiomas | ambas | — |
 | `FUN-L-13` | `UI-IDIOMAS` | La interfaz en varios idiomas (español, inglés, italiano) y preparada para agregar más. Hoy todos los textos están escritos en español dentro de los componentes | ambas | — |
+| `FUN-L-14` | `UPDATER-AUTOACTUALIZACION` | Mycelium comprueba una vez al día si hay versión nueva, muestra su changelog y ofrece instalarla con un clic. Nunca obliga ni bloquea. `tauri-plugin-updater` + instaladores firmados en Cloudflare R2. Spec en `docs/features/autoactualizacion.md` | desktop | — |
+| `FUN-L-15` | `RELEASE-PUBLICACION-AUTOMATICA` | Que el workflow que ya existe firme y publique en R2 al empujar un tag, en vez de subir el instalador y escribir `latest.json` a mano. Continuación de `FUN-L-14` | desktop | — |
 
 ### 1.4 Muy grandes — tamaño XL
 
@@ -577,6 +579,32 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   desktop); cómo se manejan plurales y fechas; y si el idioma sale del sistema operativo
   la primera vez.
 
+#### `FUN-L-14` · `UPDATER-AUTOACTUALIZACION` (—)
+- **Qué es**: que Mycelium avise, una vez al día en el primer arranque, de que hay una
+  versión nueva; muestre **qué trae** y ofrezca instalarla con un clic. Nunca obliga, nunca
+  bloquea y sin conexión no dice nada.
+- **Objetivo**: hoy publicar es compilar, hacer llegar el instalador y que el usuario
+  reinstale a mano — y no tiene forma de enterarse de que existe una versión nueva.
+- **Spec completa**: [[autoactualizacion]]. Decisiones ya tomadas: plugin oficial
+  `tauri-plugin-updater` (descarga, verifica firma, instala), **Cloudflare R2** con
+  manifiesto estático, changelog en Markdown renderizado en el propio diálogo, y tres
+  salidas — actualizar, más tarde, omitir esta versión.
+- **Es `L` y no `XL`** aunque toque la nube: no hay rearquitectura ni cambia dónde viven los
+  datos; la parte de infraestructura es un bucket con archivos estáticos. Lo que sí es nuevo
+  es el **compromiso operativo**: un bucket que mantener y una clave privada que custodiar
+  de por vida.
+- **A definir**: dominio del bucket; dónde se guarda la copia de seguridad de la clave.
+
+#### `FUN-L-15` · `RELEASE-PUBLICACION-AUTOMATICA` (—)
+- **Qué es**: que `.github/workflows/desktop-build.yml` —que ya compila y crea releases con
+  `tauri-action`— firme los artefactos y los suba a R2 con su `latest.json` al empujar un
+  tag, en vez de hacerlo a mano.
+- **Objetivo**: que publicar no dependa de recordar cuatro pasos manuales, donde un `.sig`
+  mal pegado rompe la actualización de todos los usuarios.
+- **A definir**: si el tag sigue creando también el Release de GitHub; cómo se inyecta la
+  clave privada como secreto sin que quede en logs.
+- **Depende de `FUN-L-14`**: primero se hace el circuito a mano y se comprueba que funciona.
+
 ### Pendientes — tamaño XL
 
 #### `FUN-XL-01` · `STORAGE-LOCAL-FIRST-NUBE` (C-G-03)
@@ -773,6 +801,15 @@ al decidirse que los tipos sin visor se listan en gris en vez de ocultarse: en c
 explorador muestra PDF, código y texto plano —soportados o no—, la extensión deja de ser
 un detalle cómodo y pasa a ser la única forma de distinguirlos. Estaba clasificada como
 acompañante suelta y ahora tiene un parentesco real.
+
+#### L · Distribución — `FUN-L-14` + `FUN-L-15` · minor · desktop
+`FUN-L-15` automatiza exactamente los pasos que `FUN-L-14` introduce a mano (firmar, subir
+a R2, escribir `latest.json`), sobre el mismo bucket, la misma clave y el mismo formato de
+manifiesto. Van juntas en el sentido de que se diseñan juntas — pero **se entregan en ese
+orden**: primero el circuito a mano, y solo cuando está comprobado de extremo a extremo se
+automatiza. Automatizar un proceso que todavía no se sabe si funciona es multiplicar el
+fallo, y acá un fallo rompe la actualización de todos los usuarios a la vez.
+*Si el bloque se hace muy grande*, `FUN-L-14` sola ya es entregable y útil.
 
 #### K · Idiomas — `FUN-L-12` + `FUN-L-13` · minor · ambas
 Las dos introducen la misma noción, que hoy no existe: **qué idiomas conoce Mycelium**.

@@ -58,6 +58,7 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
 - [[navegacion-por-pestana]] — scroll, historial por pestaña y previsualización (`DEF-039/040/041`).
 - [[metadata-yaml]] — frontmatter YAML como propiedades: ver, editar e indexar (`FUN-M-04`).
 - [[esporas-plantillas]] — plantillas de notas ("Esporas") con variables (`FUN-M-03`).
+- [[autoactualizacion]] — aviso diario de versión nueva y actualización con un clic (`FUN-L-14`).
 
 ## Aprendizajes técnicos
 
