@@ -96,7 +96,7 @@ y **priorizar** qué implementar antes.
 | `FUN-L-12` | `EDITOR-CORRECTOR-ORTOGRAFICO` | Corrector ortográfico activable en Configuración, con **varios idiomas simultáneos** (p. ej. español e inglés) y arquitectura preparada para sumar idiomas | ambas | — |
 | `FUN-L-13` | `UI-IDIOMAS` | La interfaz en varios idiomas (español, inglés, italiano) y preparada para agregar más. Hoy todos los textos están escritos en español dentro de los componentes | ambas | — |
 | `FUN-L-14` | `UPDATER-AUTOACTUALIZACION` | Mycelium comprueba una vez al día si hay versión nueva, muestra su changelog y ofrece instalarla con un clic. Nunca obliga ni bloquea. `tauri-plugin-updater` + instaladores firmados en Cloudflare R2. Spec en `docs/features/autoactualizacion.md` | desktop | — |
-| `FUN-L-15` | `RELEASE-PUBLICACION-AUTOMATICA` | Que el workflow que ya existe firme y publique en R2 al empujar un tag, en vez de subir el instalador y escribir `latest.json` a mano. Continuación de `FUN-L-14` | desktop | — |
+| `FUN-L-15` | `RELEASE-SCRIPT-PUBLICACION` | Un `npm run publicar` que compile, firme, suba a R2 con `wrangler` y escriba `latest.json` y `versions.json`, en vez de hacer esos cuatro pasos a mano. **Script local, no CI**: usar el workflow obligaría a alinear `origin` y a poner la clave de firma como secreto de GitHub. Continuación de `FUN-L-14` | desktop | — |
 
 ### 1.4 Muy grandes — tamaño XL
 
@@ -598,15 +598,26 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   copia para siempre, así que se decide **antes** de la primera publicación) y dónde vive la
   copia de seguridad de la clave privada.
 
-#### `FUN-L-15` · `RELEASE-PUBLICACION-AUTOMATICA` (—)
-- **Qué es**: que `.github/workflows/desktop-build.yml` —que ya compila y crea releases con
-  `tauri-action`— firme los artefactos y los suba a R2 con su `latest.json` al empujar un
-  tag, en vez de hacerlo a mano.
-- **Objetivo**: que publicar no dependa de recordar cuatro pasos manuales, donde un `.sig`
-  mal pegado rompe la actualización de todos los usuarios.
-- **A definir**: si el tag sigue creando también el Release de GitHub; cómo se inyecta la
-  clave privada como secreto sin que quede en logs.
-- **Depende de `FUN-L-14`**: primero se hace el circuito a mano y se comprueba que funciona.
+#### `FUN-L-15` · `RELEASE-SCRIPT-PUBLICACION` (—)
+- **Qué es**: un `npm run publicar` que haga de una sola vez lo que `FUN-L-14` deja como
+  cuatro pasos manuales: compilar, firmar, subir el instalador y su `.sig` a R2 con
+  `wrangler`, y reescribir `latest.json` y `versions.json`.
+- **Objetivo**: que publicar no dependa de recordar una secuencia, donde un `.sig` mal
+  pegado o una URL equivocada rompe la actualización de **todos** los usuarios a la vez.
+- **Script local, no CI** (decisión del usuario, 2026-08-03): el workflow que ya existe
+  parecía el camino natural, pero arrastra una decisión ajena a esta funcionalidad —obliga a
+  alinear `origin`, hoy 204 commits por detrás y público (ver [[RAMAS]])— y exige meter la
+  clave privada de firma como secreto de GitHub. El script consigue lo que importa sin tocar
+  el remoto y sin que la clave salga de la máquina.
+- **A definir**: si el script publica también las versiones anteriores que ya están en
+  `installers/`, y qué hace si `wrangler` no está autenticado.
+- **Depende de `FUN-L-14`**: primero el circuito a mano, comprobado de extremo a extremo.
+
+> [!note] Lo que se pierde al no usar CI, para tenerlo presente
+> El instalador sale de la compilación local en vez de una máquina limpia, y se renuncia a
+> generar de paso las versiones de Linux y macOS que el workflow sabe construir y que hoy
+> nadie compila. Ninguna de las dos cosas es un problema hoy: solo se distribuye Windows y
+> la compilación local ya es la que se viene usando.
 
 ### Pendientes — tamaño XL
 
@@ -811,12 +822,12 @@ mismo bucket, la misma clave, el mismo diálogo de confirmación y el mismo veri
 firma. Solo suma un índice `versions.json` y la interfaz escondida. Hacerla aparte
 significaría volver a entrar en el mismo código semanas después.
 
-`FUN-L-15` automatiza exactamente los pasos que `FUN-L-14` introduce a mano (firmar, subir
-a R2, escribir `latest.json`), sobre el mismo bucket, la misma clave y el mismo formato de
-manifiesto. Van juntas en el sentido de que se diseñan juntas — pero **se entregan en ese
-orden**: primero el circuito a mano, y solo cuando está comprobado de extremo a extremo se
-automatiza. Automatizar un proceso que todavía no se sabe si funciona es multiplicar el
-fallo, y acá un fallo rompe la actualización de todos los usuarios a la vez.
+`FUN-L-15` automatiza en un script local exactamente los pasos que `FUN-L-14` introduce a
+mano (firmar, subir a R2, escribir los dos JSON), sobre el mismo bucket, la misma clave y el
+mismo formato de manifiesto. Van juntas en el sentido de que se diseñan juntas — pero **se
+entregan en ese orden**: primero el circuito a mano, y solo cuando está comprobado de
+extremo a extremo se automatiza. Automatizar un proceso que todavía no se sabe si funciona
+es multiplicar el fallo, y acá un fallo rompe la actualización de todos los usuarios a la vez.
 *Si el bloque se hace muy grande*, `FUN-L-14` sola ya es entregable y útil.
 
 #### K · Idiomas — `FUN-L-12` + `FUN-L-13` · minor · ambas

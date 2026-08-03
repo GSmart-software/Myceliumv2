@@ -90,6 +90,28 @@ instala y reinicia.
 Un bucket de R2 con dominio público, sin Worker ni lógica: el updater de Tauri solo
 necesita una URL que devuelva JSON.
 
+**Qué hay que dar de alta, y nada más:**
+
+| Pieza | Para qué | Coste |
+|---|---|---|
+| Cuenta de Cloudflare | — | Gratis |
+| **Un bucket de R2** | Instaladores, `.sig`, `latest.json` y `versions.json` | Nivel gratuito: 10 GB y **egress gratis** |
+| **Un dominio propio** en Cloudflare | Que la URL del manifiesto sea nuestra y no `r2.dev` | El registro del dominio |
+
+Ni D1, ni Pages, ni KV, ni Workers. Cada versión ocupa ~18 MB entre MSI y NSIS: con 10 GB
+entran cientos de versiones, y como R2 no cobra transferencia da igual cuánta gente
+descargue.
+
+> [!warning] El dominio es el único requisito que puede faltar
+> Para poner un dominio propio delante de un bucket de R2, el dominio tiene que estar
+> gestionado por el DNS de Cloudflare. Es la única pieza con coste y **hay que resolverla
+> antes** de publicar la primera versión con updater, por lo que dice el callout de abajo:
+> la URL queda compilada en cada copia para siempre.
+
+> [!note] Acá no hay problema de CORS
+> Suele ser la primera preocupación y no aplica: la petición del manifiesto la hace el lado
+> **Rust** del plugin, no el webview, así que no interviene ninguna política de navegador.
+
 ```
 mycelium-releases/
 ├── latest.json                       ← el manifiesto que consulta la app
@@ -173,9 +195,19 @@ mycelium-releases/
 3. Subir instalador y `.sig` a R2 bajo `<version>/`.
 4. Escribir `latest.json` con la versión, la firma y las notas de la release.
 
-Automatizarlo en el workflow que ya existe es la continuación natural, pero **no entra en
-esta unidad**: primero se hace a mano y se comprueba que el circuito completo funciona. Se
-registra como continuación en el [[BACKLOG]].
+Automatizar estos cuatro pasos **no entra en esta unidad**: primero se hacen a mano y se
+comprueba que el circuito completo funciona. La continuación es `FUN-L-15` en el [[BACKLOG]].
+
+> [!important] La automatización va en un **script local**, no en GitHub Actions
+> Era lo natural —el workflow ya existe y ya usa `tauri-action`— pero arrastra una decisión
+> que no tiene nada que ver con actualizar la app: usarlo obliga a **alinear `origin`**, que
+> está 204 commits por detrás y es un repo público (ver [[RAMAS]]), y a meter la **clave
+> privada de firma** como secreto de GitHub.
+>
+> Un `npm run publicar` que compile, firme, suba a R2 con `wrangler` y escriba los dos JSON
+> consigue lo mismo que importa —que no haya pasos manuales que olvidar ni `.sig` que pegar
+> mal— **sin tocar el remoto y sin que la clave salga de la máquina**. Decisión del usuario,
+> 2026-08-03.
 
 ---
 
