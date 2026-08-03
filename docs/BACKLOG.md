@@ -41,6 +41,11 @@ y **priorizar** qué implementar antes.
 > caso de `FUN-M-12`, que salió en [[Version 1.1.1]]. Criterio completo en
 > [[Versionado del sistema]].
 
+> [!important] La tabla dice QUÉ dígito sube, no cuántas veces
+> Un release sube **un** incremento, del tamaño del cambio más significativo que lleve.
+> Si entran tres `FUN-*` juntas, la versión sube **un** minor, no tres — y ese minor
+> absorbe las correcciones que vengan con ellas.
+
 ---
 
 ## 1. Pendientes (backlog priorizable)

@@ -35,37 +35,56 @@ La pregunta que decide entre patch y minor es una sola: **¿el usuario puede hac
 que antes no podía?** Si la respuesta es no —lo mismo, más rápido, mejor comunicado o
 sin un defecto—, es **patch**, por más trabajo que haya costado.
 
-## Cuántas unidades sube: una por funcionalidad
+## Cuántas unidades sube: **una**
 
-> [!important] Regla del proyecto: cada funcionalidad nueva suma **un** minor
-> Si en un mismo release entran **dos** funcionalidades, la versión sube **dos** minors.
-> No se agrupan en un solo salto. El número cuenta cuánto se agregó, no cuántas veces se
-> publicó.
+> [!important] Un release = un incremento
+> El tamaño del salto lo decide **el cambio más significativo** que lleve el release, no
+> cuántos cambios lleva. Da igual que entren una corrección o quince: si el release solo
+> corrige, sube **un** patch. Si además trae funcionalidad nueva, sube **un** minor y las
+> correcciones **quedan absorbidas**.
 
 **Al subir un dígito, los de la derecha vuelven a `0`.**
 
 Partiendo de `1.1.1`:
 
-| Qué entra | Queda en |
+| Qué entra en el release | Queda en |
 |---|---|
+| 1 corrección | `1.1.2` |
+| 4 correcciones | `1.1.2` — es un release, no cuatro |
 | 1 funcionalidad | `1.2.0` |
-| 2 funcionalidades | **`1.3.0`** (no `1.2.0`) |
-| 3 funcionalidades | `1.4.0` |
-| 1 funcionalidad + 2 correcciones | `1.2.0` — el minor sube y el patch **se resetea**: las correcciones quedan absorbidas |
-| 2 correcciones sueltas | `1.1.3` |
+| 3 funcionalidades | `1.2.0` — el minor no cuenta cuántas |
+| 1 funcionalidad + 2 correcciones | `1.2.0` — gana lo más significativo; el patch se resetea |
+| 1 rearquitectura + lo que sea | `2.0.0` |
+
+El número identifica **una publicación**, no un volumen de trabajo. Cuánto entró se
+cuenta en la nota de release (`docs/estado/Version X.md`), que es su sitio: ahí caben los
+matices que un dígito no puede expresar.
 
 > [!note] Qué cuenta como "una funcionalidad"
-> Una entrada del [[BACKLOG]] (`FUN-*`) o, si no estaba registrada, una capacidad nueva
-> que el usuario podría nombrar por separado. Un refactor que habilita otra cosa **no**
-> cuenta aparte: se versiona por lo que el usuario recibe, no por los pasos internos.
-> Ante la duda, contá lo que pondrías en la nota de release como ítems distintos.
->
-> La misma lógica aplica a las correcciones: **cada corrección suma un patch**. Esto es
-> una extensión del criterio a lo que el usuario enunció para las funcionalidades; si no
-> es lo que se busca, corregir esta línea.
+> Sigue importando para decidir **qué dígito** sube, no cuántas veces. Una entrada del
+> [[BACKLOG]] (`FUN-*`) o una capacidad nueva que el usuario podría nombrar por separado.
+> Un refactor que habilita otra cosa **no** cuenta: se versiona por lo que el usuario
+> recibe, no por los pasos internos.
 
-Consecuencia esperada y aceptada: los números crecen rápido y `1.9.0 → 1.10.0` es
-normal. No son decimales.
+> [!info] Por qué cambió esta regla (2026-08-03)
+> Hasta acá el proyecto **contaba unidades**: cada funcionalidad sumaba un minor y cada
+> corrección un patch. El usuario notó el síntoma —de `1.1.1` se saltó a **`1.1.5`** por
+> cuatro correcciones, dejando `1.1.2`, `1.1.3` y `1.1.4` inexistentes— y se revisó.
+>
+> Contar unidades **no es la práctica de la industria** y contradice a SemVer, que sobre
+> el minor dice explícitamente que *puede incluir cambios de patch*: un release con
+> funcionalidad nueva **absorbe** las correcciones, no las suma encima. Los costos reales
+> del conteo: el número deja de identificar un release (no se puede decir "actualizá
+> desde la 1.1.3" si nunca existió), los huecos nunca tienen instalador en
+> `installers/v<version>/`, y el MSI de Windows **limita `ProductVersion` a
+> `255.255.65535`**, así que el minor tiene techo.
+>
+> **No se renumeró nada.** Como el patch se resetea al subir el minor, el número de hoy
+> es el mismo con las dos reglas: la divergencia se materializó solo en la `1.1.5` y el
+> minor siguiente la borró. [[Version 1.1.5]] conserva su número porque se publicó con
+> él: la versión es la identidad de lo que salió.
+
+Los números **no son decimales**: `1.9.0 → 1.10.0` es correcto.
 
 > [!warning] El tamaño del BACKLOG mide ESFUERZO, no impacto de versión
 > Los IDs `FUN-S/M/L/XL` del [[BACKLOG]] dicen **cuánto cuesta** implementar algo, no
@@ -124,7 +143,8 @@ dos minor, porque no corrigen un texto: enseñan una capacidad nueva del vault. 
 - [[Version 1.3.0]] — el release más reciente (Esporas).
 - [[Version 1.2.0]] — metadatos YAML, y el caso testigo de
   "un `FUN-M` puede ser minor".
-- [[Version 1.1.5]] — el primero que saltó varios patches de una.
+- [[Version 1.1.5]] — el único que saltó varios patches de una; el síntoma que hizo
+  revisar la regla. Bajo la regla actual habría sido `1.1.2`.
 - [[Version 1.1.1]] — el caso testigo de "grande ≠ minor".
 - [[Version 1.0.0]] — el primer release consolidado.
 - [[Generar instaladores desktop]] — dónde impacta la versión.

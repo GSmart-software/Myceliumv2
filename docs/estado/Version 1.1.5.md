@@ -12,7 +12,19 @@ Un solo tema: **leer varias notas en paralelo deja de entorpecerse**. Spec en
 
 ## Por qué salta cuatro patches y ningún minor
 
-Cuatro unidades, ninguna con capacidad nueva (ver [[Versionado del sistema]]):
+> [!warning] Este número no se repetiría hoy: sería `1.1.2`
+> Fue el **único** release que saltó varios patches de una, y ese salto —con `1.1.2`,
+> `1.1.3` y `1.1.4` inexistentes— es lo que hizo revisar la regla el 2026-08-03. El
+> proyecto contaba unidades; ahora sigue SemVer estándar: **un release, un incremento**,
+> del tamaño del cambio más significativo. Cuatro correcciones juntas son un patch.
+>
+> **El número se conserva** porque se publicó con él: la versión es la identidad de lo que
+> salió, no una etiqueta reescribible. Y no arrastra nada, porque el minor siguiente
+> reseteó el patch: `1.2.0` es el mismo número con las dos reglas. Ver
+> [[Versionado del sistema]].
+
+Lo que sigue es el razonamiento **con la regla que regía entonces**: cuatro unidades,
+ninguna con capacidad nueva.
 
 | Unidad | Qué es |
 |---|---|
