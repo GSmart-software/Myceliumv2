@@ -49,12 +49,13 @@ estructura, o para insertar una estructura dentro de una nota que ya existe.
 - **`FUN-M-04` acaba de entrar**: `lib/frontmatter.ts` sabe leer y editar propiedades. Es
   lo que hace posible el § 3.2 (insertar una Espora fusionando sus propiedades).
 
-> [!note] "Nueva carpeta" usa `window.prompt` — comprobar si funciona en desktop
-> Es el único diálogo de ese estilo que hay hoy (`ExplorerPanel.tsx`, dos sitios). WebView2
-> —el motor del desktop en Windows— **no implementa `window.prompt`**: devuelve `null` sin
-> mostrar nada. Si al usuario le funciona crear carpetas en la app, esto es un falso
-> positivo; si no, es un defecto que hay que registrar como `DEF-*` aparte. **Esta spec no
-> usa `window.prompt` en ningún caso.**
+> [!note] `window.prompt` funciona — comprobado, no era un defecto
+> "Nueva carpeta" es el único sitio que lo usa (`ExplorerPanel.tsx`, dos llamadas) y se
+> sospechó que WebView2 no lo implementara, lo que la habría dejado muerta en silencio. El
+> usuario lo verificó en la app el 2026-08-03 y **funciona**; queda registrado en
+> [[Tauri y el WebView]]. Aun así, **esta spec no usa `window.prompt` en ningún caso**: es
+> un cuadro del sistema, no sigue el [[DESIGN_SYSTEM]] y no admite validación ni un
+> selector. Se tolera donde ya está, no se extiende.
 
 ---
 
