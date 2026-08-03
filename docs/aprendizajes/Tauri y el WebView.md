@@ -29,6 +29,23 @@ En el WebView, `document.elementFromPoint()` durante un drag devuelve el *ghost*
 hit-testing basada en el DOM bajo el puntero es frágil aquí: usar coordenadas +
 geometría. Ver [[Drag and drop en Mycelium]].
 
+## `window.prompt` **sí** funciona en el WebView
+
+Comprobado por el usuario en la app el 2026-08-03: crear una carpeta desde el explorador
+—el único sitio que usa `window.prompt` (`ExplorerPanel.tsx`, dos llamadas)— muestra el
+cuadro y devuelve el nombre con normalidad.
+
+Queda escrito porque la sospecha contraria es fácil de tener y cuesta tiempo: WebView2
+**históricamente no implementaba** los diálogos JavaScript, y devolver `null` sin mostrar
+nada habría dejado "Nueva carpeta" muerta en silencio. No es el caso. Si alguna vez
+aparece ese síntoma, la causa será otra.
+
+> [!tip] Que funcione no lo vuelve la opción por defecto
+> Es un cuadro del sistema: no sigue el [[DESIGN_SYSTEM]], no se puede validar mientras se
+> escribe ni ofrecer un selector. Para diálogos con más de un campo —el de
+> [[esporas-plantillas]], por ejemplo— va un componente propio. `window.prompt` se tolera
+> donde ya está, no se extiende.
+
 ## Pseudo-terminales: ConPTY vía `portable-pty`
 
 Para la [[terminal-integrada]] se usa el crate `portable-pty` (ConPTY en Windows), no
