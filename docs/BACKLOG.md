@@ -78,7 +78,7 @@ y **priorizar** qué implementar antes.
 | `FUN-M-13` | `VAULT-INDEX-UN-RECORRIDO` | Fusionar `listar_archivos_meta` y `listar_directorios` en un solo comando que devuelva `{archivos, directorios}`: hoy el vault se recorre **dos veces** por apertura. Continuación de `FUN-M-12` | desktop | — |
 | `FUN-M-14` | `VAULT-WATCH-REINDEX-DIRIGIDO` | El watcher emite `vault-cambios` **con las rutas afectadas** y `lib/vaultWatch.ts` las descarta: reindexa el vault entero ante cualquier cambio. Usar esas rutas para reindexar solo lo tocado. Continuación de `FUN-M-12` | desktop | — |
 | `FUN-M-15` | `LINKS-POR-ALIAS` | Resolver `[[enlaces]]` por la propiedad `aliases` de la nota destino: hoy se parsea e indexa pero **no tiene comportamiento**. Toca la resolución de wikilinks, el autocompletado y el grafo. Continuación de `FUN-M-04` | ambas | — |
-| `FUN-M-16` | `UPDATER-SELECCION-VERSION` | Elegir e instalar **cualquier versión publicada**, incluida una anterior, desde un modo avanzado oculto (siete clics en el número de versión). Deja la app fijada en esa versión. Herramienta de desarrollo, no para el usuario normal. Spec en `docs/features/autoactualizacion.md` § 4.3. Depende de `FUN-L-14` | desktop | — |
+| `FUN-M-16` | `UPDATER-SELECCION-VERSION` | Elegir e instalar **cualquier versión publicada**, incluida una anterior, desde un modo avanzado oculto (siete clics en el número de versión). Deja la app fijada en esa versión. Herramienta de desarrollo, no para el usuario normal. **Viabilidad verificada** contra el código de `tauri-plugin-updater` y la plantilla NSIS de la CLI instalada. Spec en `docs/features/autoactualizacion.md` § 4.3. Depende de `FUN-L-14` | desktop | — |
 
 ### 1.3 Grandes — tamaño L
 

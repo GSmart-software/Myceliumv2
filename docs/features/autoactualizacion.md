@@ -43,6 +43,7 @@ Reglas que fija el usuario y que la implementación no puede negociar:
 | Firma | **No hay claves.** El workflow dice explícitamente "SIN firmar" |
 | `bundle.targets` | `"all"` → en Windows produce **MSI (WiX) y NSIS** |
 | `bundle.windows.wix.upgradeCode` | Fijado. **No se toca nunca**: es la identidad de la app para Windows |
+| `bundle.windows.allowDowngrades` | No está definido → vale su defecto, **`true`**. Es lo que hace posible `FUN-M-16`; no tocarlo |
 | CI | `.github/workflows/desktop-build.yml` ya usa `tauri-apps/tauri-action` y crea un Release en borrador al empujar un tag `v*` |
 | Notas de release | Ya existen y están bien escritas: `docs/estado/Version X.Y.Z.md` |
 | Preferencias | `stores/preferencesStore.ts` (tipo `Preferencias`, guardado con debounce) |
@@ -258,12 +259,37 @@ forma persistente hasta que se apague.
 notas, y permite instalar la que se elija — **siempre con confirmación**, y con la
 advertencia visible si es anterior a la instalada.
 
-> [!warning] El updater de Tauri, por diseño, solo acepta subir
-> Su comprobación compara versiones: pedirle instalar la `1.2.0` desde la `1.3.0` le va a
-> parecer que ya estás al día, y no hará nada. Hay que **verificar en la implementación** si
-> su API admite un comparador propio; si no lo admite, este camino descarga el instalador y
-> lo ejecuta por fuera del plugin — que para el NSIS es simplemente lanzarlo. La firma se
-> verifica igual antes de ejecutar nada.
+> [!success] Verificado el 2026-08-03: se puede, y sin salir del plugin
+> Se comprobó **antes de construir nada**, contra el código real, porque si no fuera posible
+> esta unidad no existiría. Hay **dos** portones y los dos se pueden abrir:
+>
+> **1. El plugin.** `UpdaterBuilder` expone
+> `version_comparator(Fn(Version, RemoteRelease) -> bool)`. En `updater.rs` la decisión es:
+>
+> ```rust
+> let should_update = match self.version_comparator.as_ref() {
+>     Some(comparator) => comparator(self.current_version.clone(), release.clone()),
+>     None => release.version > self.current_version,
+> };
+> ```
+>
+> El comparador **sustituye por completo** al `>` por defecto: no hay una comprobación
+> adicional cableada. Devolviendo `true` se instala cualquier versión, incluida una anterior.
+>
+> **2. El instalador.** El NSIS de Tauri compara versiones (`SemverCompare`) y trata el
+> caso "downgrading" según el define `ALLOWDOWNGRADES`. Con `false`, **aborta las
+> instalaciones silenciosas con error** — que es justo como instala el updater. Sale de
+> `bundle.windows.allowDowngrades`, que **por defecto es `true`** y el proyecto no lo
+> define, así que hoy los downgrades están permitidos.
+>
+> Comprobado en la CLI instalada (2.11), no en la documentación: la plantilla NSIS y el
+> `allow_downgrades` están dentro del binario de la CLI de este repo.
+
+> [!danger] Nunca poner `bundle.windows.allowDowngrades` en `false`
+> Es `true` por defecto y hay que dejarlo así. Ponerlo en `false` mata `FUN-M-16` de raíz —
+> y lo haría en silencio: el plugin aceptaría la versión y el fallo aparecería recién al
+> instalar, en la máquina del usuario. Si alguna vez alguien lo agrega a `tauri.conf.json`,
+> que sea con esta nota delante.
 
 **Elegir una versión la deja fijada.** La comprobación automática se apaga, el aviso diario
 deja de aparecer, y en Configuración se ve un indicador de que estás en una versión fijada
