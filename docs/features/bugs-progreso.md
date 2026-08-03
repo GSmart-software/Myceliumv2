@@ -33,6 +33,7 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-041 | La pestaña de previsualización no reemplaza, abre una nueva | ambas (frontend) | 🛠️ desktop (1.1.5), **endurecido sin causa raíz confirmada** |
 | DEF-042 | El progreso del indexado sale en todos los botones de vault; falta una pantalla de carga | ambas (frontend) | ⬜ pendiente |
 | DEF-043 | El ícono de las Esporas es un brote de planta, no evoca una espora | ambas (frontend) | 🛠️ desktop, sin confirmar — `Sprout` → `CircleDot` |
+| DEF-044 | Al cambiar de vault siguen abiertas las pestañas del vault anterior | ambas (frontend) | ⬜ pendiente — bloque F de la agrupación |
 
 ## Notas por bug
 

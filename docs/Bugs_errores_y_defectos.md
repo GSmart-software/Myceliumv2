@@ -127,6 +127,11 @@ Esa pantalla de carga también debe aparecer cuando el vault se abre **automáti
 # DEF-043
 El ícono de las Esporas (plantillas) es una planta o un brote de planta, y no es representativo de una espora. Un círculo, o algo del estilo del ícono de un virus, comunicaría mejor la idea — aunque no sea literalmente una espora, se parece más que una planta.
 
+# DEF-044
+Al cambiar de vault se mantienen abiertas las pestañas del vault anterior. Como los archivos son distintos, esas pestañas muestran mal el contenido o directamente no muestran nada.
+
+Cada vault debería tener su propio historial de pestañas abiertas. Ese registro no tendría que compartirse entre vaults.
+
 
 ---
 

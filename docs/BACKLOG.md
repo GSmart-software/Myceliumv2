@@ -96,6 +96,7 @@ y **priorizar** qué implementar antes.
 | `FUN-L-12` | `EDITOR-CORRECTOR-ORTOGRAFICO` | Corrector ortográfico activable en Configuración, con **varios idiomas simultáneos** (p. ej. español e inglés) y arquitectura preparada para sumar idiomas | ambas | — |
 | `FUN-L-13` | `UI-IDIOMAS` | La interfaz en varios idiomas (español, inglés, italiano) y preparada para agregar más. Hoy todos los textos están escritos en español dentro de los componentes | ambas | — |
 | `FUN-L-14` 🛠️ | `UPDATER-AUTOACTUALIZACION` | Mycelium comprueba una vez al día si hay versión nueva, muestra su changelog y ofrece instalarla con un clic. Nunca obliga ni bloquea. `tauri-plugin-updater` + instaladores firmados en Cloudflare R2. **Implementado y publicado** el 2026-08-03: bucket, claves y la 1.4.0 en R2, con la publicación verificada (manifiestos, firma y SHA-256 del instalador remoto). **Falta probar la otra mitad**: que una instalación detecte y aplique una versión posterior. Spec en `docs/features/autoactualizacion.md`. Salió en [[Version 1.4.0]] | desktop | — |
+| `FUN-L-16` | `VAULT-VENTANAS-MULTIPLES` | Tener **varios vaults abiertos a la vez**, cada uno en su propia ventana y sin límite de cuántos. Hoy abrir uno cierra el anterior. Continuación natural de `FUN-L-04`, y comparte raíz con `DEF-044` | ambas | — |
 | `FUN-L-15` 🛠️ | `RELEASE-SCRIPT-PUBLICACION` | Un `npm run publicar` que compruebe, compile, firme, suba a R2 con `wrangler`, escriba los tres manifiestos y **verifique lo publicado**, en vez de hacer esos cuatro pasos a mano. Tiene modo `--simulacro`. **Script local, no CI**: usar el workflow obligaría a alinear `origin` y a poner la clave de firma como secreto de GitHub. **Implementado en desktop** (sin confirmar); el proceso, en [[Publicar una version]] § 2 | desktop | — |
 
 ### 1.4 Muy grandes — tamaño XL
@@ -602,6 +603,25 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   degrada con elegancia sin claves, pero hasta que exista el bucket y la clave de firma el
   circuito real no se ha ejecutado ni una vez. Los pasos, en [[Publicar una version]] § 1.
 
+#### `FUN-L-16` · `VAULT-VENTANAS-MULTIPLES` (—)
+- **Qué es**: poder tener **varios vaults abiertos simultáneamente**, cada uno en su propia
+  ventana, sin límite de cuántos. Hoy abrir un vault cierra el anterior: solo se puede
+  mirar uno a la vez.
+- **Objetivo**: consultar dos vaults en paralelo (trabajo y personal, o uno de referencia
+  mientras se escribe en otro). Como lo dijo el usuario: no es una funcionalidad que se use
+  todo el tiempo, pero cuando falta se echa mucho en falta.
+- **No es lo mismo que `FUN-L-04`**: aquella es *tener varios y alternar*; esta es *tenerlos
+  abiertos a la vez*. `FUN-L-04` es su prerrequisito natural.
+- **Por qué es `L` y no `M`**: Tauri sabe abrir varias ventanas, y cada una es un webview
+  con su propio contexto de JavaScript —así que los stores no se pisan solos—. Lo que
+  cuesta es todo lo que hoy asume **un** vault global: el índice SQLite abierto, el watcher,
+  las sesiones de terminal, y la persistencia de pestañas (ver `DEF-044`). La ventana pasa a
+  ser el ámbito de casi todo el estado.
+- **A definir**: si cada ventana recuerda su vault al reabrir la app; qué pasa con la
+  terminal integrada y sus procesos al cerrar una ventana; si el grafo y la búsqueda son por
+  ventana (sí, casi con seguridad); y si dos ventanas pueden abrir el **mismo** vault a la
+  vez —que es donde aparecería el riesgo de que dos índices escriban sobre la misma carpeta.
+
 #### `FUN-L-15` · `RELEASE-SCRIPT-PUBLICACION` (—)
 - **Qué es**: un `npm run publicar` que haga de una sola vez lo que `FUN-L-14` deja como
   cuatro pasos manuales: compilar, firmar, subir el instalador y su `.sig` a R2 con
@@ -808,10 +828,20 @@ gana el del contenedor**. `FUN-S-01` da estilo al checkbox según su símbolo; `
 corrige que el título de un callout pierda su formato. Comparten `lib/markdown.ts`,
 `livePreview.ts` y `editor.css`. El minor de `FUN-S-01` **absorbe** la corrección.
 
-#### F · Gestión de vaults — `FUN-S-05` + `FUN-L-04` · minor · ambas
-Las dos son el ciclo de vida del vault: tener varios y poder alternar (`FUN-L-04`) y qué
-encuentra el usuario al crear uno nuevo (`FUN-S-05`). El archivo de ejemplo solo tiene
-sentido en el flujo de creación que `FUN-L-04` va a tocar igual.
+#### F · Gestión de vaults — `FUN-L-04` + `DEF-044` + `FUN-L-16` + `FUN-S-05` · minor · ambas
+Todo el ciclo de vida del vault, y las tres primeras comparten **una misma raíz**: hoy el
+estado de la app asume que hay **un** vault. El caso más visible es `DEF-044` — las pestañas
+se persisten bajo una única clave global (`micelio-tabs`), así que al cambiar de vault
+siguen abiertas las del anterior y muestran archivos que ya no existen.
+
+Ese mismo supuesto es lo que impide `FUN-L-16` (varios vaults abiertos, cada uno en su
+ventana). Por eso van juntas y **en este orden**: `FUN-L-04` define qué es alternar de
+vault, `DEF-044` hace que el estado deje de ser global —que es el trabajo de fondo— y
+`FUN-L-16` se apoya en eso para que cada ventana tenga el suyo. Arreglar `DEF-044` por
+separado significaría tocar la misma capa dos veces.
+
+`FUN-S-05` (archivo de ejemplo al crear un vault) se suma porque vive en el flujo de
+creación que `FUN-L-04` va a tocar igual; no comparte la raíz de las otras tres.
 
 #### G · Poner la web al día — reflejos pendientes · minor · **web**
 El reflejo de `FUN-M-03` (Esporas) y `FUN-M-04` (metadatos YAML) más la **parte web de
@@ -900,7 +930,7 @@ así que quedan absorbidas por cualquier bloque de su tamaño o mayor.
 visor, ver la extensión dejó de ser un extra.)*
 
 > [!note] Lo que no entra en esta agrupación
-> **Defectos**: solo hay uno abierto, `DEF-042`, y está en el bloque A. Los otros 23
+> **Defectos**: hay dos abiertos, `DEF-042` (bloque A) y `DEF-044` (bloque F). Los otros 23
 > `DEF-*` están implementados; `DEF-039`, `DEF-040` y `DEF-041` esperan confirmación en la
 > app, que es verificación y no trabajo pendiente. Ver [[bugs-progreso]].
 > **`FUN-M-11`** aparece solo en el bloque G porque su parte desktop ya está hecha.
