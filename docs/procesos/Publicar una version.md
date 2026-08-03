@@ -7,10 +7,21 @@ preguntar, y acá está lo que hay que dejar preparado para que la respuesta exi
 Este documento está escrito para seguirlo **paso a paso, con las manos**. No hace falta
 haber leído la spec.
 
-> [!important] Hoy Mycelium NO se puede autoactualizar todavía
-> Falta lo único que no puede hacer un programa por vos: **crear el bucket y generar la
-> clave de firma**. Hasta entonces, Configuración → Vault → Actualizaciones muestra el
-> motivo y no consulta nada. La § 1 es exactamente lo que falta.
+> [!success] La § 1 ya está hecha, y la 1.4.0 ya está publicada (2026-08-03)
+> Bucket `mycelium-releases` creado y público, claves generadas, clave pública compilada en
+> la app y **comprobada con una firma real**. La `1.4.0` está en el bucket con sus dos
+> instaladores, sus firmas y los tres manifiestos.
+>
+> Base pública en uso: `https://pub-4a4b6d7b99be4917a2fe0074be9dfa40.r2.dev` — es la URL
+> `r2.dev`, **sin dominio propio**. Funciona; el compromiso está explicado en la § 1.1.
+>
+> Así que a partir de acá este documento se usa desde la **§ 2**: la puesta en marcha ya
+> no hace falta repetirla.
+
+> [!warning] Los usuarios anteriores a la 1.4.0 no se autoactualizan
+> La clave pública se compila en el binario, así que la primera versión que puede recibir
+> actualizaciones es la `1.4.0`. **Hay que instalarla a mano una vez**; a partir de ahí, ya
+> no.
 
 ---
 
@@ -258,10 +269,29 @@ Cuatro cosas que hay que hacer bien y son las que más se rompen:
 >   pub_date  = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
 >   platforms = @{ "windows-x86_64" = @{ signature = $firma.Trim(); url = "<BASE>/1.4.0/Mycelium_1.4.0_x64-setup.exe" } }
 > }
-> $m | ConvertTo-Json -Depth 5 | Out-File latest.json -Encoding utf8
+> $utf8 = New-Object System.Text.UTF8Encoding($false)   # $false = SIN BOM
+> [IO.File]::WriteAllText("$PWD\latest.json", ($m | ConvertTo-Json -Depth 5), $utf8)
 > ```
 > `ConvertTo-Json` escapa los saltos de línea y las comillas por vos, que es justo donde
 > se rompe cuando se hace a mano.
+
+> [!danger] Los JSON van en UTF-8 **sin BOM**
+> `Out-File -Encoding utf8` en PowerShell 5.1 **añade un BOM** al principio del archivo, y
+> `serde_json` —el parser de Rust que lee el manifiesto— **no lo salta**: falla con un
+> error de sintaxis que no menciona el BOM por ningún lado. Por eso arriba se usa
+> `UTF8Encoding($false)` y no `Out-File`.
+>
+> Para comprobarlo, el primer byte tiene que ser `7B` (que es `{`), no `EF`:
+>
+> ```powershell
+> "{0:X2}" -f ([IO.File]::ReadAllBytes("latest.json")[0])
+> ```
+
+> [!tip] Las notas son un resumen, **no la nota de release entera**
+> La nota de `docs/estado/` tiene secciones internas —"Dónde vive el código", "Cómo
+> comprobarlo en la app"— que no le sirven a quien solo quiere decidir si actualiza.
+> Escribí diez líneas orientadas a eso. Y no anuncies ahí el **modo avanzado**
+> (`FUN-M-16`): es una función deliberadamente oculta.
 
 El **mismo archivo** se sube a **dos** sitios:
 
