@@ -1,3 +1,13 @@
+> [!warning] Documento histórico — las ideas nuevas van a la bandeja
+> Estas son las notas originales del usuario, con los códigos `C-M-*`/`C-I-*`/`C-G-*` que
+> dieron origen al [[BACKLOG]]. Se conservan como registro: la columna **Orig.** del
+> backlog apunta acá.
+>
+> **No agregues ideas nuevas a este archivo.** Van a [[Bandeja de entrada]], que es donde
+> el usuario anota en crudo y desde donde se convierten en `FUN-*`. Lo que figura abajo
+> como "Pendientes" ya está consolidado en el backlog con su ID y su tamaño; ese es el
+> documento vivo.
+
 # Pendientes
 ## Cambios Menores
 
@@ -143,5 +153,6 @@ name: data
 
 ## Relacionadas
 
-- [[BACKLOG]] — estas ideas consolidadas con IDs, tamaños y secuenciado por versiones.
+- [[BACKLOG]] — estas ideas consolidadas con IDs, tamaños y agrupación en releases.
+- [[Bandeja de entrada]] — donde van las ideas **nuevas**, en crudo.
 - [[Mapa de documentacion]] — índice general.

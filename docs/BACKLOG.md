@@ -9,6 +9,9 @@ y **priorizar** qué implementar antes.
 > Este documento no reemplaza a `Roadmap general.md` (roadmap de HUs del producto);
 > es el backlog vivo de mejoras/ideas post‑1.0.
 
+> [!tip] Las ideas nuevas entran por [[Bandeja de entrada]]
+> Ahí el usuario las anota en crudo; acá llegan ya definidas, con ID, nombre y tamaño.
+
 ## Cómo leerlo
 
 - **ID**: `FUN-TIER-NN` — la letra es el **tamaño** (`S`/`M`/`L`/`XL`) y el número es

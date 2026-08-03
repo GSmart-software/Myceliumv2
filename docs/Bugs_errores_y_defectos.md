@@ -8,6 +8,11 @@
 > trazabilidad viven en [[bugs-progreso]]. Las **causas raíz** encontradas al resolverlos
 > van a [[Aprendizajes tecnicos]]. Acá no: acá va el problema.
 
+> [!tip] El usuario no escribe acá: escribe en la bandeja
+> Las entradas de este catálogo ya están **definidas** (con su `DEF-NNN` y el síntoma
+> redactado). Lo que el usuario anota en crudo va a [[Bandeja de entrada]], y de ahí se
+> convierte en una entrada de acá.
+
 # DEF-015
 Los títulos marcados con # se pueden colapsar en la vista de edición pero no en la de lectura. 
 

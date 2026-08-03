@@ -11,6 +11,7 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
 
 | Si querés… | Leé |
 |---|---|
+| **Anotar un defecto o una idea** | [[Bandeja de entrada]] — escribí ahí sin formato |
 | Entender qué es y cómo está construido | [[Arquitectura de Mycelium]] |
 | Saber en qué punto está todo hoy | [[Estado del proyecto]] |
 | Correr el proyecto | [[Levantar Mycelium en desarrollo]] |
@@ -73,6 +74,8 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
 - [[Ideas Mycelium]] — notas originales del usuario (fuente del backlog).
 - [[bugs-progreso]] — checklist y trazabilidad de los bugs `DEF-*`.
 - [[Bugs_errores_y_defectos]] — el reporte original de bugs.
+- [[Bandeja de entrada]] — donde el usuario anota en crudo lo que después se convierte en
+  un `DEF-*` o un `FUN-*`.
 
 ## Estado y releases
 
