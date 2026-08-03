@@ -6,7 +6,7 @@ Se muestra al pie del drawer de Configuración y sale de una constante compartid
 `frontend/lib/version.ts` → `APP_VERSION`.
 
 > [!info] Estado actual
-> **desktop `1.3.0`** ([[Version 1.3.0]]) · **web `1.0.0`** ([[Version 1.0.0]]).
+> **desktop `1.4.0`** ([[Version 1.4.0]]) · **web `1.0.0`** ([[Version 1.0.0]]).
 > Las líneas se separaron en el release 1.1.0 porque todo lo que entró es solo-desktop.
 
 Al subir de versión hay que tocar **todos** estos lugares:
@@ -17,10 +17,16 @@ Al subir de versión hay que tocar **todos** estos lugares:
 | `frontend/package.json` | Ambas |
 | `frontend/src-tauri/Cargo.toml` | Solo desktop |
 | `frontend/src-tauri/tauri.conf.json` | Solo desktop (define el nombre del instalador) |
+| `frontend/src-tauri/Cargo.lock` (entrada `name = "app"`) | Solo desktop |
 
 > [!warning] Mantenerlos sincronizados a mano
 > No hay automatización. Si `tauri.conf.json` queda atrás, el instalador sale con el
 > número viejo aunque la app muestre el nuevo.
+
+> [!important] Desde la [[Version 1.4.0]], el número también viaja al bucket
+> La versión de `tauri.conf.json` es la que el updater compara con la del manifiesto: si
+> queda atrás, la app se cree más vieja de lo que es y se ofrece a sí misma una
+> actualización que ya tiene instalada. Ver [[Publicar una version]].
 
 ## Criterio (SemVer, guía del proyecto)
 
@@ -53,6 +59,7 @@ Partiendo de `1.1.1`:
 | 4 correcciones | `1.1.2` — es un release, no cuatro |
 | 1 funcionalidad | `1.2.0` |
 | 3 funcionalidades | `1.2.0` — el minor no cuenta cuántas |
+| 2 funcionalidades | `1.2.0` — el caso real de la [[Version 1.4.0]]: `FUN-L-14` + `FUN-M-16` sumaron **un** minor |
 | 1 funcionalidad + 2 correcciones | `1.2.0` — gana lo más significativo; el patch se resetea |
 | 1 rearquitectura + lo que sea | `2.0.0` |
 
@@ -140,7 +147,9 @@ dos minor, porque no corrigen un texto: enseñan una capacidad nueva del vault. 
 
 ## Relacionadas
 
-- [[Version 1.3.0]] — el release más reciente (Esporas).
+- [[Version 1.4.0]] — el release más reciente (autoactualización), y el primer caso de
+  dos funcionalidades sumando un solo minor bajo la regla nueva.
+- [[Version 1.3.0]] — Esporas.
 - [[Version 1.2.0]] — metadatos YAML, y el caso testigo de
   "un `FUN-M` puede ser minor".
 - [[Version 1.1.5]] — el único que saltó varios patches de una; el síntoma que hizo

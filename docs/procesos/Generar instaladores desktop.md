@@ -8,12 +8,27 @@ Empaquetado de la versión de escritorio con Tauri. Hecho por primera vez para l
 > datos en Cloudflare, instalador con Inno Setup) y está **obsoleto**. Se conserva como
 > registro histórico.
 
+> [!important] Desde la [[Version 1.4.0]] esto ya no termina en `installers/`
+> Compilar es el **paso 2 de cinco**: ahora hay que firmar, subir a R2 y escribir dos
+> manifiestos para que la actualización llegue sola a quien ya tiene Mycelium instalado.
+> El proceso completo está en **[[Publicar una version]]**; acá queda solo el
+> empaquetado, que sigue siendo idéntico salvo por la firma.
+
 ## Antes de empezar
 
 - Rama `desktop-tauri`, árbol limpio.
-- Versión consolidada en los **tres** archivos (ver [[Versionado del sistema]]):
-  `frontend/package.json`, `src-tauri/Cargo.toml`, `src-tauri/tauri.conf.json`.
+- Versión consolidada en los **cuatro** archivos y el `Cargo.lock` (ver
+  [[Versionado del sistema]]): `frontend/lib/version.ts`, `frontend/package.json`,
+  `src-tauri/Cargo.toml`, `src-tauri/tauri.conf.json` y `src-tauri/Cargo.lock`.
 - Rust y Node instalados; `tsc` en verde.
+- **La clave de firma en el entorno** (desde la 1.4.0): `TAURI_SIGNING_PRIVATE_KEY` y
+  `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`. Ver [[Publicar una version]] § 1.
+
+> [!warning] Sin la clave, `tauri build` **falla**
+> `bundle.createUpdaterArtifacts` está en `true`: es lo que genera los `.sig` que la app
+> verifica al actualizar. Si las variables no están, la compilación se corta pidiéndolas.
+> Es a propósito — una versión sin firmar no puede instalarse como actualización, y es
+> mejor enterarse al compilar que al publicar.
 
 ## Comando
 
@@ -39,8 +54,16 @@ Windows genera **MSI** (WiX) y **NSIS**.
 ```
 frontend/src-tauri/target/release/bundle/
 ├── msi/Mycelium_<version>_x64_en-US.msi        (~9.6 MB en 1.0.0)
-└── nsis/Mycelium_<version>_x64-setup.exe       (~8.3 MB en 1.0.0)
+└── nsis/
+    ├── Mycelium_<version>_x64-setup.exe        (~8.3 MB en 1.0.0)
+    └── Mycelium_<version>_x64-setup.exe.sig    ← desde la 1.4.0: la firma
 ```
+
+> [!important] El canal de actualización es el **NSIS**, no el MSI
+> Los dos se siguen generando, pero el manifiesto del updater apunta al `-setup.exe`: el
+> NSIS instala en modo `currentUser`, así que actualizar **no dispara UAC**. El MSI
+> instala por máquina y pediría elevación en cada actualización. El MSI se sigue
+> publicando para la instalación inicial y el despliegue silencioso.
 
 También queda el ejecutable suelto en `target/release/app.exe`.
 
@@ -146,6 +169,7 @@ El siguiente build recompila todo desde cero (varios minutos).
 
 ## Relacionadas
 
+- [[Publicar una version]] — lo que sigue después de compilar, desde la [[Version 1.4.0]].
 - [[Version 1.0.0]] — el release que se empaquetó con este proceso.
 - [[Versionado del sistema]] — dónde vive la versión y cómo se sube.
 - [[Compilacion y entorno de desarrollo]] — los errores que aparecieron acá.

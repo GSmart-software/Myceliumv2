@@ -213,6 +213,7 @@ lista está en [[RAMAS]]; la receta, en [[Reflejar cambios de desktop a web]].
 
 ## Relacionadas
 
+- [[Version 1.4.0]] — el release siguiente: Mycelium empieza a actualizarse solo.
 - [[Version 1.2.0]] — el release anterior, cuyas propiedades usan las Esporas.
 - [[esporas-plantillas]] — la spec, con los 13 criterios de aceptación completos.
 - [[metadata-yaml]] — las propiedades que las Esporas rellenan y fusionan.

@@ -109,6 +109,16 @@ entre ramas):
   en web; usa el comando Rust `leer_archivo_texto` (`src-tauri/src/vault_fs.rs`) y
   una sección nueva en `frontend/components/settings/VaultSection.tsx` (archivo ya
   divergente de por sí).
+- **Autoactualización (FUN-L-14 + FUN-M-16, solo-desktop)**: nada de esto existe en web
+  y **no hay nada que reflejar** — la web se actualiza sola al recargar. Archivos
+  exclusivos: `src-tauri/src/actualizador.rs`, `frontend/lib/updater.ts`,
+  `frontend/stores/updaterStore.ts`, `frontend/components/workspace/UpdateDialog.tsx` y
+  `frontend/components/settings/UpdaterSection.tsx`, más el bloque `plugins.updater` de
+  `tauri.conf.json`. Toca además tres archivos compartidos: `SettingsDrawer.tsx` (los
+  siete clics en el número de versión y la sección nueva), `workspace/page.tsx` (monta el
+  diálogo y dispara la comprobación) y los dos editores, que registran su guardado
+  pendiente. `frontend/lib/guardadoPendiente.ts` **sí es genérico** y podría reflejarse
+  el día que web lo necesite, pero hoy no tiene quien lo llame allá.
 - **`.mycignore` (FUN-M-11)**: en desktop vive en `src-tauri/src/mycignore.rs` +
   los walkers de `archivos.rs` + el watcher, con editor en `VaultSection.tsx`. En
   **web** la funcionalidad es distinta por naturaleza (no hay carpeta en disco):

@@ -43,6 +43,8 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
 - [[Flujo de trabajo con subagentes]] — orquestador + un agente por rama.
 - [[Convenciones de commits]] — formato, alcance y reglas del remoto.
 - [[Generar instaladores desktop]] — empaquetado con Tauri.
+- [[Publicar una version]] — bucket, claves de firma y los cinco pasos de una
+  publicación, para que la actualización llegue sola (`FUN-L-14`).
 - [[Generar el framework de IA en un vault]] — instalar las instrucciones de IA.
 
 ## Funcionalidades (especificaciones)
@@ -58,7 +60,8 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
 - [[navegacion-por-pestana]] — scroll, historial por pestaña y previsualización (`DEF-039/040/041`).
 - [[metadata-yaml]] — frontmatter YAML como propiedades: ver, editar e indexar (`FUN-M-04`).
 - [[esporas-plantillas]] — plantillas de notas ("Esporas") con variables (`FUN-M-03`).
-- [[autoactualizacion]] — aviso diario de versión nueva y actualización con un clic (`FUN-L-14`).
+- [[autoactualizacion]] — aviso diario de versión nueva, actualización con un clic y
+  selección de versión en modo avanzado (`FUN-L-14` + `FUN-M-16`).
 
 ## Aprendizajes técnicos
 
@@ -81,7 +84,9 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
 ## Estado y releases
 
 - [[Estado del proyecto]] — situación actual, pendientes y deuda.
-- [[Version 1.3.0]] — release actual de desktop (Esporas), **sin confirmar en la app**.
+- [[Version 1.4.0]] — release actual de desktop (autoactualización), **sin confirmar y
+  sin probar de extremo a extremo**: falta crear el bucket y la clave de firma.
+- [[Version 1.3.0]] — Esporas, **sin confirmar en la app**.
 - [[Version 1.2.0]] — metadatos YAML, **confirmado en la app**.
 - [[Version 1.1.5]] — navegación por pestaña, **sin confirmar en la app**.
 - [[Version 1.1.1]] — rendimiento de la apertura del vault.
