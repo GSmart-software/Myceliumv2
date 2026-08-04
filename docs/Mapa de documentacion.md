@@ -62,6 +62,8 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
 - [[esporas-plantillas]] — plantillas de notas ("Esporas") con variables (`FUN-M-03`).
 - [[autoactualizacion]] — aviso diario de versión nueva, actualización con un clic y
   selección de versión en modo avanzado (`FUN-L-14` + `FUN-M-16`).
+- [[auditoria-y-relinkeado]] — adoptar un vault Markdown existente: convertir sus
+  referencias `[texto](otra.md)` en `[[wikilinks]]` (`FUN-M-17`).
 
 ## Aprendizajes técnicos
 

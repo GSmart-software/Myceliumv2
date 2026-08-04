@@ -64,6 +64,7 @@ y **priorizar** qué implementar antes.
 | `FUN-S-05` | `VAULT-EJEMPLO-DEFAULT` | Al crear un vault nuevo, generar un archivo de ejemplo por defecto | ambas | C-G-02 |
 | `FUN-S-08` | `NOTE-CSSCLASSES` | Aplicar a la nota las clases CSS que declare su propiedad `cssclasses`: hoy se parsea e indexa pero **no tiene comportamiento**. Continuación de `FUN-M-04` | ambas | — |
 | `FUN-S-09` | `CODE-RESALTADO-SINTAXIS` | Colorear los archivos de código al visualizarlos según su lenguaje (palabras reservadas, tipos, cadenas). **Depende de `FUN-L-11`**: sin visor de código no hay nada que colorear | ambas | — |
+| `FUN-S-10` | `ENLACES-AVISO-MARKDOWN` | Hook que avisa cuando se escribe un enlace Markdown hacia otra nota del vault (`[texto](otra.md)`), que Mycelium **no** cuenta como enlace. Prevención, para que el problema que arregla `FUN-M-17` no vuelva a crecer | ambas | — |
 
 ### 1.2 Intermedias — tamaño M
 
@@ -79,6 +80,7 @@ y **priorizar** qué implementar antes.
 | `FUN-M-14` | `VAULT-WATCH-REINDEX-DIRIGIDO` | El watcher emite `vault-cambios` **con las rutas afectadas** y `lib/vaultWatch.ts` las descarta: reindexa el vault entero ante cualquier cambio. Usar esas rutas para reindexar solo lo tocado. Continuación de `FUN-M-12` | desktop | — |
 | `FUN-M-15` | `LINKS-POR-ALIAS` | Resolver `[[enlaces]]` por la propiedad `aliases` de la nota destino: hoy se parsea e indexa pero **no tiene comportamiento**. Toca la resolución de wikilinks, el autocompletado y el grafo. Continuación de `FUN-M-04` | ambas | — |
 | `FUN-M-16` 🛠️ | `UPDATER-SELECCION-VERSION` | Elegir e instalar **cualquier versión publicada**, incluida una anterior, desde un modo avanzado oculto (siete clics en el número de versión). Deja la app fijada en esa versión. Herramienta de desarrollo, no para el usuario normal. **Implementado en desktop** (sin confirmar y **sin probar de extremo a extremo**: falta el bucket). Spec en `docs/features/autoactualizacion.md` § 4.3. Salió en [[Version 1.4.0]] | desktop | — |
+| `FUN-M-17` | `VAULT-RELINKEADO` | Auditar un vault adoptado desde un proyecto Markdown y convertir sus referencias `[texto](otra.md)` en `[[wikilinks]]`. Núcleo puro + script generado en el vault, con respaldo y deshacer. Es el **caso de entrada** de Mycelium sobre un proyecto existente. Spec en `docs/features/auditoria-y-relinkeado.md` | ambas | — |
 
 ### 1.3 Grandes — tamaño L
 
@@ -97,6 +99,7 @@ y **priorizar** qué implementar antes.
 | `FUN-L-13` | `UI-IDIOMAS` | La interfaz en varios idiomas (español, inglés, italiano) y preparada para agregar más. Hoy todos los textos están escritos en español dentro de los componentes | ambas | — |
 | `FUN-L-14` 🛠️ | `UPDATER-AUTOACTUALIZACION` | Mycelium comprueba una vez al día si hay versión nueva, muestra su changelog y ofrece instalarla con un clic. Nunca obliga ni bloquea. `tauri-plugin-updater` + instaladores firmados en Cloudflare R2. **Implementado y publicado** el 2026-08-03: bucket, claves y la 1.4.0 en R2, con la publicación verificada (manifiestos, firma y SHA-256 del instalador remoto). **Falta probar la otra mitad**: que una instalación detecte y aplique una versión posterior. Spec en `docs/features/autoactualizacion.md`. Salió en [[Version 1.4.0]] | desktop | — |
 | `FUN-L-16` | `VAULT-VENTANAS-MULTIPLES` | Tener **varios vaults abiertos a la vez**, cada uno en su propia ventana y sin límite de cuántos. Hoy abrir uno cierra el anterior. Continuación natural de `FUN-L-04`, y comparte raíz con `DEF-044` | ambas | — |
+| `FUN-L-17` | `VAULT-RELINKEADO-UI` | La auditoría y conversión de `FUN-M-17` como **pantalla de la app**, consumiendo el mismo núcleo. Sirve a quien nunca usa la IA y hoy no tiene ninguna salida. Continuación de `FUN-M-17` | ambas | — |
 | `FUN-L-15` 🛠️ | `RELEASE-SCRIPT-PUBLICACION` | Un `npm run publicar` que compruebe, compile, firme, suba a R2 con `wrangler`, escriba los tres manifiestos y **verifique lo publicado**, en vez de hacer esos cuatro pasos a mano. Tiene modo `--simulacro`. **Script local, no CI**: usar el workflow obligaría a alinear `origin` y a poner la clave de firma como secreto de GitHub. **Implementado en desktop** (sin confirmar); el proceso, en [[Publicar una version]] § 2 | desktop | — |
 
 ### 1.4 Muy grandes — tamaño XL
@@ -817,6 +820,21 @@ Las dos cambian **a qué apunta un `[[enlace]]`** y obligan a tocar la misma cap
 resolución de wikilinks, autocompletado y grafo. `FUN-M-08` reescribe los enlaces al
 renombrar; `FUN-M-15` los resuelve por `aliases`. Separadas, esa capa se toca dos veces.
 
+#### M · Adoptar un vault que ya existía — `DEF-045` + `FUN-M-17` + `FUN-S-10` · minor · ambas
+El **caso de entrada** de Mycelium: alguien abre su proyecto Markdown de siempre y no tiene
+ni una conexión en el grafo, porque sus referencias son `[texto](otra.md)`. Spec en
+[[auditoria-y-relinkeado]].
+
+Van juntas y **en este orden**, que no es negociable: `DEF-045` primero, porque la
+conversión genera alias y hoy un `[[destino|alias]]` dentro de una tabla o rompe la tabla o
+rompe el enlace en el grafo — sin arreglarlo, la herramienta deja un hueco justo donde la
+documentación suele concentrar más enlaces. Después `FUN-M-17`, que es la corrección. Y
+`FUN-S-10` al final: el hook que avisa al escribir un enlace Markdown nuevo es **prevención**,
+y solo tiene sentido una vez que el problema está corregido.
+
+`FUN-L-17` (la misma auditoría como pantalla de la app) **no entra acá**: consume el mismo
+núcleo pero es un entregable aparte, y sirve a un usuario distinto —el que nunca usa la IA—.
+
 #### D · Papelera — `FUN-S-04` + `FUN-M-01` · minor · ambas
 Mismo panel, misma sesión de trabajo: seleccionar varios para borrar y previsualizar
 antes de decidir. Las dos existen por el mismo motivo — decidir con información y sin
@@ -930,11 +948,11 @@ así que quedan absorbidas por cualquier bloque de su tamaño o mayor.
 visor, ver la extensión dejó de ser un extra.)*
 
 > [!note] Lo que no entra en esta agrupación
-> **Defectos**: hay tres abiertos. `DEF-042` va en el bloque A y `DEF-044` en el F, porque
-> comparten trabajo con las funcionalidades de esos bloques. **`DEF-045` va solo**: es un
-> arreglo pequeño y aislado (normalizar `\|` en los tres consumidores de texto crudo) que no
-> se emparenta con nada — y conviene hacerlo pronto, porque hoy limita cómo se pueden
-> escribir los enlaces dentro de tablas. Al arreglarlo hay que subir además
+> **Defectos**: hay tres abiertos, y los tres están en un bloque. `DEF-042` en el A y
+> `DEF-044` en el F, porque comparten trabajo con las funcionalidades de esos bloques.
+> **`DEF-045` pasó a encabezar el bloque M**: dejó de ser un arreglo suelto al aparecer
+> `FUN-M-17`, que lo necesita hecho antes — una conversión masiva genera alias, y hoy un
+> alias dentro de una tabla rompe la tabla o el grafo. Al arreglarlo hay que subir además
 > `FRAMEWORK_IA_VERSION`, para que las skills del vault documenten `\|`. Los otros 23
 > `DEF-*` están implementados; `DEF-039`, `DEF-040` y `DEF-041` esperan confirmación en la
 > app, que es verificación y no trabajo pendiente. Ver [[bugs-progreso]].
