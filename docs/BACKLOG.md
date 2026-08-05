@@ -962,7 +962,11 @@ así que quedan absorbidas por cualquier bloque de su tamaño o mayor.
 visor, ver la extensión dejó de ser un extra.)*
 
 > [!note] Lo que no entra en esta agrupación
-> **Defectos**: hay tres abiertos, y los tres están en un bloque. `DEF-042` en el A y
+> **Defectos**: hay seis abiertos. `DEF-046` (lo eliminado no se puede recuperar) es
+> **pérdida de datos y no espera a ningún bloque**: se arregla apenas se pueda. `DEF-047`
+> (menú contextual fuera de pantalla) y `DEF-048` (falta margen inferior) son visuales y
+> sueltos — dos correcciones pequeñas que caben en cualquier release. Los otros tres están
+> en un bloque. `DEF-042` en el A y
 > `DEF-044` en el F, porque comparten trabajo con las funcionalidades de esos bloques.
 > **`DEF-045` va solo**: llegó a encabezar el bloque M, pero salió al apoyarse `FUN-M-17` en
 > `aliases` — la conversión dejó de generar barras verticales, así que el defecto ya no

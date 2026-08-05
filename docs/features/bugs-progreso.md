@@ -35,8 +35,36 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-043 | El ícono de las Esporas es un brote de planta, no evoca una espora | ambas (frontend) | 🛠️ desktop, sin confirmar — `Sprout` → `CircleDot` |
 | DEF-044 | Al cambiar de vault siguen abiertas las pestañas del vault anterior | ambas (frontend) | ⬜ pendiente — bloque F de la agrupación |
 | DEF-045 | `[[destino\|alias]]` dentro de una tabla: o rompe la tabla, o rompe el grafo | ambas (frontend) | ⬜ pendiente — causa raíz ya identificada |
+| DEF-046 | Lo eliminado no aparece en la papelera, ni en la de Windows: no hay recuperación | desktop | ⬜ pendiente — **causa raíz confirmada**, y los archivos siguen en disco |
+| DEF-047 | El menú contextual se sale de la pantalla en los archivos de abajo | ambas (frontend) | ⬜ pendiente |
+| DEF-048 | Falta margen inferior en toda la app: el contenido queda pegado al borde | ambas (frontend) | ⬜ pendiente |
 
 ## Notas por bug
+
+- **DEF-046 — el indexador borra la papelera** (causa raíz confirmada el 2026-08-03 leyendo
+  el código y el disco). El ciclo completo:
+  1. `borrarNota` (`lib/db/papelera.ts`) hace lo correcto: mueve el archivo a
+     `.mycelium/.trash`, inserta la fila en `papelera` y **conserva** la fila de `notas`
+     "para poder recuperarla" (así lo dice su propio comentario).
+  2. Mover el archivo dispara el watcher (`vault-cambios`) → corre `indexarVault`.
+  3. La limpieza final de `indexarVault` (`lib/db/indexer.ts`) recorre las notas del índice
+     y, para toda la que ya no está en su ruta de disco, ejecuta
+     **`DELETE FROM papelera`** y `DELETE FROM notas`.
+  4. Una nota recién enviada a la papelera **ya no está en su ruta** —está en `.trash`, que
+     `.mycignore` ignora siempre—, así que entra en esa limpieza y su entrada de papelera
+     desaparece a los segundos.
+
+  > [!success] Los archivos NO se perdieron
+  > Solo se perdió el registro. Siguen físicamente en `<vault>/.mycelium/.trash/`. En este
+  > repo se comprobó: había 4 archivos ahí que no aparecían en la papelera de la app.
+
+  Las dos partes del defecto tienen causas **distintas**, y conviene no confundirlas:
+  - *No aparece en la papelera* → lo de arriba. La limpieza del indexador tiene que
+    **excluir las notas que están en la papelera**, no tratarlas como borradas.
+  - *Tampoco está en la papelera de Windows* → `borrar_definitivo` (`vault_fs.rs:195`) usa
+    `std::fs::remove_file`, que borra de verdad. Es una decisión de diseño no declarada, no
+    un fallo: si se quiere que vaya a la papelera del sistema hace falta un crate que la
+    use. Como red de seguridad **la papelera propia ya alcanza**, siempre que funcione.
 
 - **DEF-045 — causa raíz ya localizada** (2026-08-03, comprobada ejecutando el pipeline real):
   hay **cuatro** sitios que interpretan `[[destino|alias]]`, y no leen lo mismo.

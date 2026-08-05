@@ -139,6 +139,21 @@ Escaparla (`[[destino\|alias]]`) arregla la tabla pero **rompe el enlace en el g
 
 Detectado al construir enlaces entre documentos que se referenciaban sin `[[wikilinks]]`.
 
+# DEF-046
+Al eliminar un archivo, **no aparece en la papelera de Mycelium**. Y cuando se destruye, tampoco está en la papelera de Windows. No hay forma de recuperarlo por ningún camino.
+
+> [!danger] Esto es pérdida de datos, no un defecto de interfaz
+> Un archivo eliminado por error hoy no se puede recuperar. Es el defecto más grave
+> registrado hasta ahora.
+
+# DEF-047
+Al hacer clic derecho sobre un archivo que está muy abajo en el explorador, el menú de opciones se dibuja hacia abajo y **queda fuera de la pantalla**. Las opciones del final no se pueden ver ni pulsar.
+
+# DEF-048
+No hay ningún borde ni margen inferior en el sistema — es general de toda la pantalla, no de un componente concreto. Todo queda pegado al límite de la ventana y da la sensación de que el contenido sigue por detrás de la pantalla.
+
+Alcanzaría con unos pocos píxeles de separación abajo para que no se produzca ese efecto.
+
 
 ---
 
