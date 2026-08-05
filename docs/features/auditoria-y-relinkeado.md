@@ -1,19 +1,19 @@
 # Auditoría y re-enlazado de un vault (`FUN-M-17` · `VAULT-RELINKEADO`)
 
-Spec de la herramienta que convierte las referencias Markdown de un proyecto existente
-(`[texto](otra.md)`) en `[[wikilinks]]`, y del flujo de trabajo de la IA alrededor.
+Spec de cómo se adopta en Mycelium un vault que viene de un proyecto Markdown: **descubrir**
+cómo se referencian entre sí sus documentos y **convertir** esas referencias en
+`[[wikilinks]]`.
 
 > [!info] Esto arregla el **caso de entrada** de Mycelium
 > No es un caso raro: es lo que le pasa a cualquiera que adopte Mycelium sobre un proyecto
-> Markdown que ya tenía. Abre el vault, mira el grafo y no hay ni una conexión — aunque sus
+> que ya tenía. Abre el vault, mira el grafo y no hay ni una conexión — aunque sus
 > documentos se referencien entre sí desde siempre.
 
 ---
 
 ## 1. El caso real que lo motivó
 
-El usuario corrió `/vault-huerfanas` sobre un vault de **+200 documentos** migrado de un
-proyecto donde las referencias eran enlaces Markdown normales. Lo que pasó:
+El usuario corrió `/vault-huerfanas` sobre un vault de **+200 documentos**. Lo que pasó:
 
 1. El comando reportó **todo huérfano**. Es literalmente cierto y prácticamente inútil.
 2. Empezó una conversión que exigió leer y editar decenas de documentos.
@@ -24,252 +24,265 @@ proyecto donde las referencias eran enlaces Markdown normales. Lo que pasó:
 
 ### El diagnóstico, comprobado en el código
 
-**El framework no conoce los enlaces Markdown.** Ni un comando ni una skill mencionan
-`[texto](archivo.md)`. `/vault-huerfanas` busca huérfanas y `[[enlaces]]` rotos, nada más.
-Por eso no pudo dar el diagnóstico útil, que no era *"todo está huérfano"* sino:
+**El framework no conoce las referencias sin estructura.** Ni un comando ni una skill
+contemplan que un documento nombre a otro sin `[[corchetes]]`. `/vault-huerfanas` busca
+huérfanas y `[[enlaces]]` rotos, nada más. Por eso no pudo dar el diagnóstico útil, que no
+era *"todo está huérfano"* sino:
 
-> *«Hay 340 referencias entre tus notas escritas en formato Markdown. Mycelium no las
-> cuenta como enlaces. No te falta estructura: te falta traducir la sintaxis.»*
+> *«Tus documentos se referencian entre sí desde siempre, pero con una notación que Mycelium
+> no reconoce. No te falta estructura: te falta traducir cómo la nombrás.»*
 
 **Y no le da ninguna herramienta.** Los únicos comandos que ofrece el framework son `grep`
 de a uno, en una skill que `/vault-huerfanas` ni siquiera manda leer. La IA improvisó un
-script porque no había ninguno.
+script porque no había ninguno — y su instinto era correcto.
 
 **Su paso 3 es cuadrático por construcción**: *"para cada huérfana, proponé desde qué nota
 convendría enlazarla"*. Con 200 huérfanas eso no se puede hacer, y menos como primer paso.
 
-**Y cierra bloqueando la única salida**: *"NO apliques cambios automáticamente"*. Sin
-matices, para un trabajo cuya inmensa mayoría es determinista y reversible.
+**Y cierra bloqueando la única salida**: *"NO apliques cambios automáticamente"*, sin
+matices y sin ofrecer un camino intermedio.
+
+### Cómo son las referencias de verdad
+
+Casi ninguna tiene forma de enlace. Son el nombre suelto en la prosa, o algo entre backticks:
+
+```markdown
+Ver `HU-009` para el detalle del login. Depende de `RF-012`.
+El despliegue se describe en Guia de despliegue.
+```
+
+Esto **descarta que un script las detecte**: las formas varían sin límite (`HU-009`,
+`HU009`, `HU 009`, "la historia 009") y cada patrón que se agregue traerá falsos positivos.
+Decidir qué es una referencia es juicio.
+
+---
+
+## 2. La separación que gobierna todo el diseño
+
+> [!danger] La auditoría no modifica documentos. Nunca.
+> Son dos operaciones con perfiles de riesgo opuestos. Mezclarlas haría que alguien corra un
+> diagnóstico y se encuentre el corpus reescrito.
+
+| | **Auditoría** | **Enlazado** |
+|---|---|---|
+| Qué hace | Diagnostica y **descubre** formas de referencia | **Aplica** el léxico al corpus |
+| ¿Escribe en documentos? | **No** | Sí |
+| Qué escribe | solo el léxico | documentos · `aliases` · respaldo · manifiesto |
+| Cuándo se corre | a menudo | rara vez |
+| Reversibilidad | no le hace falta | respaldo y `--deshacer`, obligatorios |
+
+Consecuencia concreta: **escribir `aliases` en el frontmatter pertenece al enlazado**, no a
+la auditoría, porque es modificar un documento.
+
+---
+
+## 3. El léxico: la memoria de cómo se nombran las cosas
+
+`.claude/enlaces-lexico.json` registra **cómo se nombró históricamente cada documento**.
+
+```json
+{
+  "version": 1,
+  "destinos": {
+    "HU/HU-009 Gestion de usuarios.md": {
+      "titulo": "HU-009 Gestion de usuarios",
+      "formas": ["HU-009", "HU009", "HU 009"]
+    }
+  },
+  "descartadas": [
+    { "forma": "Estado", "motivo": "palabra común, no es una referencia" }
+  ]
+}
+```
+
+Tres propiedades que lo hacen funcionar:
+
+**El costo se paga por forma, no por documento ni por aparición.** Descubrir que `HU-009` es
+una referencia cubre sus 47 apariciones en 12 documentos, y sirve para los documentos que se
+agreguen después. No hay que re-descubrirlo en cada archivo.
+
+**Guarda también lo descartado.** Que «Estado» *no* sea una referencia es una decisión que
+costó juicio, y sin registrarla se volvería a plantear en cada pasada.
+
+**Decrece con el tiempo.** La segunda auditoría es barata porque casi todo ya está
+registrado. Encaja con la premisa del proyecto —el vault es la memoria— aplicada a la
+nomenclatura del propio corpus.
+
+> [!important] El léxico es además el mecanismo de seguridad
+> **Solo se toca lo que está en él.** Un backtick con un identificador de código que nadie
+> declaró como forma queda intacto. Por eso los backticks pueden dejar de ser zona prohibida
+> sin volverse peligrosos: el filtro no es sintáctico, es el léxico.
+
+### Dos sitios, una sola dirección de escritura
+
+| Dónde | Quién escribe | Para qué |
+|---|---|---|
+| `.claude/enlaces-lexico.json` | la **IA**, en la auditoría | memoria durable; es lo que lee el script |
+| `aliases:` en el frontmatter del destino | el **script**, en el enlazado | cara visible: se ve y se corrige en la pestaña PROPIEDADES, viaja con la nota, y alimenta `FUN-M-15` |
+
+---
+
+## 4. El reparto: qué es juicio y qué es mecánico
+
+| Trabajo | Quién | Por qué |
+|---|---|---|
+| Decidir qué cadena es una referencia | **IA** | Varía sin límite |
+| Saber qué notas existen | script | Es un hecho, no una opinión |
+| Proponer formas candidatas | script | Conteo y patrones sobre texto |
+| Encontrar dónde aparece una cadena conocida | script | Es `grep`; el modelo lo hace peor y más caro |
+| Aplicar una decisión a sus N apariciones | script | Mecánico, y es donde se cometen los errores a mano |
+| Verificar que no quedaron enlaces rotos | script | Comprobable y exhaustivo |
 
 > [!important] La lección de fondo
-> El error no fue de la IA: fue **pedirle a un modelo que hiciera trabajo mecánico a
-> escala**. Convertir `[texto](x.md)` en `[[X|texto]]` no requiere juicio — la referencia ya
-> existe y solo cambia de sintaxis. Todo el diseño sale de separar eso de lo que sí requiere
-> criterio.
+> El error no fue de la IA: fue **pedirle a un modelo trabajo mecánico a escala**. Y la
+> corrección tampoco es "que el script adivine mejor" — es invertir la dirección: **la IA
+> descubre las formas, el script las aplica.**
 
 ---
 
-## 2. El principio: separar lo mecánico del juicio
+## 5. Los dos comandos
 
-| | Lo hace | Por qué |
-|---|---|---|
-| Encontrar las referencias Markdown | **Código** | Escaneo de texto con reglas fijas |
-| Resolver a qué nota apunta cada una | **Código** | La ruta del `.md` ya dice exactamente cuál es |
-| Reescribir las que son inequívocas | **Código** | Transformación mecánica y verificable |
-| Decidir los casos ambiguos | **IA** | Dos notas con el mismo título: hace falta leer y entender |
-| Los destinos que no existen | **IA** | ¿Typo? ¿nota que hay que crear? ¿referencia externa? |
-| Enlazar menciones en prosa | **IA** | Que un documento nombre a otro no significa que deba enlazarlo |
-| Construir mapas y estructura | **IA** | Es el trabajo que de verdad aporta criterio |
+### `/vault-huerfanas` — la auditoría *(se amplía, no se duplica)*
 
-El código deja a la IA **una lista corta de excepciones** en vez de 200 documentos. Ese es
-el ahorro de consumo, y de paso la mejora de calidad: el modelo dedica su atención a lo que
-solo él puede resolver.
+Ya es el comando de salud del grafo. Gana un **paso 0**: antes de declarar nada huérfano,
+detectar referencias sin estructura, porque ese suele ser el diagnóstico real. Registra lo
+descubierto en el léxico y **no toca un solo documento**.
 
----
+Hay que corregirle además dos cosas que ya tiene: eliminar el paso cuadrático, y matizar el
+*"NO apliques cambios automáticamente"* — que hoy bloquea sin ofrecer alternativa.
 
-## 3. Arquitectura: un núcleo puro, tres consumidores
+### `/vault-referencias` — el enlazado *(nuevo)*
 
-```
-        frontend/lib/enlaces.ts          ← el núcleo, PURO y sin imports
-    (detectar · resolver · clasificar · reescribir)
-                     │
-      ┌──────────────┼──────────────────────┐
-      │              │                      │
-  script del      la app                 servidor MCP
-    vault      (auditoría con UI)         (FUN-L-09)
-   ── HOY ──      ── después ──            ── después ──
-```
+Lee el léxico y genera los enlaces. Modifica, con respaldo y deshacer.
 
-**Por qué el núcleo va aparte y puro** (sin un solo `import`, como `lib/frontmatter.ts` y
-`lib/db/nombres.ts`):
+> [!note] Por qué un comando nuevo y no un parámetro
+> **Por el riesgo, no por comodidad.** Un comando que a veces solo mira y a veces reescribe
+> 200 archivos es peligroso: la separación tiene que estar en el nombre, no en un parámetro
+> que se puede olvidar. Se suman la cadencia (auditar es rutina, enlazar es excepcional) y
+> la reversibilidad (uno no necesita respaldo, el otro no puede correr sin él).
+>
+> **Sobre el nombre**: `/vault-enlazar` sería lo natural, pero ya existe `/vault-vincular` y
+> se confundirían. Son cosas distintas: `/vault-vincular` es **semántico y de a una nota**
+> (decide dónde *convendría* enlazar); este es **mecánico y de todo el vault** (aplica formas
+> ya decididas).
 
-- Es **testeable headless** con el patrón que ya existe: `scripts/test-frontmatter.mjs`
-  transpila el `.ts` con `ts.transpileModule` y lo importa por `data:` URL. Solo funciona si
-  el módulo es puro. Y esto necesita tests de verdad: es un transformador de texto con
-  decenas de casos borde sobre los documentos del usuario.
-- Los tres consumidores comparten **exactamente** las mismas reglas. Si la lógica se
-  duplicara, divergirían — que es precisamente lo que le pasó a los cuatro parsers de
-  wikilink del repo y lo que causó `DEF-045`.
-
-**Por qué el script va generado en el vault** y no en el repo: el usuario que sufre esto no
-es un desarrollador de Mycelium, es alguien que abrió su carpeta con Mycelium. Y **Node está
-garantizado**: el framework asume que la IA corre en la terminal integrada
-(`framework.ts:185`) y Claude Code se distribuye por npm.
-
-> [!note] La app cubre a quien nunca usa la IA
-> Ese usuario tiene el mismo problema y ninguna solución. Queda registrado como continuación
-> (`FUN-L-17`), consumiendo este mismo núcleo: comando Rust + pantalla de auditoría.
+No hace falta un tercero: descubrir es parte de auditar, y aplicar es todo lo que hace el
+segundo.
 
 ---
 
-## 4. Qué detecta y qué no toca
-
-### Se convierte
-
-Un enlace Markdown **cuyo destino es una nota del vault**:
+## 6. El flujo
 
 ```
-[la guía de despliegue](procesos/Desplegar.md)   →   [[Desplegar|la guía de despliegue]]
-[BACKLOG](../BACKLOG.md)                         →   [[BACKLOG]]
-[mapa](Mapa%20de%20documentacion.md)             →   [[Mapa de documentacion|mapa]]
+AUDITORÍA  (no modifica documentos)          ENLAZADO  (modifica)
+──────────────────────────────────           ─────────────────────
+script: inventario + candidatas
+   │
+   ▼
+IA: decide qué es referencia  ──▶  léxico  ──▶  script: reemplaza
+   ▲                              (memoria)         + escribe aliases
+   │                                   │            + respaldo
+   └── informe de lo no cubierto ◀─────┴───────────────────┘
 ```
 
-- **El texto visible nunca cambia.** Si el texto ya es igual al título, se omite el alias
-  (`[[BACKLOG]]` es más limpio que `[[BACKLOG|BACKLOG]]`).
-- Los destinos vienen **URL-encoded** muy a menudo (`%20` por los espacios): hay que
-  decodificarlos antes de resolver. Es el fallo más probable si se pasa por alto.
+| Fase | Comando | Quién | Coste |
+|---|---|---|---|
+| **0 · Inventario** — notas, títulos, rutas | huérfanas | script | segundos |
+| **1 · Candidatas** — cadenas repetidas entre backticks, patrones `XX-000`, títulos mencionados | huérfanas | script | segundos |
+| **2 · Descubrimiento** — decidir cuáles son referencias; escribir el léxico | huérfanas | **IA** | la parte cara, **una vez por forma** |
+| **3 · Aplicación** — reemplazo, `aliases`, respaldo, manifiesto | referencias | script | segundos |
+| **4 · Cobertura** — qué quedó sin cubrir | referencias | script | segundos |
 
-### No se toca, y se dice por qué
+Se itera: lo no cubierto vuelve a la auditoría, que extiende el léxico. Converge, y cada
+vuelta es más barata que la anterior.
 
-| Caso | Qué se hace |
-|---|---|
-| Enlaces externos (`http`, `https`, `mailto`) | Se ignoran, no se cuentan |
-| Anclas puras (`[x](#seccion)`) | Se ignoran: son internas al documento |
-| Imágenes (`![alt](img.png)`) | Se ignoran |
-| Destinos que no son notas (`.png`, `.pdf`, `.zip`) | Se ignoran: un `[[archivo.pdf]]` no es lo mismo |
-| Wikilinks y embeds ya presentes | Se ignoran |
-| **Con ancla** (`[x](otra.md#seccion)`) | **NO se convierte** — se reporta |
-| Dentro de una tabla y necesitaría alias | **NO se convierte** — se reporta (ver § 8) |
+> [!tip] Dónde entran los subagentes
+> En la **fase 2**, y solo si el corpus es grande: hay que leer de verdad para descubrir las
+> formas, y eso se reparte. Cada subagente recibe el inventario de la fase 0 y un
+> subconjunto de documentos, y devuelve formas candidatas; el orquestador consolida el
+> léxico. **Lo que se reparte es *leer*, no *editar*** — editar sigue siendo del script.
 
-> [!warning] El ancla se reporta, no se convierte
-> Los cuatro parsers de wikilink del repo **no manejan `[[nota#sección]]`**: el `#` queda
-> dentro del destino y el enlace no resuelve. Convertirlo perdería la sección en silencio, y
-> perder información sin avisar es peor que no convertir.
+---
+
+## 7. Reglas de reescritura
+
+```
+`HU-009`                     →  [[HU-009]]
+HU-009                       →  [[HU-009]]
+[HU-009](HU/HU-009 Ges…md)   →  [[HU-009]]
+```
+
+**Los backticks se quitan.** Un `[[enlace]]` entre backticks no funciona: se ve literal.
+Nunca fueron código — eran referencias.
+
+**Todas las apariciones**, no solo la primera: la regla queda uniforme y re-ejecutable. El
+grafo es idéntico en cualquier caso, porque `grafo.ts` deduplica las aristas; lo que cambia
+es solo cómo se lee el documento.
+
+**Los enlaces Markdown** `[texto](otra.md)` siguen cubiertos, pero como **un caso más** del
+mismo mecanismo — no como el caso central. Sus destinos que no son notas (`.png`, `.pdf`),
+los externos (`http`) y las anclas puras quedan intactos.
+
+**Coincidencia**: límites de palabra (que `HU-009` no coincida dentro de `HU-0091`), sin
+distinguir mayúsculas pero **preservando el texto original**, y **forma más larga primero**.
 
 ### Zonas prohibidas
 
-El escaneo tiene que **saber dónde no mirar**, y hoy ningún módulo del repo resuelve esto:
+| Zona | Por qué |
+|---|---|
+| Frontmatter | Es metadato; el enlazado solo toca `aliases`, y a propósito |
+| Bloques cercados (```` ``` ````, `~~~`) | Es código de verdad |
+| Wikilinks y embeds ya presentes | Idempotencia |
+| URLs | Un `HU-009` dentro de una URL no es una referencia |
 
-- **Frontmatter YAML** — se salta con `cuerpoDe()` de `lib/frontmatter.ts`.
-- **Bloques de código** cercados con ``` o `~~~`, incluidos los indentados dentro de listas.
-- **Código inline** entre backticks. *Este es el que más importa*: la documentación de un
-  proyecto está llena de `` `[texto](ruta.md)` `` como ejemplo — convertirlos corrompería
-  los ejemplos.
-- **Wikilinks y embeds** existentes.
-
-Se resuelve como ya hace `lib/markdown.ts`: se recogen los rangos prohibidos en una pasada,
-y los reemplazos que caen dentro se descartan (`if (m.start < cursor) continue`).
+**Los backticks ya no son zona prohibida** — son la fuente principal. Lo que los vuelve
+seguros es el léxico (§ 3).
 
 ---
 
-## 5. Cómo se resuelve el destino
+## 8. Seguridad y reversibilidad *(solo el enlazado)*
 
-Un enlace Markdown apunta por **ruta relativa al archivo que lo contiene** — distinto de un
-wikilink, que resuelve por título. El orden:
+**Hoy no hay undo de contenido en Mycelium**: `putContenido` sobrescribe y el único historial
+es el de CodeMirror, en memoria. Así que antes de escribir nada:
 
-1. Decodificar el porcentaje (`%20` → espacio) y separar ancla y query.
-2. Resolver la ruta contra la carpeta de la nota origen; normalizar `.` y `..`.
-3. Buscar esa ruta en el índice: **`notas.id` ES la ruta relativa POSIX**, así que es una
-   búsqueda exacta.
-
-| Nivel | Qué pasó | Acción |
-|---|---|---|
-| **Exacto** | La ruta resuelta es una nota del vault | **Se aplica** |
-| **Por título** | La ruta no existe, pero hay una nota con ese nombre (archivo movido, mayúsculas distintas) | Se reporta |
-| **Ambiguo** | Varias notas coinciden por título | Se reporta |
-| **Roto** | No hay nada que coincida | Se reporta como enlace roto |
-
-Solo el nivel **exacto** se aplica solo, y va a ser la enorme mayoría: la ruta del `.md` ya
-identifica el archivo sin lugar a duda.
-
-Para los niveles 2 y 3 el núcleo reutiliza **`resolveWikilink`** de `lib/editor/wikilink.ts`
-— que ya sabe de pistas de carpeta, extensiones y desempate por profundidad. Hay que romper
-antes su dependencia con `@/stores/vaultStore`, que solo usa `wikilinkCompletions`.
+1. **Respaldo** de cada archivo en `.mycelium/relink-<timestamp>/` con `copiar_archivo`.
+   `.mycelium/` está siempre fuera del índice y del `.mycignore`: las copias son invisibles.
+2. **Manifiesto** con archivo, número de reemplazos y hash SHA-256 antes y después.
+3. **`--deshacer <timestamp>`**. El hash "después" permite detectar si el usuario ya editó
+   ese archivo, y en ese caso **avisar en vez de pisarlo**.
+4. **`--simulacro`**, como en `publicar.mjs` y `versionar.mjs`.
 
 ---
 
-## 6. Seguridad y reversibilidad
+## 9. Dependencia: `FUN-M-15` habilita la versión buena
 
-Aplicar sin preguntar solo es aceptable si deshacer es trivial. **Hoy no hay undo de
-contenido en Mycelium**: `putContenido` sobrescribe y el único historial es el de CodeMirror,
-en memoria.
+`aliases` **ya existe**: `FUN-M-04` la parsea y la indexa, y `FUN-M-15` es la funcionalidad
+pendiente que la hace **resolver**. El léxico no inventa ninguna estructura nueva.
 
-Antes de escribir nada:
+Con `aliases` funcional, la reescritura es `HU-009` → `[[HU-009]]`, **sin alias**: texto casi
+idéntico al original y mucho menos invasivo que `[[HU-009 Gestion de usuarios|HU-009]]`.
 
-1. **Copia de seguridad** de cada archivo a modificar en `.mycelium/relink-<timestamp>/`,
-   con `copiar_archivo`. `.mycelium/` está siempre fuera del índice y del `.mycignore`, así
-   que las copias son invisibles para la app y el grafo.
-2. **Manifiesto** `manifiesto.json` con: archivo, número de reemplazos, y hash SHA-256 antes
-   y después.
-3. Escritura con **`putContenido`** (escribe el archivo atómicamente y reindexa FTS y
-   propiedades de una vez) o `escribir_nota` desde el script.
-4. **`--deshacer <timestamp>`** restaura desde el manifiesto. El hash "después" permite
-   detectar si el usuario ya editó ese archivo, y en ese caso no pisarlo sin avisar.
+Y como no lleva barra vertical, **`DEF-045` deja de bloquear** — el defecto de los alias
+dentro de tablas no se toca. Sigue valiendo la pena arreglarlo, pero por su cuenta.
 
-Y `--simulacro` como en `publicar.mjs` y `versionar.mjs`: es el patrón establecido del repo.
+> [!warning] Sin `FUN-M-15`, esto se puede hacer igual — peor
+> Habría que escribir `[[HU-009 Gestion de usuarios|HU-009]]` en cada aparición: más ruido
+> en el texto, y `DEF-045` vuelve a bloquear dentro de tablas. Hacer `FUN-M-15` primero es
+> lo que hace que el resultado sea limpio.
 
 ---
 
-## 7. El flujo completo
+## 10. Qué cambia en el framework de IA
 
-### Fase 1 — Diagnóstico · **script** · segundos, ~0 tokens
-
-```sh
-node .claude/scripts/vault-enlaces.mjs --auditar
-```
-
-```
-340 referencias Markdown en 187 de 214 notas
-
-  318  resuelven exacto        → se convierten solas
-   14  ambiguas                → decide la IA
-    6  destino inexistente     → decide la IA
-    2  con ancla (#seccion)    → decide la IA
-
-Ninguna nota tiene [[wikilinks]] todavía.
-Esto NO es un problema de estructura: es de sintaxis.
-```
-
-### Fase 2 — Conversión · **script**
-
-```sh
-node .claude/scripts/vault-enlaces.mjs --aplicar
-```
-
-Respaldo, conversión de las 318, manifiesto. **El grafo pasa de 0 a ~318 aristas.**
-
-### Fase 3 — Excepciones · **IA** · ~2k tokens
-
-La IA lee el informe de 22 casos, abre solo las notas implicadas y decide. Aquí sí aporta:
-distinguir dos notas homónimas o reconocer un typo requiere entender el contenido.
-
-### Fase 4 — Estructura · **IA**
-
-Recién ahora `/vault-huerfanas` da un diagnóstico real, sobre un grafo que existe: qué quedó
-de verdad aislado, qué área necesita un mapa, dónde falta un `[[enlace]]` conceptual que
-nunca fue un enlace Markdown.
-
----
-
-## 8. Dependencia: `DEF-045` bloquea la cobertura completa
-
-Una conversión masiva **produce alias**, y `DEF-045` dice que un `[[destino|alias]]` dentro
-de una tabla o rompe la tabla, o —si se escapa con `\|`— rompe el enlace en el grafo.
-
-Mientras no esté arreglado:
-
-- Dentro de una tabla, si el texto visible **es igual** al título → se convierte a
-  `[[Titulo]]`. Sin barra, sin problema.
-- Si necesitaría alias → **no se convierte**, y se reporta agrupado como *"esperan a
-  `DEF-045`"*.
-
-Arreglar `DEF-045` primero es lo sensato: es pequeño (normalizar `\|` en los tres
-consumidores de texto crudo) y sin él esta herramienta deja un hueco visible justo en las
-tablas, que es donde más enlaces suele haber en documentación.
-
----
-
-## 9. Qué cambia en el framework de IA
-
-Sube `FRAMEWORK_IA_VERSION` a **`1.5.0`** (capacidad nueva que la IA debe conocer).
+Sube `FRAMEWORK_IA_VERSION` a **`1.5.0`**.
 
 | Pieza | Cambio |
 |---|---|
-| **`/vault-huerfanas`** | **Paso 0 nuevo**: antes de declarar nada huérfano, comprobar si hay referencias Markdown. Si las hay, ese *es* el diagnóstico y hay que remitir a la herramienta. Se elimina el paso cuadrático: agrupar por área en vez de una propuesta por huérfana. Y el "NO apliques cambios automáticamente" pasa a matizarse: lo determinista y reversible sí se aplica. |
-| **`/vault-enlaces`** (nuevo) | El flujo de las cuatro fases, para el vault que se adopta desde Markdown |
-| **`/vault-vincular`** | Nota de escala: con muchas notas, primero la herramienta; este comando es para el trabajo semántico de a una |
-| **skill `mycelium-vault`** | Documentar los enlaces Markdown como algo que Mycelium **no** cuenta; la herramienta; y `\|` en tablas cuando `DEF-045` esté |
-| **`CLAUDE.md` generado** | Que existen scripts en `.claude/scripts/` y que **hay que usarlos en vez de improvisar uno** |
+| `/vault-huerfanas` | Paso 0 nuevo; descubrimiento y escritura del léxico; **queda explícito que no modifica documentos**; se elimina el paso cuadrático; se matiza el "NO apliques cambios" |
+| `/vault-referencias` | Nuevo: aplica el léxico, con respaldo y deshacer |
+| `/vault-vincular` | Nota de escala: con muchas notas, primero la auditoría; este comando es para el trabajo semántico de a una |
+| skill `mycelium-vault` | Las referencias sin estructura como algo que Mycelium **no** cuenta; el léxico; `aliases` |
+| `CLAUDE.md` generado | Que existen herramientas en `.claude/` y **hay que usarlas en vez de improvisar una** |
 
 > [!important] La instrucción que faltaba
 > «Antes de hacer trabajo repetitivo sobre muchas notas, mirá si hay una herramienta. Si no
@@ -279,72 +292,96 @@ Sube `FRAMEWORK_IA_VERSION` a **`1.5.0`** (capacidad nueva que la IA debe conoce
 
 ---
 
-## 10. El consumo
+## 11. El consumo
 
-| | Leyendo con el modelo | Con la herramienta |
+| | Sin herramienta | Con este diseño |
 |---|---|---|
-| Diagnóstico | 200 notas × ~2.000 tokens = **~400.000** | ~0 (lo hace el script) |
-| Conversión | releer + reescribir cada nota | ~0 (lo hace el script) |
-| Excepciones | — | informe de 22 casos ≈ **~2.000** |
+| Descubrir | leer 200 notas y decidir en cada una | leer para descubrir **formas**: se paga una vez por forma |
+| Aplicar | editar N archivos a mano | segundos, y sin errores de transcripción |
+| Segunda pasada | todo otra vez | casi gratis: el léxico ya lo sabe |
 
-Dos órdenes de magnitud, y **es el mismo trabajo hecho mejor**: el script no se cansa en la
-nota 150 ni se salta un bloque de código.
-
----
-
-## 11. Lo que NO entra, y por qué
-
-- **Menciones en prosa** — que un documento nombre a otro no significa que deba enlazarlo.
-  Eso es criterio, y es el trabajo de `/vault-vincular`.
-- **Un hook que avise al escribir un enlace Markdown nuevo.** Tiene valor real —evita que el
-  problema vuelva a crecer— pero es *prevención*, no la corrección que hace falta ahora. Se
-  registra como `FUN-S-10`.
-- **Subagentes.** Con este diseño las excepciones son pocas y caben en el contexto principal.
-  Un subagente serviría si fueran cientos; el objetivo del diseño es que no lo sean. Decirlo
-  explícito para que nadie lo agregue por costumbre.
-- **La pantalla de la app** — `FUN-L-17`.
+Lo que baja el costo no es que el modelo lea menos —en la primera pasada tiene que leer—,
+sino que **cada cosa que aprende se registra y no se vuelve a aprender**, y que **no edita**.
 
 ---
 
-## 12. Criterios de aceptación
+## 12. Lo que NO entra
 
-1. Sobre un vault sin ningún wikilink pero con enlaces Markdown, `--auditar` reporta el
-   número correcto y **no modifica nada**.
-2. Un `[texto](otra.md)` se convierte en `[[Otra|texto]]`; si el texto es igual al título,
-   en `[[Otra]]`.
-3. Los destinos con `%20` resuelven.
-4. Las rutas relativas con `../` resuelven contra la carpeta de la nota origen.
-5. **Nada dentro de un bloque de código, de código inline o del frontmatter se modifica.**
-6. Los enlaces externos, las imágenes y los destinos que no son notas quedan intactos.
-7. Los enlaces con ancla no se convierten y aparecen en el informe.
-8. Dentro de una tabla no se genera ningún alias mientras `DEF-045` siga abierto.
-9. `--simulacro` produce el mismo informe sin escribir.
-10. `--deshacer` devuelve todos los archivos a su contenido exacto (mismo hash).
-11. Si un archivo cambió después de la conversión, `--deshacer` avisa y no lo pisa.
-12. Tras `--aplicar`, el grafo del vault muestra las conexiones nuevas.
-13. Un archivo con CRLF conserva sus finales de línea.
-14. Volver a correr `--aplicar` no cambia nada (idempotente).
+- **Que el script adivine referencias.** Es lo que se descartó: las formas varían sin límite.
+- **Menciones que requieren interpretación** ("el documento anterior", "ver arriba"). Si la
+  IA las detecta, van al informe, no al léxico.
+- **Un hook que avise al escribir una referencia sin enlazar.** Es prevención, no corrección
+  — `FUN-S-10`.
+- **La pantalla de la app** — `FUN-L-17`, para quien nunca usa la IA.
 
-## 13. Verificación
+---
+
+## 13. Criterios de aceptación
+
+### De la auditoría — el más importante primero
+
+1. **Correr la auditoría completa no cambia ni un byte de ningún documento.** Es la garantía
+   que sostiene toda la separación.
+2. Sobre un vault sin wikilinks, el informe dice cuántas referencias sin estructura hay y de
+   qué formas, en vez de limitarse a "todo huérfano".
+3. El léxico queda escrito con las formas descubiertas y las descartadas.
+4. Volver a correrla **no vuelve a proponer** lo ya descartado.
+
+### Del enlazado
+
+5. `` `HU-009` `` pasa a `[[HU-009]]`, sin backticks.
+6. `HU-009` en prosa pasa a `[[HU-009]]`; `HU-0091` **no se toca** (límites de palabra).
+7. Una forma que no está en el léxico **no se toca**, esté entre backticks o no.
+8. Nada dentro de un bloque de código cercado, del frontmatter o de una URL se modifica.
+9. La nota destino queda con su `aliases` poblado, visible en la pestaña PROPIEDADES.
+10. `--simulacro` produce el mismo informe sin escribir.
+11. `--deshacer` devuelve todos los archivos a su hash exacto.
+12. Si un archivo cambió después de la conversión, `--deshacer` **avisa y no lo pisa**.
+13. Volver a aplicar no cambia nada (idempotente).
+14. Un archivo con CRLF conserva sus finales de línea.
+15. Tras aplicar, el grafo muestra las conexiones nuevas.
+
+---
+
+## 14. Verificación
 
 - `cd frontend && npx tsc --noEmit -p tsconfig.json`
-- `node scripts/test-enlaces.mjs` — **la pieza central**: el núcleo es puro, así que cada
-  caso borde de arriba es un test barato. Al estilo de `test-frontmatter.mjs`.
-- Prueba real sobre una **copia** de un vault grande, comparando el grafo antes y después.
+- `node scripts/test-enlaces.mjs` — **la pieza central**. El núcleo (`lib/enlaces.ts`) va
+  **puro y sin imports**, como `lib/frontmatter.ts` y `lib/db/nombres.ts`, para poder
+  testearlo headless con el patrón de `test-frontmatter.mjs`. Un test por caso borde.
+- **La prueba que importa**: correr la auditoría sobre el vault real y comprobar con `git
+  status` (o hashes) que **no cambió nada**.
+- Después, el enlazado **sobre una copia** del vault de +200 documentos: comparar el grafo
+  antes y después y revisar a mano una muestra.
 
-## 14. Documentación a actualizar
+> [!note] El criterio de éxito no es "0 sin cubrir"
+> Es que **lo no cubierto esté listado** y que nada se haya convertido mal. Un residuo
+> visible es un resultado correcto; una conversión equivocada y silenciosa, no.
 
-- [[BACKLOG]] — `FUN-M-17`, más `FUN-L-17` (app) y `FUN-S-10` (hook) como continuaciones.
+## 15. Qué reutiliza
+
+| Pieza | Para qué |
+|---|---|
+| `lib/frontmatter.ts` (`cuerpoDe`, `ponerPropiedad`) | Saltar el frontmatter; escribir `aliases` |
+| `lib/editor/wikilink.ts` (`resolveWikilink`) | Resolver rutas y desambiguar. Hay que romper antes su dependencia con `@/stores/vaultStore` |
+| `lib/db/contenido.ts` (`putContenido`) | Escribir el archivo y reindexar en un solo llamado |
+| `copiar_archivo` (Rust) | El respaldo en `.mycelium/` |
+| `frontend/scripts/publicar.mjs` | El molde: Node puro, `--simulacro`, salida legible |
+
+## 16. Documentación a actualizar
+
+- [[BACKLOG]] — `FUN-M-17`, el bloque **M** (con `FUN-M-15` encabezándolo), más `FUN-L-17` y
+  `FUN-S-10` como continuaciones.
 - [[ia-framework-vault]] — historial del framework hasta `1.5.0`.
 - [[Versionado del sistema]] — el salto de `FRAMEWORK_IA_VERSION`.
 - [[Aprendizajes tecnicos]] — la lección de fondo: no darle trabajo mecánico a escala a un
-  modelo; darle una herramienta y las excepciones.
-- Nota de release cuando salga.
+  modelo, y que la corrección no es que el script adivine mejor sino invertir la dirección.
 
 ## Relacionadas
 
-- [[Bugs_errores_y_defectos]] — `DEF-045`, que bloquea la cobertura en tablas.
-- [[ia-framework-vault]] — el framework que gana el comando y la herramienta.
-- [[Mycelium como memoria de la IA]] — el objetivo de fondo: que el vault sea navegable.
-- [[esporas-plantillas]] · [[metadata-yaml]] — las otras dos piezas con núcleo puro y tests.
+- [[BACKLOG]] — `FUN-M-15` (el prerrequisito) y el bloque M.
+- [[metadata-yaml]] — `FUN-M-04`, que ya parsea e indexa `aliases`.
+- [[Bugs_errores_y_defectos]] — `DEF-045`, que este diseño esquiva.
+- [[ia-framework-vault]] — el framework que gana el comando y las herramientas.
+- [[Mycelium como memoria de la IA]] — el objetivo de fondo.
 - [[Mapa de documentacion]] — índice general.

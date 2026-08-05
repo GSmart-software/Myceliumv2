@@ -62,8 +62,8 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
 - [[esporas-plantillas]] — plantillas de notas ("Esporas") con variables (`FUN-M-03`).
 - [[autoactualizacion]] — aviso diario de versión nueva, actualización con un clic y
   selección de versión en modo avanzado (`FUN-L-14` + `FUN-M-16`).
-- [[auditoria-y-relinkeado]] — adoptar un vault Markdown existente: convertir sus
-  referencias `[texto](otra.md)` en `[[wikilinks]]` (`FUN-M-17`).
+- [[auditoria-y-relinkeado]] — adoptar un vault que viene de otro proyecto: descubrir cómo
+  se referencian sus documentos y convertir esas referencias en `[[wikilinks]]` (`FUN-M-17`).
 
 ## Aprendizajes técnicos
 
@@ -87,8 +87,8 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
 
 - [[Estado del proyecto]] — situación actual, pendientes y deuda.
 - [[Version 1.5.0]] — release actual de desktop (ancho de tabulación), **sin confirmar en la app**.
-- [[Version 1.4.0]] — autoactualización y selección de versión.
-  sin probar de extremo a extremo**: falta crear el bucket y la clave de firma.
+- [[Version 1.4.0]] — autoactualización y selección de versión; **publicada en R2**, pendiente
+  de comprobar que una instalación detecte y aplique una versión posterior.
 - [[Version 1.3.0]] — Esporas, **sin confirmar en la app**.
 - [[Version 1.2.0]] — metadatos YAML, **confirmado en la app**.
 - [[Version 1.1.5]] — navegación por pestaña, **sin confirmar en la app**.

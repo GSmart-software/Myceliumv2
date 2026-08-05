@@ -64,7 +64,7 @@ y **priorizar** qué implementar antes.
 | `FUN-S-05` | `VAULT-EJEMPLO-DEFAULT` | Al crear un vault nuevo, generar un archivo de ejemplo por defecto | ambas | C-G-02 |
 | `FUN-S-08` | `NOTE-CSSCLASSES` | Aplicar a la nota las clases CSS que declare su propiedad `cssclasses`: hoy se parsea e indexa pero **no tiene comportamiento**. Continuación de `FUN-M-04` | ambas | — |
 | `FUN-S-09` | `CODE-RESALTADO-SINTAXIS` | Colorear los archivos de código al visualizarlos según su lenguaje (palabras reservadas, tipos, cadenas). **Depende de `FUN-L-11`**: sin visor de código no hay nada que colorear | ambas | — |
-| `FUN-S-10` | `ENLACES-AVISO-MARKDOWN` | Hook que avisa cuando se escribe un enlace Markdown hacia otra nota del vault (`[texto](otra.md)`), que Mycelium **no** cuenta como enlace. Prevención, para que el problema que arregla `FUN-M-17` no vuelva a crecer | ambas | — |
+| `FUN-S-10` | `ENLACES-AVISO-REFERENCIA` | Hook que avisa cuando se escribe una referencia a otra nota que Mycelium **no** cuenta como enlace (un `[texto](otra.md)`, o una forma ya registrada en el léxico escrita sin corchetes). Prevención, para que el problema que arregla `FUN-M-17` no vuelva a crecer | ambas | — |
 
 ### 1.2 Intermedias — tamaño M
 
@@ -80,7 +80,7 @@ y **priorizar** qué implementar antes.
 | `FUN-M-14` | `VAULT-WATCH-REINDEX-DIRIGIDO` | El watcher emite `vault-cambios` **con las rutas afectadas** y `lib/vaultWatch.ts` las descarta: reindexa el vault entero ante cualquier cambio. Usar esas rutas para reindexar solo lo tocado. Continuación de `FUN-M-12` | desktop | — |
 | `FUN-M-15` | `LINKS-POR-ALIAS` | Resolver `[[enlaces]]` por la propiedad `aliases` de la nota destino: hoy se parsea e indexa pero **no tiene comportamiento**. Toca la resolución de wikilinks, el autocompletado y el grafo. Continuación de `FUN-M-04` | ambas | — |
 | `FUN-M-16` 🛠️ | `UPDATER-SELECCION-VERSION` | Elegir e instalar **cualquier versión publicada**, incluida una anterior, desde un modo avanzado oculto (siete clics en el número de versión). Deja la app fijada en esa versión. Herramienta de desarrollo, no para el usuario normal. **Implementado en desktop** (sin confirmar y **sin probar de extremo a extremo**: falta el bucket). Spec en `docs/features/autoactualizacion.md` § 4.3. Salió en [[Version 1.4.0]] | desktop | — |
-| `FUN-M-17` | `VAULT-RELINKEADO` | Auditar un vault adoptado desde un proyecto Markdown y convertir sus referencias `[texto](otra.md)` en `[[wikilinks]]`. Núcleo puro + script generado en el vault, con respaldo y deshacer. Es el **caso de entrada** de Mycelium sobre un proyecto existente. Spec en `docs/features/auditoria-y-relinkeado.md` | ambas | — |
+| `FUN-M-17` | `VAULT-RELINKEADO` | Adoptar un vault que viene de otro proyecto: **la IA descubre** cómo se referencian sus documentos (`` `HU-009` ``, el nombre suelto, `[texto](otra.md)`) y lo registra en un léxico persistente; **el script aplica** esas formas y las convierte en `[[wikilinks]]`. La auditoría **no modifica documentos**; el enlazado sí, con respaldo y deshacer. Es el **caso de entrada** de Mycelium sobre un proyecto existente. Spec en `docs/features/auditoria-y-relinkeado.md` | ambas | — |
 
 ### 1.3 Grandes — tamaño L
 
@@ -365,6 +365,10 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 - **Por qué es M y no S**: no alcanza con el parser — toca la **resolución** de wikilinks
   (`lib/editor/wikilink.ts`), el autocompletado de `[[`, el feedback de "archivo
   inexistente" y la construcción del grafo (`lib/db/grafo.ts` resuelve por título).
+- **Habilita `FUN-M-17`**, y por eso encabeza el bloque M: con `aliases` resolviendo, el
+  re-enlazado escribe `[[HU-009]]` a secas en vez de `[[HU-009 Gestion de usuarios|HU-009]]`
+  — texto casi idéntico al original y, al no llevar barra vertical, sin chocar con
+  `DEF-045`. Ver [[auditoria-y-relinkeado]] § 9.
 - **A definir**: qué gana si un alias colisiona con el título real de otra nota, y si el
   autocompletado ofrece el alias o el título.
 
@@ -820,17 +824,27 @@ Las dos cambian **a qué apunta un `[[enlace]]`** y obligan a tocar la misma cap
 resolución de wikilinks, autocompletado y grafo. `FUN-M-08` reescribe los enlaces al
 renombrar; `FUN-M-15` los resuelve por `aliases`. Separadas, esa capa se toca dos veces.
 
-#### M · Adoptar un vault que ya existía — `DEF-045` + `FUN-M-17` + `FUN-S-10` · minor · ambas
-El **caso de entrada** de Mycelium: alguien abre su proyecto Markdown de siempre y no tiene
-ni una conexión en el grafo, porque sus referencias son `[texto](otra.md)`. Spec en
-[[auditoria-y-relinkeado]].
+#### M · Adoptar un vault que ya existía — `FUN-M-15` + `FUN-M-17` + `FUN-S-10` · minor · ambas
+El **caso de entrada** de Mycelium: alguien abre su proyecto de siempre y no tiene ni una
+conexión en el grafo, aunque sus documentos se referencien entre sí desde hace años — con
+una notación que Mycelium no reconoce (`` `HU-009` ``, o el nombre suelto en la prosa).
+Spec en [[auditoria-y-relinkeado]].
 
-Van juntas y **en este orden**, que no es negociable: `DEF-045` primero, porque la
-conversión genera alias y hoy un `[[destino|alias]]` dentro de una tabla o rompe la tabla o
-rompe el enlace en el grafo — sin arreglarlo, la herramienta deja un hueco justo donde la
-documentación suele concentrar más enlaces. Después `FUN-M-17`, que es la corrección. Y
-`FUN-S-10` al final: el hook que avisa al escribir un enlace Markdown nuevo es **prevención**,
-y solo tiene sentido una vez que el problema está corregido.
+Van **en este orden**:
+
+`FUN-M-15` primero, y no es un capricho: con `aliases` funcionando, la conversión escribe
+`[[HU-009]]` a secas en vez de `[[HU-009 Gestion de usuarios|HU-009]]`. El texto queda casi
+idéntico al original, y **sin barra vertical `DEF-045` deja de estorbar**. Sin `FUN-M-15` se
+puede hacer igual, pero el resultado es más ruidoso y vuelve a chocar con las tablas.
+
+`FUN-M-17` después: es la corrección. Y `FUN-S-10` al final — el hook que avisa al escribir
+una referencia sin enlazar es **prevención**, y solo tiene sentido una vez corregido lo que
+ya está.
+
+> [!note] `DEF-045` salió de este bloque
+> Encabezaba la lista cuando el diseño producía alias en cada conversión. Al apoyarse en
+> `aliases`, la conversión deja de generar barras verticales y el defecto ya no bloquea.
+> Sigue abierto y vale la pena arreglarlo, pero por su cuenta.
 
 `FUN-L-17` (la misma auditoría como pantalla de la app) **no entra acá**: consume el mismo
 núcleo pero es un entregable aparte, y sirve a un usuario distinto —el que nunca usa la IA—.
@@ -950,10 +964,10 @@ visor, ver la extensión dejó de ser un extra.)*
 > [!note] Lo que no entra en esta agrupación
 > **Defectos**: hay tres abiertos, y los tres están en un bloque. `DEF-042` en el A y
 > `DEF-044` en el F, porque comparten trabajo con las funcionalidades de esos bloques.
-> **`DEF-045` pasó a encabezar el bloque M**: dejó de ser un arreglo suelto al aparecer
-> `FUN-M-17`, que lo necesita hecho antes — una conversión masiva genera alias, y hoy un
-> alias dentro de una tabla rompe la tabla o el grafo. Al arreglarlo hay que subir además
-> `FRAMEWORK_IA_VERSION`, para que las skills del vault documenten `\|`. Los otros 23
+> **`DEF-045` va solo**: llegó a encabezar el bloque M, pero salió al apoyarse `FUN-M-17` en
+> `aliases` — la conversión dejó de generar barras verticales, así que el defecto ya no
+> bloquea nada. Sigue abierto y vale arreglarlo por su cuenta; al hacerlo hay que subir
+> además `FRAMEWORK_IA_VERSION`, para que las skills documenten `\|`. Los otros 23
 > `DEF-*` están implementados; `DEF-039`, `DEF-040` y `DEF-041` esperan confirmación en la
 > app, que es verificación y no trabajo pendiente. Ver [[bugs-progreso]].
 > **`FUN-M-11`** aparece solo en el bloque G porque su parte desktop ya está hecha.
