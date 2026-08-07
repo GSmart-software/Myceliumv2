@@ -99,6 +99,7 @@ y **priorizar** qué implementar antes.
 | `FUN-L-13` | `UI-IDIOMAS` | La interfaz en varios idiomas (español, inglés, italiano) y preparada para agregar más. Hoy todos los textos están escritos en español dentro de los componentes | ambas | — |
 | `FUN-L-14` 🛠️ | `UPDATER-AUTOACTUALIZACION` | Mycelium comprueba una vez al día si hay versión nueva, muestra su changelog y ofrece instalarla con un clic. Nunca obliga ni bloquea. `tauri-plugin-updater` + instaladores firmados en Cloudflare R2. **Implementado y publicado** el 2026-08-03: bucket, claves y la 1.4.0 en R2, con la publicación verificada (manifiestos, firma y SHA-256 del instalador remoto). **Falta probar la otra mitad**: que una instalación detecte y aplique una versión posterior. Spec en `docs/features/autoactualizacion.md`. Salió en [[Version 1.4.0]] | desktop | — |
 | `FUN-L-16` | `VAULT-VENTANAS-MULTIPLES` | Tener **varios vaults abiertos a la vez**, cada uno en su propia ventana y sin límite de cuántos. Hoy abrir uno cierra el anterior. Continuación natural de `FUN-L-04`, y comparte raíz con `DEF-044` | ambas | — |
+| `FUN-L-18` | `FILES-CANVAS` | Tipo de archivo **canvas** (`.canvas`, formato JSON Canvas de Obsidian): lienzo infinito con texto suelto, tarjetas de markdown y tarjetas que **son** notas del vault, unidas por flechas. Los `[[enlaces]]` de las tarjetas funcionan y cuentan en el grafo; las flechas son solo disposición visual. Spec en `docs/features/canvas.md` | ambas | — |
 | `FUN-L-17` | `VAULT-RELINKEADO-UI` | La auditoría y conversión de `FUN-M-17` como **pantalla de la app**, consumiendo el mismo núcleo. Sirve a quien nunca usa la IA y hoy no tiene ninguna salida. Continuación de `FUN-M-17` | ambas | — |
 | `FUN-L-15` 🛠️ | `RELEASE-SCRIPT-PUBLICACION` | Un `npm run publicar` que compruebe, compile, firme, suba a R2 con `wrangler`, escriba los tres manifiestos y **verifique lo publicado**, en vez de hacer esos cuatro pasos a mano. Tiene modo `--simulacro`. **Script local, no CI**: usar el workflow obligaría a alinear `origin` y a poner la clave de firma como secreto de GitHub. **Implementado en desktop** (sin confirmar); el proceso, en [[Publicar una version]] § 2 | desktop | — |
 
@@ -666,6 +667,25 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 > generar de paso las versiones de Linux y macOS que el workflow sabe construir y que hoy
 > nadie compila. Ninguna de las dos cosas es un problema hoy: solo se distribuye Windows y
 > la compilación local ya es la que se viene usando.
+
+#### `FUN-L-18` · `FILES-CANVAS` (—)
+- **Qué es**: un tipo de archivo nuevo, el **canvas** (`.canvas`), para disponer notas y
+  textos en un lienzo infinito y conectarlos con flechas. Tres elementos: texto suelto,
+  tarjetas de markdown y tarjetas que **son** una nota del vault (contenido en vivo).
+- **Objetivo**: pensar con las notas puestas en el espacio, y que los `[[enlaces]]` que se
+  escriban ahí **funcionen** — naveguen, autocompleten y cuenten en el grafo.
+- **De dónde sale**: de preguntar si se podían poner referencias en un Excalidraw. Se puede,
+  pero por efecto colateral (el grafo escanea el contenido de todo archivo sin mirar el
+  tipo); no es clicable y nadie lo diseñó. El canvas es la respuesta hecha a propósito.
+- **No reemplaza a Excalidraw**: aquel manipula trazos, este manipula contenido.
+- **Decidido** (usuario, 2026-08-03): formato **JSON Canvas** de Obsidian, por
+  interoperabilidad — mismo criterio que `FUN-M-04`. Tarjetas de texto **y** de nota. Las
+  **flechas NO cuentan** como conexión del grafo: una arista se crea de una sola manera, con
+  un `[[enlace]]`.
+- **A definir**: si se usa una librería de nodos y aristas (React Flow es la candidata) o se
+  construye a mano — lo primero lo mantiene en `L`, lo segundo lo lleva a `XL` sin aportar
+  nada distintivo. Y confirmar si una tarjeta de nota cuenta como arista (ver la spec § 5).
+- Spec completa en [[canvas]].
 
 ### Pendientes — tamaño XL
 

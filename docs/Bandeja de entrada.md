@@ -62,6 +62,7 @@ lo digo.
 | 2026-08-03 | Que Mycelium avise de versiones nuevas y se actualice solo, sin obligar | `FUN-L-14` + `FUN-L-15` · bloque **L** · spec en [[autoactualizacion]] |
 | 2026-08-03 | Al cambiar de vault siguen abiertas las pestañas del anterior | `DEF-044` · bloque **F** |
 | 2026-08-03 | Varios vaults abiertos a la vez, cada uno en su ventana | `FUN-L-16` `VAULT-VENTANAS-MULTIPLES` · bloque **F** |
+| 2026-08-03 | ¿Se pueden poner referencias en un Excalidraw? → mejor un canvas como el de Obsidian | `FUN-L-18` `FILES-CANVAS` · spec en [[canvas]] |
 
 > [!note] Esta tabla se puede vaciar cuando moleste
 > Es una comodidad para que veas en qué terminó cada cosa, no un registro canónico. La

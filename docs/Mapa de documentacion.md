@@ -64,6 +64,8 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
   selección de versión en modo avanzado (`FUN-L-14` + `FUN-M-16`).
 - [[auditoria-y-relinkeado]] — adoptar un vault que viene de otro proyecto: descubrir cómo
   se referencian sus documentos y convertir esas referencias en `[[wikilinks]]` (`FUN-M-17`).
+- [[canvas]] — notas y textos en un lienzo infinito, con `[[enlaces]]` que funcionan
+  (`FUN-L-18`).
 
 ## Aprendizajes técnicos
 
