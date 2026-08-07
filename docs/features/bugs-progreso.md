@@ -38,7 +38,7 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-046 | Lo eliminado no aparece en la papelera, ni en la de Windows: no hay recuperación | desktop | 🛠️ corregido, sin confirmar — la limpieza del indexador ya no borra lo que está en la papelera |
 | DEF-047 | El menú contextual se sale de la pantalla en los archivos de abajo | ambas (frontend) | ⬜ pendiente |
 | DEF-048 | Falta margen inferior en toda la app: el contenido queda pegado al borde | ambas (frontend) | ⬜ pendiente |
-| DEF-049 | El ancho de tabulación no cambia nada en los documentos ya escritos | ambas (frontend) | ⬜ pendiente — **hueco de diseño de `FUN-S-02`**, no un fallo de código |
+| DEF-049 | El ancho de tabulación no cambia nada en los documentos ya escritos | ambas (frontend) | 🛠️ corregido, sin confirmar — la sangría al leer es CSS y cambia todo al instante |
 | DEF-050 | Al cambiar la tabulación desaparecen los indicadores de plegado en lectura | ambas (frontend) | ⬜ pendiente — regresión de `FUN-S-02` |
 
 ## Notas por bug
@@ -57,11 +57,25 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
   documentos — sobre todo las listas anidadas—, y eso es otra cosa: se controla por CSS
   (el `padding-left` de las listas y el ancho de la sangría en el editor), no por `tabSize`.
 
-  > [!warning] No arreglarlo tocando solo el código
-  > La corrección honesta empieza por revisar [[Version 1.5.0]] y la entrada de `FUN-S-02`:
-  > hay que decidir **qué significa** "ancho de tabulación" en un editor de markdown antes
-  > de volver a implementarlo. Si se arregla solo el síntoma, se vuelve a entregar algo que
-  > técnicamente cumple y en la práctica no.
+  **Corregido el 2026-08-03** rehaciendo la funcionalidad, no parcheándola. Lo que se
+  decidió: el ajuste manda sobre **tres** cosas y cada una llega hasta donde puede.
+  - **Al leer** (lectura y dividido): la sangría de las listas y los tabuladores salen de
+    una variable CSS `--mic-tab-width`. Cambiar el ajuste reacomoda **todos** los documentos
+    al instante, sin editarlos. Esto es lo que faltaba.
+  - **Al escribir**: lo que inserta Tab, como antes.
+  - El valor pasa a **escribirse libre** (1–16, por defecto 4).
+
+  > [!important] El defecto 4 deja la app exactamente como se veía
+  > El `padding-left` de las listas está calibrado (`0.375rem` por unidad) para que 4 dé los
+  > mismos `1.5rem` de siempre. Un cambio de presentación global no debe reacomodarle los
+  > documentos a nadie que no lo haya pedido.
+
+  > [!note] Lo que sigue sin poder hacer, y por qué
+  > En la **vista en vivo** la sangría ya escrita con espacios no se reescala: dos espacios
+  > ocupan dos espacios, y no hay forma de renderizarlos como ocho sin cambiar el texto. Eso
+  > es `FUN-M-18` (reindentar), que al ser una edición masiva reutiliza el respaldo y el
+  > deshacer de [[auditoria-y-relinkeado]] en vez de inventar los suyos. La opción lo dice
+  > en su propio texto, para no volver a prometer lo que no cumple.
 
 - **DEF-050 — regresión de `FUN-S-02`, sin causa raíz confirmada.** Lo que se descartó
   leyendo el código: `attachHeadingFolds` (`lib/editor/headingFold.ts`) **es idempotente**

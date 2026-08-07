@@ -58,7 +58,7 @@ y **priorizar** qué implementar antes.
 | ID | Nombre | Descripción | Aplica | Orig. |
 |---|---|---|---|---|
 | `FUN-S-01` | `EDITOR-CHECKBOX-ESTILOS` | Estilos de checkbox según el símbolo: `x`=X, `-`=tachado, `*`=estrella, `+`=check | ambas | C-M-06 |
-| `FUN-S-02` 🟡 | `EDITOR-TAB-WIDTH` | Configurar cuánto espacio ocupa una tabulación. Salió en [[Version 1.5.0]] **con dos defectos y un ajuste pendiente**: no cambia nada en los documentos ya escritos (`DEF-049`), rompe los indicadores de plegado en lectura (`DEF-050`), y el valor tiene que poder **escribirse libremente** en vez de elegirse entre 2/4/8, con **4 por defecto** | ambas | C-M-10 |
+| `FUN-S-02` 🛠️ | `EDITOR-TAB-WIDTH` | Cuánto sangra un nivel de indentación: **al leer** cambia listas y tabuladores de todos los documentos al instante (CSS), **al escribir** es lo que inserta <kbd>Tab</kbd>. Valor libre 1–16, por defecto 4. Rehecha tras `DEF-049`; queda `DEF-050` abierto y `FUN-M-18` (reindentar) como continuación | ambas | C-M-10 |
 | `FUN-S-03` | `EXPLORER-EXTENSIONES` | Mostrar la extensión de los archivos no‑markdown para poder identificarlos | ambas | C-M-12 |
 | `FUN-S-04` | `TRASH-MULTISELECT` | Seleccionar varios archivos para borrar en la papelera | ambas | C-M-14 |
 | `FUN-S-05` | `VAULT-EJEMPLO-DEFAULT` | Al crear un vault nuevo, generar un archivo de ejemplo por defecto | ambas | C-G-02 |
@@ -80,6 +80,7 @@ y **priorizar** qué implementar antes.
 | `FUN-M-14` | `VAULT-WATCH-REINDEX-DIRIGIDO` | El watcher emite `vault-cambios` **con las rutas afectadas** y `lib/vaultWatch.ts` las descarta: reindexa el vault entero ante cualquier cambio. Usar esas rutas para reindexar solo lo tocado. Continuación de `FUN-M-12` | desktop | — |
 | `FUN-M-15` | `LINKS-POR-ALIAS` | Resolver `[[enlaces]]` por la propiedad `aliases` de la nota destino: hoy se parsea e indexa pero **no tiene comportamiento**. Toca la resolución de wikilinks, el autocompletado y el grafo. Continuación de `FUN-M-04` | ambas | — |
 | `FUN-M-16` 🛠️ | `UPDATER-SELECCION-VERSION` | Elegir e instalar **cualquier versión publicada**, incluida una anterior, desde un modo avanzado oculto (siete clics en el número de versión). Deja la app fijada en esa versión. Herramienta de desarrollo, no para el usuario normal. **Implementado en desktop** (sin confirmar y **sin probar de extremo a extremo**: falta el bucket). Spec en `docs/features/autoactualizacion.md` § 4.3. Salió en [[Version 1.4.0]] | desktop | — |
+| `FUN-M-18` | `EDITOR-REINDENTAR` | Reindentar las notas al ancho de tabulación configurado, para que el cambio se vea también en la vista en vivo y no solo al leer. Es una **edición masiva del vault**: reutiliza el respaldo, el manifiesto y el deshacer de `FUN-M-17`. Continuación de `FUN-S-02` | ambas | — |
 | `FUN-M-17` | `VAULT-RELINKEADO` | Adoptar un vault que viene de otro proyecto: **la IA descubre** cómo se referencian sus documentos (`` `HU-009` ``, el nombre suelto, `[texto](otra.md)`) y lo registra en un léxico persistente; **el script aplica** esas formas y las convierte en `[[wikilinks]]`. La auditoría **no modifica documentos**; el enlazado sí, con respaldo y deshacer. Es el **caso de entrada** de Mycelium sobre un proyecto existente. Spec en `docs/features/auditoria-y-relinkeado.md` | ambas | — |
 
 ### 1.3 Grandes — tamaño L
