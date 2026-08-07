@@ -154,6 +154,12 @@ No hay ningún borde ni margen inferior en el sistema — es general de toda la 
 
 Alcanzaría con unos pocos píxeles de separación abajo para que no se produzca ese efecto.
 
+# DEF-049
+Cambiar el ancho de tabulación **no se nota en los documentos que ya existen**. Para que el cambio se vea hay que reindentar cada documento a mano, lo que deja la opción sin utilidad práctica.
+
+# DEF-050
+Al cambiar el ancho de tabulación, en la vista de lectura **desaparecen los indicadores para plegar y desplegar los títulos**.
+
 
 ---
 

@@ -58,7 +58,7 @@ y **priorizar** qué implementar antes.
 | ID | Nombre | Descripción | Aplica | Orig. |
 |---|---|---|---|---|
 | `FUN-S-01` | `EDITOR-CHECKBOX-ESTILOS` | Estilos de checkbox según el símbolo: `x`=X, `-`=tachado, `*`=estrella, `+`=check | ambas | C-M-06 |
-| `FUN-S-02` 🛠️ | `EDITOR-TAB-WIDTH` | Configurar cuánto espacio ocupa una tabulación: 2, 4 u 8, aplicado a la vez a lo que inserta <kbd>Tab</kbd> y a cómo se ve un tabulador del archivo. **Implementado en desktop** (sin confirmar). Salió en [[Version 1.5.0]] | ambas | C-M-10 |
+| `FUN-S-02` 🟡 | `EDITOR-TAB-WIDTH` | Configurar cuánto espacio ocupa una tabulación. Salió en [[Version 1.5.0]] **con dos defectos y un ajuste pendiente**: no cambia nada en los documentos ya escritos (`DEF-049`), rompe los indicadores de plegado en lectura (`DEF-050`), y el valor tiene que poder **escribirse libremente** en vez de elegirse entre 2/4/8, con **4 por defecto** | ambas | C-M-10 |
 | `FUN-S-03` | `EXPLORER-EXTENSIONES` | Mostrar la extensión de los archivos no‑markdown para poder identificarlos | ambas | C-M-12 |
 | `FUN-S-04` | `TRASH-MULTISELECT` | Seleccionar varios archivos para borrar en la papelera | ambas | C-M-14 |
 | `FUN-S-05` | `VAULT-EJEMPLO-DEFAULT` | Al crear un vault nuevo, generar un archivo de ejemplo por defecto | ambas | C-G-02 |
@@ -192,8 +192,21 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   editor (p. ej. 2 / 4 / 8 espacios).
 - **Objetivo**: adaptar la indentación al gusto del usuario y a la coherencia con otras
   herramientas; impacta sobre todo en listas anidadas y bloques de código.
-- **A definir**: valores admitidos; si inserta espacios o tab real; si es global o por
-  vault.
+- **Salió en [[Version 1.5.0]] y quedó 🟡**: dos defectos abiertos y un ajuste pedido.
+  - `DEF-049` — **no cambia nada en los documentos ya escritos**, que es lo que se
+    esperaba. La causa no es un fallo de código: `tabSize` solo reescala **tabuladores
+    literales** y el markdown se indenta con espacios, mientras que `indentUnit` solo
+    afecta a lo que se escriba de ahí en adelante. La spec cumplió y aun así el resultado
+    no sirve.
+  - `DEF-050` — al cambiarlo desaparecen los indicadores de plegado en la vista de lectura.
+  - **Ajuste pedido** (usuario, 2026-08-03): el valor tiene que poder **escribirse
+    libremente**, no elegirse entre 2/4/8, para dar más margen de personalización. **Por
+    defecto, 4.**
+- **A definir antes de rehacerlo**: qué significa "ancho de tabulación" en un editor de
+  markdown. Si lo que se busca es que cambie **cómo se ve la sangría** de las listas
+  anidadas, eso se controla por CSS y no por `tabSize` — y es una funcionalidad distinta de
+  la que se implementó. Decidir eso primero; si no, se vuelve a entregar algo que cumple la
+  spec y no sirve. Detalle en [[bugs-progreso]].
 
 #### `FUN-S-03` · `EXPLORER-EXTENSIONES` (C-M-12)
 - **Qué es**: mostrar en el árbol del explorador la extensión de los archivos que **no**

@@ -38,8 +38,41 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-046 | Lo eliminado no aparece en la papelera, ni en la de Windows: no hay recuperación | desktop | ⬜ pendiente — **causa raíz confirmada**, y los archivos siguen en disco |
 | DEF-047 | El menú contextual se sale de la pantalla en los archivos de abajo | ambas (frontend) | ⬜ pendiente |
 | DEF-048 | Falta margen inferior en toda la app: el contenido queda pegado al borde | ambas (frontend) | ⬜ pendiente |
+| DEF-049 | El ancho de tabulación no cambia nada en los documentos ya escritos | ambas (frontend) | ⬜ pendiente — **hueco de diseño de `FUN-S-02`**, no un fallo de código |
+| DEF-050 | Al cambiar la tabulación desaparecen los indicadores de plegado en lectura | ambas (frontend) | ⬜ pendiente — regresión de `FUN-S-02` |
 
 ## Notas por bug
+
+- **DEF-049 — el ancho de tabulación casi no tiene efecto, y la culpa es de la spec.**
+  CodeMirror separa dos cosas y `FUN-S-02` fijó las dos, pero ninguna hace lo que el usuario
+  esperaba sobre contenido que **ya está escrito**:
+  - `tabSize` cambia cuánto ocupa un **tabulador literal** (`\t`). El markdown se indenta
+    casi siempre con **espacios**, así que en la práctica no hay tabuladores que reescalar
+    y no se ve ningún cambio.
+  - `indentUnit` cambia lo que inserta la tecla Tab **de ahí en adelante**. No toca nada de
+    lo ya escrito.
+
+  O sea que la funcionalidad hace exactamente lo que dice su spec y aun así **no sirve para
+  lo que se pidió**. Lo que el usuario espera es que cambie **cómo se ve la sangría** de sus
+  documentos — sobre todo las listas anidadas—, y eso es otra cosa: se controla por CSS
+  (el `padding-left` de las listas y el ancho de la sangría en el editor), no por `tabSize`.
+
+  > [!warning] No arreglarlo tocando solo el código
+  > La corrección honesta empieza por revisar [[Version 1.5.0]] y la entrada de `FUN-S-02`:
+  > hay que decidir **qué significa** "ancho de tabulación" en un editor de markdown antes
+  > de volver a implementarlo. Si se arregla solo el síntoma, se vuelve a entregar algo que
+  > técnicamente cumple y en la práctica no.
+
+- **DEF-050 — regresión de `FUN-S-02`, sin causa raíz confirmada.** Lo que se descartó
+  leyendo el código: `attachHeadingFolds` (`lib/editor/headingFold.ts`) **es idempotente**
+  para las flechas —salta las cabeceras que ya tienen una (línea 79)—, así que volver a
+  ejecutarlo no debería borrarlas.
+  Dos pistas para quien lo tome: (a) el `Set` de secciones plegadas se **recrea** en cada
+  llamada, y los manejadores de clic viejos siguen apuntando al anterior — reejecutarlo
+  resetea el estado de plegado; (b) `NoteEditor` ahora está suscrito a `tabWidth`, así que
+  cambiarlo **re-renderiza el componente**, y el efecto que llama a `attachHeadingFolds`
+  depende de `vaultNotas`/`vaultCarpetas`, que pueden traer referencias nuevas. Hay que
+  reproducirlo antes de tocar nada.
 
 - **DEF-046 — el indexador borra la papelera** (causa raíz confirmada el 2026-08-03 leyendo
   el código y el disco). El ciclo completo:
