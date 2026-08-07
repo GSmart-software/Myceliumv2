@@ -35,7 +35,7 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-043 | El ícono de las Esporas es un brote de planta, no evoca una espora | ambas (frontend) | 🛠️ desktop, sin confirmar — `Sprout` → `CircleDot` |
 | DEF-044 | Al cambiar de vault siguen abiertas las pestañas del vault anterior | ambas (frontend) | ⬜ pendiente — bloque F de la agrupación |
 | DEF-045 | `[[destino\|alias]]` dentro de una tabla: o rompe la tabla, o rompe el grafo | ambas (frontend) | ⬜ pendiente — causa raíz ya identificada |
-| DEF-046 | Lo eliminado no aparece en la papelera, ni en la de Windows: no hay recuperación | desktop | ⬜ pendiente — **causa raíz confirmada**, y los archivos siguen en disco |
+| DEF-046 | Lo eliminado no aparece en la papelera, ni en la de Windows: no hay recuperación | desktop | 🛠️ corregido, sin confirmar — la limpieza del indexador ya no borra lo que está en la papelera |
 | DEF-047 | El menú contextual se sale de la pantalla en los archivos de abajo | ambas (frontend) | ⬜ pendiente |
 | DEF-048 | Falta margen inferior en toda la app: el contenido queda pegado al borde | ambas (frontend) | ⬜ pendiente |
 | DEF-049 | El ancho de tabulación no cambia nada en los documentos ya escritos | ambas (frontend) | ⬜ pendiente — **hueco de diseño de `FUN-S-02`**, no un fallo de código |
@@ -90,6 +90,18 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
   > [!success] Los archivos NO se perdieron
   > Solo se perdió el registro. Siguen físicamente en `<vault>/.mycelium/.trash/`. En este
   > repo se comprobó: había 4 archivos ahí que no aparecían en la papelera de la app.
+
+  **Corregido el 2026-08-03**: la limpieza de `indexarVault` ahora carga primero las notas
+  que están en `papelera` y las **salta**. Su ausencia de la ruta original es intencional,
+  no es un archivo desaparecido. Un archivo borrado desde fuera de Mycelium (el explorador
+  de Windows) sigue limpiándose como antes, porque ese no tiene fila en `papelera`.
+
+  > [!note] Lo ya huérfano sigue invisible — pendiente
+  > El arreglo evita que vuelva a pasar, pero **no reconcilia** lo que quedó sin registro
+  > durante el período con el defecto. Esos archivos siguen en `.mycelium/.trash` y hay que
+  > sacarlos a mano. Reconciliar tiene sus propios casos borde (el sufijo de timestamp que
+  > `borrar_a_papelera` agrega ante colisiones, y qué hacer si la ruta original está
+  > ocupada), así que se deja como continuación en vez de improvisarlo acá.
 
   Las dos partes del defecto tienen causas **distintas**, y conviene no confundirlas:
   - *No aparece en la papelera* → lo de arriba. La limpieza del indexador tiene que
