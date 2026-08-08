@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { carpetaEsporas, crearNotaDesdeEspora, listarEsporas } from "@/lib/esporasVault";
 import { exportNoteMd, exportNotePdfActive } from "@/lib/export";
 import { collectFromDataTransfer, collectFromFileList } from "@/lib/import";
 import { useAuthStore } from "@/stores/authStore";
@@ -214,7 +215,7 @@ export function ExplorerPanel() {
     (id: string) => {
       // Abrir en el pane activo aunque la URL ya apunte a esta nota
       useTabsStore.getState().openNote(id);
-      router.push(`/workspace?note=${id}`);
+      router.replace(`/workspace?note=${id}`);
     },
     [router],
   );
@@ -224,7 +225,7 @@ export function ExplorerPanel() {
     (id: string) => {
       useTabsStore.getState().openNoteBackground(id);
       const nid = useTabsStore.getState().activeNotaId();
-      router.push(nid ? `/workspace?note=${nid}` : "/workspace");
+      router.replace(nid ? `/workspace?note=${nid}` : "/workspace");
     },
     [router],
   );
@@ -291,7 +292,7 @@ export function ExplorerPanel() {
         } else {
           useTabsStore.getState().splitPaneWithNota(nota.id, objetivo.paneId, objetivo.edge);
         }
-        router.push(`/workspace?note=${nota.id}`);
+        router.replace(`/workspace?note=${nota.id}`);
       }
       limpiarDragNota();
       return;
@@ -316,6 +317,30 @@ export function ExplorerPanel() {
     }
   }
 
+  /**
+   * Entrada "Nueva desde Espora ▸" del menú de una carpeta (FUN-M-03). Se arma
+   * al abrir el menú, con las plantillas del momento; la nota se crea en
+   * `carpetaId` (la carpeta del clic derecho), no en la carpeta activa.
+   */
+  function esporasMenu(carpetaId: string | null): MenuItem {
+    const esporas = listarEsporas(store.notas);
+    return {
+      label: "Nueva desde Espora",
+      disabled: esporas.length === 0,
+      title:
+        esporas.length === 0
+          ? `No hay plantillas en «${carpetaEsporas()}». Creá la primera desde el panel de Esporas.`
+          : "Crear una nota a partir de una plantilla",
+      submenu: esporas.map((espora) => ({
+        label: espora.titulo,
+        onClick: () =>
+          void crearNotaDesdeEspora(espora, carpetaId)
+            .then(openNota)
+            .catch((e) => console.error("[esporas] no se pudo crear la nota:", e)),
+      })),
+    };
+  }
+
   function carpetaMenu(carpeta: TreeCarpeta): MenuItem[] {
     return [
       {
@@ -326,6 +351,10 @@ export function ExplorerPanel() {
         label: "Nuevo dibujo Excalidraw",
         onClick: () => void store.createNota(carpeta.id, "excalidraw").then(openNota),
       },
+      // Plantillas (FUN-M-03): crea EN ESTA carpeta, no en la activa. Sin
+      // Esporas la entrada queda deshabilitada con el motivo, nunca oculta: es
+      // la forma de que la funcionalidad se descubra.
+      esporasMenu(carpeta.id),
       {
         label: "Nueva carpeta",
         onClick: () => {

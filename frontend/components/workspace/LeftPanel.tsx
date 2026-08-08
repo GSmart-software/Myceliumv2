@@ -1,6 +1,7 @@
 "use client";
 
 import { ExplorerDock } from "@/components/explorer/ExplorerDock";
+import { EsporasPanel } from "@/components/explorer/EsporasPanel";
 import { SearchPanel } from "@/components/explorer/SearchPanel";
 import { TrashPanel } from "@/components/explorer/TrashPanel";
 import { usePanelLayoutStore, type RailSection } from "@/stores/panelLayoutStore";
@@ -11,6 +12,7 @@ const SECTION_TITLES: Record<RailSection, string> = {
   explorer: "Explorador",
   search: "Búsqueda",
   tags: "Tags",
+  esporas: "Esporas",
   trash: "Papelera",
 };
 
@@ -56,6 +58,8 @@ function SectionContent({ section }: { section: RailSection }) {
     case "tags":
       // Placeholder permanente en esta versión (docs/FUTURE_IMPLEMENTATIONS.md).
       return <p className={styles.placeholder}>La vista de tags está planificada para una versión futura.</p>;
+    case "esporas":
+      return <EsporasPanel />;
     case "trash":
       return <TrashPanel />;
   }

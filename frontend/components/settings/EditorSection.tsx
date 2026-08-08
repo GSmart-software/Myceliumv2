@@ -1,7 +1,13 @@
 "use client";
 
 import { Check, X } from "lucide-react";
-import { usePreferencesStore } from "@/stores/preferencesStore";
+import {
+  anchoTabValido,
+  TAB_DEFECTO,
+  TAB_MAX,
+  TAB_MIN,
+  usePreferencesStore,
+} from "@/stores/preferencesStore";
 import styles from "./Settings.module.css";
 
 /** Sección Editor: comportamiento de las pestañas. */
@@ -9,10 +15,43 @@ export function EditorSection() {
   const previewTabs = usePreferencesStore((s) => s.prefs.previewTabs);
   const autoCloseBrackets = usePreferencesStore((s) => s.prefs.autoCloseBrackets);
   const showFileTitle = usePreferencesStore((s) => s.prefs.showFileTitle);
+  const tabWidth = usePreferencesStore((s) => s.prefs.tabWidth);
   const setPref = usePreferencesStore((s) => s.setPref);
 
   return (
     <div>
+      <div className={styles.field}>
+        <label className={styles.label} htmlFor="tabWidth">Ancho de tabulación</label>
+        <div className={styles.rangeRow}>
+          <input
+            id="tabWidth"
+            type="number"
+            min={TAB_MIN}
+            max={TAB_MAX}
+            step={1}
+            className={styles.select}
+            value={tabWidth}
+            // Se guarda lo que se teclea para poder borrar y reescribir; el valor
+            // se acota al salir del campo, no en cada tecla (si no, escribir "12"
+            // se convertiría en "1" en cuanto se pulsa el 1).
+            onChange={(e) => setPref("tabWidth", Number(e.target.value))}
+            onBlur={(e) => setPref("tabWidth", anchoTabValido(e.target.value))}
+          />
+          <span className={styles.rangeValue}>espacios</span>
+        </div>
+      </div>
+      <p className={styles.hint}>
+        Cuánto sangra un nivel de indentación. <strong>Al leer</strong> cambia la
+        sangría de las listas y los tabuladores de todos tus documentos al instante,
+        sin editarlos. <strong>Al escribir</strong> es lo que inserta la tecla{" "}
+        <kbd>Tab</kbd>. Entre {TAB_MIN} y {TAB_MAX}; por defecto {TAB_DEFECTO}.
+      </p>
+      <p className={styles.hint}>
+        En la vista en vivo, la sangría <em>ya escrita</em> con espacios no se
+        reescala: dos espacios ocupan dos espacios. Para cambiarla de verdad hay que
+        reindentar el documento.
+      </p>
+
       <div className={styles.toggleRow}>
         <span className={styles.label}>Pestañas de previsualización</span>
         <button

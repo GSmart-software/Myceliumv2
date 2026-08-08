@@ -188,24 +188,57 @@ public sealed class VaultRepository(ID1Client d1)
     }
 
     /// <summary>
-    /// Actualiza metadatos tras guardar contenido (HU-04) y refresca el
-    /// índice FTS5 (HU-21 CA10). Devuelve el nuevo actualizado_en.
+    /// Actualiza metadatos tras guardar contenido (HU-04) y refresca el índice
+    /// FTS5 (HU-21 CA10) y las propiedades del frontmatter (FUN-M-04). Devuelve
+    /// el nuevo actualizado_en.
     /// </summary>
+    /// <remarks>
+    /// Lo que va al FTS es <see cref="Frontmatter.TextoIndexable"/>, no el
+    /// archivo crudo: el cuerpo más los VALORES de las propiedades, sin las
+    /// claves ni la sintaxis YAML. Si se indexara el archivo entero, buscar
+    /// «tags» devolvería todas las notas que tienen esa clave y los
+    /// <c>snippet()</c> mostrarían YAML en vez de texto.
+    ///
+    /// Todo va en el MISMO batch (una transacción): el índice de una nota nunca
+    /// puede quedar medio escrito, con las propiedades viejas y el texto nuevo.
+    /// </remarks>
     public async Task<string> TouchNotaContenidoAsync(
         string notaId, string titulo, string contenido, long tamanoBytes, CancellationToken ct = default)
     {
         var now = Now();
-        await d1.BatchAsync(
-        [
-            new D1Statement(
-                "UPDATE notas SET tamano_bytes = ?, actualizado_en = ? WHERE id = ?",
+        var statements = new List<D1Statement>
+        {
+            new("UPDATE notas SET tamano_bytes = ?, actualizado_en = ? WHERE id = ?",
                 [tamanoBytes, now, notaId]),
-            new D1Statement("DELETE FROM notas_fts WHERE nota_id = ?", [notaId]),
-            new D1Statement(
-                "INSERT INTO notas_fts (nota_id, titulo, contenido) VALUES (?, ?, ?)",
-                [notaId, titulo, contenido]),
-        ], ct);
+            new("DELETE FROM notas_fts WHERE nota_id = ?", [notaId]),
+            new("INSERT INTO notas_fts (nota_id, titulo, contenido) VALUES (?, ?, ?)",
+                [notaId, titulo, Frontmatter.TextoIndexable(contenido)]),
+            new("DELETE FROM propiedades WHERE nota_id = ?", [notaId]),
+        };
+        statements.AddRange(PropiedadesStatements(notaId, contenido));
+        await d1.BatchAsync(statements, ct);
         return now;
+    }
+
+    /// <summary>
+    /// INSERTs de las propiedades de una nota: una fila por elemento de lista,
+    /// para poder filtrar por valor exacto sin LIKE. Un frontmatter ausente o
+    /// fuera del subconjunto soportado no aporta ninguna (se muestra crudo y no
+    /// se interpreta, igual que en el cliente).
+    /// </summary>
+    private static IEnumerable<D1Statement> PropiedadesStatements(string notaId, string contenido)
+    {
+        var fm = Frontmatter.Separar(contenido);
+        if (!fm.Hay || !fm.Soportado) yield break;
+        foreach (var p in fm.Props)
+        {
+            for (var i = 0; i < p.Valores.Count; i++)
+            {
+                yield return new D1Statement(
+                    "INSERT INTO propiedades (nota_id, clave, valor, tipo, orden) VALUES (?, ?, ?, ?, ?)",
+                    [notaId, p.Clave, p.Valores[i], p.Tipo, i]);
+            }
+        }
     }
 
     // ── Papelera (HU-23 CA6–10) ───────────────────────────────────
@@ -243,11 +276,14 @@ public sealed class VaultRepository(ID1Client d1)
         ], ct);
 
     public Task DeleteNotaPermanentlyAsync(string notaId, CancellationToken ct = default) =>
-        // papelera y notas_fts se limpian por separado; el blob se borra vía IBlobStorage (HU-04)
+        // papelera, notas_fts y propiedades se limpian por separado; el blob se
+        // borra vía IBlobStorage (HU-04). `propiedades` tiene ON DELETE CASCADE,
+        // pero se borra explícitamente: D1 no garantiza las claves foráneas.
         d1.BatchAsync(
         [
             new D1Statement("DELETE FROM papelera WHERE nota_id = ?", [notaId]),
             new D1Statement("DELETE FROM notas_fts WHERE nota_id = ?", [notaId]),
+            new D1Statement("DELETE FROM propiedades WHERE nota_id = ?", [notaId]),
             new D1Statement("DELETE FROM notas WHERE id = ?", [notaId]),
         ], ct);
 

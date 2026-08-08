@@ -108,6 +108,20 @@ CREATE VIRTUAL TABLE IF NOT EXISTS notas_fts USING fts5(
   contenido
 );
 
+-- Propiedades del frontmatter YAML de cada nota (FUN-M-04). El índice NO es la
+-- fuente de verdad —lo son los archivos—, pero es lo que las hace CONSULTABLES.
+-- Una fila POR ELEMENTO de lista, así `clave='tags' AND valor='activo'` funciona
+-- sin LIKE. Se reescribe entera (delete + insert) al guardar contenido.
+CREATE TABLE IF NOT EXISTS propiedades (
+  nota_id  TEXT NOT NULL REFERENCES notas(id) ON DELETE CASCADE,
+  clave    TEXT NOT NULL,
+  valor    TEXT NOT NULL,
+  tipo     TEXT NOT NULL,
+  orden    INTEGER NOT NULL DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS idx_propiedades_nota  ON propiedades(nota_id);
+CREATE INDEX IF NOT EXISTS idx_propiedades_clave ON propiedades(clave);
+
 -- Snippets de CSS personalizado por usuario (estilo Obsidian, HU-13/15).
 -- El contenido vive en blob (usuarios/{id}/css/{snippetId}.css).
 CREATE TABLE IF NOT EXISTS css_snippets (

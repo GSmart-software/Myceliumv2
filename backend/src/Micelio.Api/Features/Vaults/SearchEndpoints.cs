@@ -20,6 +20,14 @@ public static partial class SearchEndpoints
     [GeneratedRegex(@"(?:^|[\s(])#([\p{L}\p{N}_/-]+)")]
     private static partial Regex TagRegex();
 
+    /// <summary>
+    /// Token que parece un filtro de propiedad: <c>estado:activo</c> (FUN-M-04).
+    /// Se exige que la clave sea una palabra y que el valor NO empiece con
+    /// <c>/</c>, para no confundir una URL pegada (<c>https://…</c>) con un filtro.
+    /// </summary>
+    [GeneratedRegex(@"^([\p{L}_][\p{L}\p{N}_-]*):([^/].*)$")]
+    private static partial Regex FiltroPropiedadRegex();
+
     /// <summary>Lecturas de blob simultáneas al escanear el grafo (R2/local).</summary>
     private const int BlobReadConcurrency = 32;
 
@@ -43,27 +51,54 @@ public static partial class SearchEndpoints
                 return Results.Json(new { error = "Sin acceso a este vault." }, statusCode: 403);
             }
 
+            // Filtros `clave:valor` sobre el frontmatter (FUN-M-04): se separan
+            // del texto libre, con el que se pueden combinar o usarse solos.
+            var (filtros, resto) = SepararFiltrosPropiedad(q ?? "");
+
             // Por defecto (exacto=false) la búsqueda es por coincidencia (prefijo).
-            var match = BuildFtsQuery(q ?? "", prefix: !(exacto ?? false));
-            if (match.Length == 0)
+            var match = BuildFtsQuery(resto, prefix: !(exacto ?? false));
+            if (match.Length == 0 && filtros.Count == 0)
             {
                 return Results.Ok(new { resultados = Array.Empty<object>() });
             }
 
+            var (filtroSql, filtroParams) = CondicionFiltros(filtros);
+
+            // Solo filtros (`estado:activo` a secas): no hay nada que buscar en
+            // el FTS, así que se consulta por propiedad y el fragmento es la
+            // propia coincidencia.
+            if (match.Length == 0)
+            {
+                var soloFiltros = await d1.QueryAsync(
+                    $"""
+                    SELECT n.id AS nota_id, n.titulo, n.carpeta_id,
+                           (SELECT p.clave || ': «' || p.valor || '»' FROM propiedades p
+                             WHERE p.nota_id = n.id AND p.clave = ? COLLATE NOCASE
+                             LIMIT 1) AS fragmento
+                    FROM notas n
+                    WHERE n.vault_id = ?
+                      AND n.id NOT IN (SELECT nota_id FROM papelera){filtroSql}
+                    ORDER BY n.titulo
+                    LIMIT 50
+                    """,
+                    [filtros[0].Clave, vaultId, .. filtroParams], ct);
+                return Results.Ok(new { resultados = soloFiltros.Results });
+            }
+
             // Marcadores no-HTML: el cliente escapa el texto y los convierte a <mark>
             var result = await d1.QueryAsync(
-                """
+                $"""
                 SELECT f.nota_id, n.titulo, n.carpeta_id,
                        snippet(notas_fts, 2, '«', '»', '…', 10) AS fragmento
                 FROM notas_fts f
                 JOIN notas n ON n.id = f.nota_id
                 WHERE notas_fts MATCH ?
                   AND n.vault_id = ?
-                  AND n.id NOT IN (SELECT nota_id FROM papelera)
+                  AND n.id NOT IN (SELECT nota_id FROM papelera){filtroSql}
                 ORDER BY rank
                 LIMIT 50
                 """,
-                [match, vaultId], ct);
+                [match, vaultId, .. filtroParams], ct);
 
             return Results.Ok(new { resultados = result.Results });
         });
@@ -86,13 +121,13 @@ public static partial class SearchEndpoints
             var (aristasVault, titulosPorId, contenidos) =
                 await BuildVaultGraphAsync(notas, vaultId, blobs, ct);
 
-            // Etiquetas (#tag) por nota, para colorear nodos por etiqueta (HU-30).
+            // Etiquetas por nota, para colorear nodos por etiqueta (HU-30). Son
+            // las de `tags:` del frontmatter MÁS los `#tag` del cuerpo, sin
+            // distinguir de dónde salieron (FUN-M-04). Se miran sobre el CUERPO
+            // para que los comentarios `#` del YAML no se cuelen como etiquetas.
             var tagsPorId = contenidos.ToDictionary(
                 kv => kv.Key,
-                kv => TagRegex().Matches(kv.Value)
-                    .Select(m => m.Groups[1].Value)
-                    .Distinct(StringComparer.OrdinalIgnoreCase)
-                    .ToArray());
+                kv => Frontmatter.Etiquetas(kv.Value));
             // Fecha de creación por nota, para la construcción temporal del grafo.
             var creadoPorId = notas.ToDictionary(n => n.GetString("id"), n => n.GetString("creado_en"));
 
@@ -325,5 +360,62 @@ public static partial class SearchEndpoints
         }
 
         return string.Join(" ", parts);
+    }
+
+    /// <summary>Un filtro <c>clave:valor</c> sobre la tabla de propiedades.</summary>
+    internal readonly record struct FiltroPropiedad(string Clave, string Valor);
+
+    /// <summary>
+    /// Separa los filtros <c>clave:valor</c> del resto de la consulta.
+    /// <c>tag:</c> NO es un filtro de propiedad: lo resuelve el propio FTS, y así
+    /// sigue encontrando tanto los <c>#tag</c> del cuerpo como los valores de
+    /// <c>tags:</c>, que también van al índice de texto.
+    /// </summary>
+    internal static (List<FiltroPropiedad> Filtros, string Resto) SepararFiltrosPropiedad(string raw)
+    {
+        var filtros = new List<FiltroPropiedad>();
+        var resto = new List<string>();
+
+        foreach (Match token in Regex.Matches(raw, "\"[^\"]+\"|\\S+"))
+        {
+            var texto = token.Value;
+            if (texto.StartsWith('"') || texto.StartsWith("tag:", StringComparison.OrdinalIgnoreCase))
+            {
+                resto.Add(texto);
+                continue;
+            }
+            var m = FiltroPropiedadRegex().Match(texto);
+            if (m.Success)
+            {
+                filtros.Add(new FiltroPropiedad(m.Groups[1].Value, m.Groups[2].Value.Trim('"')));
+            }
+            else
+            {
+                resto.Add(texto);
+            }
+        }
+
+        return (filtros, string.Join(" ", resto));
+    }
+
+    /// <summary>
+    /// <c>EXISTS (…)</c> por filtro, para encadenarlos con AND. Se compara
+    /// <c>COLLATE NOCASE</c> igual que en el cliente: quien escribe
+    /// <c>Estado:Activo</c> espera encontrar <c>estado: activo</c>.
+    /// </summary>
+    private static (string Sql, List<object?> Params) CondicionFiltros(List<FiltroPropiedad> filtros)
+    {
+        var parametros = new List<object?>();
+        var sql = new StringBuilder();
+        foreach (var (clave, valor) in filtros)
+        {
+            parametros.Add(clave);
+            parametros.Add(valor);
+            sql.Append(" AND EXISTS (SELECT 1 FROM propiedades p")
+               .Append(" WHERE p.nota_id = n.id")
+               .Append(" AND p.clave = ? COLLATE NOCASE")
+               .Append(" AND p.valor = ? COLLATE NOCASE)");
+        }
+        return (sql.ToString(), parametros);
     }
 }

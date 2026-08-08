@@ -117,6 +117,7 @@ Micelio.Api.Features.Vaults.VaultEndpoints.MapVaultEndpoints(app);
 Micelio.Api.Features.Vaults.NoteContentEndpoints.MapNoteContentEndpoints(app);
 Micelio.Api.Features.Vaults.NoteContentEndpoints.MapDiagramEndpoints(app);
 Micelio.Api.Features.Vaults.SearchEndpoints.MapSearchEndpoints(app);
+Micelio.Api.Features.Vaults.PropiedadesEndpoints.MapPropiedadesEndpoints(app);
 Micelio.Api.Features.Vaults.PdfEndpoints.MapPdfEndpoints(app);
 Micelio.Api.Features.Vaults.SharingEndpoints.MapSharingEndpoints(app);
 Micelio.Api.Features.Vaults.CollabEndpoints.MapCollabEndpoints(app);

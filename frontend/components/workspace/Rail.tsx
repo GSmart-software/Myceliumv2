@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  CircleDot,
   Files,
   Search,
   Settings,
@@ -19,6 +20,8 @@ const TOP_ITEMS: { section: RailSection; icon: LucideIcon; label: string }[] = [
   { section: "explorer", icon: Files, label: "Explorador" },
   { section: "search", icon: Search, label: "Búsqueda global" },
   { section: "tags", icon: Tag, label: "Tags" },
+  // Plantillas de notas (FUN-M-03): un clic en una Espora crea la nota.
+  { section: "esporas", icon: CircleDot, label: "Esporas" },
 ];
 
 const BOTTOM_ITEMS: { section: RailSection; icon: LucideIcon; label: string }[] = [
@@ -38,7 +41,7 @@ export function Rail() {
   // El grafo se abre como ventana en el área de panes (estilo Obsidian).
   const openGraph = () => {
     useTabsStore.getState().openNote(GRAPH_TAB_ID);
-    router.push(`/workspace?note=${GRAPH_TAB_ID}`);
+    router.replace(`/workspace?note=${GRAPH_TAB_ID}`);
   };
 
   const renderButton = ({ section, icon: Icon, label }: (typeof TOP_ITEMS)[number]) => (
