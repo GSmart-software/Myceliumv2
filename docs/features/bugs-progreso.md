@@ -62,8 +62,33 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
   > `confirm` ni `ask`. Leer la descripción y no la lista es lo que dejó esto pasar.
   > Comprobado en `~/.cargo/registry/…/tauri-plugin-dialog-2.7.2/permissions/default.toml`.
 
-  Corregido añadiendo `dialog:allow-confirm` y `dialog:allow-ask` a
-  `src-tauri/capabilities/default.json`.
+  **El permiso era solo la mitad.** Con él concedido, la confirmación seguía sin aparecer y
+  además **la acción se ejecutaba igual**: borrar una carpeta la borraba sin preguntar. La
+  causa de fondo es que el `window.confirm` de Tauri es **asíncrono** —devuelve una promesa,
+  no un booleano— y **una promesa siempre es *truthy***, así que todo
+  `if (window.confirm(…))` se cumplía siempre.
+
+  > [!danger] TypeScript no puede avisar de esto
+  > El tipo de `window.confirm` dice `boolean`, así que `if (window.confirm(…))` compila sin
+  > una queja. El fallo solo se ve ejecutando, y se manifiesta como *"borra sin preguntar"*,
+  > que es lo contrario de lo que uno buscaría al leer el código.
+
+  Corregido en dos pasos: los permisos `dialog:allow-confirm` y `dialog:allow-ask` en
+  `src-tauri/capabilities/default.json`, y un helper único `lib/confirmar.ts` que llama al
+  plugin y **espera** la respuesta. Los cinco sitios pasan por él; ya no queda ningún
+  `window.confirm` en la app. Ante un fallo del diálogo devuelve `false`: en la duda, no se
+  ejecuta la acción destructiva.
+
+- **Regresión del arreglo de `DEF-046`: "error desconocido" al crear una Espora.** Detectada
+  por el usuario al probar. Al conservar la fila de `notas` de lo que está en la papelera
+  —que es justo lo que arregló el defecto— el nombre volvía a considerarse libre, porque
+  `basenamesOcupados` (`lib/db/vaultFs.ts`) excluía a propósito las notas de la papelera.
+  Resultado: `crearNota` intentaba insertar una fila con un `id` que ya existía y el choque
+  de clave salía como "error desconocido".
+
+  Corregido quitando esa exclusión: **lo que está en la papelera ocupa su nombre**. Además
+  de evitar el choque, previene el problema simétrico — si el nombre se reutilizara,
+  recuperar después la nota de la papelera chocaría contra la nueva.
 
   > [!note] Por qué nadie lo había visto
   > `window.prompt` **sí** funciona (se comprobó con "Nueva carpeta", ver
