@@ -58,7 +58,7 @@ y **priorizar** qué implementar antes.
 | ID | Nombre | Descripción | Aplica | Orig. |
 |---|---|---|---|---|
 | `FUN-S-01` | `EDITOR-CHECKBOX-ESTILOS` | Estilos de checkbox según el símbolo: `x`=X, `-`=tachado, `*`=estrella, `+`=check | ambas | C-M-06 |
-| `FUN-S-02` 🛠️ | `EDITOR-TAB-WIDTH` | Cuánto sangra un nivel de indentación: **al leer** cambia listas y tabuladores de todos los documentos al instante (CSS), **al escribir** es lo que inserta <kbd>Tab</kbd>. Valor libre 1–16, por defecto 4. Rehecha tras `DEF-049`; queda `DEF-050` abierto y `FUN-M-18` (reindentar) como continuación | ambas | C-M-10 |
+| `FUN-S-02` 🟢 | `EDITOR-TAB-WIDTH` | Cuánto sangra un nivel de indentación: **al leer** cambia listas y tabuladores de todos los documentos al instante (CSS), **al escribir** es lo que inserta <kbd>Tab</kbd>. Valor libre 1–16, por defecto 4. **Confirmada en desktop** el 2026-08-03 tras rehacerla por `DEF-049`/`DEF-050`. Continuación: `FUN-M-18` (reindentar), para que el cambio se vea también en la vista en vivo. Pendiente el reflejo a web | ambas | C-M-10 |
 | `FUN-S-03` | `EXPLORER-EXTENSIONES` | Mostrar la extensión de los archivos no‑markdown para poder identificarlos | ambas | C-M-12 |
 | `FUN-S-04` | `TRASH-MULTISELECT` | Seleccionar varios archivos para borrar en la papelera | ambas | C-M-14 |
 | `FUN-S-05` | `VAULT-EJEMPLO-DEFAULT` | Al crear un vault nuevo, generar un archivo de ejemplo por defecto | ambas | C-G-02 |
@@ -72,14 +72,14 @@ y **priorizar** qué implementar antes.
 |---|---|---|---|---|
 | `FUN-M-01` | `TRASH-PREVIEW` | Visualizar el contenido de los archivos en la papelera | ambas | C-M-13 |
 | `FUN-M-02` | `GRAPH-BUSCADOR-FILTRO` | Buscar por nombre en el grafo: atenúa los nodos que no coinciden | ambas | C-I-03 |
-| `FUN-M-03` 🛠️ | `TEMPLATES-ESPORAS` | Plantillas ("Esporas") para crear notas rápido: panel en el rail, "Insertar Espora" en la barra del editor y submenú en el clic derecho de una carpeta. **Implementado en desktop** (sin confirmar); spec en `docs/features/esporas-plantillas.md`. Salió en [[Version 1.3.0]]. Pendiente el reflejo a web | ambas | C-I-04 |
+| `FUN-M-03` 🟢 | `TEMPLATES-ESPORAS` | Plantillas ("Esporas") para crear notas rápido: panel en el rail, "Insertar Espora" en la barra del editor y submenú en el clic derecho de una carpeta. **Confirmada en desktop** el 2026-08-03; spec en `docs/features/esporas-plantillas.md`. Salió en [[Version 1.3.0]]. Pendiente el reflejo a web | ambas | C-I-04 |
 | `FUN-M-04` 🟢 | `METADATA-YAML` | Manejar metadatos YAML (frontmatter `---`) de las notas como **propiedades** consultables (prerequisito de `FUN-L-03`). **Confirmado en desktop** el 2026-08-02; spec en `docs/features/metadata-yaml.md`. Salió en [[Version 1.2.0]]. Pendiente el reflejo a web | ambas | C-I-07a |
 | `FUN-M-11` 🛠️ | `VAULT-MYCIGNORE` | `.mycignore` por vault (estilo `.gitignore`) para decidir qué archivos/carpetas ignora Mycelium; por defecto `.*/` + carpetas de build. **Implementado en desktop** (sin confirmar); parte **web** pendiente (otra semántica). Spec en `docs/features/mycignore.md` | ambas | — |
 | `FUN-M-12` 🛠️ | `VAULT-INDEX-PERF` | Rendimiento de la apertura del vault: default de `.mycignore` con `node_modules/`/`target/`/`dist/`/`out/`, metadatos sin contenido + `leer_archivos` en tandas, carpetas incrementales, WAL y progreso visible. **Implementado en desktop** (sin confirmar); spec en `docs/features/rendimiento-apertura-vault.md`. Salió en [[Version 1.1.1]] | desktop | — |
 | `FUN-M-13` | `VAULT-INDEX-UN-RECORRIDO` | Fusionar `listar_archivos_meta` y `listar_directorios` en un solo comando que devuelva `{archivos, directorios}`: hoy el vault se recorre **dos veces** por apertura. Continuación de `FUN-M-12` | desktop | — |
 | `FUN-M-14` | `VAULT-WATCH-REINDEX-DIRIGIDO` | El watcher emite `vault-cambios` **con las rutas afectadas** y `lib/vaultWatch.ts` las descarta: reindexa el vault entero ante cualquier cambio. Usar esas rutas para reindexar solo lo tocado. Continuación de `FUN-M-12` | desktop | — |
 | `FUN-M-15` | `LINKS-POR-ALIAS` | Resolver `[[enlaces]]` por la propiedad `aliases` de la nota destino: hoy se parsea e indexa pero **no tiene comportamiento**. Toca la resolución de wikilinks, el autocompletado y el grafo. Continuación de `FUN-M-04` | ambas | — |
-| `FUN-M-16` 🛠️ | `UPDATER-SELECCION-VERSION` | Elegir e instalar **cualquier versión publicada**, incluida una anterior, desde un modo avanzado oculto (siete clics en el número de versión). Deja la app fijada en esa versión. Herramienta de desarrollo, no para el usuario normal. **Implementado en desktop** (sin confirmar y **sin probar de extremo a extremo**: falta el bucket). Spec en `docs/features/autoactualizacion.md` § 4.3. Salió en [[Version 1.4.0]] | desktop | — |
+| `FUN-M-16` 🛠️ | `UPDATER-SELECCION-VERSION` | Elegir e instalar **cualquier versión publicada**, incluida una anterior, desde un modo avanzado oculto (siete clics en el número de versión). Deja la app fijada en esa versión. Herramienta de desarrollo, no para el usuario normal. **Implementado, SIN confirmar**: su diálogo de confirmación estuvo roto hasta `DEF-051` (2026-08-03), así que elegir una versión no llegaba a hacer nada. Es lo único de la [[Version 1.4.0]] que queda por probar. Spec en `docs/features/autoactualizacion.md` § 4.3 | desktop | — |
 | `FUN-M-18` | `EDITOR-REINDENTAR` | Reindentar las notas al ancho de tabulación configurado, para que el cambio se vea también en la vista en vivo y no solo al leer. Es una **edición masiva del vault**: reutiliza el respaldo, el manifiesto y el deshacer de `FUN-M-17`. Continuación de `FUN-S-02` | ambas | — |
 | `FUN-M-17` | `VAULT-RELINKEADO` | Adoptar un vault que viene de otro proyecto: **la IA descubre** cómo se referencian sus documentos (`` `HU-009` ``, el nombre suelto, `[texto](otra.md)`) y lo registra en un léxico persistente; **el script aplica** esas formas y las convierte en `[[wikilinks]]`. La auditoría **no modifica documentos**; el enlazado sí, con respaldo y deshacer. Es el **caso de entrada** de Mycelium sobre un proyecto existente. Spec en `docs/features/auditoria-y-relinkeado.md` | ambas | — |
 
@@ -91,18 +91,18 @@ y **priorizar** qué implementar antes.
 | `FUN-L-02` | `SHARING-PUBLICOS-GLOBALES` | Carpeta "Estado Mycelium" con 3 archivos públicos (Ayudas / Bugs / Ideas): editables por autorizados, visibles por todos | web | C-I-06 |
 | `FUN-L-03` | `FILES-BASES-TABLA` | Tipo de archivo tipo "bases" (tabla) que agrega notas por metadatos, con filtros y columnas configurables. Depende de `FUN-M-04` | ambas | C-I-07b |
 | `FUN-L-04` | `VAULT-MULTIPLE` | Un usuario con varios vaults, seleccionables en Configuración → Vault | ambas | C-G-01 |
-| `FUN-L-07` 🛠️ | `TERMINAL-INTEGRADA` | Consola nativa integrada (estilo VS Code): abre en la raíz del vault (o en la carpeta elegida), como pestaña normal del workspace (dividir, varias instancias). **Implementada** (sin confirmar); spec en `docs/features/terminal-integrada.md` | desktop | — |
+| `FUN-L-07` 🟢 | `TERMINAL-INTEGRADA` | Consola nativa integrada (estilo VS Code): abre en la raíz del vault (o en la carpeta elegida), como pestaña normal del workspace (dividir, varias instancias). **Confirmada en desktop** por el usuario en lo esencial, tras varias iteraciones (panel de consolas, shells de fondo, renombrar, selector de shell, tema reactivo); spec en `docs/features/terminal-integrada.md` | desktop | — |
 | `FUN-L-08` 🛠️ | `IA-FRAMEWORK-VAULT` | Framework IA versionado generado en el vault (CLAUDE.md + 2 skills + 6 comandos en `.claude/`) para que Claude Code use el vault como **memoria**: recuperar antes de responder y consolidar lo que valga recordar, navegando por vínculos. Botón opt‑in en Configuración → Vault. **Implementada** (sin confirmar); spec en `docs/features/ia-framework-vault.md` | desktop | — |
 | `FUN-L-09` | `IA-MCP-MYCELIUM` | Servidor MCP de Mycelium: exponer a la IA el índice del vault (búsqueda, backlinks, grafo, metadatos) como herramientas estructuradas, en vez de grep sobre archivos | desktop | — |
 | `FUN-L-10` | `VAULT-INDEX-EN-RUST` | Mover el indexado entero a Rust: el walker lee y escribe el índice en el mismo proceso, en **una** transacción, sin pasar contenido por IPC. Resuelve de raíz lo que `FUN-M-12` mitigó desde el frontend (incluido el `BEGIN`/`COMMIT` que el pool de `tauri-plugin-sql` impide). Continuación de `FUN-M-12` | desktop | — |
 | `FUN-L-11` | `FILES-OTROS-TIPOS` | Ver en Mycelium los archivos que hoy ignora: PDF, código de cualquier lenguaje y texto plano. Aparecen en el explorador y se abren en un visor propio, como una pestaña más | ambas | — |
 | `FUN-L-12` | `EDITOR-CORRECTOR-ORTOGRAFICO` | Corrector ortográfico activable en Configuración, con **varios idiomas simultáneos** (p. ej. español e inglés) y arquitectura preparada para sumar idiomas | ambas | — |
 | `FUN-L-13` | `UI-IDIOMAS` | La interfaz en varios idiomas (español, inglés, italiano) y preparada para agregar más. Hoy todos los textos están escritos en español dentro de los componentes | ambas | — |
-| `FUN-L-14` 🛠️ | `UPDATER-AUTOACTUALIZACION` | Mycelium comprueba una vez al día si hay versión nueva, muestra su changelog y ofrece instalarla con un clic. Nunca obliga ni bloquea. `tauri-plugin-updater` + instaladores firmados en Cloudflare R2. **Implementado y publicado** el 2026-08-03: bucket, claves y la 1.4.0 en R2, con la publicación verificada (manifiestos, firma y SHA-256 del instalador remoto). **Falta probar la otra mitad**: que una instalación detecte y aplique una versión posterior. Spec en `docs/features/autoactualizacion.md`. Salió en [[Version 1.4.0]] | desktop | — |
+| `FUN-L-14` 🟢 | `UPDATER-AUTOACTUALIZACION` | Mycelium comprueba una vez al día si hay versión nueva, muestra su changelog y ofrece instalarla con un clic. Nunca obliga ni bloquea. `tauri-plugin-updater` + instaladores firmados en Cloudflare R2. **Confirmada de punta a punta** el 2026-08-03: bucket y claves en marcha, la 1.4.0 y la 1.5.0 publicadas en R2, y el usuario comprobó en la app que una instalación **detecta y aplica** la versión posterior. Ya no hacen falta instalaciones manuales. Spec en `docs/features/autoactualizacion.md`. Salió en [[Version 1.4.0]] | desktop | — |
 | `FUN-L-16` | `VAULT-VENTANAS-MULTIPLES` | Tener **varios vaults abiertos a la vez**, cada uno en su propia ventana y sin límite de cuántos. Hoy abrir uno cierra el anterior. Continuación natural de `FUN-L-04`, y comparte raíz con `DEF-044` | ambas | — |
 | `FUN-L-18` | `FILES-CANVAS` | Tipo de archivo **canvas** (`.canvas`, formato JSON Canvas de Obsidian): lienzo infinito con texto suelto, tarjetas de markdown y tarjetas que **son** notas del vault, unidas por flechas. Los `[[enlaces]]` de las tarjetas funcionan y cuentan en el grafo; las flechas son solo disposición visual. Spec en `docs/features/canvas.md` | ambas | — |
 | `FUN-L-17` | `VAULT-RELINKEADO-UI` | La auditoría y conversión de `FUN-M-17` como **pantalla de la app**, consumiendo el mismo núcleo. Sirve a quien nunca usa la IA y hoy no tiene ninguna salida. Continuación de `FUN-M-17` | ambas | — |
-| `FUN-L-15` 🛠️ | `RELEASE-SCRIPT-PUBLICACION` | Un `npm run publicar` que compruebe, compile, firme, suba a R2 con `wrangler`, escriba los tres manifiestos y **verifique lo publicado**, en vez de hacer esos cuatro pasos a mano. Tiene modo `--simulacro`. **Script local, no CI**: usar el workflow obligaría a alinear `origin` y a poner la clave de firma como secreto de GitHub. **Implementado en desktop** (sin confirmar); el proceso, en [[Publicar una version]] § 2 | desktop | — |
+| `FUN-L-15` 🟢 | `RELEASE-SCRIPT-PUBLICACION` | Un `npm run publicar` que compruebe, compile, firme, suba a R2 con `wrangler`, escriba los tres manifiestos y **verifique lo publicado**, en vez de hacer esos cuatro pasos a mano. Tiene modo `--simulacro`. **Script local, no CI**: usar el workflow obligaría a alinear `origin` y a poner la clave de firma como secreto de GitHub. **Confirmado**: publicó la 1.5.0 de verdad el 2026-08-03. El proceso, en [[Publicar una version]] § 2 | desktop | — |
 
 ### 1.4 Muy grandes — tamaño XL
 
@@ -188,26 +188,27 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 - **A definir**: el set exacto de símbolos y qué significa cada uno; si es configurable;
   si el estilo alcanza a toda la línea (p. ej. tachar el texto de un ítem descartado).
 
-#### `FUN-S-02` · `EDITOR-TAB-WIDTH` (C-M-10)
-- **Qué es**: opción en Configuración para elegir cuánto "vale" una tabulación en el
-  editor (p. ej. 2 / 4 / 8 espacios).
+#### `FUN-S-02` · `EDITOR-TAB-WIDTH` (C-M-10) — 🟢 desktop
+- **Qué es**: opción en Configuración para elegir cuánto "vale" una tabulación en el editor.
+  El valor se **escribe libremente** entre 1 y 16 (por defecto **4**), no se elige de una
+  lista.
 - **Objetivo**: adaptar la indentación al gusto del usuario y a la coherencia con otras
   herramientas; impacta sobre todo en listas anidadas y bloques de código.
-- **Salió en [[Version 1.5.0]] y quedó 🟡**: dos defectos abiertos y un ajuste pedido.
-  - `DEF-049` — **no cambia nada en los documentos ya escritos**, que es lo que se
-    esperaba. La causa no es un fallo de código: `tabSize` solo reescala **tabuladores
-    literales** y el markdown se indenta con espacios, mientras que `indentUnit` solo
-    afecta a lo que se escriba de ahí en adelante. La spec cumplió y aun así el resultado
-    no sirve.
-  - `DEF-050` — al cambiarlo desaparecen los indicadores de plegado en la vista de lectura.
-  - **Ajuste pedido** (usuario, 2026-08-03): el valor tiene que poder **escribirse
-    libremente**, no elegirse entre 2/4/8, para dar más margen de personalización. **Por
-    defecto, 4.**
-- **A definir antes de rehacerlo**: qué significa "ancho de tabulación" en un editor de
-  markdown. Si lo que se busca es que cambie **cómo se ve la sangría** de las listas
-  anidadas, eso se controla por CSS y no por `tabSize` — y es una funcionalidad distinta de
-  la que se implementó. Decidir eso primero; si no, se vuelve a entregar algo que cumple la
-  spec y no sirve. Detalle en [[bugs-progreso]].
+- **Salió en [[Version 1.5.0]], falló, y se rehizo el 2026-08-03**. Confirmada por el
+  usuario ese mismo día. Lo que se aprendió: "ancho de tabulación" en markdown son **dos
+  cosas distintas**, y la primera versión solo hizo la segunda.
+  - **Al leer** — cómo se *ve* la sangría de lo ya escrito. Es CSS, no CodeMirror: una
+    variable `--mic-tab-width` que escala el `padding-left` de las listas. Es lo que
+    arregla `DEF-049`, porque `tabSize` solo reescala **tabuladores literales** y el
+    markdown se indenta con espacios.
+  - **Al escribir** — cuántos espacios inserta <kbd>Tab</kbd>. Eso sí es `indentUnit`, y
+    solo afecta a lo nuevo.
+  - `DEF-050` (desaparecían los indicadores de plegado al cambiar el valor) también quedó
+    cerrado: el estado de plegado vive ahora en un `WeakMap` de módulo, así que reaplicarlo
+    es idempotente.
+- **Continuación**: `FUN-M-18` (reindentar documentos), para que el cambio se vea también
+  en la vista en vivo y no solo en lectura. Y el **reflejo a web**.
+- Causas raíz en [[Aprendizajes tecnicos]]; trazabilidad en [[bugs-progreso]].
 
 #### `FUN-S-03` · `EXPLORER-EXTENSIONES` (C-M-12)
 - **Qué es**: mostrar en el árbol del explorador la extensión de los archivos que **no**
@@ -275,7 +276,7 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 - **A definir**: coincidencia parcial vs exacta; si además centra/hace zoom al
   resultado; si permite buscar por tag o path además del nombre.
 
-#### `FUN-M-03` · `TEMPLATES-ESPORAS` (C-I-04) — 🛠️ desktop
+#### `FUN-M-03` · `TEMPLATES-ESPORAS` (C-I-04) — 🟢 desktop
 - **Qué es**: plantillas reutilizables para crear notas ya con una estructura base. Un
   botón nuevo en el rail izquierdo permite ver/gestionar (crear, editar, borrar) las
   plantillas. Al crear un archivo, aparece un menú (como el de crear carpeta) con el
@@ -283,9 +284,8 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   "ninguna"). Nombre propuesto para las plantillas: **"Esporas"**.
 - **Objetivo**: acelerar la creación de notas recurrentes (reuniones, diario, fichas) y
   mantener consistencia de formato en el vault.
-- **Implementado en desktop** — spec en [[esporas-plantillas]], release en
-  [[Version 1.3.0]]. Pendiente la confirmación del usuario en la app y el reflejo a web.
-  Lo que se construyó: se valida el nombre **"Esporas"**. Cada
+- **Confirmado en desktop** el 2026-08-03 — spec en [[esporas-plantillas]], release en
+  [[Version 1.3.0]]. Pendiente solo el **reflejo a web**. Lo que se construyó: se valida el nombre **"Esporas"**. Cada
   plantilla es una **nota normal** en una carpeta del vault (`Esporas/` por defecto,
   configurable en Configuración → Vault). Admiten variables `{{titulo}}`, `{{fecha}}`,
   `{{hora}}` y `{{fecha:FORMATO}}` con tokens en español (`AAAA-MM-DD hh:mm`); un token
@@ -295,7 +295,7 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   existentes, y fusiona el frontmatter) y submenú "Nueva desde Espora" en el clic derecho
   del explorador. `FUN-M-07` (Daily Note) reutiliza la lista y la sustitución.
 
-#### `FUN-M-04` · `METADATA-YAML` (C-I-07a) — 🛠️ desktop
+#### `FUN-M-04` · `METADATA-YAML` (C-I-07a) — 🟢 desktop
 - **Qué es**: manejar el frontmatter YAML al inicio de una nota (bloque entre `---`)
   como **propiedades** estructuradas (pares clave/valor), con un estilo visual propio en
   edición y lectura.
@@ -312,7 +312,7 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   vivo es de solo lectura. Lo que cae fuera del subconjunto se muestra crudo y **no se
   reescribe nunca**. Las propiedades se indexan en la tabla `propiedades` y se filtran
   desde el buscador con `clave:valor`.
-- **Pendiente**: confirmación del usuario en la app y **reflejo a `web-cloud`** (el
+- **Pendiente**: solo el **reflejo a `web-cloud`** (el
   parseo, el render y el panel son compartidos; el índice diverge — allá toca el backend
   .NET). Ver [[Reflejar cambios de desktop a web]].
 
@@ -450,7 +450,7 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 - **A definir**: granularidad (por sesión, por intervalo), retención, y la UI para
   comparar/restaurar.
 
-#### `FUN-L-07` · `TERMINAL-INTEGRADA` (—)
+#### `FUN-L-07` · `TERMINAL-INTEGRADA` (—) — 🟢 desktop
 - **Qué es**: una consola **totalmente funcional y nativa** integrada en Mycelium, al
   estilo de la terminal de VS Code. No es una consola simulada: es la shell real del
   sistema, así que sirve para trabajar con el sistema de archivos del vault, gestionar
@@ -603,7 +603,7 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   desktop); cómo se manejan plurales y fechas; y si el idioma sale del sistema operativo
   la primera vez.
 
-#### `FUN-L-14` · `UPDATER-AUTOACTUALIZACION` (—)
+#### `FUN-L-14` · `UPDATER-AUTOACTUALIZACION` (—) — 🟢 desktop
 - **Qué es**: que Mycelium avise, una vez al día en el primer arranque, de que hay una
   versión nueva; muestre **qué trae** y ofrezca instalarla con un clic. Nunca obliga, nunca
   bloquea y sin conexión no dice nada.
@@ -617,13 +617,17 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   datos; la parte de infraestructura es un bucket con archivos estáticos. Lo que sí es nuevo
   es el **compromiso operativo**: un bucket que mantener y una clave privada que custodiar
   de por vida.
-- **A definir**: si se usa un dominio propio delante del bucket o se arranca con la URL
-  `r2.dev` (**no bloquea**: se puede empezar sin dominio y migrar después; ver la spec) y
-  dónde vive la copia de seguridad de la clave privada.
-- **Implementado** en [[Version 1.4.0]] (2026-08-03), junto con `FUN-M-16`. Lo que decía
-  "a definir" **sigue sin definirse y ahora es lo único que falta**: el código está y
-  degrada con elegancia sin claves, pero hasta que exista el bucket y la clave de firma el
-  circuito real no se ha ejecutado ni una vez. Los pasos, en [[Publicar una version]] § 1.
+- **Confirmada de punta a punta** el 2026-08-03. Salió en [[Version 1.4.0]] junto con
+  `FUN-M-16`; el bucket y las claves se pusieron en marcha ese día, se publicaron la 1.4.0 y
+  la 1.5.0, y una instalación de la 1.4.0 **detectó, descargó, verificó, instaló y reinició**
+  en 1.5.0. Desde ahí ninguna versión necesita instalación manual. Los pasos, en
+  [[Publicar una version]] § 1.
+- **Se arrancó con la URL `r2.dev`**, sin dominio propio: no bloqueaba y se puede migrar
+  después (ver la spec).
+- **Lo único que queda abierto es operativo, no de código**: la **copia de seguridad de la
+  clave privada** fuera de la máquina. Si se pierde, nadie puede volver a actualizarse — y
+  además `tauri build` ya no compila sin ella.
+- **Sin confirmar**: el modo avanzado de `FUN-M-16`, roto hasta `DEF-051`.
 
 #### `FUN-L-16` · `VAULT-VENTANAS-MULTIPLES` (—)
 - **Qué es**: poder tener **varios vaults abiertos simultáneamente**, cada uno en su propia
@@ -644,7 +648,7 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   ventana (sí, casi con seguridad); y si dos ventanas pueden abrir el **mismo** vault a la
   vez —que es donde aparecería el riesgo de que dos índices escriban sobre la misma carpeta.
 
-#### `FUN-L-15` · `RELEASE-SCRIPT-PUBLICACION` (—)
+#### `FUN-L-15` · `RELEASE-SCRIPT-PUBLICACION` (—) — 🟢 desktop
 - **Qué es**: un `npm run publicar` que haga de una sola vez lo que `FUN-L-14` deja como
   cuatro pasos manuales: compilar, firmar, subir el instalador y su `.sig` a R2 con
   `wrangler`, y reescribir `latest.json` y `versions.json`.
@@ -663,7 +667,7 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
     previas** con el comando exacto que hay que ejecutar. Todo lo que puede fallar se
     comprueba **antes de compilar**: descubrir que falta una variable de entorno después de
     diez minutos de `tauri build` es el peor momento posible.
-- **Implementado** (2026-08-03, sin confirmar). Además de lo pedido, el script **verifica lo
+- **Confirmado en uso real** (2026-08-03): publicó la 1.5.0. Además de lo pedido, **verifica lo
   publicado**: que los tres JSON respondan y parseen, que la firma del manifiesto sea la del
   `.sig` generado y que el `.exe` **descargado del bucket** tenga el mismo SHA-256 que el que
   se firmó — la única comprobación que atrapa una subida truncada, que a la vista deja un
@@ -910,11 +914,17 @@ separado significaría tocar la misma capa dos veces.
 creación que `FUN-L-04` va a tocar igual; no comparte la raíz de las otras tres.
 
 #### G · Poner la web al día — reflejos pendientes · minor · **web**
-El reflejo de `FUN-M-03` (Esporas) y `FUN-M-04` (metadatos YAML) más la **parte web de
-`FUN-M-11`** (`.mycignore`, que necesita decidir su semántica y tocar el backend .NET).
+El reflejo de `FUN-M-03` (Esporas), `FUN-M-04` (metadatos YAML) y `FUN-S-02` (ancho de
+tabulación), la **parte web de `FUN-M-11`** (`.mycignore`, que necesita decidir su semántica
+y tocar el backend .NET), y las correcciones ya confirmadas en desktop: la navegación por
+pestaña (`DEF-039`/`DEF-040`/`DEF-041`), `DEF-043`, `DEF-049` y `DEF-050`.
 Van juntas porque es **una sola sesión de trabajo**: un worktree de `web-cloud`, la misma
 receta de [[Reflejar cambios de desktop a web]] y una única verificación con
 `npm ci` + `tsc` + `next build`. Sube la versión **de web**, no la de desktop.
+
+`DEF-046` (papelera) y `DEF-051` (confirmaciones) **no entran acá**: son de desktop: uno vive
+en el indexador SQLite local y el otro en los permisos de Tauri. Habrá que revisar si web
+tiene sus propios equivalentes, pero no es un reflejo.
 
 #### H · Identidad y permisos — `FUN-M-10` + `FUN-L-02` · minor · **web**
 `FUN-M-10` resuelve *quién sos* (login con GitHub) y `FUN-L-02` *qué podés* (carpeta
@@ -996,18 +1006,18 @@ así que quedan absorbidas por cualquier bloque de su tamaño o mayor.
 visor, ver la extensión dejó de ser un extra.)*
 
 > [!note] Lo que no entra en esta agrupación
-> **Defectos**: hay seis abiertos. `DEF-046` (lo eliminado no se puede recuperar) es
-> **pérdida de datos y no espera a ningún bloque**: se arregla apenas se pueda. `DEF-047`
-> (menú contextual fuera de pantalla) y `DEF-048` (falta margen inferior) son visuales y
-> sueltos — dos correcciones pequeñas que caben en cualquier release. Los otros tres están
-> en un bloque. `DEF-042` en el A y
+> **Defectos**: quedan **cinco abiertos** (2026-08-03). `DEF-047` (menú contextual fuera de
+> pantalla) y `DEF-048` (falta margen inferior) son visuales y sueltos — dos correcciones
+> pequeñas que caben en cualquier release. Otros dos están en un bloque: `DEF-042` en el A y
 > `DEF-044` en el F, porque comparten trabajo con las funcionalidades de esos bloques.
 > **`DEF-045` va solo**: llegó a encabezar el bloque M, pero salió al apoyarse `FUN-M-17` en
 > `aliases` — la conversión dejó de generar barras verticales, así que el defecto ya no
 > bloquea nada. Sigue abierto y vale arreglarlo por su cuenta; al hacerlo hay que subir
-> además `FRAMEWORK_IA_VERSION`, para que las skills documenten `\|`. Los otros 23
-> `DEF-*` están implementados; `DEF-039`, `DEF-040` y `DEF-041` esperan confirmación en la
-> app, que es verificación y no trabajo pendiente. Ver [[bugs-progreso]].
+> además `FRAMEWORK_IA_VERSION`, para que las skills documenten `\|`.
+> El resto de los `DEF-*` está **confirmado en desktop**, incluidos los del 2026-08-03
+> (`DEF-046` pérdida de datos en la papelera, `DEF-049`, `DEF-050` y `DEF-051` borrar sin
+> preguntar). Lo que les queda es el **reflejo a web**, que vive en el bloque G. Ver
+> [[bugs-progreso]].
 > **`FUN-M-11`** aparece solo en el bloque G porque su parte desktop ya está hecha.
 
 ---

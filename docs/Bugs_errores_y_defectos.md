@@ -161,7 +161,13 @@ Cambiar el ancho de tabulación **no se nota en los documentos que ya existen**.
 Al cambiar el ancho de tabulación, en la vista de lectura **desaparecen los indicadores para plegar y desplegar los títulos**.
 
 # DEF-051
-Las confirmaciones no aparecen y la acción **no se ejecuta**: borrar una carpeta, borrar una Espora o vaciar la papelera no hacen nada, sin ningún mensaje. En el registro de la aplicación queda `dialog.confirm not allowed`.
+**Ninguna confirmación aparece, y la acción se ejecuta igual.** Borrar una carpeta la borra directo, sin preguntar; lo mismo al borrar una Espora o al eliminar algo definitivamente desde la papelera. No hay diálogo, no hay aviso y no hay vuelta atrás.
+
+En el registro de la aplicación queda `dialog.confirm not allowed`.
+
+> [!danger] Es destructivo, no cosmético
+> No es que falte un cartel: es que **se borra sin que nadie lo confirme**, que es lo
+> contrario de lo que el código creía estar haciendo.
 
 
 ---

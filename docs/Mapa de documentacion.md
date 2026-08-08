@@ -88,12 +88,15 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
 ## Estado y releases
 
 - [[Estado del proyecto]] — situación actual, pendientes y deuda.
-- [[Version 1.5.0]] — release actual de desktop (ancho de tabulación), **sin confirmar en la app**.
-- [[Version 1.4.0]] — autoactualización y selección de versión; **publicada en R2**, pendiente
-  de comprobar que una instalación detecte y aplique una versión posterior.
-- [[Version 1.3.0]] — Esporas, **sin confirmar en la app**.
+- [[Version 1.5.0]] — release actual de desktop (ancho de tabulación). Salió fallando y se
+  **rehizo y confirmó** el 2026-08-03; el binario publicado en R2 todavía no lleva esas
+  correcciones (hace falta una `1.5.1`).
+- [[Version 1.4.0]] — autoactualización y selección de versión; **confirmada de punta a
+  punta**: una instalación detectó y aplicó la versión posterior. Sin probar solo el modo
+  avanzado (`FUN-M-16`).
+- [[Version 1.3.0]] — Esporas, **confirmadas en la app**.
 - [[Version 1.2.0]] — metadatos YAML, **confirmado en la app**.
-- [[Version 1.1.5]] — navegación por pestaña, **sin confirmar en la app**.
+- [[Version 1.1.5]] — navegación por pestaña, **confirmada en la app**.
 - [[Version 1.1.1]] — rendimiento de la apertura del vault.
 - [[Version 1.1.0]] — línea de IA, grafo, devtools.
 - [[Version 1.0.0]] — el primer release final, común a las dos versiones.

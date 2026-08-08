@@ -11,7 +11,7 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-015 | Colapsar títulos `#` también en vista de lectura | ambas (frontend) | ✅ 🌐 |
 | DEF-015b | Ícono de plegar/desplegar personalizado y centrado vertical | ambas (frontend) | ✅ 🌐 |
 | DEF-017 | El embed `.excalidraw` no se dibuja en la vista en vivo; crear diagrama abre pestaña | ambas (frontend) | ✅ 🌐 (pre-separación) |
-| DEF-018 | Se pierde el progreso de exportar vault al cerrar el menú | ambas (frontend) | 🛠️🌐 ⏳ pend. evaluación |
+| DEF-018 | Se pierde el progreso de exportar vault al cerrar el menú | ambas (frontend) | ✅ 🌐 |
 | DEF-020 | El panel de Configuración se cierra de golpe, sin animación de salida | ambas (frontend) | ✅ 🌐 (pre-separación) |
 | DEF-021 | Callout con tipo "contamina" las `>` siguientes separadas | ambas (frontend) | ✅ 🌐 |
 | DEF-022 | No se renderizan callouts anidados en edición en vivo | ambas (frontend) | ✅ 🌐 |
@@ -28,19 +28,19 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-036b | Falta feedback del lugar donde se sueltan los archivos | ambas (frontend) | ✅ 🌐 |
 | DEF-037 | Conflictos de scroll/selección al abrir el buscador en el archivo | ambas (frontend) | ✅ 🌐 |
 | DEF-038 | Límite de zoom-out del grafo insuficiente con muchos nodos | ambas (frontend) | ✅ 🌐 |
-| DEF-039 | Al volver a una pestaña se pierde la posición de lectura | ambas (frontend) | 🛠️ desktop (1.1.5), sin confirmar |
-| DEF-040 | El historial de atrás/adelante es global en vez de por pestaña | ambas (frontend) | 🛠️ desktop (1.1.5), sin confirmar |
-| DEF-041 | La pestaña de previsualización no reemplaza, abre una nueva | ambas (frontend) | 🛠️ desktop (1.1.5), **endurecido sin causa raíz confirmada** |
+| DEF-039 | Al volver a una pestaña se pierde la posición de lectura | ambas (frontend) | ✅ desktop (2026-08-03) · reflejo a web pendiente |
+| DEF-040 | El historial de atrás/adelante es global en vez de por pestaña | ambas (frontend) | ✅ desktop (2026-08-03) · reflejo a web pendiente |
+| DEF-041 | La pestaña de previsualización no reemplaza, abre una nueva | ambas (frontend) | ✅ desktop (2026-08-03) — se confirmó pese a haberse endurecido sin causa raíz · reflejo a web pendiente |
 | DEF-042 | El progreso del indexado sale en todos los botones de vault; falta una pantalla de carga | ambas (frontend) | ⬜ pendiente |
-| DEF-043 | El ícono de las Esporas es un brote de planta, no evoca una espora | ambas (frontend) | 🛠️ desktop, sin confirmar — `Sprout` → `CircleDot` |
+| DEF-043 | El ícono de las Esporas es un brote de planta, no evoca una espora | ambas (frontend) | ✅ desktop (2026-08-03) · reflejo a web pendiente |
 | DEF-044 | Al cambiar de vault siguen abiertas las pestañas del vault anterior | ambas (frontend) | ⬜ pendiente — bloque F de la agrupación |
 | DEF-045 | `[[destino\|alias]]` dentro de una tabla: o rompe la tabla, o rompe el grafo | ambas (frontend) | ⬜ pendiente — causa raíz ya identificada |
-| DEF-046 | Lo eliminado no aparece en la papelera, ni en la de Windows: no hay recuperación | desktop | 🛠️ corregido **las dos mitades**, sin confirmar — el indexador ya no borra la papelera, y el borrado definitivo va a la del sistema |
+| DEF-046 | Lo eliminado no aparece en la papelera, ni en la de Windows: no hay recuperación | desktop | ✅ desktop (2026-08-03) — las dos mitades |
 | DEF-047 | El menú contextual se sale de la pantalla en los archivos de abajo | ambas (frontend) | ⬜ pendiente |
 | DEF-048 | Falta margen inferior en toda la app: el contenido queda pegado al borde | ambas (frontend) | ⬜ pendiente |
-| DEF-049 | El ancho de tabulación no cambia nada en los documentos ya escritos | ambas (frontend) | 🛠️ corregido, sin confirmar — la sangría al leer es CSS y cambia todo al instante |
-| DEF-050 | Al cambiar la tabulación desaparecen los indicadores de plegado en lectura | ambas (frontend) | 🛠️ corregido, sin confirmar — las flechas se reponen tras cada render |
-| DEF-051 | Ninguna confirmación funciona: borrar carpeta, borrar Espora o vaciar papelera no hacen nada | desktop | 🛠️ corregido, sin confirmar — faltaba `dialog:allow-confirm` en las capacidades |
+| DEF-049 | El ancho de tabulación no cambia nada en los documentos ya escritos | ambas (frontend) | ✅ desktop (2026-08-03) · reflejo a web pendiente |
+| DEF-050 | Al cambiar la tabulación desaparecen los indicadores de plegado en lectura | ambas (frontend) | ✅ desktop (2026-08-03) · reflejo a web pendiente |
+| DEF-051 | Ninguna confirmación aparece y se borra igual: carpeta, Espora o papelera, sin preguntar | desktop | ✅ desktop (2026-08-03) — permiso + `confirmar()` que espera |
 
 ## Notas por bug
 
@@ -338,8 +338,9 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
   lote en un checkpoint (para no alternar de rama en cada bug). Archivos divergentes a
   vigilar al reflejar: `NoteEditor.tsx` difiere entre ramas (aplicar el cambio a mano,
   no copiar el archivo).
-- **DEF-018** (desktop `ae3f3df`, web `c3109c1`) — ⏳ PENDIENTE DE EVALUACIÓN (el
-  usuario aún no confirmó en runtime): el progreso de export pasó de estado local de
+- **DEF-018** (desktop `ae3f3df`, web `c3109c1`) — ✅ evaluado y correcto por el usuario;
+  la tabla decía "pendiente" y [[Estado del proyecto]] decía lo contrario, así que se
+  unifica acá: el progreso de export pasó de estado local de
   `VaultSection` a `exportStore` (global) mostrado por `ImportDialogs` a nivel de app.
   `VaultSection.tsx` diverge entre ramas (desktop tiene export-a-carpeta + toggle
   abrir-último; web solo ZIP) → se aplicó a mano en cada una; `exportStore.ts` (nuevo)

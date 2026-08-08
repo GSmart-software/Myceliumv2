@@ -6,7 +6,7 @@ Foto de dónde está Mycelium hoy. Para el detalle de cada tema, seguir los enla
 
 ## Resumen
 
-- **Versión: desktop `1.4.0`** ([[Version 1.4.0]]) · **web `1.0.0`** ([[Version 1.0.0]]).
+- **Versión: desktop `1.5.0`** ([[Version 1.5.0]]) · **web `1.0.0`** ([[Version 1.0.0]]).
   Las líneas se separaron: todo lo nuevo es solo-desktop.
 - [[Version 1.0.0]] fue el primer release final en **ambas** versiones, con instaladores
   de escritorio generados.
@@ -15,9 +15,13 @@ Foto de dónde está Mycelium hoy. Para el detalle de cada tema, seguir los enla
 - Desde entonces, el foco está en la línea de **IA sobre el vault**
   ([[Mycelium como memoria de la IA]]), que avanza **solo en desktop**.
 
-- **Instaladores de 1.1.0 generados** (MSI 9.8 MB y NSIS 8.4 MB, preservados en
-  `installers/v1.1.0/`). Son los primeros que incluyen las **devtools en producción**.
-  Ver [[Generar instaladores desktop]]. **Los de 1.1.1 todavía no se generaron.**
+- **Ya no hacen falta instaladores manuales**: desde la 1.4.0 la app se autoactualiza, y el
+  circuito quedó verificado con la 1.5.0. Los instaladores generados se preservan en
+  `installers/v<version>/` (fuera de git). Ver [[Generar instaladores desktop]] y
+  [[Publicar una version]].
+- **La 1.5.0 publicada en R2 está desactualizada**: no lleva las correcciones del
+  2026-08-03. Hasta que salga una `1.5.1`, quien se actualice recibe una versión que borra
+  sin preguntar (`DEF-051`).
 
 ## Implementado después de 1.0.0 (solo desktop)
 
@@ -26,40 +30,36 @@ Foto de dónde está Mycelium hoy. Para el detalle de cada tema, seguir los enla
 | [[terminal-integrada]] (`FUN-L-07`) | Implementada y confirmada por el usuario en lo esencial; pasó por varias iteraciones (panel de consolas, shells de fondo, renombrar, selector de shell, tema reactivo) |
 | [[ia-framework-vault]] (`FUN-L-08`) | Implementada, framework en **v1.4.0** (describe las propiedades del frontmatter y las Esporas); pendiente de prueba de los comandos nuevos. **El vault de este repo tiene instalada la v1.2.0**: hay que regenerar desde Configuración → Vault |
 | [[metadata-yaml]] (`FUN-M-04`) | **Confirmada** en desktop (1.2.0) el 2026-08-02, pendiente de reflejo a web: el frontmatter pasa a ser propiedades (tarjeta en lectura y en vivo, pestaña PROPIEDADES, tabla `propiedades` en el índice, filtro `clave:valor`). Ver [[Version 1.2.0]] |
-| [[esporas-plantillas]] (`FUN-M-03`) | Implementada en desktop (1.3.0), **sin confirmar por el usuario**: las notas de una carpeta configurable son plantillas con variables, usables desde el panel del rail, la barra del editor y el clic derecho de una carpeta. Ver [[Version 1.3.0]] |
-| [[autoactualizacion]] (`FUN-L-14` + `FUN-M-16`) | **Publicada** el 2026-08-03: bucket `mycelium-releases` creado, claves generadas y la 1.4.0 en R2 con sus firmas y manifiestos, **verificada la publicación** (los tres JSON, la firma y el SHA-256 del instalador remoto). Mycelium comprueba una vez al día, muestra el changelog renderizado y ofrece instalar; en modo avanzado (siete clics en el número de versión) se instala cualquier versión publicada, incluida una anterior. **Falta probar la otra mitad del circuito**: que una instalación detecte y aplique una versión posterior — hace falta publicar una 1.4.1. Ver [[Version 1.4.0]] |
-| [[Publicar una version]] (`FUN-L-15`) | `npm run publicar` compila, firma, sube y **verifica** (incluido el SHA-256 del instalador ya publicado). Probado en modo simulacro; **su primera publicación real será la próxima versión** |
+| [[esporas-plantillas]] (`FUN-M-03`) | **Confirmada** en desktop (1.3.0) el 2026-08-03: las notas de una carpeta configurable son plantillas con variables, usables desde el panel del rail, la barra del editor y el clic derecho de una carpeta. Ver [[Version 1.3.0]] |
+| [[autoactualizacion]] (`FUN-L-14` + `FUN-M-16`) | **Circuito confirmado de punta a punta** el 2026-08-03: se publicaron la 1.4.0 y la 1.5.0 en R2 y el usuario comprobó en la app que una instalación **detecta y aplica** la versión posterior. Mycelium comprueba una vez al día, muestra el changelog renderizado y ofrece instalar. Lo único que sigue **sin probar** es el modo avanzado (`FUN-M-16`, siete clics en el número de versión, para instalar una versión cualquiera o anterior): su diálogo de confirmación estuvo roto hasta `DEF-051`. Ver [[Version 1.4.0]] |
+| [[Publicar una version]] (`FUN-L-15`) | `npm run publicar` compila, firma, sube y **verifica** (incluido el SHA-256 del instalador ya publicado). **Confirmado en uso real**: publicó la 1.4.0 y la 1.5.0 |
 | [[mycignore]] (`FUN-M-11`) | Implementada en desktop (parser con tests); **parte web pendiente**. Su default se amplió en 1.1.1 |
 | Rendimiento de la apertura del vault (`FUN-M-12`) | Implementada en desktop (1.1.1), **sin confirmar por el usuario**: no se pudo medir el efecto real. Ver [[Rendimiento de la apertura del vault]] |
-| Navegación por pestaña (`DEF-039/040/041`) | Implementada en desktop (1.1.5), **sin confirmar**: scroll conservado, historial propio por pestaña con botones. `DEF-041` quedó endurecido sin causa raíz confirmada. Ver [[Version 1.1.5]] |
+| Navegación por pestaña (`DEF-039/040/041`) | **Confirmada** en desktop (1.1.5) el 2026-08-03: scroll conservado, historial propio por pestaña con botones. `DEF-041` quedó endurecido sin causa raíz confirmada, pero el síntoma no reapareció. Ver [[Version 1.1.5]] |
 | Dock de pestañas del panel lateral | Generalizado a cualquier sección (`SidebarDock`) |
 
 ## Pendiente / próximos pasos
 
-0. **Cerrar el circuito de la autoactualización** (`FUN-L-14`). La puesta en marcha está
-   hecha y la 1.4.0 publicada y verificada del lado del bucket. Falta la mitad del cliente,
-   y son tres cosas en este orden:
-   1. **Instalar la 1.4.0 a mano** (`installers/v1.4.0/`). Es la primera con clave pública:
-      ninguna anterior puede autoactualizarse a ella. Es la última instalación manual.
-   2. **Publicar una 1.4.1** con `npm run publicar` — será su primera ejecución real.
-   3. **Comprobar que la 1.4.0 instalada la detecta**, muestra el changelog, la instala y
-      reinicia. Recién ahí el circuito está verificado de punta a punta.
-
-   Dos cosas pendientes que no dependen de eso: la **copia de seguridad de la clave
-   privada** fuera de la máquina (si se pierde, nadie puede volver a actualizarse) y
-   decidir si el `pubkey` y el `endpoint` se commitean (hoy son una modificación local:
-   un checkout limpio compila con el updater apagado).
+0. **Copia de seguridad de la clave privada de firma** fuera de la máquina: si se pierde,
+   **nadie** puede volver a actualizarse y no hay forma de recuperarlo. Es lo más urgente
+   que queda del circuito de actualización, que por lo demás ya está confirmado de punta a
+   punta (se publicaron la 1.4.0 y la 1.5.0, y una instalación detectó y aplicó la
+   posterior). Sigue abierto decidir si el `pubkey` y el `endpoint` se commitean (hoy son
+   una modificación local: un checkout limpio compila con el updater apagado).
    Ojo: desde ahora `tauri build` **falla sin la clave**, así que esto bloquea también
    generar cualquier instalador.
-1. **Comprobar 1.3.0 en la app** (`FUN-M-03`, Esporas): el paso a paso de los 13
-   criterios está en [[Version 1.3.0]]. Lo más delicado es la **fusión de propiedades**
-   al insertar (criterios 8-10) y la **no-regresión** del criterio 13: crear una nota con
-   el botón "+" tiene que seguir siendo un clic sin diálogo. Después, **reflejar a web**.
-2. **Comprobar 1.2.0 en la app** (`FUN-M-04`, metadatos YAML): confirmada por el usuario
-   el 2026-08-02; queda **reflejar a web** (la parte del índice va al backend .NET).
-3. **Comprobar 1.1.5 en la app** (`DEF-039/040/041`): el paso a paso está en
-   [[Version 1.1.5]]. `DEF-041` es el que más riesgo tiene de seguir vivo: se endureció
-   sin haber reproducido la causa raíz. Después, **reflejar a web**.
+1. **Publicar una 1.5.1**: la 1.5.0 que está en R2 **no** lleva las correcciones del
+   2026-08-03 (`DEF-046`, `DEF-049`, `DEF-050`, `DEF-051` y la papelera del sistema
+   operativo). Quien se actualice hoy recibe una versión con el borrado sin confirmar.
+2. **Probar el modo avanzado del updater** (`FUN-M-16`): siete clics en el número de
+   versión del pie → lista de versiones publicadas → instalar una anterior. Es lo único de
+   la [[Version 1.4.0]] sin confirmar; su diálogo estuvo roto hasta `DEF-051`, así que
+   nunca llegó a hacer nada.
+3. **Reflejar a web** todo lo confirmado en desktop desde la 1.1.0. Es el bloque más
+   grande de deuda: `FUN-M-04` (metadatos YAML, con su parte de índice en el backend .NET),
+   `FUN-M-03` (Esporas), la navegación por pestaña (`DEF-039/040/041`) y las correcciones
+   `DEF-043`/`DEF-046`/`DEF-049`/`DEF-050`/`DEF-051`. La receta está en
+   [[Reflejar cambios de desktop a web]] y la lista de archivos divergentes en [[RAMAS]].
 4. **Verificar 1.1.1 en la app**: abrir un vault grande y comprobar que el indexado es
    más rápido y que se ve el avance. El `.mycignore` de este vault **ya se amplió**
    (2026-08-01) con `node_modules/`, `target/`, `out/`, `dist/`, `installers/`,

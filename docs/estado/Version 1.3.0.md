@@ -13,11 +13,13 @@
 Un solo tema: **las Esporas**, las plantillas de notas. Spec en [[esporas-plantillas]]
 (`FUN-M-03` · `TEMPLATES-ESPORAS`).
 
-> [!warning] Implementado, **sin confirmar por el usuario**
-> El código está en `desktop-tauri` y la verificación automática está en verde, pero el
-> comportamiento visible **todavía no lo probó el usuario en la app**. El paso a paso de
-> los 13 criterios está más abajo. Hasta esa confirmación no se refleja a `web-cloud`
-> (ver [[Reflejar cambios de desktop a web]]).
+> [!success] Confirmada por el usuario el 2026-08-03
+> Las Esporas se crean, se aplican desde el panel, la barra del editor y el clic derecho de
+> una carpeta, y crear una nota con el "+" sigue siendo un clic sin diálogo (criterio 13).
+> En esa prueba salieron dos defectos ya corregidos: `DEF-051` (no preguntaba al borrar) y
+> el "error desconocido" al crear una Espora tras un borrado, causado por la corrección de
+> `DEF-046`. Pendiente: **reflejar a `web-cloud`** (ver
+> [[Reflejar cambios de desktop a web]]).
 
 ## Por qué sube un minor y no un patch
 

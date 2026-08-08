@@ -5,10 +5,11 @@
 Un solo tema: **leer varias notas en paralelo deja de entorpecerse**. Spec en
 `docs/features/navegacion-por-pestana.md`.
 
-> [!warning] Pendiente de comprobación del usuario
-> `tsc` quedó en verde, pero **esta capa no tiene tests automáticos y `tsc` no prueba
-> comportamiento**. Los tres defectos están **sin confirmar en la app**. El paso a paso
-> para verificarlos está más abajo.
+> [!success] Confirmada por el usuario el 2026-08-03
+> Los tres defectos quedaron **comprobados en la app**: la navegación por pestañas funciona
+> como se especificó. `DEF-041` se había endurecido sin reproducir la causa raíz y aun así
+> el síntoma no volvió a aparecer. El paso a paso que se usó está más abajo.
+> Pendiente: **reflejar a `web-cloud`**.
 
 ## Por qué salta cuatro patches y ningún minor
 

@@ -4,25 +4,30 @@
 
 Un solo tema: **el ancho de tabulación se configura** (`FUN-S-02` · `EDITOR-TAB-WIDTH`).
 
-> [!warning] Probada por el usuario: no cumple lo que prometía
-> `DEF-049` — **no se nota en los documentos ya escritos**, que era el objetivo. La causa no
+> [!warning] Probada por el usuario: no cumplía lo que prometía · **corregido después**
+> Lo de abajo es lo que se encontró al probarla. Los dos defectos ya están resueltos y
+> confirmados en `desktop-tauri` (2026-08-03), pero **el binario 1.5.0 que está en R2 no los
+> lleva**: hace falta publicar una `1.5.1`.
+>
+> `DEF-049` — **no se notaba en los documentos ya escritos**, que era el objetivo. La causa no
 > es un fallo de código sino de esta misma spec: `tabSize` solo reescala tabuladores
 > literales y el markdown se indenta con espacios; `indentUnit` solo afecta a lo que se
 > escriba después. Lo que hacía falta era cambiar **cómo se ve la sangría**, y eso se
 > controla por CSS.
 >
-> `DEF-050` — al cambiarlo desaparecen los indicadores de plegado en la vista de lectura.
+> `DEF-050` — al cambiarlo desaparecían los indicadores de plegado en la vista de lectura.
 >
-> Y queda pedido que el valor se pueda **escribir libremente** en vez de elegirse entre
-> 2/4/8, con 4 por defecto. Ver [[BACKLOG]] y [[bugs-progreso]] antes de rehacerlo.
+> Ambos se rehicieron el mismo día: la sangría se controla por CSS (`--mic-tab-width`), el
+> valor se **escribe libremente** entre 1 y 16 con **4 por defecto**, y los plegados
+> sobreviven al cambio. Ver [[bugs-progreso]].
 
-> [!important] Esta versión existe sobre todo para cerrar el circuito de la autoactualización
-> `FUN-L-14` quedó verificada solo por la mitad: sabemos que **publicar** funciona, pero no
-> que una instalación **detecte y aplique** una versión posterior — para eso hacían falta
-> dos versiones reales, y esta es la segunda.
+> [!success] Cerró el circuito de la autoactualización
+> Esta versión existía sobre todo para verificar la otra mitad de `FUN-L-14`, y lo hizo: el
+> 2026-08-03 una instalación **detectó y aplicó** esta versión posterior. `FUN-L-14` y
+> `FUN-L-15` quedan confirmadas —esta fue además la **primera publicada con
+> `npm run publicar`**, en su primera ejecución real—.
 >
-> Es además la **primera publicada con `npm run publicar`** (`FUN-L-15`), así que estrena
-> el script en su primera ejecución real.
+> Queda sin probar solo el **modo avanzado** (`FUN-M-16`), roto hasta `DEF-051`.
 
 ## Por qué sube minor y no patch
 
@@ -94,21 +99,20 @@ visor, y no se mezclan ambos en un archivo que después edite otra herramienta.
 4. Abrir el editor de CSS (Configuración → Apariencia → Snippets): usa el mismo ancho.
 5. El valor sobrevive a cerrar y abrir Mycelium.
 
-## Y lo que esta versión sirve para probar
+## Lo que esta versión sirvió para probar
 
-Lo importante no es la tabulación, es esto:
+Lo importante no era la tabulación, era esto — y **funcionó** el 2026-08-03:
 
-1. Tener la **1.4.0 instalada** (a mano, desde `installers/v1.4.0/`).
-2. Publicar esta **1.5.0** con `npm run publicar`.
-3. Abrir la 1.4.0 y comprobar que **la detecta**, muestra este changelog, la instala y
-   reinicia en 1.5.0.
+1. La **1.4.0 instalada** a mano (desde `installers/v1.4.0/`), la última instalación manual.
+2. Esta **1.5.0** publicada con `npm run publicar`, primera ejecución real del script.
+3. La 1.4.0 **la detectó**, mostró este changelog, la instaló y reinició en 1.5.0.
 
-Si eso pasa, `FUN-L-14` queda verificada de punta a punta y ninguna versión posterior
-necesita instalación manual. Paso a paso en [[Publicar una version]].
+Con eso `FUN-L-14` y `FUN-L-15` quedan verificadas de punta a punta y ninguna versión
+posterior necesita instalación manual. Paso a paso en [[Publicar una version]].
 
 ## Relacionadas
 
-- [[Version 1.4.0]] — la autoactualización, que esta versión termina de verificar.
+- [[Version 1.4.0]] — la autoactualización, que esta versión terminó de verificar.
 - [[Publicar una version]] — cómo se publica, ahora con el script.
 - [[Versionado del sistema]] — por qué esto es minor y no patch.
 - [[BACKLOG]] — `FUN-S-02` y el resto del inventario.
