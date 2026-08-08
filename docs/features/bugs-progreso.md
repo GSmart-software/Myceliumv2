@@ -35,11 +35,11 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-043 | El ícono de las Esporas es un brote de planta, no evoca una espora | ambas (frontend) | 🛠️ desktop, sin confirmar — `Sprout` → `CircleDot` |
 | DEF-044 | Al cambiar de vault siguen abiertas las pestañas del vault anterior | ambas (frontend) | ⬜ pendiente — bloque F de la agrupación |
 | DEF-045 | `[[destino\|alias]]` dentro de una tabla: o rompe la tabla, o rompe el grafo | ambas (frontend) | ⬜ pendiente — causa raíz ya identificada |
-| DEF-046 | Lo eliminado no aparece en la papelera, ni en la de Windows: no hay recuperación | desktop | 🛠️ corregido, sin confirmar — la limpieza del indexador ya no borra lo que está en la papelera |
+| DEF-046 | Lo eliminado no aparece en la papelera, ni en la de Windows: no hay recuperación | desktop | 🛠️ corregido **las dos mitades**, sin confirmar — el indexador ya no borra la papelera, y el borrado definitivo va a la del sistema |
 | DEF-047 | El menú contextual se sale de la pantalla en los archivos de abajo | ambas (frontend) | ⬜ pendiente |
 | DEF-048 | Falta margen inferior en toda la app: el contenido queda pegado al borde | ambas (frontend) | ⬜ pendiente |
 | DEF-049 | El ancho de tabulación no cambia nada en los documentos ya escritos | ambas (frontend) | 🛠️ corregido, sin confirmar — la sangría al leer es CSS y cambia todo al instante |
-| DEF-050 | Al cambiar la tabulación desaparecen los indicadores de plegado en lectura | ambas (frontend) | ⬜ pendiente — regresión de `FUN-S-02` |
+| DEF-050 | Al cambiar la tabulación desaparecen los indicadores de plegado en lectura | ambas (frontend) | 🛠️ corregido, sin confirmar — las flechas se reponen tras cada render |
 
 ## Notas por bug
 
@@ -77,16 +77,29 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
   > deshacer de [[auditoria-y-relinkeado]] en vez de inventar los suyos. La opción lo dice
   > en su propio texto, para no volver a prometer lo que no cumple.
 
-- **DEF-050 — regresión de `FUN-S-02`, sin causa raíz confirmada.** Lo que se descartó
-  leyendo el código: `attachHeadingFolds` (`lib/editor/headingFold.ts`) **es idempotente**
-  para las flechas —salta las cabeceras que ya tienen una (línea 79)—, así que volver a
-  ejecutarlo no debería borrarlas.
-  Dos pistas para quien lo tome: (a) el `Set` de secciones plegadas se **recrea** en cada
-  llamada, y los manejadores de clic viejos siguen apuntando al anterior — reejecutarlo
-  resetea el estado de plegado; (b) `NoteEditor` ahora está suscrito a `tabWidth`, así que
-  cambiarlo **re-renderiza el componente**, y el efecto que llama a `attachHeadingFolds`
-  depende de `vaultNotas`/`vaultCarpetas`, que pueden traer referencias nuevas. Hay que
-  reproducirlo antes de tocar nada.
+- **DEF-050 — las flechas se inyectan después de que React pinte, y un re-render se las
+  lleva.** Confirmado por reproducción: seguía pasando tras rehacer `FUN-S-02`, así que no
+  dependía de `tabSize` ni del compartimento.
+
+  El mecanismo: `attachHeadingFolds` añade las flechas al DOM **después** del render. Si
+  algo reescribe el HTML del preview —cambiar cualquier preferencia a la que `NoteEditor`
+  esté suscrito basta para re-renderizarlo— las flechas se van con él. Y el efecto que las
+  repone **no volvía a correr**, porque sus dependencias (`previewHtml`, `mode`, …) seguían
+  exactamente iguales: el contenido no había cambiado.
+
+  **Corregido** haciendo la reposición auto-reparable en vez de perseguir cada causa:
+  - `attachHeadingFolds` pasa a ser **idempotente de verdad**. Ya saltaba las cabeceras con
+    flecha, pero recreaba el conjunto de secciones plegadas en cada llamada, así que
+    repetirla reseteaba el plegado. Ahora ese conjunto vive en un `WeakMap` por contenedor
+    —`WeakMap` para no retener nodos de notas ya cerradas— y se limpia de los que dejaron
+    de colgar del DOM.
+  - Se llama desde un efecto **sin lista de dependencias**, es decir, tras cada render. Como
+    repetirla no cuesta ni pierde estado, repone lo que falte sin importar qué se lo llevó.
+
+  > [!note] Por qué auto-reparable y no "arreglar la causa"
+  > La causa concreta —qué re-render exacto reescribe el HTML— es de las internas de React
+  > y podría cambiar entre versiones. Un efecto que repone lo que falta sobrevive a eso; una
+  > corrección atada al re-render de hoy, no.
 
 - **DEF-046 — el indexador borra la papelera** (causa raíz confirmada el 2026-08-03 leyendo
   el código y el disco). El ciclo completo:
@@ -120,10 +133,16 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
   Las dos partes del defecto tienen causas **distintas**, y conviene no confundirlas:
   - *No aparece en la papelera* → lo de arriba. La limpieza del indexador tiene que
     **excluir las notas que están en la papelera**, no tratarlas como borradas.
-  - *Tampoco está en la papelera de Windows* → `borrar_definitivo` (`vault_fs.rs:195`) usa
-    `std::fs::remove_file`, que borra de verdad. Es una decisión de diseño no declarada, no
-    un fallo: si se quiere que vaya a la papelera del sistema hace falta un crate que la
-    use. Como red de seguridad **la papelera propia ya alcanza**, siempre que funcione.
+  - *Tampoco está en la papelera de Windows* → `borrar_definitivo` usaba
+    `std::fs::remove_file`, que borra de verdad. **Corregido el 2026-08-03** a pedido del
+    usuario: ahora usa el crate `trash`, así que sacar algo de la papelera de Mycelium lo
+    manda a la del sistema y queda una última red de recuperación fuera de la app.
+
+    > [!note] Si el sistema no puede aceptarlo, se borra igual
+    > Una unidad de red o un sistema de archivos sin papelera harían fallar el envío. En ese
+    > caso se borra permanentemente —el usuario pidió sacarlo de ahí y la operación tiene que
+    > completarse— pero **el motivo se registra en el log**: lo que no se hace es fingir que
+    > fue a la papelera del sistema cuando no fue.
 
 - **DEF-045 — causa raíz ya localizada** (2026-08-03, comprobada ejecutando el pipeline real):
   hay **cuatro** sitios que interpretan `[[destino|alias]]`, y no leen lo mismo.
