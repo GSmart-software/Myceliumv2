@@ -160,6 +160,9 @@ Cambiar el ancho de tabulación **no se nota en los documentos que ya existen**.
 # DEF-050
 Al cambiar el ancho de tabulación, en la vista de lectura **desaparecen los indicadores para plegar y desplegar los títulos**.
 
+# DEF-051
+Las confirmaciones no aparecen y la acción **no se ejecuta**: borrar una carpeta, borrar una Espora o vaciar la papelera no hacen nada, sin ningún mensaje. En el registro de la aplicación queda `dialog.confirm not allowed`.
+
 
 ---
 

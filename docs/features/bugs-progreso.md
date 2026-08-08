@@ -40,8 +40,36 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-048 | Falta margen inferior en toda la app: el contenido queda pegado al borde | ambas (frontend) | ⬜ pendiente |
 | DEF-049 | El ancho de tabulación no cambia nada en los documentos ya escritos | ambas (frontend) | 🛠️ corregido, sin confirmar — la sangría al leer es CSS y cambia todo al instante |
 | DEF-050 | Al cambiar la tabulación desaparecen los indicadores de plegado en lectura | ambas (frontend) | 🛠️ corregido, sin confirmar — las flechas se reponen tras cada render |
+| DEF-051 | Ninguna confirmación funciona: borrar carpeta, borrar Espora o vaciar papelera no hacen nada | desktop | 🛠️ corregido, sin confirmar — faltaba `dialog:allow-confirm` en las capacidades |
 
 ## Notas por bug
+
+- **DEF-051 — `dialog:default` no incluye `allow-confirm`** (encontrado el 2026-08-03 en el
+  log de arranque, no reportado: `dialog.confirm not allowed. Command not found`).
+
+  Tauri **enruta `window.confirm` al plugin de diálogos**, y ese comando no estaba
+  permitido. Como el error se lanza, el manejador entero muere: la confirmación no aparece
+  y la acción tampoco se ejecuta. Silencioso de los dos lados.
+
+  Afectaba a **cinco** sitios, y ninguno era menor:
+  `EsporasPanel` (borrar una Espora) · `ExplorerPanel` (borrar una carpeta) · `TrashPanel`
+  (**vaciar la papelera / borrar definitivo**) · `UpdaterSection` (**instalar una versión
+  elegida**, `FUN-M-16`) · `VaultSection`.
+
+  > [!warning] La trampa: el conjunto `default` dice que están todos y no es cierto
+  > La descripción de `dialog:default` en el propio plugin afirma *"All dialog types are
+  > enabled"*, pero su lista real es `["allow-message", "allow-save", "allow-open"]` — sin
+  > `confirm` ni `ask`. Leer la descripción y no la lista es lo que dejó esto pasar.
+  > Comprobado en `~/.cargo/registry/…/tauri-plugin-dialog-2.7.2/permissions/default.toml`.
+
+  Corregido añadiendo `dialog:allow-confirm` y `dialog:allow-ask` a
+  `src-tauri/capabilities/default.json`.
+
+  > [!note] Por qué nadie lo había visto
+  > `window.prompt` **sí** funciona (se comprobó con "Nueva carpeta", ver
+  > [[Tauri y el WebView]]), así que la conclusión razonable era que los diálogos del
+  > navegador estaban bien. `confirm` falla y `prompt` no: no hay forma de deducirlo sin
+  > mirar los permisos o el log.
 
 - **DEF-049 — el ancho de tabulación casi no tiene efecto, y la culpa es de la spec.**
   CodeMirror separa dos cosas y `FUN-S-02` fijó las dos, pero ninguna hace lo que el usuario
