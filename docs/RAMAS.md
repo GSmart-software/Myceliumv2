@@ -56,7 +56,7 @@ entre ramas):
   espacio de pestañas, con cualquier sección activa); en web sigue existiendo
   `ExplorerDock` (solo explorador). Al reflejar features a web, aplicar los cambios
   a mano en esos archivos (no traerlos enteros).
-- **Navegación por pestaña (`DEF-039/040/041`, desktop 1.1.5, pendiente de reflejo)**:
+- **Navegación por pestaña (`DEF-039/040/041`, desktop 1.1.5, ✅ reflejada 2026-08-08)**:
   aleja todavía más los archivos que la terminal ya había hecho divergir.
   `frontend/stores/tabsStore.ts` (historial por pestaña en `Tab`, `navegarHistorial`,
   depuración de las líneas en renombres/papelera/reconcile),
@@ -65,8 +65,8 @@ entre ramas):
   `frontend/components/editor/NoteEditor.tsx` (captura del scroll en vivo). Además,
   **todos** los `router.push('/workspace?note=…')` pasaron a `router.replace` en una
   decena de archivos: al reflejar, ese cambio sí es mecánico y aplica igual en web.
-  Ver [[navegacion-por-pestana]] y [[Version 1.1.5]].
-- **Metadatos YAML (`FUN-M-04`, desktop 1.2.0, pendiente de reflejo)**: la mayor parte
+  Ver [[navegacion-por-pestana]], [[Version 1.1.5]] y [[Version 1.1.0 de web]].
+- **Metadatos YAML (`FUN-M-04`, desktop 1.2.0, ✅ reflejado 2026-08-08)**: la mayor parte
   es **compartida** y se puede traer entera con `git checkout desktop-tauri -- <archivo>`
   — `frontend/lib/frontmatter.ts` (parser puro, sin dependencias),
   `frontend/scripts/test-frontmatter.mjs`, `frontend/components/editor/PropiedadesTab.tsx`,
@@ -75,12 +75,13 @@ entre ramas):
   `frontend/components/editor/NotePanel.module.css` y `frontend/lib/search.ts`.
   Lo que **diverge de verdad es el índice**: `frontend/lib/db/propiedades.ts`,
   `indexer.ts`, `contenido.ts`, `grafo.ts`, `buscar.ts` y `fts.ts` son solo-desktop, y en
-  web hay que llevar la tabla `propiedades`, el cambio de contenido del FTS (cuerpo +
-  valores, sin claves), las etiquetas del grafo y el filtro `clave:valor` **al backend
-  .NET**. `frontend/lib/api.ts`, `NoteEditor.tsx` y `NotePanel.tsx` ya divergían: aplicar
-  a mano (el panel recibe `paneId`, `reloadFromDisk` publica en el `docBroker`).
-  Ver [[metadata-yaml]] y [[Version 1.2.0]].
-- **Esporas (`FUN-M-03`, desktop 1.3.0, pendiente de reflejo)**: casi todo es
+  web se llevó al **backend .NET**: `Frontmatter.cs` (port del parser), la tabla
+  `propiedades` en los dos esquemas, el contenido del FTS (cuerpo + valores, sin claves),
+  las etiquetas del grafo, el filtro `clave:valor` y cuatro endpoints nuevos
+  (`propiedades/claves`, `propiedades`, `notas/{id}/propiedades`, `reindexar`).
+  `frontend/lib/api.ts`, `NoteEditor.tsx` y `NotePanel.tsx` ya divergían y se aplicaron a
+  mano. Ver [[metadata-yaml]], [[Version 1.2.0]] y [[Version 1.1.0 de web]].
+- **Esporas (`FUN-M-03`, desktop 1.3.0, ✅ reflejadas 2026-08-08)**: casi todo es
   **compartido** y se puede traer entero con `git checkout desktop-tauri -- <archivo>`,
   porque las plantillas son **notas del vault** y no tocan la capa de datos:
   `frontend/lib/esporas.ts` (lógica pura, sin dependencias),
@@ -99,12 +100,21 @@ entre ramas):
   desktop). `frontend/stores/vaultStore.ts` (`createNota` acepta un título) y
   `frontend/stores/preferencesStore.ts` (`carpetaEsporas`) son cambios de una línea que
   aplican igual en las dos. Ver [[esporas-plantillas]] y [[Version 1.3.0]].
-  > [!warning] Al reflejar: en desktop el id de una carpeta **es su ruta**
+  > [!warning] En desktop el id de una carpeta **es su ruta**
   > `listarEsporas` busca las notas cuya `carpetaId` sea exactamente la ruta
   > configurada (`Esporas`). En **web** el id de una carpeta es un **UUID**, así que
-  > esa comparación no encuentra nada: hay que resolver la ruta configurada a su id
-  > recorriendo el árbol (segmento a segmento desde la raíz) antes de filtrar. Es el
-  > único punto de las Esporas donde las dos capas de datos no son intercambiables.
+  > esa comparación no encuentra nada. Se resolvió con `idCarpetaEsporas()`, que recorre
+  > el árbol segmento a segmento desde la raíz. Fue el único punto de las Esporas donde
+  > las dos capas de datos no resultaron intercambiables — la advertencia se cumplió.
+- **Confirmación del usuario (`DEF-051`)**: `frontend/lib/confirmar.ts` existe en las dos
+  ramas con **la misma firma asíncrona**, pero por dentro son cosas distintas: en desktop
+  el diálogo del plugin de Tauri (el WebView intercepta `window.confirm` y devuelve una
+  promesa siempre "truthy"), en web el `confirm` del navegador, que sí devuelve un
+  booleano. La forma asíncrona la impone el escritorio y web se adapta, para que los
+  componentes compartidos no tengan que saber dónde corren. **No se sincroniza.**
+- **Ancho de tabulación (`FUN-S-02`, ✅ reflejado 2026-08-08)**: todo compartido
+  (`lib/editor/tabWidth.ts`, `headingFold.ts`, `styles/editor.css`, `preferencesStore.ts`,
+  `EditorSection.tsx`), se trae entero.
 - **Framework IA del vault (FUN-L-08, solo-desktop)**: `frontend/lib/ia/*` no existe
   en web; usa el comando Rust `leer_archivo_texto` (`src-tauri/src/vault_fs.rs`) y
   una sección nueva en `frontend/components/settings/VaultSection.tsx` (archivo ya

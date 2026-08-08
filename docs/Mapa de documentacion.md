@@ -96,6 +96,8 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
   avanzado (`FUN-M-16`).
 - [[Version 1.3.0]] — Esporas, **confirmadas en la app**.
 - [[Version 1.2.0]] — metadatos YAML, **confirmado en la app**.
+- [[Version 1.1.0 de web]] — la web al día: propiedades, Esporas, tabulación y navegación
+  por pestaña. **Numeración propia**: no tiene relación con la 1.1.0 de escritorio.
 - [[Version 1.1.5]] — navegación por pestaña, **confirmada en la app**.
 - [[Version 1.1.1]] — rendimiento de la apertura del vault.
 - [[Version 1.1.0]] — línea de IA, grafo, devtools.

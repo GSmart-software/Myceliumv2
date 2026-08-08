@@ -28,19 +28,19 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-036b | Falta feedback del lugar donde se sueltan los archivos | ambas (frontend) | ✅ 🌐 |
 | DEF-037 | Conflictos de scroll/selección al abrir el buscador en el archivo | ambas (frontend) | ✅ 🌐 |
 | DEF-038 | Límite de zoom-out del grafo insuficiente con muchos nodos | ambas (frontend) | ✅ 🌐 |
-| DEF-039 | Al volver a una pestaña se pierde la posición de lectura | ambas (frontend) | ✅ desktop (2026-08-03) · reflejo a web pendiente |
-| DEF-040 | El historial de atrás/adelante es global en vez de por pestaña | ambas (frontend) | ✅ desktop (2026-08-03) · reflejo a web pendiente |
-| DEF-041 | La pestaña de previsualización no reemplaza, abre una nueva | ambas (frontend) | ✅ desktop (2026-08-03) — se confirmó pese a haberse endurecido sin causa raíz · reflejo a web pendiente |
+| DEF-039 | Al volver a una pestaña se pierde la posición de lectura | ambas (frontend) | ✅ 🌐 (web: 2026-08-08) |
+| DEF-040 | El historial de atrás/adelante es global en vez de por pestaña | ambas (frontend) | ✅ 🌐 (web: 2026-08-08) |
+| DEF-041 | La pestaña de previsualización no reemplaza, abre una nueva | ambas (frontend) | ✅ 🌐 (web: 2026-08-08) — se confirmó pese a haberse endurecido sin causa raíz |
 | DEF-042 | El progreso del indexado sale en todos los botones de vault; falta una pantalla de carga | ambas (frontend) | ⬜ pendiente |
-| DEF-043 | El ícono de las Esporas es un brote de planta, no evoca una espora | ambas (frontend) | ✅ desktop (2026-08-03) · reflejo a web pendiente |
+| DEF-043 | El ícono de las Esporas es un brote de planta, no evoca una espora | ambas (frontend) | ✅ 🌐 (web: 2026-08-08) |
 | DEF-044 | Al cambiar de vault siguen abiertas las pestañas del vault anterior | ambas (frontend) | ⬜ pendiente — bloque F de la agrupación |
 | DEF-045 | `[[destino\|alias]]` dentro de una tabla: o rompe la tabla, o rompe el grafo | ambas (frontend) | ⬜ pendiente — causa raíz ya identificada |
 | DEF-046 | Lo eliminado no aparece en la papelera, ni en la de Windows: no hay recuperación | desktop | ✅ desktop (2026-08-03) — las dos mitades |
 | DEF-047 | El menú contextual se sale de la pantalla en los archivos de abajo | ambas (frontend) | ⬜ pendiente |
 | DEF-048 | Falta margen inferior en toda la app: el contenido queda pegado al borde | ambas (frontend) | ⬜ pendiente |
-| DEF-049 | El ancho de tabulación no cambia nada en los documentos ya escritos | ambas (frontend) | ✅ desktop (2026-08-03) · reflejo a web pendiente |
-| DEF-050 | Al cambiar la tabulación desaparecen los indicadores de plegado en lectura | ambas (frontend) | ✅ desktop (2026-08-03) · reflejo a web pendiente |
-| DEF-051 | Ninguna confirmación aparece y se borra igual: carpeta, Espora o papelera, sin preguntar | desktop | ✅ desktop (2026-08-03) — permiso + `confirmar()` que espera |
+| DEF-049 | El ancho de tabulación no cambia nada en los documentos ya escritos | ambas (frontend) | ✅ 🌐 (web: 2026-08-08) |
+| DEF-050 | Al cambiar la tabulación desaparecen los indicadores de plegado en lectura | ambas (frontend) | ✅ 🌐 (web: 2026-08-08) |
+| DEF-051 | Ninguna confirmación aparece y se borra igual: carpeta, Espora o papelera, sin preguntar | desktop | ✅ desktop (2026-08-03) — permiso + `confirmar()` que espera. **No aplica a web**: el `confirm` del navegador sí devuelve un booleano |
 
 ## Notas por bug
 

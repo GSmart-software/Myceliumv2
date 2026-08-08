@@ -6,8 +6,10 @@ Foto de dónde está Mycelium hoy. Para el detalle de cada tema, seguir los enla
 
 ## Resumen
 
-- **Versión: desktop `1.5.0`** ([[Version 1.5.0]]) · **web `1.0.0`** ([[Version 1.0.0]]).
-  Las líneas se separaron: todo lo nuevo es solo-desktop.
+- **Versión: desktop `1.5.0`** ([[Version 1.5.0]]) · **web `1.1.0`**
+  ([[Version 1.1.0 de web]], 2026-08-08). Las dos líneas **no comparten numeración**.
+  Web se puso al día con todo lo que le aplicaba; lo que sigue solo en desktop es lo que
+  por naturaleza no le aplica (terminal, framework de IA, autoactualización).
 - [[Version 1.0.0]] fue el primer release final en **ambas** versiones, con instaladores
   de escritorio generados.
 - **Todos los bugs `DEF-*`** del reporte original cerrados y reflejados
@@ -29,13 +31,13 @@ Foto de dónde está Mycelium hoy. Para el detalle de cada tema, seguir los enla
 |---|---|
 | [[terminal-integrada]] (`FUN-L-07`) | Implementada y confirmada por el usuario en lo esencial; pasó por varias iteraciones (panel de consolas, shells de fondo, renombrar, selector de shell, tema reactivo) |
 | [[ia-framework-vault]] (`FUN-L-08`) | Implementada, framework en **v1.4.0** (describe las propiedades del frontmatter y las Esporas); pendiente de prueba de los comandos nuevos. **El vault de este repo tiene instalada la v1.2.0**: hay que regenerar desde Configuración → Vault |
-| [[metadata-yaml]] (`FUN-M-04`) | **Confirmada** en desktop (1.2.0) el 2026-08-02, pendiente de reflejo a web: el frontmatter pasa a ser propiedades (tarjeta en lectura y en vivo, pestaña PROPIEDADES, tabla `propiedades` en el índice, filtro `clave:valor`). Ver [[Version 1.2.0]] |
-| [[esporas-plantillas]] (`FUN-M-03`) | **Confirmada** en desktop (1.3.0) el 2026-08-03: las notas de una carpeta configurable son plantillas con variables, usables desde el panel del rail, la barra del editor y el clic derecho de una carpeta. Ver [[Version 1.3.0]] |
+| [[metadata-yaml]] (`FUN-M-04`) | **Confirmada** en desktop (1.2.0) el 2026-08-02 y **reflejada en web** el 2026-08-08 (el índice, reimplementado en el backend .NET): el frontmatter pasa a ser propiedades (tarjeta en lectura y en vivo, pestaña PROPIEDADES, tabla `propiedades` en el índice, filtro `clave:valor`). Ver [[Version 1.2.0]] y [[Version 1.1.0 de web]] |
+| [[esporas-plantillas]] (`FUN-M-03`) | **Confirmada** en desktop (1.3.0) el 2026-08-03 y **reflejada en web** el 2026-08-08: las notas de una carpeta configurable son plantillas con variables, usables desde el panel del rail, la barra del editor y el clic derecho de una carpeta. Ver [[Version 1.3.0]] y [[Version 1.1.0 de web]] |
 | [[autoactualizacion]] (`FUN-L-14` + `FUN-M-16`) | **Circuito confirmado de punta a punta** el 2026-08-03: se publicaron la 1.4.0 y la 1.5.0 en R2 y el usuario comprobó en la app que una instalación **detecta y aplica** la versión posterior. Mycelium comprueba una vez al día, muestra el changelog renderizado y ofrece instalar. Lo único que sigue **sin probar** es el modo avanzado (`FUN-M-16`, siete clics en el número de versión, para instalar una versión cualquiera o anterior): su diálogo de confirmación estuvo roto hasta `DEF-051`. Ver [[Version 1.4.0]] |
 | [[Publicar una version]] (`FUN-L-15`) | `npm run publicar` compila, firma, sube y **verifica** (incluido el SHA-256 del instalador ya publicado). **Confirmado en uso real**: publicó la 1.4.0 y la 1.5.0 |
 | [[mycignore]] (`FUN-M-11`) | Implementada en desktop (parser con tests); **parte web pendiente**. Su default se amplió en 1.1.1 |
 | Rendimiento de la apertura del vault (`FUN-M-12`) | Implementada en desktop (1.1.1), **sin confirmar por el usuario**: no se pudo medir el efecto real. Ver [[Rendimiento de la apertura del vault]] |
-| Navegación por pestaña (`DEF-039/040/041`) | **Confirmada** en desktop (1.1.5) el 2026-08-03: scroll conservado, historial propio por pestaña con botones. `DEF-041` quedó endurecido sin causa raíz confirmada, pero el síntoma no reapareció. Ver [[Version 1.1.5]] |
+| Navegación por pestaña (`DEF-039/040/041`) | **Confirmada** en desktop (1.1.5) el 2026-08-03 y **reflejada en web** el 2026-08-08: scroll conservado, historial propio por pestaña con botones. `DEF-041` quedó endurecido sin causa raíz confirmada, pero el síntoma no reapareció. Ver [[Version 1.1.5]] |
 | Dock de pestañas del panel lateral | Generalizado a cualquier sección (`SidebarDock`) |
 
 ## Pendiente / próximos pasos
@@ -55,20 +57,20 @@ Foto de dónde está Mycelium hoy. Para el detalle de cada tema, seguir los enla
    versión del pie → lista de versiones publicadas → instalar una anterior. Es lo único de
    la [[Version 1.4.0]] sin confirmar; su diálogo estuvo roto hasta `DEF-051`, así que
    nunca llegó a hacer nada.
-3. **Reflejar a web** todo lo confirmado en desktop desde la 1.1.0. Es el bloque más
-   grande de deuda: `FUN-M-04` (metadatos YAML, con su parte de índice en el backend .NET),
-   `FUN-M-03` (Esporas), la navegación por pestaña (`DEF-039/040/041`) y las correcciones
-   `DEF-043`/`DEF-046`/`DEF-049`/`DEF-050`/`DEF-051`. La receta está en
-   [[Reflejar cambios de desktop a web]] y la lista de archivos divergentes en [[RAMAS]].
-4. **Verificar 1.1.1 en la app**: abrir un vault grande y comprobar que el indexado es
+3. **Probar la web en la app**: el reflejo del 2026-08-08 ([[Version 1.1.0 de web]]) pasó
+   `tsc`, `next build`, `dotnet build` y un smoke contra la API, pero **nadie lo miró en
+   pantalla**. Lo primero, un `POST /vaults/{id}/reindexar`: las notas guardadas antes no
+   tienen sus propiedades en el índice.
+4. **`.mycignore` en web** (`FUN-M-11`): lo único del bloque G que quedó fuera, porque no
+   es un reflejo — en web la semántica sería otra (filtro de importación, con la config en
+   el backend). Hay que definirla antes de implementarla.
+5. **Verificar 1.1.1 en la app**: abrir un vault grande y comprobar que el indexado es
    más rápido y que se ve el avance. El `.mycignore` de este vault **ya se amplió**
    (2026-08-01) con `node_modules/`, `target/`, `out/`, `dist/`, `installers/`,
    `installer/`, `backend/` y `scripts/`: pasó de 1830 archivos indexados a **63**, de
    4020 directorios a **110** y de 14 MB a **495 KB**. Hacía falta a mano porque el
    archivo ya existía y un `.mycignore` presente reemplaza al default (ver [[mycignore]]).
-5. **Probar** `/vault-buscar` y `/vault-recordar` del framework v1.4.0 en un vault real (hay que **regenerarlo** antes: este vault tiene la v1.2.0).
-6. **`.mycignore` en web** — requiere decidir la semántica (filtro de importación +
-   visualización) y tocar el backend .NET. Registrado en [[BACKLOG]].
+6. **Probar** `/vault-buscar` y `/vault-recordar` del framework v1.4.0 en un vault real (hay que **regenerarlo** antes: este vault tiene la v1.2.0).
 7. **Reflejar a web** lo que corresponda de la línea de IA: por naturaleza, poco o nada
    (ver [[Diferencias funcionales aceptadas entre versiones]]).
 8. **Backlog de funcionalidades**: [[BACKLOG]] tiene el inventario completo con tamaños

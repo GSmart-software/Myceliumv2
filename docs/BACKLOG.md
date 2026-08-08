@@ -58,7 +58,7 @@ y **priorizar** qué implementar antes.
 | ID | Nombre | Descripción | Aplica | Orig. |
 |---|---|---|---|---|
 | `FUN-S-01` | `EDITOR-CHECKBOX-ESTILOS` | Estilos de checkbox según el símbolo: `x`=X, `-`=tachado, `*`=estrella, `+`=check | ambas | C-M-06 |
-| `FUN-S-02` 🟢 | `EDITOR-TAB-WIDTH` | Cuánto sangra un nivel de indentación: **al leer** cambia listas y tabuladores de todos los documentos al instante (CSS), **al escribir** es lo que inserta <kbd>Tab</kbd>. Valor libre 1–16, por defecto 4. **Confirmada en desktop** el 2026-08-03 tras rehacerla por `DEF-049`/`DEF-050`. Continuación: `FUN-M-18` (reindentar), para que el cambio se vea también en la vista en vivo. Pendiente el reflejo a web | ambas | C-M-10 |
+| `FUN-S-02` 🟢🌐 | `EDITOR-TAB-WIDTH` | Cuánto sangra un nivel de indentación: **al leer** cambia listas y tabuladores de todos los documentos al instante (CSS), **al escribir** es lo que inserta <kbd>Tab</kbd>. Valor libre 1–16, por defecto 4. **Confirmada en desktop** el 2026-08-03 tras rehacerla por `DEF-049`/`DEF-050`, y **reflejada en web** el 2026-08-08. Continuación: `FUN-M-18` (reindentar), para que el cambio se vea también en la vista en vivo | ambas | C-M-10 |
 | `FUN-S-03` | `EXPLORER-EXTENSIONES` | Mostrar la extensión de los archivos no‑markdown para poder identificarlos | ambas | C-M-12 |
 | `FUN-S-04` | `TRASH-MULTISELECT` | Seleccionar varios archivos para borrar en la papelera | ambas | C-M-14 |
 | `FUN-S-05` | `VAULT-EJEMPLO-DEFAULT` | Al crear un vault nuevo, generar un archivo de ejemplo por defecto | ambas | C-G-02 |
@@ -72,8 +72,8 @@ y **priorizar** qué implementar antes.
 |---|---|---|---|---|
 | `FUN-M-01` | `TRASH-PREVIEW` | Visualizar el contenido de los archivos en la papelera | ambas | C-M-13 |
 | `FUN-M-02` | `GRAPH-BUSCADOR-FILTRO` | Buscar por nombre en el grafo: atenúa los nodos que no coinciden | ambas | C-I-03 |
-| `FUN-M-03` 🟢 | `TEMPLATES-ESPORAS` | Plantillas ("Esporas") para crear notas rápido: panel en el rail, "Insertar Espora" en la barra del editor y submenú en el clic derecho de una carpeta. **Confirmada en desktop** el 2026-08-03; spec en `docs/features/esporas-plantillas.md`. Salió en [[Version 1.3.0]]. Pendiente el reflejo a web | ambas | C-I-04 |
-| `FUN-M-04` 🟢 | `METADATA-YAML` | Manejar metadatos YAML (frontmatter `---`) de las notas como **propiedades** consultables (prerequisito de `FUN-L-03`). **Confirmado en desktop** el 2026-08-02; spec en `docs/features/metadata-yaml.md`. Salió en [[Version 1.2.0]]. Pendiente el reflejo a web | ambas | C-I-07a |
+| `FUN-M-03` 🟢🌐 | `TEMPLATES-ESPORAS` | Plantillas ("Esporas") para crear notas rápido: panel en el rail, "Insertar Espora" en la barra del editor y submenú en el clic derecho de una carpeta. **Confirmada en desktop** el 2026-08-03 y **reflejada en web** el 2026-08-08 ([[Version 1.1.0 de web]]); spec en `docs/features/esporas-plantillas.md`. Salió en [[Version 1.3.0]] | ambas | C-I-04 |
+| `FUN-M-04` 🟢🌐 | `METADATA-YAML` | Manejar metadatos YAML (frontmatter `---`) de las notas como **propiedades** consultables (prerequisito de `FUN-L-03`). **Confirmado en desktop** el 2026-08-02 y **reflejado en web** el 2026-08-08, con el índice reimplementado en el backend .NET ([[Version 1.1.0 de web]]); spec en `docs/features/metadata-yaml.md`. Salió en [[Version 1.2.0]] | ambas | C-I-07a |
 | `FUN-M-11` 🛠️ | `VAULT-MYCIGNORE` | `.mycignore` por vault (estilo `.gitignore`) para decidir qué archivos/carpetas ignora Mycelium; por defecto `.*/` + carpetas de build. **Implementado en desktop** (sin confirmar); parte **web** pendiente (otra semántica). Spec en `docs/features/mycignore.md` | ambas | — |
 | `FUN-M-12` 🛠️ | `VAULT-INDEX-PERF` | Rendimiento de la apertura del vault: default de `.mycignore` con `node_modules/`/`target/`/`dist/`/`out/`, metadatos sin contenido + `leer_archivos` en tandas, carpetas incrementales, WAL y progreso visible. **Implementado en desktop** (sin confirmar); spec en `docs/features/rendimiento-apertura-vault.md`. Salió en [[Version 1.1.1]] | desktop | — |
 | `FUN-M-13` | `VAULT-INDEX-UN-RECORRIDO` | Fusionar `listar_archivos_meta` y `listar_directorios` en un solo comando que devuelva `{archivos, directorios}`: hoy el vault se recorre **dos veces** por apertura. Continuación de `FUN-M-12` | desktop | — |
@@ -188,7 +188,7 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 - **A definir**: el set exacto de símbolos y qué significa cada uno; si es configurable;
   si el estilo alcanza a toda la línea (p. ej. tachar el texto de un ítem descartado).
 
-#### `FUN-S-02` · `EDITOR-TAB-WIDTH` (C-M-10) — 🟢 desktop
+#### `FUN-S-02` · `EDITOR-TAB-WIDTH` (C-M-10) — 🟢 ambas
 - **Qué es**: opción en Configuración para elegir cuánto "vale" una tabulación en el editor.
   El valor se **escribe libremente** entre 1 y 16 (por defecto **4**), no se elige de una
   lista.
@@ -206,8 +206,9 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   - `DEF-050` (desaparecían los indicadores de plegado al cambiar el valor) también quedó
     cerrado: el estado de plegado vive ahora en un `WeakMap` de módulo, así que reaplicarlo
     es idempotente.
+- **Reflejada en web** el 2026-08-08 ([[Version 1.1.0 de web]]).
 - **Continuación**: `FUN-M-18` (reindentar documentos), para que el cambio se vea también
-  en la vista en vivo y no solo en lectura. Y el **reflejo a web**.
+  en la vista en vivo y no solo en lectura.
 - Causas raíz en [[Aprendizajes tecnicos]]; trazabilidad en [[bugs-progreso]].
 
 #### `FUN-S-03` · `EXPLORER-EXTENSIONES` (C-M-12)
@@ -276,7 +277,7 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 - **A definir**: coincidencia parcial vs exacta; si además centra/hace zoom al
   resultado; si permite buscar por tag o path además del nombre.
 
-#### `FUN-M-03` · `TEMPLATES-ESPORAS` (C-I-04) — 🟢 desktop
+#### `FUN-M-03` · `TEMPLATES-ESPORAS` (C-I-04) — 🟢 ambas
 - **Qué es**: plantillas reutilizables para crear notas ya con una estructura base. Un
   botón nuevo en el rail izquierdo permite ver/gestionar (crear, editar, borrar) las
   plantillas. Al crear un archivo, aparece un menú (como el de crear carpeta) con el
@@ -285,7 +286,8 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 - **Objetivo**: acelerar la creación de notas recurrentes (reuniones, diario, fichas) y
   mantener consistencia de formato en el vault.
 - **Confirmado en desktop** el 2026-08-03 — spec en [[esporas-plantillas]], release en
-  [[Version 1.3.0]]. Pendiente solo el **reflejo a web**. Lo que se construyó: se valida el nombre **"Esporas"**. Cada
+  [[Version 1.3.0]] — y **reflejado en web** el 2026-08-08 ([[Version 1.1.0 de web]]).
+  Lo que se construyó: se valida el nombre **"Esporas"**. Cada
   plantilla es una **nota normal** en una carpeta del vault (`Esporas/` por defecto,
   configurable en Configuración → Vault). Admiten variables `{{titulo}}`, `{{fecha}}`,
   `{{hora}}` y `{{fecha:FORMATO}}` con tokens en español (`AAAA-MM-DD hh:mm`); un token
@@ -295,7 +297,7 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   existentes, y fusiona el frontmatter) y submenú "Nueva desde Espora" en el clic derecho
   del explorador. `FUN-M-07` (Daily Note) reutiliza la lista y la sustitución.
 
-#### `FUN-M-04` · `METADATA-YAML` (C-I-07a) — 🟢 desktop
+#### `FUN-M-04` · `METADATA-YAML` (C-I-07a) — 🟢 ambas
 - **Qué es**: manejar el frontmatter YAML al inicio de una nota (bloque entre `---`)
   como **propiedades** estructuradas (pares clave/valor), con un estilo visual propio en
   edición y lectura.
@@ -312,7 +314,7 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   vivo es de solo lectura. Lo que cae fuera del subconjunto se muestra crudo y **no se
   reescribe nunca**. Las propiedades se indexan en la tabla `propiedades` y se filtran
   desde el buscador con `clave:valor`.
-- **Pendiente**: solo el **reflejo a `web-cloud`** (el
+- **Reflejado en `web-cloud`** el 2026-08-08 ([[Version 1.1.0 de web]]): el
   parseo, el render y el panel son compartidos; el índice diverge — allá toca el backend
   .NET). Ver [[Reflejar cambios de desktop a web]].
 
@@ -913,18 +915,22 @@ separado significaría tocar la misma capa dos veces.
 `FUN-S-05` (archivo de ejemplo al crear un vault) se suma porque vive en el flujo de
 creación que `FUN-L-04` va a tocar igual; no comparte la raíz de las otras tres.
 
-#### G · Poner la web al día — reflejos pendientes · minor · **web**
-El reflejo de `FUN-M-03` (Esporas), `FUN-M-04` (metadatos YAML) y `FUN-S-02` (ancho de
-tabulación), la **parte web de `FUN-M-11`** (`.mycignore`, que necesita decidir su semántica
-y tocar el backend .NET), y las correcciones ya confirmadas en desktop: la navegación por
-pestaña (`DEF-039`/`DEF-040`/`DEF-041`), `DEF-043`, `DEF-049` y `DEF-050`.
-Van juntas porque es **una sola sesión de trabajo**: un worktree de `web-cloud`, la misma
-receta de [[Reflejar cambios de desktop a web]] y una única verificación con
-`npm ci` + `tsc` + `next build`. Sube la versión **de web**, no la de desktop.
+#### G · Poner la web al día — ✅ hecho el 2026-08-08 · minor · **web**
+Se reflejaron `FUN-M-03` (Esporas), `FUN-M-04` (metadatos YAML), `FUN-S-02` (ancho de
+tabulación), la navegación por pestaña (`DEF-039`/`DEF-040`/`DEF-041`), `DEF-043`,
+`DEF-049`, `DEF-050` y las mejoras del grafo. Salió como [[Version 1.1.0 de web]].
 
-`DEF-046` (papelera) y `DEF-051` (confirmaciones) **no entran acá**: son de desktop: uno vive
-en el indexador SQLite local y el otro en los permisos de Tauri. Habrá que revisar si web
-tiene sus propios equivalentes, pero no es un reflejo.
+Fue **una sola sesión de trabajo**, como estaba previsto: un worktree de `web-cloud`, la
+receta de [[Reflejar cambios de desktop a web]] y verificación con `tsc` + `next build` +
+`dotnet build`. Lo que **no** fue un reflejo sino implementación propia: el índice de
+propiedades de `FUN-M-04`, que en web vive en el backend .NET (tabla `propiedades`, port
+del parser a C#, filtro `clave:valor` y cuatro endpoints).
+
+**Queda pendiente del bloque** la parte web de `FUN-M-11` (`.mycignore`): no es un reflejo
+—en web la semántica sería otra, un filtro de importación— así que se trata aparte.
+`DEF-046` (papelera) y `DEF-051` (confirmaciones) nunca entraron acá: son de la capa
+nativa. `DEF-051` **no puede pasar en web**, donde el `confirm` del navegador sí devuelve
+un booleano.
 
 #### H · Identidad y permisos — `FUN-M-10` + `FUN-L-02` · minor · **web**
 `FUN-M-10` resuelve *quién sos* (login con GitHub) y `FUN-L-02` *qué podés* (carpeta
