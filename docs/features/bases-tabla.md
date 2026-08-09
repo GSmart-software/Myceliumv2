@@ -149,9 +149,34 @@ mejora posterior que beneficiaría a los dos endpoints a la vez.
 ### Crear y abrir
 
 Una base es un archivo más del vault: aparece en el explorador, se renombra, se mueve, se
-manda a la papelera. Se crea desde «Nueva base» en el menú contextual de una carpeta.
+manda a la papelera. Se crea desde el **botón de la barra del explorador** (crea en la
+carpeta activa) o desde «Nueva base» en el clic derecho de una carpeta (crea en esa).
+
+Tiene **ícono propio** en el árbol: markdown, dibujo y base se distinguen de un vistazo.
 
 Al abrirla, el pane muestra la tabla. Si tiene varias vistas, una pestaña por vista.
+
+### Editar la base
+
+La tabla es de solo lectura respecto de **las notas**; lo que sí se edita es **la base**,
+que es la definición de la consulta. Tres controles en la cabecera:
+
+| Control | Qué hace |
+|---|---|
+| **Filtros** | Lista de condiciones `propiedad · operador · valor`, unidas por «todas» (`and`) o «alguna» (`or`) |
+| **Columnas** | Casillas con los campos del archivo y todas las claves de propiedad del vault |
+| **Fuente** | El YAML crudo, editable. <kbd>Ctrl</kbd>+<kbd>S</kbd> guarda |
+
+> [!danger] Los controles solo aparecen si Mycelium entiende el archivo ENTERO
+> Escriben el YAML **regenerándolo desde el modelo**, así que lo que el modelo no
+> represente desaparecería al guardar: `formulas`, `groupBy`, `summaries`, un filtro
+> anidado. Sería perder trabajo por haber pulsado un botón.
+>
+> Por eso `motivosNoEditable()` audita el archivo y, si encuentra algo, **deshabilita los
+> controles con el motivo** y deja solo la edición de la fuente — que no reescribe nada.
+> El mismo criterio, un escalón más abajo: el constructor de filtros se declara incapaz
+> (`condicionesPlanas()` devuelve `null`) ante un filtro anidado o un `not`, en vez de
+> enseñar una versión simplificada que al guardar destruiría el original.
 
 ### La tabla
 
@@ -186,10 +211,10 @@ Es una decisión reversible de una línea si más adelante pesa más la identida
 
 ## 5. Lo que NO hace
 
-- **No edita.** Cambiar un valor se hace en la nota. Decisión del usuario, y además acota
-  el riesgo: escribir desde la tabla tocaría el frontmatter de N archivos y habría que
-  resolver el conflicto con el editor abierto y el deshacer — que es de donde salieron
-  `DEF-031`/`DEF-037`.
+- **No edita las notas.** Cambiar el valor de una propiedad se hace en la nota. Decisión
+  del usuario, y además acota el riesgo: escribir desde la tabla tocaría el frontmatter de
+  N archivos y habría que resolver el conflicto con el editor abierto y el deshacer — que
+  es de donde salieron `DEF-031`/`DEF-037`. La **base** sí se edita (ver arriba).
 - **No agrega ni resume** (`summaries`, `groupBy`): fuera de v1.
 - **No es una vista de tarjetas**: el backlog ya la dejaba fuera de alcance.
 - **No aporta aristas al grafo.** Una base **sí** es un destino válido —`[[Mi base]]`
