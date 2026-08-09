@@ -115,6 +115,20 @@ entre ramas):
 - **Ancho de tabulación (`FUN-S-02`, ✅ reflejado 2026-08-08)**: todo compartido
   (`lib/editor/tabWidth.ts`, `headingFold.ts`, `styles/editor.css`, `preferencesStore.ts`,
   `EditorSection.tsx`), se trae entero.
+- **Bases (`FUN-L-03`, las dos ramas, 2026-08-08)**: casi todo es **compartido** y se trae
+  entero — `frontend/lib/bases.ts` (parser del `.base` + evaluador, puro y sin imports),
+  `frontend/scripts/test-bases.mjs` y `frontend/components/bases/*`. Es deliberado: el
+  filtrado **no baja a SQL** para no tener que escribir el intérprete otra vez en C#.
+  Lo que **diverge** es solo la consulta que lo alimenta: `frontend/lib/db/tabla.ts`
+  (desktop, SQLite local) vs `backend/…/TablaEndpoints.cs` (web, D1 + blobs). Y el tipo de
+  archivo toca archivos ya divergentes: `NotaTipo` en `stores/vaultStore.ts` y
+  `lib/db/types.ts`, `extDeTipo` en `lib/db/vaultFs.ts`, `tipo_de`/`es_importable` en
+  `src-tauri/src/archivos.rs` (solo desktop), y `VaultEndpoints`/`VaultRepository` en .NET.
+  Ver [[bases-tabla]].
+  > [!warning] En web hay que reconstruir la ruta de la carpeta
+  > Misma trampa que con las Esporas: acá el id de una carpeta es un **UUID** y no dice
+  > nada del nombre, así que `file.folder` y `file.inFolder()` no significarían nada sin
+  > subir por los padres hasta la raíz. En desktop el id **es** la ruta y sale gratis.
 - **Framework IA del vault (FUN-L-08, solo-desktop)**: `frontend/lib/ia/*` no existe
   en web; usa el comando Rust `leer_archivo_texto` (`src-tauri/src/vault_fs.rs`) y
   una sección nueva en `frontend/components/settings/VaultSection.tsx` (archivo ya

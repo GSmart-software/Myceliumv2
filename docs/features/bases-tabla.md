@@ -192,8 +192,20 @@ Es una decisión reversible de una línea si más adelante pesa más la identida
   `DEF-031`/`DEF-037`.
 - **No agrega ni resume** (`summaries`, `groupBy`): fuera de v1.
 - **No es una vista de tarjetas**: el backlog ya la dejaba fuera de alcance.
-- **No cuenta en el grafo.** Una base no es una nota: no aporta aristas. Si escribe
-  `[[algo]]` dentro del YAML, es un valor, no un enlace.
+- **No aporta aristas al grafo.** Una base **sí** es un destino válido —`[[Mi base]]`
+  navega, y aparece como nodo—, pero su contenido **no se escanea**: es la definición de
+  una consulta, no prosa, y un `[[…]]` dentro de un valor del YAML crearía una arista
+  fantasma. Es el mismo efecto colateral que ya arrastra Excalidraw y que nadie diseñó
+  (ver [[canvas]]); acá se evitó a propósito.
+
+  > [!warning] En desktop hay que excluirlas a mano; en web sale gratis, y eso es frágil
+  > En desktop el grafo lee `contenidos` para **todas** las notas, así que hubo que añadir
+  > un `tipo !== "base"` explícito en `lib/db/grafo.ts`. En web no hizo falta, pero **no
+  > porque alguien lo decidiera**: el escaneo lee la clave `…/{id}.md` y el blob de una
+  > base es `…/{id}.base`, así que no lo encuentra. El día que alguien "arregle" el grafo
+  > de web para usar el `r2_key` real, las bases —y los Excalidraw— empezarán a aportar
+  > aristas fantasma sin que nadie toque nada relacionado. Si eso pasa, el filtro por tipo
+  > hay que ponerlo también allá.
 
 ---
 

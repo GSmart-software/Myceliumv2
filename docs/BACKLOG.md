@@ -89,7 +89,7 @@ y **priorizar** qué implementar antes.
 |---|---|---|---|---|
 | `FUN-L-01` | `MACROS-HOTKEYS` | Configurar acciones de Mycelium por macros/atajos (escribir, crear con plantilla, abrir, etc.) | ambas | C-I-05 |
 | `FUN-L-02` | `SHARING-PUBLICOS-GLOBALES` | Carpeta "Estado Mycelium" con 3 archivos públicos (Ayudas / Bugs / Ideas): editables por autorizados, visibles por todos | web | C-I-06 |
-| `FUN-L-03` | `FILES-BASES-TABLA` | Tipo de archivo tipo "bases" (tabla) que agrega notas por metadatos, con filtros y columnas configurables. Depende de `FUN-M-04` | ambas | C-I-07b |
+| `FUN-L-03` 🛠️ | `FILES-BASES-TABLA` | Archivo `.base` (formato de Obsidian) que agrega notas por sus propiedades y las muestra en una tabla, con filtros y columnas configurables. Solo lectura. **Implementado en las dos ramas** el 2026-08-08 (sin confirmar); spec en [[bases-tabla]] | ambas | C-I-07b |
 | `FUN-L-04` | `VAULT-MULTIPLE` | Un usuario con varios vaults, seleccionables en Configuración → Vault | ambas | C-G-01 |
 | `FUN-L-07` 🟢 | `TERMINAL-INTEGRADA` | Consola nativa integrada (estilo VS Code): abre en la raíz del vault (o en la carpeta elegida), como pestaña normal del workspace (dividir, varias instancias). **Confirmada en desktop** por el usuario en lo esencial, tras varias iteraciones (panel de consolas, shells de fondo, renombrar, selector de shell, tema reactivo); spec en `docs/features/terminal-integrada.md` | desktop | — |
 | `FUN-L-08` 🛠️ | `IA-FRAMEWORK-VAULT` | Framework IA versionado generado en el vault (CLAUDE.md + 2 skills + 6 comandos en `.claude/`) para que Claude Code use el vault como **memoria**: recuperar antes de responder y consolidar lo que valga recordar, navegando por vínculos. Botón opt‑in en Configuración → Vault. **Implementada** (sin confirmar); spec en `docs/features/ia-framework-vault.md` | desktop | — |
@@ -411,19 +411,35 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 - **A definir**: modelo de permisos (quién es "autorizado"); si los usuarios pueden
   proponer/comentar o solo leer; naturaleza **web** (requiere backend + roles).
 
-#### `FUN-L-03` · `FILES-BASES-TABLA` (C-I-07b)
-- **Qué es**: un tipo de archivo nuevo (equivalente a las *Bases* de Obsidian —
-  **hay que buscarle un nombre propio**) que **agrega** un conjunto de notas y muestra
-  sus metadatos (`FUN-M-04`) en formato de **tabla**. Incluye filtros para elegir qué
-  notas entran (por path, nombre, etiquetas, u otros atributos) y selección de qué
-  columnas/parámetros mostrar (por defecto, solo el nombre).
+#### `FUN-L-03` · `FILES-BASES-TABLA` (C-I-07b) — 🛠️ ambas
+- **Qué es**: un tipo de archivo nuevo, la **base** (`.base`), que agrega un conjunto de
+  notas y muestra sus propiedades (`FUN-M-04`) en una **tabla**, con filtros para elegir
+  qué notas entran y qué columnas se ven.
 - **Objetivo**: convertir el vault en algo consultable como una base de datos ligera
   (índices, catálogos, seguimientos) sin salir de Markdown.
-- **A definir**: el nombre del tipo de archivo; sintaxis de filtros; vista de **tarjetas**
-  queda fuera de alcance salvo que resulte barata.
-- **Desbloqueada**: `FUN-M-04` ya dejó las propiedades indexadas en la tabla
-  `propiedades` (una fila por elemento de lista, filtrable con `=`) y consultables desde
-  `lib/db/propiedades.ts`. Es de ahí de donde leería la tabla.
+- **Implementado en las dos ramas** el 2026-08-08, **sin confirmar**. Spec completa en
+  [[bases-tabla]]. Decisiones tomadas:
+  - **Formato `.base` de Obsidian**, verificado contra su documentación antes de escribir
+    código. Es la tercera vez que se elige interoperabilidad —tras las Propiedades y JSON
+    Canvas— por el mismo motivo: que el vault siga siendo intercambiable.
+  - **Un subconjunto cerrado** del lenguaje: `and`/`or`/`not`, los seis comparadores,
+    `file.hasTag/inFolder/hasProperty` y `.isEmpty/contains/startsWith/endsWith`. El
+    lenguaje completo lleva fórmulas y métodos encadenados con semántica de JavaScript —un
+    intérprete entero, `XL` por sí solo—. Fuera de v1: `formulas`, `summaries`, `groupBy` y
+    las vistas `cards`/`list`/`map`.
+  - **Solo lectura**: para cambiar un valor se abre la nota.
+  - **El nombre propio se descartó**: la extensión que el usuario ve dice `base`, y ponerle
+    otro nombre en la UI obligaría a traducir mentalmente. Reversible en una línea.
+- **La regla que gobierna la implementación**: un filtro que no se entiende **no se
+  ignora**. Ignorarlo dentro de un `and` ensancha el resultado; descartar la fila dentro de
+  un `or` lo estrecha. Las dos salidas dan una tabla plausible y equivocada, y una tabla se
+  mira para decidir. El evaluador usa lógica de tres valores y el error se hace visible.
+- **El filtrado no baja a SQL**, a propósito: `lib/bases.ts` es puro y compartido por las
+  dos ramas, y lo único que se implementa dos veces es la consulta que lo alimenta
+  (`GET /vaults/{id}/tabla`). Duplicar un intérprete entre TS y C# es lo que costó caro con
+  el frontmatter (ver [[Version 1.1.0 de web]]).
+- **Continuaciones naturales**: `groupBy` y `summaries`, la vista de tarjetas, y editar en
+  la celda.
 
 #### `FUN-L-04` · `VAULT-MULTIPLE` (C-G-01)
 - **Qué es**: que un usuario tenga varios vaults y pueda alternar entre ellos desde
@@ -988,7 +1004,7 @@ No tienen parentesco suficiente con nada: cada una es su propio release.
 
 | ID | Por qué va sola | Dígito |
 |---|---|---|
-| `FUN-L-03` `FILES-BASES-TABLA` | Tipo de archivo nuevo y subsistema propio. Ya está desbloqueada (`FUN-M-04` hecho); consumirla no la emparenta con sus continuaciones | minor |
+| ~~`FUN-L-03` `FILES-BASES-TABLA`~~ | ✅ **Implementada** en las dos ramas el 2026-08-08, sin confirmar. Sigue sin release propio: el usuario pidió más funcionalidades antes de publicar, así que viajará en el minor que salga | minor |
 | `FUN-L-09` `IA-MCP-MYCELIUM` | Único pendiente de la línea de IA; `FUN-L-07` y `FUN-L-08` ya salieron | minor |
 | `FUN-L-01` `MACROS-HOTKEYS` | Capa transversal de comandos: no comparte código con ninguna funcionalidad concreta | minor |
 | `FUN-L-05` `IMPORT-ADJUNTOS` | Subsistema de importación, aislado del resto | minor |
