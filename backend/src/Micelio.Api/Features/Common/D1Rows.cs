@@ -17,6 +17,12 @@ public static class D1Rows
     public static long GetInt64(this JsonElement row, string column) =>
         row.GetProperty(column).GetInt64();
 
+    /// <summary>Entero de una columna que puede faltar o venir null (0 por defecto).</summary>
+    public static long GetInt64OrZero(this JsonElement row, string column) =>
+        row.TryGetProperty(column, out var value) && value.ValueKind == JsonValueKind.Number
+            ? value.GetInt64()
+            : 0;
+
     public static bool GetBool(this JsonElement row, string column) =>
         row.GetProperty(column).ValueKind switch
         {

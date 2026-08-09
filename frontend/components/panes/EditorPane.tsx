@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { BaseView } from "@/components/bases/BaseView";
 import { ExcalidrawFileEditor } from "@/components/editor/ExcalidrawFileEditor";
 import { NoteEditor } from "@/components/editor/NoteEditor";
 import { GraphView } from "@/components/graph/GraphView";
@@ -46,6 +47,8 @@ export function EditorPane({ pane }: { pane: LeafPane }) {
           <GraphView key={activeTab.id} />
         ) : activeTab && activeTipo === "excalidraw" ? (
           <ExcalidrawFileEditor key={activeTab.id} notaId={activeTab.notaId} />
+        ) : activeTab && activeTipo === "base" ? (
+          <BaseView key={activeTab.id} notaId={activeTab.notaId} />
         ) : activeTab ? (
           <NoteEditor
             key={activeTab.id}

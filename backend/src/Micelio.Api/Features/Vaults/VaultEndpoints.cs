@@ -105,8 +105,14 @@ public static class VaultEndpoints
         {
             if (await Forbidden(repo, user, vaultId, requireEditor: true, ct) is { } error) return error;
 
-            var tipo = request.Tipo == "excalidraw" ? "excalidraw" : "markdown";
-            var defecto = tipo == "excalidraw" ? "Dibujo sin título" : "Sin título";
+            // `base` = archivo de tabla (FUN-L-03); el resto cae a markdown.
+            var tipo = request.Tipo is "excalidraw" or "base" ? request.Tipo : "markdown";
+            var defecto = tipo switch
+            {
+                "excalidraw" => "Dibujo sin título",
+                "base" => "Base sin título",
+                _ => "Sin título",
+            };
             var titulo = string.IsNullOrWhiteSpace(request.Titulo) ? defecto : request.Titulo.Trim();
             var carpetaId = NullIfEmpty(request.CarpetaId);
             titulo = await EnsureUniqueTituloAsync(repo, vaultId, carpetaId, titulo, ct);

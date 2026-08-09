@@ -146,8 +146,14 @@ public sealed class VaultRepository(ID1Client d1)
         var id = Guid.NewGuid().ToString();
         var now = Now();
         // r2_key ID-based e invariante ante renombres (HU-23 CA3). La extensión
-        // refleja el tipo: .md para notas, .excalidraw para dibujos (HU-16).
-        var ext = tipo == "excalidraw" ? "excalidraw" : "md";
+        // refleja el tipo: .md para notas, .excalidraw para dibujos (HU-16) y
+        // .base para las tablas (FUN-L-03, la extensión de Obsidian).
+        var ext = tipo switch
+        {
+            "excalidraw" => "excalidraw",
+            "base" => "base",
+            _ => "md",
+        };
         var r2Key = $"vaults/{vaultId}/notas/{id}.{ext}";
         await d1.QueryAsync(
             """
