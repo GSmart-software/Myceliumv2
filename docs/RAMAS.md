@@ -129,6 +129,13 @@ entre ramas):
   > Misma trampa que con las Esporas: acá el id de una carpeta es un **UUID** y no dice
   > nada del nombre, así que `file.folder` y `file.inFolder()` no significarían nada sin
   > subir por los padres hasta la raíz. En desktop el id **es** la ruta y sale gratis.
+- **Auditoría y re-enlazado (`FUN-L-17` + núcleo de `FUN-M-17`, 2026-08-08, hoy solo-desktop)**:
+  `frontend/lib/enlaces.ts` (núcleo puro), `scripts/test-enlaces.mjs` y
+  `components/enlaces/RelinkView.tsx` son **compartibles** y se traerían enteros. Lo que
+  **no** existe en web es su cimiento: `frontend/lib/db/enlaces.ts` respalda en
+  `.mycelium/` y lee el léxico de `.claude/`, dos rutas del sistema de archivos. Llevarlo a
+  web **no es un reflejo**: hay que decidir dónde vive el léxico y cómo se respalda sin
+  disco. Ver [[auditoria-y-relinkeado]] § 17.
 - **Framework IA del vault (FUN-L-08, solo-desktop)**: `frontend/lib/ia/*` no existe
   en web; usa el comando Rust `leer_archivo_texto` (`src-tauri/src/vault_fs.rs`) y
   una sección nueva en `frontend/components/settings/VaultSection.tsx` (archivo ya

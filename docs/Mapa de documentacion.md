@@ -59,6 +59,8 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
 - [[rendimiento-apertura-vault]] — optimización del indexado al abrir (`FUN-M-12`).
 - [[navegacion-por-pestana]] — scroll, historial por pestaña y previsualización (`DEF-039/040/041`).
 - [[metadata-yaml]] — frontmatter YAML como propiedades: ver, editar e indexar (`FUN-M-04`).
+- [[auditoria-y-relinkeado]] — adoptar un vault que ya existía: descubrir cómo se
+  referencian sus documentos y convertirlo en enlaces (`FUN-M-17` · `FUN-L-17`).
 - [[bases-tabla]] — el archivo `.base`: agregar notas por sus propiedades en una tabla
   (`FUN-L-03`). Continuación directa de [[metadata-yaml]].
 - [[esporas-plantillas]] — plantillas de notas ("Esporas") con variables (`FUN-M-03`).

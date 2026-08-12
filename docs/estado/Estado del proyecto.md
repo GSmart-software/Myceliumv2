@@ -40,6 +40,7 @@ Foto de dónde está Mycelium hoy. Para el detalle de cada tema, seguir los enla
 | Rendimiento de la apertura del vault (`FUN-M-12`) | Implementada en desktop (1.1.1), **sin confirmar por el usuario**: no se pudo medir el efecto real. Ver [[Rendimiento de la apertura del vault]] |
 | Navegación por pestaña (`DEF-039/040/041`) | **Confirmada** en desktop (1.1.5) el 2026-08-03 y **reflejada en web** el 2026-08-08: scroll conservado, historial propio por pestaña con botones. `DEF-041` quedó endurecido sin causa raíz confirmada, pero el síntoma no reapareció. Ver [[Version 1.1.5]] |
 | [[bases-tabla]] (`FUN-L-03`) | **Implementada en las dos ramas** el 2026-08-08, **sin confirmar**: el archivo `.base` (formato de Obsidian) agrega notas por sus propiedades y las muestra en una tabla de solo lectura, con filtros. Se implementa un subconjunto cerrado del lenguaje de Bases; lo que no se entiende **no se ignora**, se declara. Sin release todavía |
+| [[auditoria-y-relinkeado]] (`FUN-L-17`) | **Implementada en desktop** el 2026-08-08, **sin confirmar**: pantalla que audita las referencias sin estructura del vault y las convierte en `[[enlaces]]`, con simulacro, respaldo y deshacer. Con ella salió el **núcleo de `FUN-M-17`**, que no existía. Hoy **solo-desktop**: llevarla a web no es un reflejo (§ 17 de la spec) |
 | Dock de pestañas del panel lateral | Generalizado a cualquier sección (`SidebarDock`) |
 
 ## Pendiente / próximos pasos

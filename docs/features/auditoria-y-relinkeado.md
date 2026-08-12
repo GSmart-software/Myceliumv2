@@ -312,7 +312,7 @@ sino que **cada cosa que aprende se registra y no se vuelve a aprender**, y que 
   IA las detecta, van al informe, no al léxico.
 - **Un hook que avise al escribir una referencia sin enlazar.** Es prevención, no corrección
   — `FUN-S-10`.
-- **La pantalla de la app** — `FUN-L-17`, para quien nunca usa la IA.
+- ~~La pantalla de la app~~ — **`FUN-L-17`, implementada el 2026-08-08** (ver § 17).
 
 ---
 
@@ -376,6 +376,59 @@ sino que **cada cosa que aprende se registra y no se vuelve a aprender**, y que 
 - [[Versionado del sistema]] — el salto de `FRAMEWORK_IA_VERSION`.
 - [[Aprendizajes tecnicos]] — la lección de fondo: no darle trabajo mecánico a escala a un
   modelo, y que la corrección no es que el script adivine mejor sino invertir la dirección.
+
+## 17. Lo que se implementó (`FUN-L-17`, 2026-08-08)
+
+La pantalla salió **antes** que los comandos de la IA, y eso cambió el orden de las cosas:
+el núcleo (`lib/enlaces.ts`) se escribió para ella y queda listo para que los comandos lo
+consuman. En la pantalla **el juicio lo pone el usuario**, que es exactamente el papel que
+la spec le daba a la IA en la fase 2.
+
+| Pieza | Estado |
+|---|---|
+| `frontend/lib/enlaces.ts` — núcleo puro | ✅ 41 tests en `scripts/test-enlaces.mjs` |
+| `frontend/lib/db/enlaces.ts` — inventario, léxico, respaldo, manifiesto, deshacer | ✅ desktop |
+| `frontend/components/enlaces/RelinkView.tsx` — la pantalla | ✅ pestaña del workspace |
+| Entrada en Configuración → Vault | ✅ |
+| `/vault-huerfanas` ampliado y `/vault-referencias` | ⬜ pendiente (`FUN-M-17`) |
+
+### El hallazgo que cambió el diseño: ordenar por apariciones no sirve
+
+Corriendo la auditoría sobre el vault real de este repo (63 documentos), las **15 formas
+más usadas eran todas falsas**: `.mycignore`, `desktop-tauri`, `.md`, `---`, `.excalidraw`.
+Backticks de código, no referencias. El léxico las protegía —nada se habría convertido mal—
+pero el usuario tenía que descartar decenas de filas antes de llegar a la primera útil, y
+eso es no haber resuelto el problema.
+
+La señal que faltaba es gratis y es la más fuerte que hay: **que la forma apunte a una nota
+que existe**. Con eso:
+
+- Las candidatas se ordenan por destino primero, y después por apariciones.
+- Las que no apuntan a ninguna nota se **esconden por defecto**, tras un interruptor que
+  dice cuántas son y por qué están escondidas.
+- Se descarta el ruido evidente (`---`, `.md`, `f(x)`) — pero **solo si no tiene destino**:
+  si una forma resuelve a un archivo real sobrevive pase lo que pase, así que el filtro no
+  puede esconder una referencia de verdad.
+
+Resultado sobre el mismo vault: las 15 primeras pasan a ser `BACKLOG`, `DEF-023`, `RAMAS`,
+`DESIGN_SYSTEM`, `metadata-yaml`… todas correctas.
+
+> [!note] Y el criterio nº1 se comprobó sobre el vault real
+> Auditar los 63 documentos no cambió ni un byte, ni en memoria ni en disco.
+
+### Lo que queda fuera
+
+- **Web**. La funcionalidad reescribe archivos con respaldo en `.mycelium/` y comparte el
+  léxico con los comandos de la IA en `.claude/` — dos cosas que en web no existen. Llevarla
+  allá no es un reflejo: hay que decidir **dónde vive el léxico** y **cómo se respalda sin
+  sistema de archivos**. Se deja explícito en vez de improvisarlo.
+- **`FUN-M-15`** (que `aliases` resuelva) sigue siendo la mejora que hace el resultado más
+  limpio, y sigue pendiente. Sin ella la conversión funciona igual —se escribe `[[HU-009]]`,
+  que resuelve por título— pero la nota destino no gana su alias.
+- **Listar todos los respaldos**: hoy se recuerda el último, que es el caso real (deshacer
+  lo que acabás de hacer). Listar el directorio pediría un comando nuevo en Rust.
+
+---
 
 ## Relacionadas
 
