@@ -94,6 +94,20 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
   > Las que había vivían en la clave común y no se pueden repartir: no hay forma de saber a
   > qué vault pertenecía cada una. Esa clave queda como la del modo SQLite clásico.
 
+  **Segunda causa, encontrada al confirmarlo.** Con las claves por vault ya puestas, el
+  usuario probó: abrir A, dejar una pestaña, cerrar, abrir **B**, cerrar, volver a A → sin
+  pestañas. Y sin pasar por B sí funcionaba. Esa diferencia era la pista: `vaultStore`
+  **no se vaciaba al cambiar de vault**, así que al montar el workspace `reconcileNotes`
+  —que descarta las pestañas cuya nota no esté en la lista— corría contra las notas del
+  vault ANTERIOR y se llevaba por delante las que se acababan de restaurar. Peor: dejaba
+  además el layout vacío guardado en la clave del vault nuevo, así que el daño era
+  permanente. Sin pasar por B, la lista obsoleta era la del propio A y no borraba nada.
+
+  Se arregla en la raíz —`vaultStore.reset()` al abrir y al salir, exactamente por el mismo
+  motivo por el que ya existía `graphStore.reset()`— y se refuerza el sitio destructivo: la
+  reconciliación exige ahora que el árbol sea el del vault activo, no solo que no esté
+  vacío.
+
   **Alcance**: se marca solo-desktop porque en web no se puede reproducir — cambiar de
   vault es `FUN-L-04` y todavía no existe. Cuando llegue, tiene que llamar a lo mismo.
 
