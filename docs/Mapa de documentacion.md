@@ -94,7 +94,9 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
 ## Estado y releases
 
 - [[Estado del proyecto]] — situación actual, pendientes y deuda.
-- [[Version 1.5.0]] — release actual de desktop (ancho de tabulación). Salió fallando y se
+- [[Version 1.6.0]] — release actual de desktop: bases, canvas y la pantalla de
+  referencias. **Sin publicar todavía**.
+- [[Version 1.5.0]] — la anterior (ancho de tabulación). Salió fallando y se
   **rehizo y confirmó** el 2026-08-03; el binario publicado en R2 todavía no lleva esas
   correcciones (hace falta una `1.5.1`).
 - [[Version 1.4.0]] — autoactualización y selección de versión; **confirmada de punta a

@@ -6,7 +6,7 @@ Foto de dónde está Mycelium hoy. Para el detalle de cada tema, seguir los enla
 
 ## Resumen
 
-- **Versión: desktop `1.5.0`** ([[Version 1.5.0]]) · **web `1.1.0`**
+- **Versión: desktop `1.6.0`** ([[Version 1.6.0]], **sin publicar**) · **web `1.1.0`**
   ([[Version 1.1.0 de web]], 2026-08-08). Las dos líneas **no comparten numeración**.
   Web se puso al día con todo lo que le aplicaba; lo que sigue solo en desktop es lo que
   por naturaleza no le aplica (terminal, framework de IA, autoactualización).
@@ -39,24 +39,22 @@ Foto de dónde está Mycelium hoy. Para el detalle de cada tema, seguir los enla
 | [[mycignore]] (`FUN-M-11`) | Implementada en desktop (parser con tests); **parte web pendiente**. Su default se amplió en 1.1.1 |
 | Rendimiento de la apertura del vault (`FUN-M-12`) | Implementada en desktop (1.1.1), **sin confirmar por el usuario**: no se pudo medir el efecto real. Ver [[Rendimiento de la apertura del vault]] |
 | Navegación por pestaña (`DEF-039/040/041`) | **Confirmada** en desktop (1.1.5) el 2026-08-03 y **reflejada en web** el 2026-08-08: scroll conservado, historial propio por pestaña con botones. `DEF-041` quedó endurecido sin causa raíz confirmada, pero el síntoma no reapareció. Ver [[Version 1.1.5]] |
-| [[bases-tabla]] (`FUN-L-03`) | **Implementada en las dos ramas** el 2026-08-08, **sin confirmar**: el archivo `.base` (formato de Obsidian) agrega notas por sus propiedades y las muestra en una tabla de solo lectura, con filtros. Se implementa un subconjunto cerrado del lenguaje de Bases; lo que no se entiende **no se ignora**, se declara. Sin release todavía |
-| [[auditoria-y-relinkeado]] (`FUN-L-17`) | **Implementada en desktop** el 2026-08-08, **sin confirmar**: pantalla que audita las referencias sin estructura del vault y las convierte en `[[enlaces]]`, con simulacro, respaldo y deshacer. Con ella salió el **núcleo de `FUN-M-17`**, que no existía. Hoy **solo-desktop**: llevarla a web no es un reflejo (§ 17 de la spec) |
-| [[canvas]] (`FUN-L-18`) | **Implementado en desktop** el 2026-08-08, **sin confirmar**: tipo de archivo `.canvas` (JSON Canvas, el de Obsidian) con lienzo infinito, tarjetas de markdown y de nota, y flechas. Construido **sin librería de nodos**; el parser conserva lo que todavía no edita para no borrar trabajo de un canvas ajeno. **Reflejado a web** el mismo día, salvo que allá un canvas todavía no aporta aristas al grafo |
+| [[bases-tabla]] (`FUN-L-03`) | Sale en la [[Version 1.6.0]]. **Implementada en las dos ramas** el 2026-08-08, **sin confirmar**: el archivo `.base` (formato de Obsidian) agrega notas por sus propiedades y las muestra en una tabla de solo lectura, con filtros. Se implementa un subconjunto cerrado del lenguaje de Bases; lo que no se entiende **no se ignora**, se declara. Sin release todavía |
+| [[auditoria-y-relinkeado]] (`FUN-L-17`) | Sale en la [[Version 1.6.0]]. **Implementada en desktop** el 2026-08-08, **sin confirmar**: pantalla que audita las referencias sin estructura del vault y las convierte en `[[enlaces]]`, con simulacro, respaldo y deshacer. Con ella salió el **núcleo de `FUN-M-17`**, que no existía. Hoy **solo-desktop**: llevarla a web no es un reflejo (§ 17 de la spec) |
+| [[canvas]] (`FUN-L-18`) | Sale en la [[Version 1.6.0]]. **Implementado en desktop** el 2026-08-08, **sin confirmar**: tipo de archivo `.canvas` (JSON Canvas, el de Obsidian) con lienzo infinito, tarjetas de markdown y de nota, y flechas. Construido **sin librería de nodos**; el parser conserva lo que todavía no edita para no borrar trabajo de un canvas ajeno. **Reflejado a web** el mismo día, salvo que allá un canvas todavía no aporta aristas al grafo |
 | Dock de pestañas del panel lateral | Generalizado a cualquier sección (`SidebarDock`) |
 
 ## Pendiente / próximos pasos
 
-0. **Publicar el próximo release de desktop**, que ya no es un patch: la 1.5.0 que está
-   en R2 **no** lleva las correcciones del 2026-08-03 (`DEF-046`, `DEF-049`, `DEF-050`,
-   `DEF-051` y la papelera del sistema operativo), y quien se actualice hoy recibe una
-   versión que borra sin preguntar. Como encima entró `FUN-L-03`, el salto pasa a ser
-   **minor** y absorbe esas correcciones: será `1.6.0`, no `1.5.1`.
+0. **Publicar la 1.6.0.** El número ya está puesto en los cinco archivos
+   ([[Version 1.6.0]]) pero **no se generó instalador ni se subió a R2**: el usuario pidió
+   corregir defectos antes. Hasta que se publique, quien se actualice sigue recibiendo la
+   1.5.0 de R2, que **no** lleva las correcciones del 2026-08-03 y borra sin preguntar
+   (`DEF-051`). El proceso está en [[Publicar una version]].
 
-   > [!important] Las versiones NO se subieron todavía, y es deliberado
-   > La regla del proyecto es **un release, un incremento** ([[Versionado del sistema]]).
-   > El usuario avisó que quiere meter más funcionalidades antes de publicar, así que
-   > subir el número ahora y otra vez al terminar recrearía justo los huecos que esa
-   > regla vino a eliminar. Se sube **al publicar**, una sola vez.
+   > [!note] La `1.5.1` que estaba prevista ya no existe
+   > Al entrar tres funcionalidades el salto pasó a **minor**, y un minor **absorbe** las
+   > correcciones que vengan con él. Un release, un incremento ([[Versionado del sistema]]).
 1. **Probar el modo avanzado del updater** (`FUN-M-16`): siete clics en el número de
    versión del pie → lista de versiones publicadas → instalar una anterior. Es lo único de
    la [[Version 1.4.0]] sin confirmar; su diálogo estuvo roto hasta `DEF-051`, así que
