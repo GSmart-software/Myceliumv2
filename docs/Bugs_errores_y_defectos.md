@@ -175,6 +175,8 @@ Al abrir un vault, la etapa **«Vigilando los cambios de la carpeta»** es, con 
 
 Se nota desde que existe la pantalla de carga (`DEF-042`): antes el tiempo estaba ahí igual, pero repartido dentro de un spinner mudo y sin forma de saber en qué se iba.
 
+Relacionado, encontrado al arreglarlo: **los cambios hechos desde fuera de la app a un archivo `.base` o `.canvas` no refrescan nada**. Con un `.md` sí.
+
 ---
 
 > [!warning] Defectos sin reporte original

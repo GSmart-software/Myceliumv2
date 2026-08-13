@@ -41,7 +41,7 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-049 | El ancho de tabulación no cambia nada en los documentos ya escritos | ambas (frontend) | ✅ 🌐 (web: 2026-08-08) |
 | DEF-050 | Al cambiar la tabulación desaparecen los indicadores de plegado en lectura | ambas (frontend) | ✅ 🌐 (web: 2026-08-08) |
 | DEF-051 | Ninguna confirmación aparece y se borra igual: carpeta, Espora o papelera, sin preguntar | desktop | ✅ desktop (2026-08-03) — permiso + `confirmar()` que espera. **No aplica a web**: el `confirm` del navegador sí devuelve un booleano |
-| DEF-052 | Abrir un vault se va casi todo en «vigilando los cambios», más que en leer los archivos | desktop | ⬜ pendiente — causa raíz identificada |
+| DEF-052 | Abrir un vault se va casi todo en «vigilando los cambios», más que en leer los archivos | desktop | 🛠️ desktop (2026-08-13) — el poblado del caché respeta `.mycignore` |
 
 ## Notas por bug
 
@@ -61,6 +61,19 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 
   Para qué sirve ese caché: **coser renombrados** cuando el sistema no emite pares de
   eventos. En Windows `ReadDirectoryChangesW` sí los emite, así que aporta poco.
+
+  **Corregido conservando el caché**, que era la opción que el usuario eligió con un
+  criterio que vale la pena dejar escrito: *si `.mycignore` ignora algo, Mycelium no
+  debería tomarlo en cuenta para nada*. El root se registra como `NonRecursive` —para que
+  el `rescan()` tras un desbordamiento del SO siga acotado, en vez de quedarse sin ningún
+  root y dejar la caché muerta— y el poblado se hace con `archivos::rutas_observables()`,
+  el mismo recorrido filtrado que usa el indexador.
+
+  **Salió un segundo defecto de paso**: `vault_watch::es_nota` era una copia de la lista de
+  extensiones con `.md` y `.excalidraw`, y se quedó atrás al aparecer las bases
+  (`FUN-L-03`) y los canvas (`FUN-L-18`) — editarlos desde fuera **no disparaba
+  reindexado**. Ahora el watcher usa `archivos::es_importable`, la misma lista que el
+  indexador: dos listas de extensiones separadas por medio archivo se desincronizan siempre.
 
 - **DEF-042 — el progreso se pintaba en todos los botones porque la etiqueta era una
   sola.** `etiquetaAbrir` se calculaba una vez, a nivel de página, y se usaba dentro del
