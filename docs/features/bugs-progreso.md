@@ -31,7 +31,7 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-039 | Al volver a una pestaña se pierde la posición de lectura | ambas (frontend) | ✅ 🌐 (web: 2026-08-08) |
 | DEF-040 | El historial de atrás/adelante es global en vez de por pestaña | ambas (frontend) | ✅ 🌐 (web: 2026-08-08) |
 | DEF-041 | La pestaña de previsualización no reemplaza, abre una nueva | ambas (frontend) | ✅ 🌐 (web: 2026-08-08) — se confirmó pese a haberse endurecido sin causa raíz |
-| DEF-042 | El progreso del indexado sale en todos los botones de vault; falta una pantalla de carga | ambas (frontend) | ⬜ pendiente |
+| DEF-042 | El progreso del indexado sale en todos los botones de vault; falta una pantalla de carga | desktop | 🛠️ desktop (2026-08-13) — pantalla propia, con etapas y aviso de atasco |
 | DEF-043 | El ícono de las Esporas es un brote de planta, no evoca una espora | ambas (frontend) | ✅ 🌐 (web: 2026-08-08) |
 | DEF-044 | Al cambiar de vault siguen abiertas las pestañas del vault anterior | ambas (frontend) | ⬜ pendiente — bloque F de la agrupación |
 | DEF-045 | `[[destino\|alias]]` dentro de una tabla: o rompe la tabla, o rompe el grafo | ambas (frontend) | ⬜ pendiente — causa raíz ya identificada |
@@ -43,6 +43,19 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-051 | Ninguna confirmación aparece y se borra igual: carpeta, Espora o papelera, sin preguntar | desktop | ✅ desktop (2026-08-03) — permiso + `confirmar()` que espera. **No aplica a web**: el `confirm` del navegador sí devuelve un booleano |
 
 ## Notas por bug
+
+- **DEF-042 — el progreso se pintaba en todos los botones porque la etiqueta era una
+  sola.** `etiquetaAbrir` se calculaba una vez, a nivel de página, y se usaba dentro del
+  `map` de la lista: no había forma de que un botón supiera si el vault que se estaba
+  abriendo era el suyo. La corrección no fue pasarle el id a cada botón sino **quitar el
+  progreso de la lista entera**: mientras se abre un vault el selector desaparece y da paso
+  a una pantalla propia, que es lo que pedía el defecto. El mismo camino cubre la apertura
+  automática, que antes mostraba un «Cargando…» mudo.
+
+  La pantalla lee **solo el store**, a propósito: el [[BACKLOG]] emparentaba este defecto
+  con `FUN-L-10` (mover el indexado a Rust) para no tocar el feedback dos veces. Con la
+  pantalla desacoplada de quién produce el progreso, a `FUN-L-10` le basta con alimentar el
+  mismo store.
 
 - **DEF-051 — `dialog:default` no incluye `allow-confirm`** (encontrado el 2026-08-03 en el
   log de arranque, no reportado: `dialog.confirm not allowed. Command not found`).
