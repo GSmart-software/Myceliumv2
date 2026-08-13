@@ -31,9 +31,9 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-039 | Al volver a una pestaña se pierde la posición de lectura | ambas (frontend) | ✅ 🌐 (web: 2026-08-08) |
 | DEF-040 | El historial de atrás/adelante es global en vez de por pestaña | ambas (frontend) | ✅ 🌐 (web: 2026-08-08) |
 | DEF-041 | La pestaña de previsualización no reemplaza, abre una nueva | ambas (frontend) | ✅ 🌐 (web: 2026-08-08) — se confirmó pese a haberse endurecido sin causa raíz |
-| DEF-042 | El progreso del indexado sale en todos los botones de vault; falta una pantalla de carga | desktop | 🛠️ desktop (2026-08-13) — pantalla propia, con etapas y aviso de atasco |
+| DEF-042 | El progreso del indexado sale en todos los botones de vault; falta una pantalla de carga | desktop | ✅ desktop (2026-08-13) — pantalla propia, con etapas y aviso de atasco |
 | DEF-043 | El ícono de las Esporas es un brote de planta, no evoca una espora | ambas (frontend) | ✅ 🌐 (web: 2026-08-08) |
-| DEF-044 | Al cambiar de vault siguen abiertas las pestañas del vault anterior | ambas (frontend) | ⬜ pendiente — bloque F de la agrupación |
+| DEF-044 | Al cambiar de vault siguen abiertas las pestañas del vault anterior | desktop | 🛠️ desktop (2026-08-13) — un almacén de pestañas por vault |
 | DEF-045 | `[[destino\|alias]]` dentro de una tabla: o rompe la tabla, o rompe el grafo | ambas (frontend) | ⬜ pendiente — causa raíz ya identificada |
 | DEF-046 | Lo eliminado no aparece en la papelera, ni en la de Windows: no hay recuperación | desktop | ✅ desktop (2026-08-03) — las dos mitades |
 | DEF-047 | El menú contextual se sale de la pantalla en los archivos de abajo | ambas (frontend) | ⬜ pendiente |
@@ -41,7 +41,7 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-049 | El ancho de tabulación no cambia nada en los documentos ya escritos | ambas (frontend) | ✅ 🌐 (web: 2026-08-08) |
 | DEF-050 | Al cambiar la tabulación desaparecen los indicadores de plegado en lectura | ambas (frontend) | ✅ 🌐 (web: 2026-08-08) |
 | DEF-051 | Ninguna confirmación aparece y se borra igual: carpeta, Espora o papelera, sin preguntar | desktop | ✅ desktop (2026-08-03) — permiso + `confirmar()` que espera. **No aplica a web**: el `confirm` del navegador sí devuelve un booleano |
-| DEF-052 | Abrir un vault se va casi todo en «vigilando los cambios», más que en leer los archivos | desktop | 🛠️ desktop (2026-08-13) — el poblado del caché respeta `.mycignore` |
+| DEF-052 | Abrir un vault se va casi todo en «vigilando los cambios», más que en leer los archivos | desktop | ✅ desktop (2026-08-13) — el poblado del caché respeta `.mycignore` |
 
 ## Notas por bug
 
@@ -74,6 +74,28 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
   (`FUN-L-03`) y los canvas (`FUN-L-18`) — editarlos desde fuera **no disparaba
   reindexado**. Ahora el watcher usa `archivos::es_importable`, la misma lista que el
   indexador: dos listas de extensiones separadas por medio archivo se desincronizan siempre.
+
+- **DEF-044 — había UNA sola clave de `localStorage` para las pestañas de todos los
+  vaults.** `tabsStore` persistía en `micelio-tabs`, sin más, así que al cambiar de vault el
+  layout restaurado era el del anterior. Y `reconcileNotes` no lo salvaba: en modo carpeta
+  el id de una nota **es su ruta**, y dos vaults comparten rutas con facilidad
+  (`Indice.md`), de modo que la pestaña sobrevivía a la reconciliación y pasaba a mostrar
+  *otra* nota — que es el «muestran mal el contenido» del reporte.
+
+  Ahora cada vault tiene su clave (`micelio-tabs:<ruta>`), y `usarAlmacenDeVault()` la
+  cambia al abrir y la suelta al salir. **El orden de esa función no es intercambiable**:
+  se lee lo guardado, después se reapunta el `persist` y solo entonces se rehidrata o se
+  resetea. Resetear antes de reapuntar escribiría el layout vacío en la clave del vault que
+  se está cerrando —borrándole las pestañas—; y rehidratar después de un reset escribiría
+  el vacío en la clave nueva antes de poder leerla, con el mismo daño sobre el vault al que
+  se entra.
+
+  > [!note] La primera apertura tras actualizar sale sin pestañas
+  > Las que había vivían en la clave común y no se pueden repartir: no hay forma de saber a
+  > qué vault pertenecía cada una. Esa clave queda como la del modo SQLite clásico.
+
+  **Alcance**: se marca solo-desktop porque en web no se puede reproducir — cambiar de
+  vault es `FUN-L-04` y todavía no existe. Cuando llegue, tiene que llamar a lo mismo.
 
 - **DEF-042 — el progreso se pintaba en todos los botones porque la etiqueta era una
   sola.** `etiquetaAbrir` se calculaba una vez, a nivel de página, y se usaba dentro del
