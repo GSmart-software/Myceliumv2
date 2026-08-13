@@ -33,11 +33,11 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-041 | La pestaña de previsualización no reemplaza, abre una nueva | ambas (frontend) | ✅ 🌐 (web: 2026-08-08) — se confirmó pese a haberse endurecido sin causa raíz |
 | DEF-042 | El progreso del indexado sale en todos los botones de vault; falta una pantalla de carga | desktop | ✅ desktop (2026-08-13) — pantalla propia, con etapas y aviso de atasco |
 | DEF-043 | El ícono de las Esporas es un brote de planta, no evoca una espora | ambas (frontend) | ✅ 🌐 (web: 2026-08-08) |
-| DEF-044 | Al cambiar de vault siguen abiertas las pestañas del vault anterior | desktop | 🛠️ desktop (2026-08-13) — un almacén de pestañas por vault |
+| DEF-044 | Al cambiar de vault siguen abiertas las pestañas del vault anterior | desktop | ✅ desktop (2026-08-13) — un almacén por vault, y el árbol se vacía al cambiar |
 | DEF-045 | `[[destino\|alias]]` dentro de una tabla: o rompe la tabla, o rompe el grafo | ambas (frontend) | ⬜ pendiente — causa raíz ya identificada |
 | DEF-046 | Lo eliminado no aparece en la papelera, ni en la de Windows: no hay recuperación | desktop | ✅ desktop (2026-08-03) — las dos mitades |
-| DEF-047 | El menú contextual se sale de la pantalla en los archivos de abajo | ambas (frontend) | ⬜ pendiente |
-| DEF-048 | Falta margen inferior en toda la app: el contenido queda pegado al borde | ambas (frontend) | ⬜ pendiente |
+| DEF-047 | El menú contextual se sale de la pantalla en los archivos de abajo | ambas (frontend) | 🛠️ desktop (2026-08-13) — se mide y se vuelca |
+| DEF-048 | Falta margen inferior en toda la app: el contenido queda pegado al borde | ambas (frontend) | 🛠️ desktop (2026-08-13) — token `--mic-gap-inferior` |
 | DEF-049 | El ancho de tabulación no cambia nada en los documentos ya escritos | ambas (frontend) | ✅ 🌐 (web: 2026-08-08) |
 | DEF-050 | Al cambiar la tabulación desaparecen los indicadores de plegado en lectura | ambas (frontend) | ✅ 🌐 (web: 2026-08-08) |
 | DEF-051 | Ninguna confirmación aparece y se borra igual: carpeta, Espora o papelera, sin preguntar | desktop | ✅ desktop (2026-08-03) — permiso + `confirmar()` que espera. **No aplica a web**: el `confirm` del navegador sí devuelve un booleano |
@@ -74,6 +74,22 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
   (`FUN-L-03`) y los canvas (`FUN-L-18`) — editarlos desde fuera **no disparaba
   reindexado**. Ahora el watcher usa `archivos::es_importable`, la misma lista que el
   indexador: dos listas de extensiones separadas por medio archivo se desincronizan siempre.
+
+- **DEF-047 — el menú se dibujaba en el punto del clic, sin mirar si cabía.** La posición
+  era literalmente `left: x; top: y`. Ahora el menú **se mide ya montado** y se reubica:
+  vuelca al otro lado del cursor y, si ni así entra —menú más alto que la ventana—, se
+  arrima al borde. Se mide en vez de estimar el alto porque este depende de cuántas
+  entradas tenga cada menú (el de una carpeta y el de una nota no son iguales) y cualquier
+  número fijo se queda corto en cuanto se agrega una opción. `useLayoutEffect` lo hace
+  antes de pintar, así que no se ve saltar. Los submenús —el de Esporas puede ser largo—
+  además se acotan con `max-height` y se desplazan dentro.
+
+- **DEF-048 — no había ningún aire abajo, y el defecto era general.** Se resuelve con un
+  token, `--mic-gap-inferior`, aplicado al shell del workspace, que es la única pantalla a
+  altura completa cuyo contenido llega al borde (las demás centran su contenido). Es un
+  token y no un valor suelto justamente porque el reporte decía «es general de toda la
+  pantalla, no de un componente concreto»: cualquier pantalla futura a altura completa
+  tiene dónde mirar.
 
 - **DEF-044 — había UNA sola clave de `localStorage` para las pestañas de todos los
   vaults.** `tabsStore` persistía en `micelio-tabs`, sin más, así que al cambiar de vault el
