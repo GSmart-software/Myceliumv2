@@ -186,6 +186,9 @@ Relacionado, encontrado al arreglarlo: **los cambios hechos desde fuera de la ap
 # DEF-053
 El mismo problema del `DEF-047`, pero con el menú de **opciones del grafo**: si la pestaña del grafo es pequeña, el panel de opciones **se sale de la pantalla**, tanto por los lados como por abajo, y no se puede usar.
 
+# DEF-054
+El grafo solo se actualiza cuando el archivo se crea **desde la propia UI de Mycelium**. Si el documento lo genera algo de fuera —un agente de IA escribiendo en la carpeta, otro editor, un `git pull`— el grafo no se entera y sigue mostrando la foto anterior.
+
 ---
 
 > [!warning] Defectos sin reporte original

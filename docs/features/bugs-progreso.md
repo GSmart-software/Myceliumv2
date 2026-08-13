@@ -43,6 +43,7 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-051 | Ninguna confirmación aparece y se borra igual: carpeta, Espora o papelera, sin preguntar | desktop | ✅ desktop (2026-08-03) — permiso + `confirmar()` que espera. **No aplica a web**: el `confirm` del navegador sí devuelve un booleano |
 | DEF-052 | Abrir un vault se va casi todo en «vigilando los cambios», más que en leer los archivos | desktop | ✅ desktop (2026-08-13) — el poblado del caché respeta `.mycignore` |
 | DEF-053 | Las opciones del grafo se salen de la pantalla si la pestaña es pequeña | ambas (frontend) | 🛠️🌐 (2026-08-13) — portal y posición acotada; sin confirmar |
+| DEF-054 | El grafo no se actualiza si el archivo lo crea algo de fuera de Mycelium | desktop | 🛠️ desktop (2026-08-13) — el watcher marca el grafo desactualizado |
 
 ## Notas por bug
 
@@ -75,6 +76,28 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
   (`FUN-L-03`) y los canvas (`FUN-L-18`) — editarlos desde fuera **no disparaba
   reindexado**. Ahora el watcher usa `archivos::es_importable`, la misma lista que el
   indexador: dos listas de extensiones separadas por medio archivo se desincronizan siempre.
+
+- **DEF-054 — el watcher reindexaba pero no avisaba al grafo.** Los mutadores de
+  `vaultStore` (crear, renombrar, borrar) llaman a `markGraphStale()`, que marca el grafo y
+  refresca las vistas en vivo. Por eso funcionaba desde la UI. Pero los cambios hechos
+  **desde fuera** entran por otro camino —`vaultWatch.refrescar()`—, que reindexaba,
+  recargaba el árbol y avisaba a los editores… y no tocaba el grafo. El explorador se
+  enteraba y el grafo no.
+
+  `GraphView` ya sabía reaccionar (`stale` → refetch estando abierto), así que faltaba solo
+  quien lo marcara. Se añade también `refreshAllLiveViews()`, por lo mismo que van juntos
+  en `markGraphStale`: un archivo nuevo puede hacer que un `[[enlace]]` que se mostraba como
+  roto pase a resolver.
+
+  Y el **panel de conexiones** tenía la misma ceguera por otra vía: su caché es por nota y
+  el panel puede quedarse montado mientras el vault cambia, así que un documento nuevo que
+  enlazara a la nota abierta no aparecía en RETROENLACES hasta cambiar de nota. Ahora
+  escucha el mismo evento.
+
+  > [!note] La constante del evento se mudó a `lib/eventos.ts`
+  > La emitía `lib/vaultWatch.ts`, que es **solo-desktop**, y el panel que ahora la escucha
+  > es **compartido**: importarla de ahí habría arrastrado a web un módulo que allá no
+  > existe. El sitio de una constante compartida no es el emisor.
 
 - **DEF-053 — el mismo problema del `DEF-047`, y encima recortado.** El panel de opciones
   era `position: absolute` **dentro del grafo**: 300 px de ancho y hasta `70vh` de alto
