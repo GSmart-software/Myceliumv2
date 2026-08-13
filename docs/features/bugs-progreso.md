@@ -41,8 +41,26 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-049 | El ancho de tabulación no cambia nada en los documentos ya escritos | ambas (frontend) | ✅ 🌐 (web: 2026-08-08) |
 | DEF-050 | Al cambiar la tabulación desaparecen los indicadores de plegado en lectura | ambas (frontend) | ✅ 🌐 (web: 2026-08-08) |
 | DEF-051 | Ninguna confirmación aparece y se borra igual: carpeta, Espora o papelera, sin preguntar | desktop | ✅ desktop (2026-08-03) — permiso + `confirmar()` que espera. **No aplica a web**: el `confirm` del navegador sí devuelve un booleano |
+| DEF-052 | Abrir un vault se va casi todo en «vigilando los cambios», más que en leer los archivos | desktop | ⬜ pendiente — causa raíz identificada |
 
 ## Notas por bug
+
+- **DEF-052 — el watcher recorre el vault ENTERO, y sin `.mycignore`** (causa raíz
+  confirmada el 2026-08-13 leyendo la fuente del crate). `iniciar_watcher` hace dos cosas:
+  `watch()`, que en Windows es un solo handle y no cuesta nada, y
+  `debouncer.cache().add_root(base, Recursive)`, que es lo caro. En
+  `notify-debouncer-full 0.3.2`, `add_root` → `add_path` → `WalkDir` con
+  `max_depth(usize::MAX)` y `follow_links(true)`, **llamando a `get_file_id()` en cada
+  entrada** — una llamada al sistema por archivo y por carpeta.
+
+  Ese recorrido **no conoce el `.mycignore`**: entra en `node_modules/`, `target/`, `.git/`
+  y todo lo demás. Es exactamente el coste que `FUN-M-12` le quitó al indexador —en este
+  vault, de 1830 archivos y 4020 directorios a 63 y 110— pero que el watcher sigue pagando
+  íntegro. Por eso «vigilar» tarda más que «leer los archivos»: el indexador mira 63 y el
+  watcher mira 1830.
+
+  Para qué sirve ese caché: **coser renombrados** cuando el sistema no emite pares de
+  eventos. En Windows `ReadDirectoryChangesW` sí los emite, así que aporta poco.
 
 - **DEF-042 — el progreso se pintaba en todos los botones porque la etiqueta era una
   sola.** `etiquetaAbrir` se calculaba una vez, a nivel de página, y se usaba dentro del

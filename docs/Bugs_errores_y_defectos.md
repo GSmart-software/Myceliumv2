@@ -170,6 +170,11 @@ En el registro de la aplicación queda `dialog.confirm not allowed`.
 > contrario de lo que el código creía estar haciendo.
 
 
+# DEF-052
+Al abrir un vault, la etapa **«Vigilando los cambios de la carpeta»** es, con diferencia, la que más tarda — bastante más que leer todos los archivos del vault, que es lo que uno esperaría que costara.
+
+Se nota desde que existe la pantalla de carga (`DEF-042`): antes el tiempo estaba ahí igual, pero repartido dentro de un spinner mudo y sin forma de saber en qué se iba.
+
 ---
 
 > [!warning] Defectos sin reporte original
