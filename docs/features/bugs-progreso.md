@@ -88,6 +88,14 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
   pantalla desacoplada de quién produce el progreso, a `FUN-L-10` le basta con alimentar el
   mismo store.
 
+  **Segunda pasada**: al confirmarlo apareció un parpadeo del selector justo antes de
+  entrar. Era una carrera entre dos pasos que parecían uno: el store pone `abriendo: false`
+  en cuanto termina, pero el `router.replace("/workspace")` corre **después**, y en ese
+  hueco la página volvía a pintar la lista. La página sostiene ahora la pantalla con una
+  bandera propia hasta que la navegación se lleve la página —no hasta que el store diga que
+  terminó— y el store deja de limpiar `etapa`/`rutaAbriendo` al acabar bien, para que esos
+  milisegundos no se vean como un salto a una pantalla con todo otra vez pendiente.
+
 - **DEF-051 — `dialog:default` no incluye `allow-confirm`** (encontrado el 2026-08-03 en el
   log de arranque, no reportado: `dialog.confirm not allowed. Command not found`).
 

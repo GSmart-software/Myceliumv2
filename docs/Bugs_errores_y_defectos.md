@@ -124,6 +124,12 @@ Al pulsar "abrir", la pantalla de selección de vault debería desaparecer y dar
 
 Esa pantalla de carga también debe aparecer cuando el vault se abre **automáticamente** por configuración.
 
+> [!note] Detalle detectado al confirmarlo (2026-08-13)
+> Con la pantalla ya funcionando, al terminar la carga **asomaba de nuevo la pantalla de
+> selección de vault** durante un instante, antes de entrar al workspace. Se anota acá y no
+> como defecto propio porque es el mismo síntoma del mismo trabajo, y nunca llegó a
+> publicarse.
+
 # DEF-043
 El ícono de las Esporas (plantillas) es una planta o un brote de planta, y no es representativo de una espora. Un círculo, o algo del estilo del ícono de un virus, comunicaría mejor la idea — aunque no sea literalmente una espora, se parece más que una planta.
 
