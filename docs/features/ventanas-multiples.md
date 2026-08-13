@@ -76,11 +76,19 @@ como siempre) y **Abrir en una ventana nueva**.
 > etiqueta habría arrancado **sin permisos**: sin SQL, sin diálogos, incapaz de abrir nada.
 > Por eso las etiquetas son `vault-<timestamp>` y la capability lista `vault-*`.
 
-> [!warning] `/workspace` no existe como archivo en la exportación estática
-> `next build` con `output: "export"` genera `out/workspace.html`, **no**
-> `out/workspace/index.html`. La ventana nueva carga `workspace.html?vault=…`; con la ruta
-> con barra habría abierto en blanco. Nunca se había notado porque la ventana principal
-> llega a `/workspace` navegando por el cliente, sin pedirle el archivo a nadie.
+> [!warning] La ruta del workspace NO es la misma en desarrollo que empaquetada
+> Y hay que distinguirlas con `tauri::is_dev()`, o la ventana abre en blanco justo en uno
+> de los dos entornos:
+>
+> | | Qué resuelve | Qué falla |
+> |---|---|---|
+> | **Empaquetado** | `workspace.html` — el export genera el archivo suelto | `/workspace`: no hay `workspace/index.html` |
+> | **Desarrollo** | `/workspace` — el servidor de Next sirve la ruta | `workspace.html`: no conoce ningún `.html` |
+>
+> Nunca se había notado porque la ventana principal llega al workspace navegando por el
+> cliente, sin pedirle el archivo a nadie. **Consecuencia práctica**: sin esto la
+> funcionalidad solo se podría probar tras compilar e instalar, que es justo lo que no
+> conviene para iterar.
 
 El vault viaja en la URL y no en un estado compartido porque la ventana nueva arranca con su
 `sessionStorage` vacío: tiene que saber por sí misma qué abrir.
@@ -88,6 +96,10 @@ El vault viaja en la URL y no en un estado compartido porque la ventana nueva ar
 ---
 
 ## 5. Verificación
+
+Se puede probar **en desarrollo** (`npm run tauri dev`), sin compilar ni instalar: la
+ventana nueva resuelve su URL según el entorno (§ 4). Lo único que sigue exigiendo el
+paquete es el instalador en sí.
 
 - `cargo check` y `cargo test --lib` (26 tests, dos nuevos: comparación de rutas y el
   escapado de la URL) · `npx tsc --noEmit` · `npx next build`.
