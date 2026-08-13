@@ -42,7 +42,7 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-050 | Al cambiar la tabulación desaparecen los indicadores de plegado en lectura | ambas (frontend) | ✅ 🌐 (web: 2026-08-08) |
 | DEF-051 | Ninguna confirmación aparece y se borra igual: carpeta, Espora o papelera, sin preguntar | desktop | ✅ desktop (2026-08-03) — permiso + `confirmar()` que espera. **No aplica a web**: el `confirm` del navegador sí devuelve un booleano |
 | DEF-052 | Abrir un vault se va casi todo en «vigilando los cambios», más que en leer los archivos | desktop | ✅ desktop (2026-08-13) — el poblado del caché respeta `.mycignore` |
-| DEF-053 | Las opciones del grafo se salen de la pantalla si la pestaña es pequeña | ambas (frontend) | 🛠️ desktop (2026-08-13) — portal y posición acotada |
+| DEF-053 | Las opciones del grafo se salen de la pantalla si la pestaña es pequeña | ambas (frontend) | 🛠️🌐 (2026-08-13) — portal y posición acotada; sin confirmar |
 
 ## Notas por bug
 
