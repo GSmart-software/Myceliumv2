@@ -100,7 +100,7 @@ y **priorizar** qué implementar antes.
 | `FUN-L-13` | `UI-IDIOMAS` | La interfaz en varios idiomas (español, inglés, italiano) y preparada para agregar más. Hoy todos los textos están escritos en español dentro de los componentes | ambas | — |
 | `FUN-L-14` 🟢 | `UPDATER-AUTOACTUALIZACION` | Mycelium comprueba una vez al día si hay versión nueva, muestra su changelog y ofrece instalarla con un clic. Nunca obliga ni bloquea. `tauri-plugin-updater` + instaladores firmados en Cloudflare R2. **Confirmada de punta a punta** el 2026-08-03: bucket y claves en marcha, la 1.4.0 y la 1.5.0 publicadas en R2, y el usuario comprobó en la app que una instalación **detecta y aplica** la versión posterior. Ya no hacen falta instalaciones manuales. Spec en `docs/features/autoactualizacion.md`. Salió en [[Version 1.4.0]] | desktop | — |
 | `FUN-L-16` | `VAULT-VENTANAS-MULTIPLES` | Tener **varios vaults abiertos a la vez**, cada uno en su propia ventana y sin límite de cuántos. Hoy abrir uno cierra el anterior. Continuación natural de `FUN-L-04`, y comparte raíz con `DEF-044` | ambas | — |
-| `FUN-L-18` | `FILES-CANVAS` | Tipo de archivo **canvas** (`.canvas`, formato JSON Canvas de Obsidian): lienzo infinito con texto suelto, tarjetas de markdown y tarjetas que **son** notas del vault, unidas por flechas. Los `[[enlaces]]` de las tarjetas funcionan y cuentan en el grafo; las flechas son solo disposición visual. Spec en `docs/features/canvas.md` | ambas | — |
+| `FUN-L-18` 🛠️ | `FILES-CANVAS` | Tipo de archivo **canvas** (`.canvas`, formato JSON Canvas de Obsidian): lienzo infinito con texto suelto, tarjetas de markdown y tarjetas que **son** notas del vault, unidas por flechas. Los `[[enlaces]]` de las tarjetas funcionan y cuentan en el grafo; las flechas son solo disposición visual. Spec en [[canvas]]. **Implementado en desktop** el 2026-08-08 (sin confirmar); construido sin librería de nodos, ver [[canvas]] § 9. | ambas | — |
 | `FUN-L-17` 🛠️ | `VAULT-RELINKEADO-UI` | La auditoría y conversión de `FUN-M-17` como **pantalla de la app**, consumiendo el mismo núcleo. Sirve a quien nunca usa la IA y hoy no tiene ninguna salida. **Implementada en desktop** el 2026-08-08 (sin confirmar), y con ella el **núcleo de `FUN-M-17`**, que no existía: `lib/enlaces.ts`. Ver [[auditoria-y-relinkeado]] § 17 | ambas | — |
 | `FUN-L-15` 🟢 | `RELEASE-SCRIPT-PUBLICACION` | Un `npm run publicar` que compruebe, compile, firme, suba a R2 con `wrangler`, escriba los tres manifiestos y **verifique lo publicado**, en vez de hacer esos cuatro pasos a mano. Tiene modo `--simulacro`. **Script local, no CI**: usar el workflow obligaría a alinear `origin` y a poner la clave de firma como secreto de GitHub. **Confirmado**: publicó la 1.5.0 de verdad el 2026-08-03. El proceso, en [[Publicar una version]] § 2 | desktop | — |
 
@@ -704,7 +704,7 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 > nadie compila. Ninguna de las dos cosas es un problema hoy: solo se distribuye Windows y
 > la compilación local ya es la que se viene usando.
 
-#### `FUN-L-18` · `FILES-CANVAS` (—)
+#### `FUN-L-18` · `FILES-CANVAS` (—) — 🛠️ desktop
 - **Qué es**: un tipo de archivo nuevo, el **canvas** (`.canvas`), para disponer notas y
   textos en un lienzo infinito y conectarlos con flechas. Tres elementos: texto suelto,
   tarjetas de markdown y tarjetas que **son** una nota del vault (contenido en vivo).
@@ -725,6 +725,11 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 
 ### Pendientes — tamaño XL
 
+- **Implementado en desktop** el 2026-08-08, **sin confirmar**. Se cambió la
+  recomendación de la spec y se construyó **sin librería de nodos** (`MiniGraph.tsx` ya
+  tenía pan/zoom/arrastre propios, y el proyecto viene evitando dependencias). El parser
+  **conserva lo que no entiende** —`link`, `group`, `subpath`, colores— para no borrarle
+  trabajo a quien traiga un canvas de Obsidian. Ver [[canvas]] § 9.
 #### `FUN-XL-01` · `STORAGE-LOCAL-FIRST-NUBE` (C-G-03)
 - **Qué es**: rearquitectura del almacenamiento en **desktop** hacia un modelo
   *local‑first*: los markdowns y archivos viven en local y hay un botón para **guardar

@@ -61,6 +61,8 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
 - [[metadata-yaml]] — frontmatter YAML como propiedades: ver, editar e indexar (`FUN-M-04`).
 - [[auditoria-y-relinkeado]] — adoptar un vault que ya existía: descubrir cómo se
   referencian sus documentos y convertirlo en enlaces (`FUN-M-17` · `FUN-L-17`).
+- [[canvas]] — el archivo `.canvas`: notas y textos en el espacio, unidos por flechas
+  (`FUN-L-18`).
 - [[bases-tabla]] — el archivo `.base`: agregar notas por sus propiedades en una tabla
   (`FUN-L-03`). Continuación directa de [[metadata-yaml]].
 - [[esporas-plantillas]] — plantillas de notas ("Esporas") con variables (`FUN-M-03`).

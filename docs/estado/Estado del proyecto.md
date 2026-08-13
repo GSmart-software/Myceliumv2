@@ -41,6 +41,7 @@ Foto de dónde está Mycelium hoy. Para el detalle de cada tema, seguir los enla
 | Navegación por pestaña (`DEF-039/040/041`) | **Confirmada** en desktop (1.1.5) el 2026-08-03 y **reflejada en web** el 2026-08-08: scroll conservado, historial propio por pestaña con botones. `DEF-041` quedó endurecido sin causa raíz confirmada, pero el síntoma no reapareció. Ver [[Version 1.1.5]] |
 | [[bases-tabla]] (`FUN-L-03`) | **Implementada en las dos ramas** el 2026-08-08, **sin confirmar**: el archivo `.base` (formato de Obsidian) agrega notas por sus propiedades y las muestra en una tabla de solo lectura, con filtros. Se implementa un subconjunto cerrado del lenguaje de Bases; lo que no se entiende **no se ignora**, se declara. Sin release todavía |
 | [[auditoria-y-relinkeado]] (`FUN-L-17`) | **Implementada en desktop** el 2026-08-08, **sin confirmar**: pantalla que audita las referencias sin estructura del vault y las convierte en `[[enlaces]]`, con simulacro, respaldo y deshacer. Con ella salió el **núcleo de `FUN-M-17`**, que no existía. Hoy **solo-desktop**: llevarla a web no es un reflejo (§ 17 de la spec) |
+| [[canvas]] (`FUN-L-18`) | **Implementado en desktop** el 2026-08-08, **sin confirmar**: tipo de archivo `.canvas` (JSON Canvas, el de Obsidian) con lienzo infinito, tarjetas de markdown y de nota, y flechas. Construido **sin librería de nodos**; el parser conserva lo que todavía no edita para no borrar trabajo de un canvas ajeno |
 | Dock de pestañas del panel lateral | Generalizado a cualquier sección (`SidebarDock`) |
 
 ## Pendiente / próximos pasos

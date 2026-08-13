@@ -53,12 +53,13 @@ explícitamente **para que el vault sea intercambiable**.
 }
 ```
 
-> [!warning] Verificar el esquema contra la especificación antes de implementar
-> Lo de arriba está escrito de memoria del formato. Antes de escribir código hay que
-> contrastarlo con la especificación publicada de JSON Canvas: nombres exactos de los
-> campos, tipos de nodo (`text`, `file`, `link`, `group`), los lados de las aristas y los
-> extremos (`fromEnd`/`toEnd`). Equivocarse ahí rompe justo la interoperabilidad que motivó
-> elegir el formato.
+> [!success] Verificado contra la especificación publicada (2026-08-08)
+> Se contrastó antes de escribir código, como pedía esta nota. El ejemplo de arriba era
+> correcto; lo que faltaba y ahora está implementado: `subpath` en los nodos `file`,
+> `background`/`backgroundStyle` en los `group`, `label` y `color` en las aristas, y los
+> **valores por defecto** de los extremos — `fromEnd` es `none` y `toEnd` es `arrow`, así
+> que una flecha normal no necesita escribirlos. El color es un hex (`"#FF0000"`) o un
+> preset `"1"`–`"6"`.
 
 ---
 
@@ -190,7 +191,59 @@ hace falta tabla nueva.
 
 ---
 
-## 9. Lo que NO entra
+## 9. Lo que se implementó (2026-08-08)
+
+| Pieza | Dónde |
+|---|---|
+| Formato: parser, serializador y geometría | `frontend/lib/canvas.ts` (puro, 26 tests) |
+| El lienzo | `frontend/components/canvas/CanvasView.tsx` |
+| Tipo de archivo | `NotaTipo`, `extDeTipo`, `archivos.rs`, explorador (ícono e íconos de arrastre), `EditorPane`, `SidebarNoteView` |
+| Qué llega al grafo | `lib/db/grafo.ts` lee los canvas con `referenciasDe()` |
+
+### Sin librería de nodos — se cambió la recomendación de la spec
+
+La § 6 recomendaba React Flow. **Se construyó a mano**, por tres razones concretas:
+
+1. El proyecto **ya tiene esta maquinaria**: `MiniGraph.tsx` hace pan, zoom, arrastre y
+   hover por su cuenta desde hace versiones.
+2. `FUN-M-04` y `FUN-M-03` se hicieron sin sumar dependencias, y es una preferencia
+   sostenida del proyecto.
+3. Lo que hace falta acá está **acotado**: cajas rectangulares, cuatro anclas fijas y
+   beziers. El miedo al `XL` era construir un editor de nodos de propósito general.
+
+Y una razón de método: no puedo probar React Flow dentro del WebView de Tauri sin correr la
+app, así que la alternativa era meter en el instalador una dependencia sin verificar.
+
+> [!note] Si el canvas crece (agrupar, selección múltiple, alineado), conviene revisarlo
+> La decisión se tomó para *esta* unidad de trabajo, no para siempre.
+
+### La decisión que gobierna el módulo: no perder nada ajeno
+
+Un `.canvas` de Obsidian puede traer nodos `link` y `group`, colores, `subpath`,
+`background`… Mycelium todavía no los **edita**, pero guardarlo sin ellos le borraría
+trabajo al usuario en silencio. Por eso el parser **conserva el objeto crudo** de cada nodo
+y arista, y al serializar escribe encima solo los campos que maneja. Incluso una extensión
+futura del formato sobrevive a una edición — hay un test que lo fija.
+
+### Sobre la duda de la § 5, resuelta
+
+La spec dejaba anotado que «que la tarjeta de nota cuente es interpretación mía, conviene
+confirmarlo». Se implementó **que sí cuente**, por coherencia con los embeds, y con el
+trabajo que la propia nota advertía: `grafo.ts` no busca wikilinks en el JSON crudo —eso
+encontraría también los de las rutas y los escapes— sino que **entiende el formato** y saca
+los `[[enlaces]]` de las tarjetas de texto y las rutas de las tarjetas de nota. Las flechas
+siguen sin contar.
+
+### Lo que quedó fuera de esta unidad
+
+- **Crear** nodos `link` y `group`: se leen, se dibujan y se conservan, pero no hay botón.
+- **Web**: es frontend puro y `lib/canvas.ts` es compartible, pero el tipo de archivo toca
+  la capa de datos de cada rama. Queda como reflejo pendiente.
+- Deshacer con <kbd>Ctrl</kbd>+<kbd>Z</kbd> dentro del lienzo, selección múltiple y alineado.
+
+---
+
+## 10. Lo que NO entra
 
 - **Que las flechas sean conexiones del grafo.** Decidido: son visuales.
 - **Nodos `link`** (una URL como tarjeta) y **`group`** (agrupar nodos): están en el formato
@@ -198,7 +251,7 @@ hace falta tabla nueva.
 - **Edición colaborativa** del canvas.
 - **Convertir un Excalidraw en canvas** o al revés.
 
-## 10. Verificación
+## 11. Verificación
 
 - `cd frontend && npx tsc --noEmit -p tsconfig.json` · `cargo check` (se toca Rust).
 - **La prueba que más importa es la interoperabilidad**: crear un canvas en Mycelium, abrirlo
@@ -207,7 +260,7 @@ hace falta tabla nueva.
 - Un canvas con muchas tarjetas de nota: comprobar que no se relentiza (cada tarjeta lee un
   archivo).
 
-## 11. Documentación a actualizar
+## 12. Documentación a actualizar
 
 - [[BACKLOG]] — `FUN-L-18`.
 - [[Arquitectura de Mycelium]] — el modelo de contenido gana un tercer tipo de archivo.

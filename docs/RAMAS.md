@@ -136,6 +136,13 @@ entre ramas):
   `.mycelium/` y lee el léxico de `.claude/`, dos rutas del sistema de archivos. Llevarlo a
   web **no es un reflejo**: hay que decidir dónde vive el léxico y cómo se respalda sin
   disco. Ver [[auditoria-y-relinkeado]] § 17.
+- **Canvas (`FUN-L-18`, desktop 2026-08-08, pendiente de reflejo)**: `frontend/lib/canvas.ts`,
+  `scripts/test-canvas.mjs` y `components/canvas/*` son **compartidos** y se traen enteros.
+  Lo que hay que aplicar a mano es el tipo de archivo, que toca los mismos sitios que ya
+  tocaron las bases: `NotaTipo` en `stores/vaultStore.ts` y `lib/db/types.ts`, `extDeTipo`,
+  el explorador, `EditorPane`, `SidebarNoteView`, y en web además `VaultEndpoints`/
+  `VaultRepository`. `src-tauri/src/archivos.rs` es solo-desktop. En `lib/db/grafo.ts` (y su
+  equivalente .NET) los canvas se leen con `referenciasDe()`, no como prosa. Ver [[canvas]].
 - **Framework IA del vault (FUN-L-08, solo-desktop)**: `frontend/lib/ia/*` no existe
   en web; usa el comando Rust `leer_archivo_texto` (`src-tauri/src/vault_fs.rs`) y
   una sección nueva en `frontend/components/settings/VaultSection.tsx` (archivo ya
