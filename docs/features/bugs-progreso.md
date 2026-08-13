@@ -36,8 +36,8 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-044 | Al cambiar de vault siguen abiertas las pestañas del vault anterior | desktop | ✅ desktop (2026-08-13) — un almacén por vault, y el árbol se vacía al cambiar |
 | DEF-045 | `[[destino\|alias]]` dentro de una tabla: o rompe la tabla, o rompe el grafo | ambas (frontend) | ⬜ pendiente — causa raíz ya identificada |
 | DEF-046 | Lo eliminado no aparece en la papelera, ni en la de Windows: no hay recuperación | desktop | ✅ desktop (2026-08-03) — las dos mitades |
-| DEF-047 | El menú contextual se sale de la pantalla en los archivos de abajo | ambas (frontend) | 🛠️ desktop (2026-08-13) — se mide y se vuelca |
-| DEF-048 | Falta margen inferior en toda la app: el contenido queda pegado al borde | ambas (frontend) | 🛠️ desktop (2026-08-13) — token `--mic-gap-inferior` |
+| DEF-047 | El menú contextual se sale de la pantalla en los archivos de abajo | ambas (frontend) | 🛠️🌐 (2026-08-13) — se mide y se vuelca; sin confirmar |
+| DEF-048 | Falta margen inferior en toda la app: el contenido queda pegado al borde | ambas (frontend) | 🛠️🌐 (2026-08-13) — token `--mic-gap-inferior`; sin confirmar |
 | DEF-049 | El ancho de tabulación no cambia nada en los documentos ya escritos | ambas (frontend) | ✅ 🌐 (web: 2026-08-08) |
 | DEF-050 | Al cambiar la tabulación desaparecen los indicadores de plegado en lectura | ambas (frontend) | ✅ 🌐 (web: 2026-08-08) |
 | DEF-051 | Ninguna confirmación aparece y se borra igual: carpeta, Espora o papelera, sin preguntar | desktop | ✅ desktop (2026-08-03) — permiso + `confirmar()` que espera. **No aplica a web**: el `confirm` del navegador sí devuelve un booleano |
