@@ -237,8 +237,14 @@ siguen sin contar.
 ### Lo que quedó fuera de esta unidad
 
 - **Crear** nodos `link` y `group`: se leen, se dibujan y se conservan, pero no hay botón.
-- **Web**: es frontend puro y `lib/canvas.ts` es compartible, pero el tipo de archivo toca
-  la capa de datos de cada rama. Queda como reflejo pendiente.
+- **Web**: reflejado el mismo día. Lo que **no** fue mecánico es `lib/rutasNotas.ts`: el
+  formato guarda una **ruta** en `"file"` —lo que hace que el archivo se abra en Obsidian— y
+  en web el id de una nota es un UUID que no dice dónde está, así que hay que componer la
+  ruta subiendo por las carpetas. Tercera aparición de la misma divergencia, tras las
+  Esporas y el endpoint de las bases.
+  **Queda un hueco en web**: un canvas todavía no aporta aristas al grafo, porque el escaneo
+  lee `…/{id}.md` y el blob de un canvas es `.canvas`. Hacerlo contar pide portar
+  `referenciasDe` a C# y resolver ruta→id en el backend.
 - Deshacer con <kbd>Ctrl</kbd>+<kbd>Z</kbd> dentro del lienzo, selección múltiple y alineado.
 
 ---

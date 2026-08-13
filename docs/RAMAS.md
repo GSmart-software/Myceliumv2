@@ -136,13 +136,22 @@ entre ramas):
   `.mycelium/` y lee el léxico de `.claude/`, dos rutas del sistema de archivos. Llevarlo a
   web **no es un reflejo**: hay que decidir dónde vive el léxico y cómo se respalda sin
   disco. Ver [[auditoria-y-relinkeado]] § 17.
-- **Canvas (`FUN-L-18`, desktop 2026-08-08, pendiente de reflejo)**: `frontend/lib/canvas.ts`,
+- **Canvas (`FUN-L-18`, las dos ramas, 2026-08-08)**: `frontend/lib/canvas.ts`,
   `scripts/test-canvas.mjs` y `components/canvas/*` son **compartidos** y se traen enteros.
   Lo que hay que aplicar a mano es el tipo de archivo, que toca los mismos sitios que ya
   tocaron las bases: `NotaTipo` en `stores/vaultStore.ts` y `lib/db/types.ts`, `extDeTipo`,
   el explorador, `EditorPane`, `SidebarNoteView`, y en web además `VaultEndpoints`/
   `VaultRepository`. `src-tauri/src/archivos.rs` es solo-desktop. En `lib/db/grafo.ts` (y su
-  equivalente .NET) los canvas se leen con `referenciasDe()`, no como prosa. Ver [[canvas]].
+  equivalente .NET) los canvas se leen con `referenciasDe()`, no como prosa.
+  Y una divergencia nueva: **`frontend/lib/rutasNotas.ts`**. El formato guarda una RUTA en
+  `"file"`, que es lo que hace que el archivo se abra en Obsidian; en desktop el id **es** la
+  ruta y el módulo es la identidad, en web hay que componerla subiendo por las carpetas y
+  resolverla de vuelta. Tercera aparición de la misma divergencia, tras las Esporas y el
+  endpoint de las bases. Ver [[canvas]].
+  > [!warning] En web un canvas todavía no aporta aristas al grafo
+  > El escaneo lee la clave `…/{id}.md` y el blob de un canvas es `.canvas`, así que ni lo
+  > encuentra. Hacerlo contar pide portar `referenciasDe` a C# y resolver ruta→id en el
+  > backend. Es un hueco conocido, no un resultado equivocado.
 - **Framework IA del vault (FUN-L-08, solo-desktop)**: `frontend/lib/ia/*` no existe
   en web; usa el comando Rust `leer_archivo_texto` (`src-tauri/src/vault_fs.rs`) y
   una sección nueva en `frontend/components/settings/VaultSection.tsx` (archivo ya
