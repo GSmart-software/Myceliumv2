@@ -99,7 +99,7 @@ y **priorizar** qué implementar antes.
 | `FUN-L-12` | `EDITOR-CORRECTOR-ORTOGRAFICO` | Corrector ortográfico activable en Configuración, con **varios idiomas simultáneos** (p. ej. español e inglés) y arquitectura preparada para sumar idiomas | ambas | — |
 | `FUN-L-13` | `UI-IDIOMAS` | La interfaz en varios idiomas (español, inglés, italiano) y preparada para agregar más. Hoy todos los textos están escritos en español dentro de los componentes | ambas | — |
 | `FUN-L-14` 🟢 | `UPDATER-AUTOACTUALIZACION` | Mycelium comprueba una vez al día si hay versión nueva, muestra su changelog y ofrece instalarla con un clic. Nunca obliga ni bloquea. `tauri-plugin-updater` + instaladores firmados en Cloudflare R2. **Confirmada de punta a punta** el 2026-08-03: bucket y claves en marcha, la 1.4.0 y la 1.5.0 publicadas en R2, y el usuario comprobó en la app que una instalación **detecta y aplica** la versión posterior. Ya no hacen falta instalaciones manuales. Spec en `docs/features/autoactualizacion.md`. Salió en [[Version 1.4.0]] | desktop | — |
-| `FUN-L-16` | `VAULT-VENTANAS-MULTIPLES` | Tener **varios vaults abiertos a la vez**, cada uno en su propia ventana y sin límite de cuántos. Hoy abrir uno cierra el anterior. Continuación natural de `FUN-L-04`, y comparte raíz con `DEF-044` | ambas | — |
+| `FUN-L-16` 🛠️ | `VAULT-VENTANAS-MULTIPLES` | Tener **varios vaults abiertos a la vez**, cada uno en su propia ventana y sin límite de cuántos. Hoy abrir uno cierra el anterior. Continuación natural de `FUN-L-04`, y comparte raíz con `DEF-044`. **Implementada en desktop** el 2026-08-13 (sin confirmar); sale en la [[Version 1.6.1]]. Spec en [[ventanas-multiples]] | desktop | — |
 | `FUN-L-18` 🛠️🌐 | `FILES-CANVAS` | Tipo de archivo **canvas** (`.canvas`, formato JSON Canvas de Obsidian): lienzo infinito con texto suelto, tarjetas de markdown y tarjetas que **son** notas del vault, unidas por flechas. Los `[[enlaces]]` de las tarjetas funcionan y cuentan en el grafo; las flechas son solo disposición visual. Spec en [[canvas]]. **Implementado en las dos ramas** el 2026-08-08 (sin confirmar); sale en la [[Version 1.6.0]]; construido sin librería de nodos, ver [[canvas]] § 9. | ambas | — |
 | `FUN-L-17` 🛠️ | `VAULT-RELINKEADO-UI` | La auditoría y conversión de `FUN-M-17` como **pantalla de la app**, consumiendo el mismo núcleo. Sirve a quien nunca usa la IA y hoy no tiene ninguna salida. **Implementada en desktop** el 2026-08-08 (sin confirmar), y con ella el **núcleo de `FUN-M-17`**, que no existía: `lib/enlaces.ts`. Sale en la [[Version 1.6.0]]. Ver [[auditoria-y-relinkeado]] § 17 | ambas | — |
 | `FUN-L-15` 🟢 | `RELEASE-SCRIPT-PUBLICACION` | Un `npm run publicar` que compruebe, compile, firme, suba a R2 con `wrangler`, escriba los tres manifiestos y **verifique lo publicado**, en vez de hacer esos cuatro pasos a mano. Tiene modo `--simulacro`. **Script local, no CI**: usar el workflow obligaría a alinear `origin` y a poner la clave de firma como secreto de GitHub. **Confirmado**: publicó la 1.5.0 de verdad el 2026-08-03. El proceso, en [[Publicar una version]] § 2 | desktop | — |
@@ -647,7 +647,7 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   además `tauri build` ya no compila sin ella.
 - **Sin confirmar**: el modo avanzado de `FUN-M-16`, roto hasta `DEF-051`.
 
-#### `FUN-L-16` · `VAULT-VENTANAS-MULTIPLES` (—)
+#### `FUN-L-16` · `VAULT-VENTANAS-MULTIPLES` (—) — 🛠️ desktop
 - **Qué es**: poder tener **varios vaults abiertos simultáneamente**, cada uno en su propia
   ventana, sin límite de cuántos. Hoy abrir un vault cierra el anterior: solo se puede
   mirar uno a la vez.
@@ -665,6 +665,15 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   terminal integrada y sus procesos al cerrar una ventana; si el grafo y la búsqueda son por
   ventana (sí, casi con seguridad); y si dos ventanas pueden abrir el **mismo** vault a la
   vez —que es donde aparecería el riesgo de que dos índices escriban sobre la misma carpeta.
+- **Implementada** el 2026-08-13, **sin confirmar**. Lo que costó fue, como estaba previsto,
+  el estado global de Rust: el watcher era **uno** para toda la app —la segunda ventana se
+  lo robaba a la primera, en silencio— y tanto sus eventos como los de las terminales se
+  emitían con `app.emit`, o sea a todas las ventanas. Ahora la ventana es el ámbito.
+- **Lo que estaba «a definir», resuelto**: un vault **no** se abre en dos ventanas (dos
+  indexadores sobre el mismo índice es un problema de concurrencia, no de UI: si ya está
+  abierto se levanta su ventana); las terminales **mueren** con su ventana; el grafo y la
+  búsqueda son por ventana y eso sale gratis; y **restaurar el juego de ventanas al
+  arrancar queda fuera**. Ver [[ventanas-multiples]].
 
 #### `FUN-L-15` · `RELEASE-SCRIPT-PUBLICACION` (—) — 🟢 desktop
 - **Qué es**: un `npm run publicar` que haga de una sola vez lo que `FUN-L-14` deja como

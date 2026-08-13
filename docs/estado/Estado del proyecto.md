@@ -6,7 +6,7 @@ Foto de dónde está Mycelium hoy. Para el detalle de cada tema, seguir los enla
 
 ## Resumen
 
-- **Versión: desktop `1.6.0`** ([[Version 1.6.0]], **sin publicar**) · **web `1.1.0`**
+- **Versión: desktop `1.6.1`** ([[Version 1.6.1]], **sin publicar**) · **web `1.1.0`**
   ([[Version 1.1.0 de web]], 2026-08-08). Las dos líneas **no comparten numeración**.
   Web se puso al día con todo lo que le aplicaba; lo que sigue solo en desktop es lo que
   por naturaleza no le aplica (terminal, framework de IA, autoactualización).
@@ -42,6 +42,7 @@ Foto de dónde está Mycelium hoy. Para el detalle de cada tema, seguir los enla
 | [[bases-tabla]] (`FUN-L-03`) | Sale en la [[Version 1.6.0]]. **Implementada en las dos ramas** el 2026-08-08, **sin confirmar**: el archivo `.base` (formato de Obsidian) agrega notas por sus propiedades y las muestra en una tabla de solo lectura, con filtros. Se implementa un subconjunto cerrado del lenguaje de Bases; lo que no se entiende **no se ignora**, se declara. Sin release todavía |
 | [[auditoria-y-relinkeado]] (`FUN-L-17`) | Sale en la [[Version 1.6.0]]. **Implementada en desktop** el 2026-08-08, **sin confirmar**: pantalla que audita las referencias sin estructura del vault y las convierte en `[[enlaces]]`, con simulacro, respaldo y deshacer. Con ella salió el **núcleo de `FUN-M-17`**, que no existía. Hoy **solo-desktop**: llevarla a web no es un reflejo (§ 17 de la spec) |
 | [[canvas]] (`FUN-L-18`) | Sale en la [[Version 1.6.0]]. **Implementado en desktop** el 2026-08-08, **sin confirmar**: tipo de archivo `.canvas` (JSON Canvas, el de Obsidian) con lienzo infinito, tarjetas de markdown y de nota, y flechas. Construido **sin librería de nodos**; el parser conserva lo que todavía no edita para no borrar trabajo de un canvas ajeno. **Reflejado a web** el mismo día, salvo que allá un canvas todavía no aporta aristas al grafo |
+| [[ventanas-multiples]] (`FUN-L-16`) | **Implementada en desktop** el 2026-08-13, **sin confirmar**: varios vaults a la vez, uno por ventana. La ventana pasa a ser el ámbito del watcher y de las terminales, que eran globales. Sale en la [[Version 1.6.1]] |
 | Dock de pestañas del panel lateral | Generalizado a cualquier sección (`SidebarDock`) |
 
 ## Pendiente / próximos pasos

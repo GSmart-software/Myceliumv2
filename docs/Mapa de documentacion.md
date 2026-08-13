@@ -59,6 +59,7 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
 - [[rendimiento-apertura-vault]] — optimización del indexado al abrir (`FUN-M-12`).
 - [[navegacion-por-pestana]] — scroll, historial por pestaña y previsualización (`DEF-039/040/041`).
 - [[metadata-yaml]] — frontmatter YAML como propiedades: ver, editar e indexar (`FUN-M-04`).
+- [[ventanas-multiples]] — varios vaults abiertos a la vez, uno por ventana (`FUN-L-16`).
 - [[auditoria-y-relinkeado]] — adoptar un vault que ya existía: descubrir cómo se
   referencian sus documentos y convertirlo en enlaces (`FUN-M-17` · `FUN-L-17`).
 - [[canvas]] — el archivo `.canvas`: notas y textos en el espacio, unidos por flechas
@@ -94,7 +95,9 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
 ## Estado y releases
 
 - [[Estado del proyecto]] — situación actual, pendientes y deuda.
-- [[Version 1.6.0]] — release actual de desktop: bases, canvas y la pantalla de
+- [[Version 1.6.1]] — release actual de desktop: varios vaults a la vez, uno por ventana,
+  y una tanda de correcciones. **Sin publicar todavía**.
+- [[Version 1.6.0]] — bases, canvas y la pantalla de
   referencias. **Sin publicar todavía**.
 - [[Version 1.5.0]] — la anterior (ancho de tabulación). Salió fallando y se
   **rehizo y confirmó** el 2026-08-03; el binario publicado en R2 todavía no lleva esas
