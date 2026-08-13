@@ -183,6 +183,9 @@ Se nota desde que existe la pantalla de carga (`DEF-042`): antes el tiempo estab
 
 Relacionado, encontrado al arreglarlo: **los cambios hechos desde fuera de la app a un archivo `.base` o `.canvas` no refrescan nada**. Con un `.md` sí.
 
+# DEF-053
+El mismo problema del `DEF-047`, pero con el menú de **opciones del grafo**: si la pestaña del grafo es pequeña, el panel de opciones **se sale de la pantalla**, tanto por los lados como por abajo, y no se puede usar.
+
 ---
 
 > [!warning] Defectos sin reporte original

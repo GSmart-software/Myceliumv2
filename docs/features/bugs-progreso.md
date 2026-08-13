@@ -36,12 +36,13 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-044 | Al cambiar de vault siguen abiertas las pestañas del vault anterior | desktop | ✅ desktop (2026-08-13) — un almacén por vault, y el árbol se vacía al cambiar |
 | DEF-045 | `[[destino\|alias]]` dentro de una tabla: o rompe la tabla, o rompe el grafo | ambas (frontend) | ⬜ pendiente — causa raíz ya identificada |
 | DEF-046 | Lo eliminado no aparece en la papelera, ni en la de Windows: no hay recuperación | desktop | ✅ desktop (2026-08-03) — las dos mitades |
-| DEF-047 | El menú contextual se sale de la pantalla en los archivos de abajo | ambas (frontend) | 🛠️🌐 (2026-08-13) — se mide y se vuelca; sin confirmar |
+| DEF-047 | El menú contextual se sale de la pantalla en los archivos de abajo | ambas (frontend) | ✅ desktop · 🌐 (2026-08-13) — se mide y se vuelca |
 | DEF-048 | Falta margen inferior en toda la app: el contenido queda pegado al borde | ambas (frontend) | 🛠️🌐 (2026-08-13) — token `--mic-gap-inferior`; sin confirmar |
 | DEF-049 | El ancho de tabulación no cambia nada en los documentos ya escritos | ambas (frontend) | ✅ 🌐 (web: 2026-08-08) |
 | DEF-050 | Al cambiar la tabulación desaparecen los indicadores de plegado en lectura | ambas (frontend) | ✅ 🌐 (web: 2026-08-08) |
 | DEF-051 | Ninguna confirmación aparece y se borra igual: carpeta, Espora o papelera, sin preguntar | desktop | ✅ desktop (2026-08-03) — permiso + `confirmar()` que espera. **No aplica a web**: el `confirm` del navegador sí devuelve un booleano |
 | DEF-052 | Abrir un vault se va casi todo en «vigilando los cambios», más que en leer los archivos | desktop | ✅ desktop (2026-08-13) — el poblado del caché respeta `.mycignore` |
+| DEF-053 | Las opciones del grafo se salen de la pantalla si la pestaña es pequeña | ambas (frontend) | 🛠️ desktop (2026-08-13) — portal y posición acotada |
 
 ## Notas por bug
 
@@ -75,6 +76,17 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
   reindexado**. Ahora el watcher usa `archivos::es_importable`, la misma lista que el
   indexador: dos listas de extensiones separadas por medio archivo se desincronizan siempre.
 
+- **DEF-053 — el mismo problema del `DEF-047`, y encima recortado.** El panel de opciones
+  era `position: absolute` **dentro del grafo**: 300 px de ancho y hasta `70vh` de alto
+  —medido contra la ventana, no contra el pane— así que con la pestaña pequeña se salía por
+  los lados y por abajo. Y como el área de contenido tiene `overflow: hidden`, lo que
+  sobresalía no solo quedaba fuera: quedaba **recortado**, sin forma de alcanzarlo.
+
+  Se saca a un portal sobre el `body` con posición fija, se mide y se acota a la ventana
+  —abriendo hacia arriba si abajo no hay sitio— y el `max-height` pasa a salir del espacio
+  realmente disponible en vez de un `70vh` fijo. Al vivir en un portal, el cierre por clic
+  fuera tiene que preguntarle **también al panel**: si no, pulsar dentro lo cerraría.
+
 - **DEF-047 — el menú se dibujaba en el punto del clic, sin mirar si cabía.** La posición
   era literalmente `left: x; top: y`. Ahora el menú **se mide ya montado** y se reubica:
   vuelca al otro lado del cursor y, si ni así entra —menú más alto que la ventana—, se
@@ -84,12 +96,15 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
   antes de pintar, así que no se ve saltar. Los submenús —el de Esporas puede ser largo—
   además se acotan con `max-height` y se desplazan dentro.
 
-- **DEF-048 — no había ningún aire abajo, y el defecto era general.** Se resuelve con un
-  token, `--mic-gap-inferior`, aplicado al shell del workspace, que es la única pantalla a
-  altura completa cuyo contenido llega al borde (las demás centran su contenido). Es un
-  token y no un valor suelto justamente porque el reporte decía «es general de toda la
-  pantalla, no de un componente concreto»: cualquier pantalla futura a altura completa
-  tiene dónde mirar.
+- **DEF-048 — no había ningún aire abajo.** Se resuelve con un token,
+  `--mic-gap-inferior`, y va como token y no como valor suelto para que cualquier pantalla
+  futura tenga dónde mirar.
+
+  **Corregido el alcance tras probarlo**: se aplicó primero al shell entero, y así el rail
+  y el panel lateral quedaban despegados también. El usuario lo acotó a lo que de verdad
+  pedía: **solo el área de contenido** —las pestañas abiertas: notas, consolas, grafo,
+  bases, canvas—. Va en `.editorArea`, cuyo fondo pasa a ser el del lienzo para que la
+  franja lea como un margen y no como una prolongación del pane.
 
 - **DEF-044 — había UNA sola clave de `localStorage` para las pestañas de todos los
   vaults.** `tabsStore` persistía en `micelio-tabs`, sin más, así que al cambiar de vault el
