@@ -152,6 +152,7 @@ public sealed class VaultRepository(ID1Client d1)
         {
             "excalidraw" => "excalidraw",
             "base" => "base",
+            "canvas" => "canvas",
             _ => "md",
         };
         var r2Key = $"vaults/{vaultId}/notas/{id}.{ext}";

@@ -106,11 +106,12 @@ public static class VaultEndpoints
             if (await Forbidden(repo, user, vaultId, requireEditor: true, ct) is { } error) return error;
 
             // `base` = archivo de tabla (FUN-L-03); el resto cae a markdown.
-            var tipo = request.Tipo is "excalidraw" or "base" ? request.Tipo : "markdown";
+            var tipo = request.Tipo is "excalidraw" or "base" or "canvas" ? request.Tipo : "markdown";
             var defecto = tipo switch
             {
                 "excalidraw" => "Dibujo sin título",
                 "base" => "Base sin título",
+                "canvas" => "Lienzo sin título",
                 _ => "Sin título",
             };
             var titulo = string.IsNullOrWhiteSpace(request.Titulo) ? defecto : request.Titulo.Trim();
