@@ -121,7 +121,7 @@ y **priorizar** qué implementar antes.
 
 | ID | Nombre | Descripción | Aplica | Orig. |
 |---|---|---|---|---|
-| `FUN-S-06` | `EDITOR-CALLOUT-TITULO-COLOR` | El título del callout debe conservar el color de la etiqueta. Bug: al aplicar negrita/cursiva/color/links dentro del título, se pierde ese estilo (el color solo debería aplicarse cuando no hay otro elemento con estilo propio) | ambas | C-M-04 |
+| `FUN-S-06` | `EDITOR-CALLOUT-TITULO-COLOR` | El título del callout **ya lleva** el color de su etiqueta; lo que falta es el límite. Bug: ese color **pisa el color propio** de lo que se escriba dentro del título (un link, un `_texto_`, un color aplicado a mano), que se ve del color del callout en vez del suyo. Solo debería aplicarse al texto que no trae color propio | ambas | C-M-04 |
 
 ---
 
@@ -827,13 +827,25 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 ### Con errores / a ajustar
 
 #### `FUN-S-06` · `EDITOR-CALLOUT-TITULO-COLOR` (C-M-04) — 🟡
-- **Qué es**: el título de un callout debe conservar el **color de su etiqueta** (el
-  color representativo del tipo, p. ej. *question*). Bug actual: cuando el título lleva
-  otro estilo (negrita, cursiva, color propio, link), ese estilo se pierde y se fuerza
-  el color del callout.
-- **Objetivo**: que el color de la etiqueta se aplique **solo** cuando el título no tiene
-  otro elemento con estilo propio; si lo tiene, respetar ese estilo.
-- **A definir**: prioridad exacta cuando conviven varios estilos en el título.
+- **Qué es**: el título de un callout lleva el **color de su etiqueta** (el color
+  representativo del tipo, p. ej. *question*). Eso ya funciona — era la primera mitad de
+  `C-M-04`, y el propio reporte dice «funciona, pero…». Lo que falta es el **límite**.
+- **Bug**: ese color **pisa el color propio** de lo que se escriba dentro del título: un
+  link, un `_texto_`, un `__texto__`, un color aplicado a mano. Todo eso sale del color del
+  callout en vez del suyo. La negrita y la cursiva en sí **no** se pierden (nadie toca
+  `font-weight` ni `font-style`); lo que se pierde es el color.
+- **Objetivo**: el color de la etiqueta se aplica solo al texto que no trae color propio; lo
+  que sí lo trae, lo conserva.
+- **Dónde**: solo en la **edición en vivo**. En la vista de lectura las reglas de los
+  elementos (`.mic-preview a`, `em.mic-em-us`, `strong.mic-strong-us`) le ganan por
+  especificidad a la herencia del título, así que ahí ya se comporta como se busca.
+- **Causa** (leída en el CSS, sin comprobar en la app): `editor.css:332`,
+  `.cm-editor .mic-live-callout-head span { color: inherit }`. Está puesto a propósito —el
+  título escrito es texto de cita y el resaltado de sintaxis lo pinta de gris en un `<span>`
+  anidado, así que hacía falta algo que le ganara— pero alcanza a **todos** los spans de la
+  cabecera, incluidos los que traen color propio.
+- **A definir**: cómo distinguir «span del resaltado de cita» de «span con estilo propio»
+  sin volver a pelear especificidad a ciegas.
 
 ---
 
@@ -927,8 +939,9 @@ ir de a uno.
 #### E · Estilos propios al renderizar markdown — `FUN-S-01` + `FUN-S-06` 🟡 · minor · ambas
 Las dos son la misma pregunta: **cuándo un elemento conserva su estilo propio y cuándo
 gana el del contenedor**. `FUN-S-01` da estilo al checkbox según su símbolo; `FUN-S-06`
-corrige que el título de un callout pierda su formato. Comparten `lib/markdown.ts`,
-`livePreview.ts` y `editor.css`. El minor de `FUN-S-01` **absorbe** la corrección.
+corrige que el título de un callout le pise el color a lo que lleva dentro. Comparten
+`lib/markdown.ts`, `livePreview.ts` y `editor.css`. El minor de `FUN-S-01` **absorbe** la
+corrección.
 
 #### F · Gestión de vaults — `FUN-L-04` + `DEF-044` + `FUN-L-16` + `FUN-S-05` · minor · ambas
 Todo el ciclo de vida del vault, y las tres primeras comparten **una misma raíz**: hoy el
