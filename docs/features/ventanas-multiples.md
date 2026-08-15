@@ -95,7 +95,57 @@ El vault viaja en la URL y no en un estado compartido porque la ventana nueva ar
 
 ---
 
-## 5. Verificación
+## 5. La instancia única, que hasta ahora nadie había mirado
+
+`tauri-plugin-single-instance` está desde las asociaciones de archivo: doble clic en un `.md`
+tiene que abrirlo en el Mycelium que ya corre, no lanzar otro. Al arrancar crea un mutex
+—con nombre derivado del `identifier`— y si ya existe **reenvía su `argv` a la instancia
+viva, le enfoca la ventana y hace `std::process::exit(0)`**.
+
+Con `FUN-L-16` dejó de ser un detalle de comodidad y pasó a ser **carga estructural**:
+`VentanasState` vive en el proceso, así que la garantía de «un vault en una sola ventana»
+vale *mientras haya un solo proceso*. Dos Mycelium serían exactamente los dos indexadores
+sobre el mismo índice que la § 2 se propuso evitar, y ninguno sabría del otro.
+
+Eso deja dos cosas que arreglar, las dos encontradas al intentar levantar un segundo
+Mycelium desde la consola:
+
+### El evento `open-files` llegaba a todas las ventanas
+
+El callback emitía con `app.emit`, que es difusión a la app entera. Cada webview tiene su
+`FileOpenBridge`, y ese puente **crea la nota** si no encuentra una con ese título — así que
+con dos ventanas abiertas, abrir un `.md` desde el explorador de Windows lo importaba en
+**los dos vaults**, una copia en cada uno.
+
+Es la misma clase de fallo que la § 1 corrigió en el watcher y en la terminal —estado global
+a la app que en realidad pertenece a una ventana—, pero este puente había quedado fuera de
+esa revisión. Ahora se resuelve **una** ventana destino (la que tiene el foco; si ninguna, la
+principal) y se emite solo ahí.
+
+### En desarrollo el plugin no se registra
+
+> [!warning] El mutex se nombra **solo** con el `identifier`
+> No lleva la versión —la feature `semver` del plugin no está activada— ni distingue el
+> binario de desarrollo del instalado. Con el plugin activo en `tauri dev`, **los dos se
+> excluyen entre sí**: no se puede tener Mycelium abierto mientras se lo desarrolla, y el
+> segundo lanzamiento se cierra solo sin decir por qué. El único mensaje visible es el aviso
+> de que el puerto 3000 está ocupado, que es ruido: `next dev` lo ve, avisa y se pasa al 3001
+> él solo.
+
+Por eso ahora se registra con `if !tauri::is_dev()`. Perder la instancia única en desarrollo
+no cuesta nada —las asociaciones de archivo apuntan al ejecutable **instalado**, así que ese
+camino no se puede ejercitar en `tauri dev` de todos modos— y a cambio se puede tener el
+Mycelium instalado abierto al lado del que se está desarrollando.
+
+Para levantar un segundo Mycelium de desarrollo hay `npm run tauri:otra`, que reutiliza el
+`next dev` ya en marcha (`--config` con `beforeDevCommand: null`) en vez de arrancar otro
+servidor en un puerto que `devUrl` no mira. **Es una herramienta de desarrollo, no un modo
+de uso**: dos procesos pueden abrir el mismo vault, que es justo lo que la instancia única
+impide en producción.
+
+---
+
+## 6. Verificación
 
 Se puede probar **en desarrollo** (`npm run tauri dev`), sin compilar ni instalar: la
 ventana nueva resuelve su URL según el entorno (§ 4). Lo único que sigue exigiendo el
@@ -110,6 +160,15 @@ paquete es el instalador en sí.
   4. Intentar abrir A en la ventana de B → se levanta la ventana de A, no se duplica.
   5. Abrir una terminal en cada ventana → la salida no se cruza.
   6. Cerrar la ventana de B → sus shells mueren y B se puede volver a abrir.
+
+Lo de la § 5 se comprueba aparte, y una de las dos cosas **solo en el paquete**:
+
+- En desarrollo: con `tauri dev` corriendo, abrir el Mycelium **instalado** → arranca, no se
+  cierra solo. Y `npm run tauri:otra` levanta un segundo Mycelium de desarrollo sin tocar el
+  puerto.
+- **Instalado** (la instancia única no existe en desarrollo): con dos ventanas abiertas sobre
+  vaults distintos, doble clic en un `.md` de fuera del vault → aparece en **una sola**
+  ventana, la que tenía el foco. Antes se importaba en las dos.
 
 ## Relacionadas
 

@@ -8,6 +8,17 @@
 > trazabilidad viven en [[bugs-progreso]]. Las **causas raíz** encontradas al resolverlos
 > van a [[Aprendizajes tecnicos]]. Acá no: acá va el problema.
 
+> [!important] Un `DEF-*` presupone una funcionalidad ya consolidada
+> Solo se registra acá lo que falla en algo **terminado y entregado**. Si el fallo aparece
+> mientras se implementa una funcionalidad que todavía no cerró —y es lo que le impide
+> funcionar—, **no lleva `DEF-*`: se corrige como parte de esa implementación** y se
+> documenta en su spec. Numerarlo sería inventarle una vida propia a un problema que nunca
+> llegó a existir para nadie.
+>
+> Ejemplos de esto último, ambos de `FUN-L-16` (ver [[ventanas-multiples]] § 5): el evento
+> `open-files` difundido a todas las ventanas y la instancia única bloqueando el binario de
+> desarrollo. Se corrigieron sin número.
+
 > [!tip] El usuario no escribe acá: escribe en la bandeja
 > Las entradas de este catálogo ya están **definidas** (con su `DEF-NNN` y el síntoma
 > redactado). Lo que el usuario anota en crudo va a [[Bandeja de entrada]], y de ahí se
