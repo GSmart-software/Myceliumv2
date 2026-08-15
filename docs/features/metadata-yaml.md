@@ -197,6 +197,13 @@ Mismo diseño, como **widget de bloque** que reemplaza las líneas del frontmatt
   widgets interactivos dentro de CodeMirror son de donde salieron `DEF-031` y `DEF-037`.
 - Poner el cursor **dentro del bloque revela la fuente** (deja de renderizarse), igual que
   las tablas y los callouts. Sacarlo lo vuelve a plegar.
+
+> [!important] Las dos viñetas de arriba las revierte `FUN-M-19`
+> El widget pasa a ser **interactivo** y el bloque deja de abrirse en crudo con el cursor
+> dentro: se edita renderizado, propiedades nuevas incluidas. Los motivos, y por qué el
+> riesgo de `DEF-031`/`DEF-037` es más acotado de lo que dice el párrafo de arriba, están en
+> [[edicion-en-el-render]] § 2. El resto de esta spec —el parser, los tipos, el índice, la
+> pestaña PROPIEDADES— no cambia.
 - Decoración de **bloque** → debe venir de un `StateField`, no de un `ViewPlugin`
   (comentado en `livePreview.ts`, y es la trampa de [[CodeMirror y la vista en vivo]]).
 

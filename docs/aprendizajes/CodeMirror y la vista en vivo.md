@@ -42,6 +42,13 @@ desfase (fue la hipótesis #2 del caso anterior), pero ayuda al primer pintado.
 > **de solo lectura**: la interacción que edite el documento va fuera del editor, que
 > es de donde salieron `DEF-031`/`DEF-037`.
 
+> [!important] Lo de "solo lectura" se revisa en `FUN-M-19` / `FUN-L-19`
+> Conviene no arrastrar de más esa última línea: la causa de `DEF-031`/`DEF-037` fue el
+> `margin` del widget, no la interactividad. Lo que sí hay que sostener cuando el widget
+> pase a editar —`updateDOM()` para no perder el foco, `ignoreEvent()` invertido, el
+> `estimatedHeight` recalculado y el `dispatch` al rango mínimo— está en
+> [[edicion-en-el-render]] § 2. **La regla del `padding` no se toca.**
+
 ## Decoraciones que dependen de la profundidad
 
 **Caso**: `DEF-021` y `DEF-022` — callouts. Dos problemas distintos con la misma

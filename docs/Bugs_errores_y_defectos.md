@@ -24,6 +24,7 @@
 > redactado). Lo que el usuario anota en crudo va a [[Bandeja de entrada]], y de ahí se
 > convierte en una entrada de acá.
 
+
 # DEF-015
 Los títulos marcados con # se pueden colapsar en la vista de edición pero no en la de lectura. 
 

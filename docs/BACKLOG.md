@@ -81,6 +81,7 @@ y **priorizar** qué implementar antes.
 | `FUN-M-15` | `LINKS-POR-ALIAS` | Resolver `[[enlaces]]` por la propiedad `aliases` de la nota destino: hoy se parsea e indexa pero **no tiene comportamiento**. Toca la resolución de wikilinks, el autocompletado y el grafo. Continuación de `FUN-M-04` | ambas | — |
 | `FUN-M-16` 🛠️ | `UPDATER-SELECCION-VERSION` | Elegir e instalar **cualquier versión publicada**, incluida una anterior, desde un modo avanzado oculto (siete clics en el número de versión). Deja la app fijada en esa versión. Herramienta de desarrollo, no para el usuario normal. **Implementado, SIN confirmar**: su diálogo de confirmación estuvo roto hasta `DEF-051` (2026-08-03), así que elegir una versión no llegaba a hacer nada. Es lo único de la [[Version 1.4.0]] que queda por probar. Spec en `docs/features/autoactualizacion.md` § 4.3 | desktop | — |
 | `FUN-M-18` | `EDITOR-REINDENTAR` | Reindentar las notas al ancho de tabulación configurado, para que el cambio se vea también en la vista en vivo y no solo al leer. Es una **edición masiva del vault**: reutiliza el respaldo, el manifiesto y el deshacer de `FUN-M-17`. Continuación de `FUN-S-02` | ambas | — |
+| `FUN-M-19` | `EDITOR-PROPIEDADES-EN-SITIO` | El bloque de propiedades **deja de abrirse en crudo** al entrar el cursor: sigue renderizado y se edita ahí — cambiar un valor, renombrar una clave, **agregar y quitar** propiedades — sin ir a la vista raw. Invierte el «widget de solo lectura» de `FUN-M-04`, cuyo motor (`ponerPropiedad`, `quitarPropiedad`, `renombrarPropiedad`) ya está hecho y probado. Primera mitad de [[edicion-en-el-render]]; la segunda es `FUN-L-19` | ambas | — |
 | `FUN-M-17` 🟡 | `VAULT-RELINKEADO` | Adoptar un vault que viene de otro proyecto: **la IA descubre** cómo se referencian sus documentos (`` `HU-009` ``, el nombre suelto, `[texto](otra.md)`) y lo registra en un léxico persistente; **el script aplica** esas formas y las convierte en `[[wikilinks]]`. La auditoría **no modifica documentos**; el enlazado sí, con respaldo y deshacer. Es el **caso de entrada** de Mycelium sobre un proyecto existente. **Su núcleo ya está hecho** (`lib/enlaces.ts`, 41 tests), porque lo necesitaba `FUN-L-17`; lo que falta son los dos comandos de la IA. Spec en [[auditoria-y-relinkeado]] | ambas | — |
 
 ### 1.3 Grandes — tamaño L
@@ -91,6 +92,7 @@ y **priorizar** qué implementar antes.
 | `FUN-L-02` | `SHARING-PUBLICOS-GLOBALES` | Carpeta "Estado Mycelium" con 3 archivos públicos (Ayudas / Bugs / Ideas): editables por autorizados, visibles por todos | web | C-I-06 |
 | `FUN-L-03` 🛠️ | `FILES-BASES-TABLA` | Archivo `.base` (formato de Obsidian) que agrega notas por sus propiedades y las muestra en una tabla, con filtros y columnas configurables. Solo lectura. **Implementado en las dos ramas** el 2026-08-08 (sin confirmar); sale en la [[Version 1.6.0]]; spec en [[bases-tabla]] | ambas | C-I-07b |
 | `FUN-L-04` | `VAULT-MULTIPLE` | Un usuario con varios vaults, seleccionables en Configuración → Vault | ambas | C-G-01 |
+| `FUN-L-19` | `EDITOR-TABLAS-EN-SITIO` | Las tablas **dejan de abrirse en crudo** al entrar el cursor: siguen renderizadas y se editan ahí — escribir en una celda, insertar, eliminar y mover filas y columnas, y alinear — sin ir a la vista raw. Necesita `lib/tablas.ts`, un módulo **puro** de parseo y reescritura que hoy no existe (y que debe manejar el `|` escapado dentro de una celda, que es lo mismo que rompe `DEF-045`). Segunda mitad de [[edicion-en-el-render]]; la primera es `FUN-M-19` | ambas | — |
 | `FUN-L-07` 🟢 | `TERMINAL-INTEGRADA` | Consola nativa integrada (estilo VS Code): abre en la raíz del vault (o en la carpeta elegida), como pestaña normal del workspace (dividir, varias instancias). **Confirmada en desktop** por el usuario en lo esencial, tras varias iteraciones (panel de consolas, shells de fondo, renombrar, selector de shell, tema reactivo); spec en `docs/features/terminal-integrada.md` | desktop | — |
 | `FUN-L-08` 🛠️ | `IA-FRAMEWORK-VAULT` | Framework IA versionado generado en el vault (CLAUDE.md + 2 skills + 6 comandos en `.claude/`) para que Claude Code use el vault como **memoria**: recuperar antes de responder y consolidar lo que valga recordar, navegando por vínculos. Botón opt‑in en Configuración → Vault. **Implementada** (sin confirmar); spec en `docs/features/ia-framework-vault.md` | desktop | — |
 | `FUN-L-09` | `IA-MCP-MYCELIUM` | Servidor MCP de Mycelium: exponer a la IA el índice del vault (búsqueda, backlinks, grafo, metadatos) como herramientas estructuradas, en vez de grep sobre archivos | desktop | — |
@@ -389,7 +391,38 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 - **A definir**: qué gana si un alias colisiona con el título real de otra nota, y si el
   autocompletado ofrece el alias o el título.
 
+#### `FUN-M-19` · `EDITOR-PROPIEDADES-EN-SITIO` (—)
+- **Qué es**: que el bloque de propiedades **no se abra en crudo** al entrar el cursor. Sigue
+  renderizado y se edita ahí: cambiar un valor con el control de su tipo, renombrar una
+  clave, **agregar** y **quitar** propiedades.
+- **Por qué**: existe la vista raw, así que ya no hace falta que el editor se abra solo para
+  ver el YAML; y las propiedades tienen tipos, así que verlas como texto justo mientras se
+  las edita es lo peor de los dos mundos.
+- **Por qué es M y no L**: el motor ya está hecho y probado —`ponerPropiedad`,
+  `quitarPropiedad`, `renombrarPropiedad` en `lib/frontmatter.ts`— y la UI por tipo también,
+  en la pestaña PROPIEDADES. Lo que falta es llevarlo al widget del editor.
+- **Invierte una decisión de `FUN-M-04`**: el widget era de solo lectura a propósito. El
+  motivo escrito (`DEF-031`/`DEF-037`) es más amplio que la causa real de aquellos, que fue
+  el `margin` en un widget de bloque, no la interactividad. Ver [[edicion-en-el-render]] § 2.
+- **A definir**: nada bloqueante. La única decisión de diseño —despachar el rango del bloque
+  y no el documento entero— está resuelta en la spec.
+
 ### Pendientes — tamaño L
+
+#### `FUN-L-19` · `EDITOR-TABLAS-EN-SITIO` (—)
+- **Qué es**: lo mismo que `FUN-M-19` pero para las tablas, que es donde más molesta: hoy la
+  tabla desaparece justo cuando hay que mirarla. Escribir en una celda con la tabla a la
+  vista, insertar/eliminar/mover filas y columnas y alinear, sin ir a la vista raw.
+- **Por qué es L y la otra M**: no hay motor. Hace falta `lib/tablas.ts`, **puro y sin
+  imports** (patrón de `frontmatter.ts`, `bases.ts`, `canvas.ts`, `enlaces.ts`), con parseo,
+  serialización y nueve operaciones, más su `scripts/test-tablas.mjs`.
+- **El detalle que decide el módulo**: una celda puede contener `|` escapado (`\|`), y
+  partir por `|` a lo bruto rompe cualquier tabla con un alias de wikilink dentro. Es
+  literalmente lo mismo que rompe `DEF-045`, así que las dos se tocan.
+- **Riesgo conocido**: es el widget que produjo `DEF-031`/`DEF-037`. La verificación a mano
+  incluye el síntoma de aquellos (clic mal ubicado y gutter corrido al final de una nota
+  larga). Ver [[edicion-en-el-render]] § 2 y 7.
+- **A definir**: si mover filas y columnas se arrastra o solo se elige por menú.
 
 #### `FUN-L-01` · `MACROS-HOTKEYS` (C-I-05)
 - **Qué es**: permitir configurar **macros** (secuencias de acciones) disparadas por
@@ -942,6 +975,20 @@ gana el del contenedor**. `FUN-S-01` da estilo al checkbox según su símbolo; `
 corrige que el título de un callout le pise el color a lo que lleva dentro. Comparten
 `lib/markdown.ts`, `livePreview.ts` y `editor.css`. El minor de `FUN-S-01` **absorbe** la
 corrección.
+
+#### N · Editar sin salir del render — `FUN-M-19` + `FUN-L-19` · minor · ambas
+Las dos mitades de [[edicion-en-el-render]]: el bloque de propiedades y las tablas dejan de
+abrirse en crudo con el cursor dentro y pasan a editarse ahí mismo, estructura incluida.
+Comparten el mecanismo entero —widget de bloque interactivo en `livePreview.ts`,
+`updateDOM()` para no perder el foco, `ignoreEvent()` invertido— y el criterio de producto,
+así que separarlas sería diseñar dos veces lo mismo.
+
+> [!important] Se entregan en dos releases, no en uno
+> Es la excepción a la regla de agrupar, y es deliberada: `FUN-M-19` reutiliza un motor ya
+> probado, mientras que `FUN-L-19` escribe uno nuevo **y** toca el widget que produjo
+> `DEF-031`/`DEF-037`. Sacar primero las propiedades valida el patrón de widget interactivo
+> sobre la mitad barata; si las tablas se complican, no arrastran consigo algo que ya estaba
+> listo. Cada una es un minor por su cuenta.
 
 #### F · Gestión de vaults — `FUN-L-04` + `DEF-044` + `FUN-L-16` + `FUN-S-05` · minor · ambas
 Todo el ciclo de vida del vault, y las tres primeras comparten **una misma raíz**: hoy el
