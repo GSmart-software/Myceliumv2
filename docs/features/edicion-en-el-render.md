@@ -271,6 +271,27 @@ Decisiones que la spec dejaba abiertas y se resolvieron al implementar:
   del `StateField`), nunca se guarda en el widget: mientras la tabla no cambie, CodeMirror
   reusa el mismo widget aunque el texto de más arriba se mueva.
 
+### El menú de los tiradores, corregido al probarlo (2026-08-16)
+
+Dos defectos que el usuario encontró en la primera prueba. Sin `DEF-*`, porque la
+funcionalidad todavía no estaba consolidada (ver [[Bugs_errores_y_defectos]]).
+
+1. **El menú cerrado seguía dibujándose vacío** sobre la tabla: el borde, el fondo y el
+   padding, sin ítems. Se ocultaba con el atributo `hidden`, que es solo un `display: none`
+   de la hoja del navegador — y **cualquier `display` de autor le gana**. Con el
+   `display: flex` de la caja, `hidden` no hacía nada. Se agrega `.mic-tab-menu[hidden]`.
+2. **El menú quedaba recortado.** Era `position: absolute` dentro de `.mic-tab-caja`, que
+   lleva `overflow-x: auto` para las tablas anchas, así que se veía a medias y con el scroll
+   de la tabla en vez de flotar por encima. Pasa a `position: fixed` —escapa del recorte
+   porque ningún ancestro tiene `transform`— con el mismo `z-index` y el mismo acotado a la
+   ventana que `ContextMenu` y `GraphOptionsMenu` (`DEF-047`/`DEF-053`): si no entra abajo se
+   abre hacia arriba, y si es más alto que la ventana **se desplaza él**, no la tabla.
+
+> [!tip] Un menú fijo no acompaña al scroll
+> Por eso desplazar **cierra** el menú, como en los otros dos. Y enfocar el primer ítem usa
+> `focus({ preventScroll: true })`: sin eso el propio foco desplaza el contenedor y el menú
+> se cerraría solo al abrirse.
+
 ---
 
 ## 6. Casos borde
