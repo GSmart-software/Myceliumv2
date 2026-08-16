@@ -78,6 +78,23 @@ Lo que hay que sostener cuando un widget deja de ser un adorno y pasa a editar e
    atómico, el clic y las flechas caen en sus bordes. No hacía falta antes porque el bloque
    se abría al entrar el cursor: la interactividad es lo que crea el problema.
 
+> [!info] Aplicadas por segunda vez en `FUN-L-19` (tablas, 2026-08-16)
+> Las seis salieron enteras de la primera mitad y no hubo que agregar ninguna. Lo que sí
+> apareció al aplicarlas a un widget que **ya existía**:
+>
+> - **El átomo tiene un efecto lateral: no se puede TECLEAR una tabla nueva.** Al cerrar la
+>   fila de guiones el bloque se vuelve widget con el cursor adentro, y como el rango es
+>   atómico la tecla siguiente cae fuera. Se resolvió dejando en crudo la tabla que se está
+>   tecleando, hasta que el cursor sale — y solo para lo que teclea el usuario, no para lo
+>   que escribe el widget (que lleva su propio `userEvent`) ni para el deshacer.
+> - **La posición del bloque no se puede guardar en el widget.** Mientras el contenido no
+>   cambie, CodeMirror reusa el widget aunque el texto de más arriba se mueva, así que el
+>   `dispatch` iría a un rango viejo. Se resuelve con `view.posAtDOM(dom)` en el momento de
+>   la operación. (En `FUN-M-19` no se notó: el frontmatter siempre arranca en 0.)
+> - **Los controles que aparecen al pasar el puntero no pueden cambiar el alto**: si lo
+>   cambian, la quinta regla obliga a medir en cada `mouseover`. Reservarles el lugar con
+>   `visibility` y sacar el menú del flujo con `position: absolute` lo evita de raíz.
+
 > [!tip] Lo que CodeMirror ya resuelve solo
 > Las mutaciones del DOM **dentro** de un widget se ignoran (`readMutation` devuelve `null`
 > para los tiles de widget), y la selección no se fuerza mientras el `activeElement` no sea

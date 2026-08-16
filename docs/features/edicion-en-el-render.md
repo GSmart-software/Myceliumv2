@@ -12,7 +12,10 @@ columnas— sin pasar por la vista en crudo.
 > - **Parte 1 (propiedades, `FUN-M-19`): implementada en `desktop-tauri`** el 2026-08-16,
 >   **sin confirmar en la app**. `tsc` y `scripts/test-frontmatter.mjs` en verde; lo visible
 >   —el foco, el clic, el gutter— lo confirma el usuario. Reflejo a `web-cloud` pendiente.
-> - **Parte 2 (tablas, `FUN-L-19`): sin implementar.**
+> - **Parte 2 (tablas, `FUN-L-19`): implementada en `desktop-tauri`** el 2026-08-16,
+>   **sin confirmar en la app**. `scripts/test-tablas.mjs` (30 tests), `tsc` y `next build`
+>   en verde; el comportamiento lo confirma el usuario con la lista del § 7. Reflejo a
+>   `web-cloud` pendiente.
 
 ---
 
@@ -220,12 +223,59 @@ Existe un ajuste que **desactiva** el render de tablas en la vista en vivo
 (`useUiStore.liveTables`). Se conserva tal cual: con él apagado no hay widget, no hay
 controles y se escribe markdown a mano, que es exactamente lo que quiere quien lo apaga.
 
+### Cómo quedó implementado (2026-08-16)
+
+| Pieza | Dónde |
+|---|---|
+| Motor puro: `parsear`/`serializar` y las nueve operaciones | `lib/tablas.ts` (nuevo) + `scripts/test-tablas.mjs` (30 tests) |
+| DOM de la tabla editable, sus tiradores y el parcheo en sitio | `lib/editor/tablaWidget.ts` (nuevo) |
+| Widget de bloque: `toDOM`, `updateDOM`, `ignoreEvent`, `estimatedHeight`, `destroy`, el estado «ver como texto» y el átomo | `lib/editor/livePreview.ts` |
+| `dispatch` al rango de la tabla con `userEvent: "input.tabla"` | `aplicarEdicionTabla`, en `lib/editor/commands.ts` |
+| El markdown de una celda renderizado como en la vista de lectura | `renderMarkdownEnLinea`, exportado de `lib/markdown.ts` |
+| Estilos (todo `padding`, nunca `margin`) | `styles/editor.css`, al final del archivo |
+
+Decisiones que la spec dejaba abiertas y se resolvieron al implementar:
+
+- **La `Tabla` lleva su `eol` y su `sangria`.** La firma de arriba no los tenía, pero
+  preservar el CRLF y el `> ` de una cita exige que viajen con la estructura: si no,
+  `serializar` tendría que adivinarlos. Con eso, una tabla **dentro de un callout o una
+  cita sí tiene controles**: cada línea se reescribe con su prefijo intacto, y el widget la
+  dibuja dentro de su cita. Si el prefijo **no es idéntico** en todas las líneas, `parsear`
+  devuelve `null` y la tabla queda como hasta ahora (renderizada y sin controles).
+- **En la estructura el `|` va SIN escapar; el escape es cosa de `serializar`.** Así una
+  celda contiene `[[destino|alias]]` de verdad —que es lo que quieren el render y el
+  grafo— y el `\|` existe solo en el documento.
+- **Una fila con celdas de más ENSANCHA la tabla** (columnas nuevas vacías) en vez de que
+  se descarten. Es visible y reversible; perder texto no lo es.
+- **Se elimina la última fila, pero no la última columna.** Sin filas de datos sigue
+  habiendo tabla; sin columnas, no. Borrar el bloque entero es trabajo del editor.
+- **`ponerCelda(t, -1, columna, texto)` escribe el encabezado**: la estructura lo guarda
+  aparte de las filas, así que el índice negativo es lo que lo nombra.
+- **Los tiradores no cambian el alto al aparecer.** Ocupan su lugar siempre
+  (`visibility`) y el menú es absoluto: si el hover empujara el layout habría que medir en
+  cada `mouseover`, que es la quinta regla por la puerta de atrás.
+- **Teclado**: `Tab`/`Shift+Tab` recorren las celdas (del encabezado hacia abajo) y tras la
+  última llevan al pie; `Enter` confirma; `Escape` descarta y devuelve el foco al editor;
+  **`Alt+Enter` abre el menú de la fila y `Alt+Shift+Enter` el de la columna**, que es la
+  entrada por teclado a los tiradores. Dentro del menú, `Tab` recorre y `Escape` vuelve a
+  la celda.
+- **Una tabla que se está TECLEANDO se queda en crudo hasta que el cursor sale.** No es una
+  excepción al § 3.1: ahí el cursor ya estaba en el texto, no entró a un render. Sin esto,
+  al terminar de escribir la fila de guiones el bloque se volvería widget con el cursor
+  adentro y —como el rango es atómico— la tecla siguiente caería fuera de la tabla. Solo
+  cuenta lo que teclea el usuario: las ediciones del widget (`input.tabla`) y el deshacer
+  quedan afuera.
+- **La posición de la tabla se resuelve en cada operación** (`view.posAtDOM` + los rangos
+  del `StateField`), nunca se guarda en el widget: mientras la tabla no cambie, CodeMirror
+  reusa el mismo widget aunque el texto de más arriba se mueva.
+
 ---
 
 ## 6. Casos borde
 
 - Tabla **dentro de un callout** o de una cita: hoy se renderiza; los controles no deben
-  romper la indentación de los `>` al reescribir.
+  romper la indentación de los `>` al reescribir. *(Resuelto: la `sangria` viaja con la
+  estructura y se reescribe igual; si el prefijo varía entre líneas, no hay controles.)*
 - Tabla con una sola columna, o sin filas de datos.
 - Celda vacía, y celda que solo tiene espacios.
 - Eliminar **la última** fila o la última columna: la tabla no puede quedar inválida.
@@ -243,6 +293,14 @@ controles y se escribe markdown a mano, que es exactamente lo que quiere quien l
 
 - `node scripts/test-tablas.mjs` (parte 2) y `scripts/test-frontmatter.mjs` (sin regresiones)
   · `npx tsc --noEmit -p tsconfig.json`.
+
+> [!warning] Lo que falta probar de la parte 2, en la app
+> `scripts/test-tablas.mjs` prueba el motor, no la interfaz. De la lista de abajo, a las
+> tablas les tocan **todos** los puntos — y además: una tabla **dentro de un callout**
+> (los `>` tienen que quedar intactos), una tabla **mal formada** (tiene que verse
+> renderizada, sin controles y con el motivo), **escribir una tabla nueva a mano** (se
+> queda en crudo hasta que el cursor sale), el ajuste **`liveTables` apagado** (ni widget
+> ni controles) y la **misma nota en dos paneles** a la vez.
 
 > [!warning] Lo que falta probar de la parte 1, en la app
 > `tsc` verde y 41 tests en verde **no** prueban comportamiento. De la lista de abajo, a las
