@@ -201,6 +201,12 @@ El mismo problema del `DEF-047`, pero con el menú de **opciones del grafo**: si
 # DEF-054
 El grafo solo se actualiza cuando el archivo se crea **desde la propia UI de Mycelium**. Si el documento lo genera algo de fuera —un agente de IA escribiendo en la carpeta, otro editor, un `git pull`— el grafo no se entera y sigue mostrando la foto anterior.
 
+# DEF-055
+Al cambiar de modo de visualización —de edición a **lectura**, o a cualquier otro— el documento **vuelve al principio**. La posición del scroll debería mantenerse: si estabas leyendo por la mitad de una nota larga, cambiar de modo debería dejarte donde estabas.
+
+# DEF-056
+El buscador del archivo (`Ctrl+F`) encuentra las coincidencias y salta a ellas, pero las deja **al borde superior** del área visible, que es justo donde está la barra de herramientas. La palabra encontrada queda **tapada**, más arriba de lo que se ve. Debería quedar **centrada** en la parte visible.
+
 ---
 
 > [!warning] Defectos sin reporte original

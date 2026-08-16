@@ -44,8 +44,33 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-052 | Abrir un vault se va casi todo en «vigilando los cambios», más que en leer los archivos | desktop | ✅ desktop (2026-08-13) — el poblado del caché respeta `.mycignore` |
 | DEF-053 | Las opciones del grafo se salen de la pantalla si la pestaña es pequeña | ambas (frontend) | 🛠️🌐 (2026-08-13) — portal y posición acotada; sin confirmar |
 | DEF-054 | El grafo no se actualiza si el archivo lo crea algo de fuera de Mycelium | desktop | 🛠️ desktop (2026-08-13) — el watcher marca el grafo desactualizado |
+| DEF-055 | Cambiar de modo de visualización devuelve el documento al principio | ambas (frontend) | 🛠️ desktop (2026-08-16) — el ratio de scroll se traspasa entre los dos scrollers; sin confirmar |
+| DEF-056 | La coincidencia del buscador queda tapada por la barra de herramientas | ambas (frontend) | 🛠️ desktop (2026-08-16) — se recentra con `scrollIntoView({y:"center"})`; sin confirmar |
 
 ## Notas por bug
+
+- **DEF-055 — cada modo tiene su propio scroller, y nadie los conectaba.** En edición el que
+  se desplaza es el de CodeMirror; en lectura, el panel del preview. Son dos elementos
+  distintos midiendo alturas distintas del mismo documento, así que al cambiar de modo el
+  que aparecía estaba donde lo habían dejado: en el principio.
+
+  Se traspasa el **ratio** [0,1], la misma aproximación que ya usaba el scroll sincronizado
+  del modo dividido. No es exacto —una tabla no ocupa lo mismo renderizada que en markdown—
+  pero deja al lector cerca de donde estaba en vez de mandarlo arriba. Dos detalles que
+  costaban el arreglo: se lee **antes** de cambiar de modo, porque un elemento con
+  `display: none` informa `scrollTop` 0; y se reaplica por frames hasta que el alto se
+  estabiliza, porque Mermaid, Excalidraw y las imágenes llegan tarde. Cede ante el pendiente
+  en píxeles de `DEF-039`, que es una posición exacta y por tanto mejor.
+
+- **DEF-056 — `findNext` desplaza lo mínimo, y lo mínimo deja la coincidencia bajo la barra.**
+  El `scrollIntoView` por defecto de `@codemirror/search` acerca la selección con la
+  estrategia «nearest»: si está por encima del viewport, la pega al borde superior. Ese borde
+  está debajo de la barra de herramientas, así que la palabra encontrada quedaba tapada. Se
+  añade una segunda transacción que la centra (`y: "center"`).
+
+  Es pariente de `DEF-037` —que también hablaba de la coincidencia fuera de pantalla por
+  arriba— pero no es el mismo: aquel era el desfase del height-map, corregido en su momento;
+  este es la estrategia de desplazamiento, que nunca se había tocado.
 
 - **DEF-052 — el watcher recorre el vault ENTERO, y sin `.mycignore`** (causa raíz
   confirmada el 2026-08-13 leyendo la fuente del crate). `iniciar_watcher` hace dos cosas:
