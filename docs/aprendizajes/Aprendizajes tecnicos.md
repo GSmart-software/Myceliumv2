@@ -36,6 +36,14 @@ y qué principio general dejó.
 4. **En el escritorio hay dos mundos** (WebView y Rust): un síntoma "del frontend"
    puede tener causa nativa — el caso de `dragDropEnabled` en
    [[Tauri y el WebView]] es el ejemplo canónico.
+5. **Lo que parece basura puede ser deliberado.** Un byte **NUL literal** dentro de un
+   template literal (`` `${a}\0${b}` ``) hace que git trate el archivo como **binario**: deja
+   de diffear y nadie puede revisarlo. Pasaba en `lib/db/grafo.ts` y en
+   `components/editor/PropiedadesTab.tsx`, y al implementar `FUN-M-19` se lo tomó por
+   suciedad y se lo reemplazó por espacios — cambiando el separador de una clave compuesta
+   por el carácter que **sí** puede aparecer dentro de una ruta. Se escribe `\u0000`: mismo
+   valor en runtime, archivo de texto para git. **Si algo parece un descuido y está en
+   producción, buscá para qué sirve antes de limpiarlo.**
 
 ## Relacionadas
 
