@@ -101,6 +101,40 @@ Hay 4 combinaciones posibles: Bio Claro · Bio Oscuro · Cant Claro · Cant Oscu
 - Verificar contraste en las 4 combinaciones al diseñar cualquier componente nuevo.
 - `--mic-raw-base` y `--mic-raw-base-deep` NO cambian con dark mode — siguen siendo los colores oscuros del sidebar/rail, que ya son oscuros en modo claro también.
 
+## Controles nativos: `<select>`, fechas y todo lo que dibuja el navegador
+
+> [!important] Regla — todo desplegable nuevo
+> Un `<select>` tiene **dos partes y solo una está en el documento**. La caja cerrada se
+> estila como cualquier otra; **la lista desplegada la dibuja el navegador fuera del DOM**, y
+> ninguna regla de un `.module.css` la alcanza. Por eso el mismo defecto reaparecía en cada
+> funcionalidad con un desplegable: el control se veía bien y la lista salía en blanco, con
+> el texto casi invisible en modo oscuro.
+>
+> Ya está resuelto **globalmente**, y por eso no hay que hacer nada por componente:
+>
+> | Dónde | Qué hace |
+> |---|---|
+> | `styles/tokens.css` | `color-scheme: light` en `:root` y `color-scheme: dark` en `[data-dark='true']` |
+> | `app/globals.css` | `select option` con `--mic-text-primary` sobre `--mic-bg-surface` |
+>
+> `color-scheme` es la pieza que no se puede omitir: es lo único que le dice al navegador
+> **con qué luz dibujar lo suyo** — esta lista, el calendario de un `input[type="date"]`, los
+> spinners de un `number`, los controles nativos. Sin ella no hay CSS que arregle el popup,
+> porque el popup no está en la página.
+
+Qué hacer al construir un desplegable:
+
+- **Usar `<select>` a secas.** Hereda el arreglo. Estilá la caja cerrada en tu `.module.css`
+  como cualquier otra caja (fondo `--mic-bg-base`, borde `--mic-border`).
+- **No repitas `option { … }`** en el módulo del componente: ya está en `globals.css`, y
+  duplicarlo hace que la próxima corrección tenga que aplicarse en N sitios.
+- **Si el desplegable NO es un `<select>`** —un menú propio en un `<div>`, un combo con
+  buscador— entonces sí vive en el documento y va estilado con tokens como cualquier panel.
+  El caso de referencia es `GraphOptionsMenu`, que además se **acota a la pantalla**
+  (`DEF-047`/`DEF-053`).
+- **Probalo en modo oscuro antes de darlo por terminado**, y con la lista **abierta**. Con la
+  lista cerrada este defecto no se ve: es exactamente lo que lo dejó pasar tantas veces.
+
 ## Tipografía
 
 - Geist Sans — interfaz y títulos. Geométrica, clara, moderna sin ser fría.
