@@ -42,12 +42,47 @@ desfase (fue la hipótesis #2 del caso anterior), pero ayuda al primer pintado.
 > **de solo lectura**: la interacción que edite el documento va fuera del editor, que
 > es de donde salieron `DEF-031`/`DEF-037`.
 
-> [!important] Lo de "solo lectura" se revisa en `FUN-M-19` / `FUN-L-19`
-> Conviene no arrastrar de más esa última línea: la causa de `DEF-031`/`DEF-037` fue el
-> `margin` del widget, no la interactividad. Lo que sí hay que sostener cuando el widget
-> pase a editar —`updateDOM()` para no perder el foco, `ignoreEvent()` invertido, el
-> `estimatedHeight` recalculado y el `dispatch` al rango mínimo— está en
-> [[edicion-en-el-render]] § 2. **La regla del `padding` no se toca.**
+> [!important] Lo de "solo lectura" ya no vale: `FUN-M-19` lo revirtió
+> La causa de `DEF-031`/`DEF-037` fue el `margin` del widget, no la interactividad. Desde el
+> 2026-08-16 el widget de propiedades **edita el documento** (ver [[edicion-en-el-render]]).
+> **La regla del `padding` no se toca.**
+
+## Widget de bloque INTERACTIVO: las seis reglas
+
+Lo que hay que sostener cuando un widget deja de ser un adorno y pasa a editar el documento
+(`FUN-M-19`; `lib/editor/propiedadesWidget.ts` es el caso de referencia):
+
+1. **`padding`, nunca `margin`** — la de arriba, la única que ya costó cara.
+2. **`updateDOM(dom, view, from)` obligatorio**: parchear el DOM en sitio y devolver `true`.
+   Sin esto CodeMirror tira el DOM y lo reconstruye en cada pulsación, y el campo que se está
+   editando **pierde el foco a la primera tecla**. Ojo con la firma en CodeMirror 6.43: el
+   tercer argumento es el **widget anterior**, no una posición.
+3. **`ignoreEvent()` al revés de lo habitual**: por defecto un widget de bloque devuelve
+   `false` para que el clic lo tome el editor y coloque el cursor; si hay controles, tiene que
+   devolver `true` **para lo que nace en ellos** o `eventBelongsToEditor` se queda el clic y
+   las teclas y nunca llegan al campo. Conviene distinguir: `true` en los controles, `false`
+   en el resto del widget, para no perder la forma de posicionar el cursor.
+4. **`dispatch` al rango mínimo, con `userEvent` propio**: escribir el documento entero
+   arruina el deshacer y mueve el cursor. Y `history` **solo agrupa `input.type` y `delete`**
+   (regex `joinableUserEvent`), así que un `userEvent` como `input.propiedad` garantiza que
+   cada operación sea un paso de `Ctrl+Z` entero — y al empezar por `input.` sigue contando
+   como edición del usuario para el resto del editor.
+5. **Todo cambio de alto pide medida** (`view.requestMeasure()`). Si el widget crece o
+   encoge por interacción —abrir el editor de un campo, mostrar un error— eso pasa FUERA del
+   ciclo de actualización de CodeMirror y su height-map se queda con el alto anterior: el
+   mismo desfase de `DEF-031`/`DEF-037` por otra puerta.
+6. **Si el bloque ya no se abre en crudo, es un átomo** (`EditorView.atomicRanges`). Un
+   widget que reemplaza texto y NUNCA lo revela deja un rango donde el cursor puede entrar
+   sin verse: el clic en un hueco de la tarjeta, o una flecha, dejan el cursor dentro del
+   YAML invisible y lo siguiente que se teclee lo corrompe **a ciegas**. Declarando el rango
+   atómico, el clic y las flechas caen en sus bordes. No hacía falta antes porque el bloque
+   se abría al entrar el cursor: la interactividad es lo que crea el problema.
+
+> [!tip] Lo que CodeMirror ya resuelve solo
+> Las mutaciones del DOM **dentro** de un widget se ignoran (`readMutation` devuelve `null`
+> para los tiles de widget), y la selección no se fuerza mientras el `activeElement` no sea
+> el `contentDOM` — o sea que un `<input>` enfocado dentro de un widget no pelea con el
+> editor. Lo que hay que cuidar es lo de arriba, no eso.
 
 ## Decoraciones que dependen de la profundidad
 
