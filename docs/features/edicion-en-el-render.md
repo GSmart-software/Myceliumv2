@@ -9,13 +9,15 @@ columnas— sin pasar por la vista en crudo.
 > (`FUN-M-19`), después las tablas (`FUN-L-19`). Aplica a **ambas** versiones: es frontend
 > puro y el comportamiento es idéntico.
 >
-> - **Parte 1 (propiedades, `FUN-M-19`): implementada en `desktop-tauri`** el 2026-08-16,
->   **sin confirmar en la app**. `tsc` y `scripts/test-frontmatter.mjs` en verde; lo visible
->   —el foco, el clic, el gutter— lo confirma el usuario. Reflejo a `web-cloud` pendiente.
+> - **Parte 1 (propiedades, `FUN-M-19`): confirmada en la app** por el usuario el 2026-08-16.
+>   Reflejo a `web-cloud` pendiente.
 > - **Parte 2 (tablas, `FUN-L-19`): implementada en `desktop-tauri`** el 2026-08-16,
 >   **sin confirmar en la app**. `scripts/test-tablas.mjs` (30 tests), `tsc` y `next build`
 >   en verde; el comportamiento lo confirma el usuario con la lista del § 7. Reflejo a
 >   `web-cloud` pendiente.
+>
+> Las dos salen juntas en la **[[Version 1.6.2]]**, y como **patch**: el usuario las
+> clasificó como ajuste de algo que ya existía, no como funcionalidad nueva.
 
 ---
 

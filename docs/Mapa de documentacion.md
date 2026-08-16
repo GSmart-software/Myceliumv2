@@ -97,7 +97,9 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
 ## Estado y releases
 
 - [[Estado del proyecto]] — situación actual, pendientes y deuda.
-- [[Version 1.6.1]] — release actual de desktop: varios vaults a la vez, uno por ventana,
+- [[Version 1.6.2]] — release actual de desktop: las tablas y las propiedades se editan
+  renderizadas, sin abrir el crudo. **Sin publicar todavía**.
+- [[Version 1.6.1]] — varios vaults a la vez, uno por ventana,
   y una tanda de correcciones. **Sin publicar todavía**.
 - [[Version 1.6.0]] — bases, canvas y la pantalla de
   referencias. **Sin publicar todavía**.

@@ -81,7 +81,7 @@ y **priorizar** qué implementar antes.
 | `FUN-M-15` | `LINKS-POR-ALIAS` | Resolver `[[enlaces]]` por la propiedad `aliases` de la nota destino: hoy se parsea e indexa pero **no tiene comportamiento**. Toca la resolución de wikilinks, el autocompletado y el grafo. Continuación de `FUN-M-04` | ambas | — |
 | `FUN-M-16` 🛠️ | `UPDATER-SELECCION-VERSION` | Elegir e instalar **cualquier versión publicada**, incluida una anterior, desde un modo avanzado oculto (siete clics en el número de versión). Deja la app fijada en esa versión. Herramienta de desarrollo, no para el usuario normal. **Implementado, SIN confirmar**: su diálogo de confirmación estuvo roto hasta `DEF-051` (2026-08-03), así que elegir una versión no llegaba a hacer nada. Es lo único de la [[Version 1.4.0]] que queda por probar. Spec en `docs/features/autoactualizacion.md` § 4.3 | desktop | — |
 | `FUN-M-18` | `EDITOR-REINDENTAR` | Reindentar las notas al ancho de tabulación configurado, para que el cambio se vea también en la vista en vivo y no solo al leer. Es una **edición masiva del vault**: reutiliza el respaldo, el manifiesto y el deshacer de `FUN-M-17`. Continuación de `FUN-S-02` | ambas | — |
-| `FUN-M-19` 🛠️ | `EDITOR-PROPIEDADES-EN-SITIO` | El bloque de propiedades **deja de abrirse en crudo** al entrar el cursor: sigue renderizado y se edita ahí — cambiar un valor, renombrar una clave, **agregar y quitar** propiedades — sin ir a la vista raw, más «editar como texto» por bloque. Invierte el «widget de solo lectura» de `FUN-M-04`, cuyo motor (`ponerPropiedad`, `quitarPropiedad`, `renombrarPropiedad`) ya está hecho y probado. **Confirmado en desktop** por el usuario el 2026-08-16; parte **web** pendiente de reflejo, que se hará junto con el de `FUN-L-19` porque tocan los mismos archivos compartidos. Primera mitad de [[edicion-en-el-render]]; la segunda es `FUN-L-19` | ambas | — |
+| `FUN-M-19` 🟢 | `EDITOR-PROPIEDADES-EN-SITIO` | El bloque de propiedades **deja de abrirse en crudo** al entrar el cursor: sigue renderizado y se edita ahí — cambiar un valor, renombrar una clave, **agregar y quitar** propiedades — sin ir a la vista raw, más «editar como texto» por bloque. Invierte el «widget de solo lectura» de `FUN-M-04`, cuyo motor (`ponerPropiedad`, `quitarPropiedad`, `renombrarPropiedad`) ya está hecho y probado. **Confirmado en desktop** por el usuario el 2026-08-16; parte **web** pendiente de reflejo, que se hará junto con el de `FUN-L-19` porque tocan los mismos archivos compartidos. Primera mitad de [[edicion-en-el-render]]; la segunda es `FUN-L-19` | ambas | — |
 | `FUN-M-17` 🟡 | `VAULT-RELINKEADO` | Adoptar un vault que viene de otro proyecto: **la IA descubre** cómo se referencian sus documentos (`` `HU-009` ``, el nombre suelto, `[texto](otra.md)`) y lo registra en un léxico persistente; **el script aplica** esas formas y las convierte en `[[wikilinks]]`. La auditoría **no modifica documentos**; el enlazado sí, con respaldo y deshacer. Es el **caso de entrada** de Mycelium sobre un proyecto existente. **Su núcleo ya está hecho** (`lib/enlaces.ts`, 41 tests), porque lo necesitaba `FUN-L-17`; lo que falta son los dos comandos de la IA. Spec en [[auditoria-y-relinkeado]] | ambas | — |
 
 ### 1.3 Grandes — tamaño L
@@ -985,19 +985,23 @@ corrige que el título de un callout le pise el color a lo que lleva dentro. Com
 `lib/markdown.ts`, `livePreview.ts` y `editor.css`. El minor de `FUN-S-01` **absorbe** la
 corrección.
 
-#### N · Editar sin salir del render — `FUN-M-19` + `FUN-L-19` · minor · ambas
+#### N · Editar sin salir del render — `FUN-M-19` + `FUN-L-19` · patch · ambas
 Las dos mitades de [[edicion-en-el-render]]: el bloque de propiedades y las tablas dejan de
 abrirse en crudo con el cursor dentro y pasan a editarse ahí mismo, estructura incluida.
 Comparten el mecanismo entero —widget de bloque interactivo en `livePreview.ts`,
 `updateDOM()` para no perder el foco, `ignoreEvent()` invertido— y el criterio de producto,
 así que separarlas sería diseñar dos veces lo mismo.
 
-> [!important] Se entregan en dos releases, no en uno
-> Es la excepción a la regla de agrupar, y es deliberada: `FUN-M-19` reutiliza un motor ya
-> probado, mientras que `FUN-L-19` escribe uno nuevo **y** toca el widget que produjo
-> `DEF-031`/`DEF-037`. Sacar primero las propiedades valida el patrón de widget interactivo
-> sobre la mitad barata; si las tablas se complican, no arrastran consigo algo que ya estaba
-> listo. Cada una es un minor por su cuenta.
+> [!important] Se implementaron en dos tandas, pero salen en UN release
+> Lo primero fue deliberado: `FUN-M-19` reutiliza un motor ya probado, mientras que
+> `FUN-L-19` escribe uno nuevo **y** toca el widget que produjo `DEF-031`/`DEF-037`. Hacer
+> primero las propiedades validó el patrón de widget interactivo sobre la mitad barata, y
+> las seis reglas del widget salieron enteras de ahí.
+>
+> Lo segundo lo decidió el usuario al integrar (2026-08-16): las dos van juntas en la
+> **`1.6.2`**, y como **patch**, no como minor. Su criterio: no es funcionalidad nueva sino
+> un **ajuste de algo que ya existía** — editar tablas y propiedades ya se podía, lo que
+> cambia es que ya no hay que abrir el crudo para hacerlo. Ver [[Version 1.6.2]].
 
 #### F · Gestión de vaults — `FUN-L-04` + `DEF-044` + `FUN-L-16` + `FUN-S-05` · minor · ambas
 Todo el ciclo de vida del vault, y las tres primeras comparten **una misma raíz**: hoy el
