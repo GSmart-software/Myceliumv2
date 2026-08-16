@@ -5,9 +5,14 @@ se puedan editar ahí mismo —incluida la estructura: agregar y quitar campos, 
 columnas— sin pasar por la vista en crudo.
 
 > [!info] Estado
-> Especificada el 2026-08-15. **Sin implementar.** Se entrega en dos partes: primero las
-> propiedades (`FUN-M-19`), después las tablas (`FUN-L-19`). Aplica a **ambas** versiones:
-> es frontend puro y el comportamiento es idéntico.
+> Especificada el 2026-08-15. Se entrega en dos partes: primero las propiedades
+> (`FUN-M-19`), después las tablas (`FUN-L-19`). Aplica a **ambas** versiones: es frontend
+> puro y el comportamiento es idéntico.
+>
+> - **Parte 1 (propiedades, `FUN-M-19`): implementada en `desktop-tauri`** el 2026-08-16,
+>   **sin confirmar en la app**. `tsc` y `scripts/test-frontmatter.mjs` en verde; lo visible
+>   —el foco, el clic, el gutter— lo confirma el usuario. Reflejo a `web-cloud` pendiente.
+> - **Parte 2 (tablas, `FUN-L-19`): sin implementar.**
 
 ---
 
@@ -55,6 +60,8 @@ Eso no la vuelve gratis. Lo que sí es cierto y sigue vigente:
 | El widget se reconstruye al escribir y se pierde el foco | `updateDOM()` obligatorio: parchea en sitio y devuelve `true`. Reconstruir en cada tecla es un defecto, no un detalle |
 | Los eventos se los queda CodeMirror | `ignoreEvent()` pasa a devolver `true` para lo que nace en los controles (hoy devuelve `false` a propósito, para que el clic coloque el cursor) |
 | Un cambio del widget rompe el deshacer | Los `dispatch` tocan **el rango mínimo**, con `userEvent` propio, para que Ctrl+Z revierta la operación y no el documento |
+| El bloque cambia de alto al interactuar | `view.requestMeasure()` en cada cambio de alto: pasa fuera del ciclo de actualización de CodeMirror y su height-map no se entera solo *(agregada al implementar `FUN-M-19`)* |
+| El cursor entra en un bloque que ya no se abre | El rango va a `EditorView.atomicRanges`: si no, el clic en un hueco deja el cursor dentro del texto invisible y la tecla siguiente lo corrompe a ciegas *(agregada al implementar `FUN-M-19`)* |
 
 > [!warning] La regla del `margin` no se toca
 > Sigue valiendo para todo widget de bloque, y es la única de las cuatro que ya costó cara.
@@ -112,6 +119,47 @@ Lo que falta es llevar eso al widget del editor.
 un cambio de todo el documento arruinaría el deshacer y el cursor. Como solo cambian líneas
 del frontmatter, el `dispatch` reemplaza **el rango del bloque** (de la posición 0 a
 `cuerpoDesde`) con el bloque nuevo. Contenido, mínimo y sin tocar el cuerpo de la nota.
+
+### Cómo quedó implementado (2026-08-16)
+
+| Pieza | Dónde |
+|---|---|
+| DOM de la tarjeta editable, con sus controles y el parcheo en sitio | `lib/editor/propiedadesWidget.ts` (nuevo) |
+| Widget de bloque: `toDOM`, `updateDOM`, `ignoreEvent`, `estimatedHeight`, y el estado «ver como texto» | `lib/editor/livePreview.ts` |
+| `dispatch` al rango del bloque + crear el bloque desde la barra | `aplicarEdicionFrontmatter` y `insertarBloquePropiedades`, en `lib/editor/commands.ts` |
+| Metadatos de tipo compartidos con el panel (`TIPOS_PROPIEDAD`, `NOMBRE_TIPO`, `valorInicialDe`, `valorComoTexto`) | `lib/frontmatter.ts` (siguen puros y con tests) |
+| El valor renderizado, el mismo que la vista de lectura | `valorPropiedadHtml` e `ICONO_TIPO`, exportados de `lib/markdown.ts` |
+
+Decisiones que la spec dejaba abiertas y se resolvieron al implementar:
+
+- **El valor se ve renderizado y pasa a `<input>` al recibir el foco**, no antes. Es el
+  "grano fino" del § 3.2: los wikilinks y las etiquetas de una propiedad se siguen viendo
+  como tales mientras no se las edita. Las **casillas** y las **listas** son la excepción
+  razonable: su control ya es su propio render, así que están siempre vivos (la casilla se
+  marca de un clic; las listas son pastillas con `×` y un `+`, igual que el panel).
+- **La clave es siempre un `<input>` plano** (como en la pestaña PROPIEDADES): no hay nada
+  que renderizar en un nombre, y así se ve dónde se puede escribir.
+- **`ignoreEvent()` distingue**: `true` para lo que nace en un control (`input`, `select`,
+  `button`, el valor enfocable), `false` para el resto de la tarjeta, donde el clic sigue
+  siendo de CodeMirror. Devolver `true` a todo dejaría el bloque sin forma de recibir el
+  cursor.
+- **Cada cambio de alto pide medida** (`view.requestMeasure()`). Abrir el editor de un valor
+  cambia la altura del bloque FUERA del ciclo de actualización de CodeMirror: sin eso, su
+  height-map se queda con el alto viejo, que es el desfase de `DEF-031`/`DEF-037` por otra
+  puerta. No estaba en la spec y es la quinta regla de la tabla del § 2.
+- **El bloque pasa a ser un átomo** (`EditorView.atomicRanges`). Es una regla nueva que la
+  spec no tenía y que **solo aparece al dejar de abrir el bloque en crudo**: si el cursor
+  puede entrar en un rango reemplazado que nunca se revela, un clic en un hueco de la
+  tarjeta lo deja dentro del YAML invisible y la tecla siguiente lo corrompe a ciegas. Con
+  el rango declarado atómico, el clic y las flechas caen en sus bordes. Mientras se edita
+  como texto no hay decoración y por tanto tampoco átomo. Lo mismo va a hacer falta en
+  `FUN-L-19`.
+- **`userEvent: "input.propiedad"`**: `history` solo agrupa `input.type` y `delete`, así que
+  cada operación es un paso de deshacer entero; y como empieza por `input.`, el editor la
+  sigue tratando como edición del usuario (marca la nota sucia, fija la pestaña).
+- **Nota sin frontmatter**: el botón de la barra («Propiedades de la nota») crea el bloque
+  **vacío** —que es frontmatter válido— y enfoca el campo de la tarjeta. Así la primera
+  propiedad se agrega en el mismo sitio que todas las demás, en vez de tener dos flujos.
 
 ---
 
@@ -195,6 +243,13 @@ controles y se escribe markdown a mano, que es exactamente lo que quiere quien l
 
 - `node scripts/test-tablas.mjs` (parte 2) y `scripts/test-frontmatter.mjs` (sin regresiones)
   · `npx tsc --noEmit -p tsconfig.json`.
+
+> [!warning] Lo que falta probar de la parte 1, en la app
+> `tsc` verde y 41 tests en verde **no** prueban comportamiento. De la lista de abajo, a las
+> propiedades les tocan los puntos 1, 2, 3 (agregar y quitar), 4, 6 y 7 — y además:
+> frontmatter **vacío** (`---`/`---`) y nota **sin** frontmatter (botón «Propiedades de la
+> nota» en la barra), un frontmatter **no soportado** (tiene que verse crudo, sin controles,
+> con el motivo), `tags`, y la **misma nota en dos paneles** a la vez.
 - Casos que el test del módulo debe cubrir: `|` escapado · celdas con wikilinks y con alias ·
   filas irregulares · CRLF · idempotencia · eliminar la última fila/columna · alineaciones.
 - **A mano, que es donde esto se prueba de verdad** — y todo con el bloque **renderizado**:

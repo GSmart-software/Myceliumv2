@@ -198,12 +198,13 @@ Mismo diseño, como **widget de bloque** que reemplaza las líneas del frontmatt
 - Poner el cursor **dentro del bloque revela la fuente** (deja de renderizarse), igual que
   las tablas y los callouts. Sacarlo lo vuelve a plegar.
 
-> [!important] Las dos viñetas de arriba las revierte `FUN-M-19`
-> El widget pasa a ser **interactivo** y el bloque deja de abrirse en crudo con el cursor
-> dentro: se edita renderizado, propiedades nuevas incluidas. Los motivos, y por qué el
-> riesgo de `DEF-031`/`DEF-037` es más acotado de lo que dice el párrafo de arriba, están en
-> [[edicion-en-el-render]] § 2. El resto de esta spec —el parser, los tipos, el índice, la
-> pestaña PROPIEDADES— no cambia.
+> [!important] Las dos viñetas de arriba **ya no valen**: las revirtió `FUN-M-19`
+> Desde el 2026-08-16 (en `desktop-tauri`) el widget es **interactivo** y el bloque ya no se
+> abre en crudo con el cursor dentro: se edita renderizado —cambiar un valor, renombrar,
+> agregar y quitar propiedades— y la fuente se ve solo a pedido, con «editar como texto».
+> Los motivos, y por qué el riesgo de `DEF-031`/`DEF-037` es más acotado de lo que dice el
+> párrafo de arriba, están en [[edicion-en-el-render]] § 2; cómo quedó, en su § 4. El resto
+> de esta spec —el parser, los tipos, el índice, la pestaña PROPIEDADES— no cambia.
 - Decoración de **bloque** → debe venir de un `StateField`, no de un `ViewPlugin`
   (comentado en `livePreview.ts`, y es la trampa de [[CodeMirror y la vista en vivo]]).
 
