@@ -47,8 +47,47 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-055 | Cambiar de modo de visualización devuelve el documento al principio | ambas (frontend) | ✅ 🌐 (2026-08-17) — se traspasa la **línea** del documento; dos intentos por proporción antes |
 | DEF-056 | La coincidencia del buscador queda tapada por la barra de herramientas | ambas (frontend) | ✅ 🌐 (2026-08-17) — el scroll se calcula a mano; **tres arreglos fallidos antes**, ver nota |
 | DEF-057 | En la vista de lectura el buscador de texto no encuentra nada | ambas (frontend) | ✅ 🌐 (2026-08-17) — búsqueda sobre el DOM del preview, resaltada sin tocarlo |
+| DEF-058 | Al volver de lectura a edición el foco se queda en los botones de vista | ambas (frontend) | 🛠️ desktop (2026-08-17) — se devuelve el foco al editor; sin confirmar |
+| DEF-059 | Con el buscador abierto, las flechas hacen saltar el documento | ambas (frontend) | ⬜ pendiente — **medido a fondo**, ver nota |
 
 ## Notas por bug
+
+- **DEF-059 — lo que se sabe, medido (2026-08-17).** Cinco hipótesis descartadas con datos,
+  así que lo importante acá es el **terreno ya explorado**, para que quien lo retome no lo
+  vuelva a recorrer.
+
+  **La condición es el buscador abierto.** Cerrarlo devuelve el comportamiento normal en el
+  acto, sin recargar nada. Con él abierto, una flecha abajo mueve el cursor una línea y el
+  scroll salta cientos de píxeles.
+
+  **Los números** (nota de 850 líneas, sin tablas ni frontmatter): clic en la línea 13 con
+  `scrollTop=0`, cursor visible. Una flecha abajo → línea 14, `scrollTop=597`, cursor a
+  −148 px del borde. Y `altoBloque=43` contra líneas reales de ~21 px: **14 × 43 = 602 ≈ 597**,
+  o sea que CodeMirror desplaza exactamente a donde su height-map cree que está la línea.
+
+  **La pila de llamadas** lo sitúa dentro del propio editor:
+  `keydown → cursorByLine → moveSel → dispatch → update → requestMeasure → measure →
+  scrollIntoView → scrollRectIntoView`. No es código nuestro el que mueve el scroll.
+
+  **Descartado, cada uno con su prueba**:
+
+  | Hipótesis | Cómo se descartó |
+  |---|---|
+  | La barra de herramientas tapa | Está en flujo, no superpuesta |
+  | Los `estimatedHeight` de los widgets | Pasa con `liveTables` apagado y sin frontmatter |
+  | El contenedor se desplaza solo | `hostScroll=0` en todas las medidas |
+  | Márgenes de scroll | Los dos proveedores internos dan 0 con el panel oculto |
+  | Medición con el editor oculto | Pasa sin pasar nunca por la vista de lectura |
+  | El escalado del sistema al 125 % | El clic acierta; solo falla el movimiento |
+  | Los arreglos del `DEF-056` | Lo que queda de ellos no se ejecuta con las flechas |
+
+  **Por dónde seguir**: el panel de búsqueda se crea con un `<div>` vacío y se oculta con
+  `display: none` (`search({ createPanel })` + `.cm-panels` en `editor.css`). Es lo único que
+  distingue «buscador abierto» de «cerrado» a ojos de CodeMirror. La sospecha viva es que el
+  height-map queda inflado —43 px por bloque contra 21 reales— al abrirlo.
+
+  **No bloquea publicar**: es anterior a esta versión y convivió con los usuarios desde el
+  `DEF-037`.
 
 - **DEF-031 reapareció, y lo había reintroducido el arreglo del `DEF-056`** (2026-08-17,
   encontrado por el usuario). Con el buscador abierto, seleccionar con el ratón o moverse con

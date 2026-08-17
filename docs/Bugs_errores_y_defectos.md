@@ -216,6 +216,13 @@ escribe, y no encuentra nada ni resalta nada. En la vista de edición sí funcio
 # DEF-058
 Al volver de la vista de lectura a la de edición, el **foco se queda en los botones que cambian de vista**: las flechas del teclado mueven el foco de un botón a otro en vez de mover el cursor, y hay que volver a hacer clic dentro del texto para poder escribir.
 
+# DEF-059
+Con el **buscador abierto**, moverse con las flechas del teclado hace que el documento **salte**: el cursor avanza una línea pero la vista se desplaza cientos de píxeles, y el cursor queda **por encima** de lo visible. Seleccionar texto sufre lo mismo. Al **cerrar** el buscador, las flechas vuelven a comportarse bien de inmediato.
+
+Pasa en notas **sin tablas y sin frontmatter**, y también con el render de tablas de la vista en vivo desactivado.
+
+*Es la mitad del `DEF-037` que nunca se corrigió: aquel describía este mismo síntoma junto al de las tablas, y lo que se arregló fue lo de las tablas.*
+
 ---
 
 > [!warning] Defectos sin reporte original
