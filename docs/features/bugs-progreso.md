@@ -83,6 +83,17 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
   estabiliza, porque Mermaid, Excalidraw y las imágenes llegan tarde. Cede ante el pendiente
   en píxeles de `DEF-039`, que es una posición exacta y por tanto mejor.
 
+  **Ajuste tras probarlo** (2026-08-17): la vista de edición quedaba *un poco más abajo* que
+  la de lectura. La fracción se calculaba sobre el **recorrido posible**
+  (`scrollHeight - clientHeight`), que es lo que hace el scroll sincronizado del modo
+  dividido, y esa no es la magnitud correcta: lo que hay que conservar es **qué parte del
+  texto queda por encima del borde**, o sea una fracción del **contenido** (`scrollHeight` a
+  secas). Dividir por el recorrido mete un sesgo que vale 0 en los extremos y crece hacia el
+  medio, y que empuja hacia abajo cuando la vista de destino es la más alta de las dos —que
+  es justo el caso de la edición frente a la lectura. Sigue siendo aproximado: exacto
+  exigiría que el HTML del preview conservara la **línea de origen** de cada bloque, que hoy
+  no la lleva.
+
 - **DEF-056 — CodeMirror da por cumplido un `scrollIntoView` que no cumplió.** La causa
   real, y costó tres arreglos equivocados llegar a ella. Lo medido en la app tras
   `findNext`: la coincidencia queda **149 px por encima** del área visible, con
