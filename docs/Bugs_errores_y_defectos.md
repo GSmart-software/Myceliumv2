@@ -207,6 +207,12 @@ Al cambiar de modo de visualización —de edición a **lectura**, o a cualquier
 # DEF-056
 El buscador del archivo (`Ctrl+F`) encuentra las coincidencias y salta a ellas, pero las deja **al borde superior** del área visible, que es justo donde está la barra de herramientas. La palabra encontrada queda **tapada**, más arriba de lo que se ve. Debería quedar **centrada** en la parte visible.
 
+# DEF-057
+En la **vista de lectura** el buscador de texto (`Ctrl+F`) no funciona: se abre la barra, se
+escribe, y no encuentra nada ni resalta nada. En la vista de edición sí funciona.
+
+*Viene de antes de las correcciones del `DEF-055`/`DEF-056`: no lo causaron ellas.*
+
 ---
 
 > [!warning] Defectos sin reporte original

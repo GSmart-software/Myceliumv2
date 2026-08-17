@@ -46,8 +46,29 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-054 | El grafo no se actualiza si el archivo lo crea algo de fuera de Mycelium | desktop | 🛠️ desktop (2026-08-13) — el watcher marca el grafo desactualizado |
 | DEF-055 | Cambiar de modo de visualización devuelve el documento al principio | ambas (frontend) | 🛠️ desktop (2026-08-16) — el ratio de scroll se traspasa entre los dos scrollers; sin confirmar |
 | DEF-056 | La coincidencia del buscador queda tapada por la barra de herramientas | ambas (frontend) | ✅ desktop (2026-08-17) — el scroll se calcula a mano; **tres arreglos fallidos antes**, ver nota |
+| DEF-057 | En la vista de lectura el buscador de texto no encuentra nada | ambas (frontend) | 🛠️ desktop (2026-08-17) — búsqueda sobre el DOM del preview; sin confirmar |
 
 ## Notas por bug
+
+- **DEF-057 — el buscador solo sabía buscar en CodeMirror.** `SearchBar` trabajaba
+  exclusivamente contra la vista del editor: `setSearchQuery`, `findNext`, `replaceAll`. En
+  modo lectura el editor sigue montado pero **oculto** (`display: none`), y lo que se ve es el
+  panel del preview, que es HTML suelto. Así que la búsqueda funcionaba perfectamente… sobre
+  un editor invisible. Nada se resaltaba ni se desplazaba porque nada de eso estaba en
+  pantalla.
+
+  Se añade `lib/buscarEnDom.ts`: busca sobre el texto **concatenado** de los nodos —así una
+  coincidencia partida por una negrita o un enlace se encuentra igual— y devuelve `Range`.
+
+  **El resaltado NO inserta marcas**: usa la CSS Custom Highlight API
+  (`CSS.highlights` + `::highlight()`). Es lo que corresponde acá porque el HTML del preview
+  se **regenera entero** en cada cambio del documento: cualquier `<mark>` insertado se perdería
+  en el render siguiente o, peor, quedaría pegado al contenido. Y por lo mismo hay que
+  limpiarlo a mano: `CSS.highlights` es global del documento y no se vacía al desmontar la
+  barra ni al cambiar de modo.
+
+  El centrado se calcula a mano, por lo aprendido en `DEF-056`. **Reemplazar** no se ofrece en
+  lectura: edita el documento.
 
 - **DEF-055 — cada modo tiene su propio scroller, y nadie los conectaba.** En edición el que
   se desplaza es el de CodeMirror; en lectura, el panel del preview. Son dos elementos
