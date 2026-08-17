@@ -272,9 +272,14 @@ const escapar = (s: string): string => s.replace(/[&<>"]/g, (c) => HTML_ESCAPES[
 
 /**
  * Renderiza un valor como markdown EN LÍNEA (sin el `<p>` envolvente): así un
- * `[[enlace]]` dentro de una propiedad se ve y navega como cualquier wikilink.
- * El pipeline escapa el HTML, así que el valor del usuario no puede inyectar.
+ * `[[enlace]]` dentro de una propiedad —o de una celda de tabla (`FUN-L-19`)—
+ * se ve y navega como cualquier wikilink. El pipeline escapa el HTML, así que
+ * el valor del usuario no puede inyectar.
  */
+export function renderMarkdownEnLinea(md: string): string {
+  return renderEnLinea(md);
+}
+
 function renderEnLinea(md: string): string {
   return renderMarkdown(md)
     .replace(/^\s*<p>/, "")
@@ -282,7 +287,7 @@ function renderEnLinea(md: string): string {
 }
 
 /** Glifo del tipo, para reconocer la propiedad de un vistazo. */
-const ICONO_TIPO: Record<TipoPropiedad, string> = {
+export const ICONO_TIPO: Record<TipoPropiedad, string> = {
   texto: "T",
   numero: "#",
   casilla: "☑",
@@ -312,8 +317,12 @@ export function formatearFecha(valor: string): string {
     : d.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
 }
 
-/** El valor de una propiedad como HTML, según su tipo. */
-function valorHtml(p: Propiedad): string {
+/**
+ * El valor de una propiedad como HTML, según su tipo. Lo usan la tarjeta de
+ * lectura y el widget editable de la vista en vivo (`FUN-M-19`): el valor se ve
+ * IGUAL en los dos sitios mientras no se lo está editando.
+ */
+export function valorPropiedadHtml(p: Propiedad): string {
   if (p.tipo === "casilla") {
     const marcado = p.valor === true ? " checked" : "";
     return `<input type="checkbox" class="mic-prop-check" disabled${marcado} aria-label="${escapar(p.clave)}">`;
@@ -375,7 +384,7 @@ export function tarjetaPropiedadesHtml(texto: string): string {
         "</span>" +
         escapar(p.clave) +
         '</span><span class="mic-prop-valor">' +
-        valorHtml(p) +
+        valorPropiedadHtml(p) +
         "</span></div>",
     )
     .join("");

@@ -79,6 +79,35 @@ const instanceCache = new Map<
   }
 >();
 
+/**
+ * Fracción [0,1] del DOCUMENTO que queda por encima del borde superior
+ * (DEF-055).
+ *
+ * Es la moneda común entre el scroller de CodeMirror y el del panel de lectura,
+ * que miden alturas distintas del MISMO documento.
+ *
+ * Se divide por `scrollHeight` (el alto del contenido) y **no** por
+ * `scrollHeight - clientHeight` (el recorrido posible), que es lo que hace el
+ * scroll sincronizado del modo dividido. La diferencia importa cuando las dos
+ * alturas no coinciden —y nunca coinciden: una tabla o una imagen ocupan
+ * distinto renderizadas que en markdown—. Lo que hay que conservar es *qué parte
+ * del texto queda arriba*, que es una fracción del contenido; usar el recorrido
+ * mete un sesgo que crece hacia el medio del documento y hacía que la vista de
+ * edición quedara un poco más abajo que la de lectura.
+ *
+ * Sigue siendo una aproximación: exacto exigiría que el HTML del preview
+ * conservara la línea de origen de cada bloque, que hoy no la lleva.
+ */
+function fraccionDe(el: HTMLElement): number {
+  return el.scrollHeight > 0 ? el.scrollTop / el.scrollHeight : 0;
+}
+
+/** Aplica una fracción de documento a un scroller, acotada a sus extremos. */
+function aplicarFraccion(el: HTMLElement, fraccion: number): void {
+  const objetivo = fraccion * el.scrollHeight;
+  el.scrollTop = Math.max(0, Math.min(objetivo, el.scrollHeight - el.clientHeight));
+}
+
 /** Marcador de tarea por línea: indentación + viñeta + `[ ]`/`[x]`. */
 const TASK_RE = /^(\s*(?:[-*+]|\d+[.)])\s+)\[([ xX])\]/gm;
 
@@ -112,7 +141,10 @@ function gotoMatch(view: EditorView, term: string) {
   if (idx < 0) return;
   view.dispatch({
     selection: { anchor: idx, head: idx + term.length },
-    scrollIntoView: true,
+    // DEF-056: el comentario decía "centra" pero `scrollIntoView: true` usa la
+    // estrategia "nearest", que pega la coincidencia al borde superior. Acá se
+    // centra de verdad, igual que en la barra de búsqueda.
+    effects: EditorView.scrollIntoView(idx, { y: "center" }),
   });
   view.focus();
 }
@@ -150,6 +182,12 @@ export function NoteEditor({
   const previewScrollRef = useRef(0);
   /** Scroll del preview pendiente de restaurar (null = nada que restaurar). */
   const previewScrollPendienteRef = useRef<number | null>(null);
+  // DEF-055: ratio pendiente de aplicar tras un cambio de modo. Va aparte del
+  // pendiente en píxeles de arriba, que es el de volver a una pestaña (DEF-039):
+  // aquel restaura una posición exacta ya conocida, este traduce entre dos
+  // scrollers de altura distinta.
+  const previewRatioPendienteRef = useRef<number | null>(null);
+  const editorRatioPendienteRef = useRef<number | null>(null);
   const soltarScrollRef = useRef<(() => void) | null>(null);
 
   const [mode, setModeState] = useState<EditorMode>(() => {
@@ -306,6 +344,13 @@ export function NoteEditor({
               }
             : undefined,
           extensions: [
+            // DEF-056: CodeMirror no sabe que ARRIBA del scroller hay una barra
+            // de herramientas encima. Sin este margen, cualquier desplazamiento
+            // suyo —el del buscador, pero también el del cursor o el del
+            // autocompletado— puede dejar el objetivo pegado al borde superior,
+            // que es justo la franja tapada. `scrollMargins` es la forma nativa
+            // de decirle "esta parte no cuenta como visible".
+            EditorView.scrollMargins.of(() => ({ top: 56, bottom: 24 })),
             history(),
             // Tab/Shift+Tab indentan la línea (sangría) en vez de mover el foco.
             keymap.of([...defaultKeymap, ...historyKeymap, ...foldKeymap, indentWithTab]),
@@ -590,6 +635,21 @@ export function NoteEditor({
 
   const setMode = useCallback(
     (next: EditorMode) => {
+      // DEF-055: cada modo tiene SU scroller —CodeMirror en edición, el panel en
+      // lectura—, así que al cambiar hay que traspasar la posición de uno a otro
+      // o el documento aparece en el principio. Se lee ANTES de cambiar, mientras
+      // el que sale todavía está visible: un elemento con `display: none` informa
+      // `scrollTop` 0.
+      const anterior = modeRef.current;
+      if (next !== anterior) {
+        const sale =
+          anterior === "read" ? previewRef.current : (viewRef.current?.scrollDOM ?? null);
+        if (sale) {
+          const fraccion = fraccionDe(sale);
+          if (next === "read" || next === "split") previewRatioPendienteRef.current = fraccion;
+          else editorRatioPendienteRef.current = fraccion;
+        }
+      }
       setModeState(next);
       modeRef.current = next;
       window.localStorage.setItem(`micelio-mode-${notaId}`, next);
@@ -689,6 +749,7 @@ export function NoteEditor({
     if (!preview) return;
     const onScroll = () => {
       if (previewScrollPendienteRef.current !== null) return;
+      if (previewRatioPendienteRef.current !== null) return;
       previewScrollRef.current = preview.scrollTop;
     };
     preview.addEventListener("scroll", onScroll, { passive: true });
@@ -718,6 +779,88 @@ export function NoteEditor({
     raf = requestAnimationFrame(aplicar);
     return () => cancelAnimationFrame(raf);
   }, [previewHtml, mode, previewTick]);
+
+  // DEF-055: aplicar al panel de lectura el ratio traído del otro modo. Se
+  // reintenta mientras el alto siga cambiando (Mermaid, Excalidraw e imágenes
+  // llegan tarde) y se corta en cuanto se estabiliza, para no pelear con el
+  // usuario si vuelve a desplazar. Cede ante el pendiente en píxeles de DEF-039,
+  // que es una posición exacta y por tanto mejor.
+  useEffect(() => {
+    if (previewRatioPendienteRef.current === null) return;
+    if (previewScrollPendienteRef.current !== null) return;
+    if (mode !== "read" && mode !== "split") return;
+    let raf = 0;
+    let intentos = 0;
+    let altoPrevio = -1;
+    const aplicar = () => {
+      const preview = previewRef.current;
+      const ratio = previewRatioPendienteRef.current;
+      if (!preview || ratio === null) return;
+      if (preview.scrollHeight !== altoPrevio && intentos++ < 30) {
+        altoPrevio = preview.scrollHeight;
+        aplicarFraccion(preview, ratio);
+        raf = requestAnimationFrame(aplicar);
+      } else {
+        previewScrollRef.current = preview.scrollTop;
+        previewRatioPendienteRef.current = null;
+      }
+    };
+    raf = requestAnimationFrame(aplicar);
+    return () => cancelAnimationFrame(raf);
+  }, [previewHtml, mode, previewTick]);
+
+  // DEF-055: lo mismo al volver a un modo de edición. Acá sí se asigna
+  // `scrollTop` a mano —lo que DEF-039 desaconseja al CREAR la vista— porque el
+  // editor no se desmonta nunca: en lectura solo queda oculto, así que ya está
+  // medido y solo hay que reposicionarlo.
+  useEffect(() => {
+    if (editorRatioPendienteRef.current === null) return;
+    if (mode !== "live" && mode !== "raw") return;
+    const scroller = viewRef.current?.scrollDOM;
+    if (!scroller) return;
+    let raf = 0;
+    let intentos = 0;
+    let altoPrevio = -1;
+    const aplicar = () => {
+      const ratio = editorRatioPendienteRef.current;
+      if (ratio === null) return;
+      if (scroller.scrollHeight !== altoPrevio && intentos++ < 30) {
+        altoPrevio = scroller.scrollHeight;
+        aplicarFraccion(scroller, ratio);
+        raf = requestAnimationFrame(aplicar);
+      } else {
+        editorRatioPendienteRef.current = null;
+      }
+    };
+    raf = requestAnimationFrame(aplicar);
+    return () => cancelAnimationFrame(raf);
+  }, [mode]);
+
+  // DEF-056: el contenedor del editor NO debe desplazarse nunca, y hay que
+  // obligarlo.
+  //
+  // Los contenedores con `overflow: hidden` no tienen barra, pero **sí se pueden
+  // desplazar**: el navegador los desplaza por su cuenta para "revelar" lo que
+  // acaba de recibir el foco o la selección, y como no hay barra, nada los
+  // devuelve. El efecto visible es que todo el contenido del editor queda
+  // corrido hacia arriba, por debajo de la barra de herramientas — que es
+  // exactamente el sintoma: la coincidencia del buscador aparece más arriba de
+  // lo visible aunque CodeMirror haya desplazado bien SU scroller.
+  //
+  // Por eso los arreglos del lado de CodeMirror no cambiaban nada: el que se
+  // movía era el contenedor, no el scroller. Se lo devuelve a cero en cuanto se
+  // detecta el desplazamiento (el evento `scroll` se emite igual, aunque no haya
+  // barra).
+  useEffect(() => {
+    const host = hostRef.current;
+    if (!host) return;
+    const anclar = () => {
+      if (host.scrollTop !== 0) host.scrollTop = 0;
+      if (host.scrollLeft !== 0) host.scrollLeft = 0;
+    };
+    host.addEventListener("scroll", anclar);
+    return () => host.removeEventListener("scroll", anclar);
+  }, []);
 
   // Scroll sincronizado en split (HU-01 CA11)
   useEffect(() => {
@@ -859,7 +1002,13 @@ export function NoteEditor({
         titulo={notaTitulo}
       />
 
-      {isActivePane && <SearchBar getView={() => viewRef.current} />}
+      {isActivePane && (
+        <SearchBar
+          getView={() => viewRef.current}
+          getPreview={() => previewRef.current}
+          modoLectura={mode === "read"}
+        />
+      )}
 
       {conflict !== null && (
         <div className={styles.conflictBar}>
