@@ -13,6 +13,12 @@ import {
 import type { EditorView } from "@codemirror/view";
 import { CaseSensitive, ChevronDown, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  buscarEnDom,
+  centrarRango,
+  limpiarResaltados,
+  pintarResaltados,
+} from "@/lib/buscarEnDom";
 import { useUiStore } from "@/stores/uiStore";
 import styles from "./SearchBar.module.css";
 
@@ -20,7 +26,16 @@ import styles from "./SearchBar.module.css";
  * Búsqueda y reemplazo en la nota activa (HU-31). Barra flotante entre el
  * AppTopbar y el editor; entry points: Ctrl+F y la barra del topbar (HU-38).
  */
-export function SearchBar({ getView }: { getView: () => EditorView | null }) {
+export function SearchBar({
+  getView,
+  getPreview,
+  modoLectura,
+}: {
+  getView: () => EditorView | null;
+  /** Panel de la vista de lectura, donde se busca cuando el editor no se ve. */
+  getPreview: () => HTMLElement | null;
+  modoLectura: boolean;
+}) {
   const open = useUiStore((s) => s.searchInNoteOpen);
   const setOpen = useUiStore((s) => s.setSearchInNoteOpen);
 
@@ -30,9 +45,25 @@ export function SearchBar({ getView }: { getView: () => EditorView | null }) {
   const [replaceWith, setReplaceWith] = useState("");
   const [counts, setCounts] = useState({ current: 0, total: 0 });
   const inputRef = useRef<HTMLInputElement>(null);
+  // DEF-057: en lectura no hay CodeMirror que resalte, así que las
+  // coincidencias se llevan acá. Un ref y no un estado: cambian en cada tecla y
+  // solo se leen al navegar.
+  const rangosRef = useRef<Range[]>([]);
+  const indiceRef = useRef(0);
 
   const applyQuery = useCallback(
     (search: string, cs: boolean, replace: string) => {
+      if (modoLectura) {
+        // La vista de lectura es HTML, no un editor: se busca sobre el DOM y se
+        // resalta sin tocarlo (ver `lib/buscarEnDom.ts`).
+        const panel = getPreview();
+        rangosRef.current = panel ? buscarEnDom(panel, search, cs) : [];
+        indiceRef.current = 0;
+        pintarResaltados(rangosRef.current, 0);
+        const total = rangosRef.current.length;
+        setCounts({ current: total > 0 ? 1 : 0, total });
+        return;
+      }
       const view = getView();
       if (!view) return;
       const sq = new SearchQuery({
@@ -44,7 +75,7 @@ export function SearchBar({ getView }: { getView: () => EditorView | null }) {
       view.dispatch({ effects: setSearchQuery.of(sq) });
       updateCounts(view, sq);
     },
-    [getView],
+    [getView, getPreview, modoLectura],
   );
 
   function updateCounts(view: EditorView, sq: SearchQuery) {
@@ -82,12 +113,55 @@ export function SearchBar({ getView }: { getView: () => EditorView | null }) {
     if (open) inputRef.current?.focus();
   }, [open]);
 
+  // DEF-057: los resaltados viven en `CSS.highlights`, que es GLOBAL del
+  // documento: no desaparecen solos al desmontar la barra ni al cambiar de modo.
+  useEffect(() => {
+    if (!open || !modoLectura) limpiarResaltados();
+    return () => limpiarResaltados();
+  }, [open, modoLectura]);
+
   const navigate = useCallback(
     (forward: boolean) => {
+      if (modoLectura) {
+        const rangos = rangosRef.current;
+        const panel = getPreview();
+        if (rangos.length === 0 || !panel) return;
+        // Circular, como en el editor: pasar del último vuelve al primero.
+        indiceRef.current =
+          (indiceRef.current + (forward ? 1 : -1) + rangos.length) % rangos.length;
+        pintarResaltados(rangos, indiceRef.current);
+        centrarRango(panel, rangos[indiceRef.current]);
+        setCounts({ current: indiceRef.current + 1, total: rangos.length });
+        return;
+      }
       const view = getView();
       if (!view) return;
       if (forward) findNext(view);
       else findPrevious(view);
+      // DEF-056: el desplazamiento se calcula y se aplica a mano.
+      //
+      // Pedírselo a CodeMirror no funciona: medido en la app, tras `findNext` la
+      // coincidencia quedaba 149 px POR ENCIMA del área visible y ahí se
+      // quedaba, sin corregirse ni en el frame siguiente ni a los 300 ms. No es
+      // que calcule mal dónde está —su height-map coincide con el DOM salvo 2
+      // px— es que da por cumplido un `scrollIntoView` que no cumplió, así que ni
+      // `y: "center"` ni `scrollMargins` cambiaban nada.
+      //
+      // Como las medidas SÍ son fiables, se usan directamente: el bloque de la
+      // coincidencia se lleva al centro del scroller asignando `scrollTop`. Va en
+      // el frame siguiente para no pelear con el desplazamiento que `findNext`
+      // deja pendiente, y acotado a los extremos del documento.
+      requestAnimationFrame(() => {
+        const v = getView();
+        if (!v) return;
+        const sc = v.scrollDOM;
+        const bloque = v.lineBlockAt(v.state.selection.main.head);
+        // Offset del inicio del documento dentro del contenido del scroller
+        // (el padding del editor), deducido de lo ya medido en vez de fijarlo.
+        const origen = v.documentTop - sc.getBoundingClientRect().top + sc.scrollTop;
+        const centrado = origen + bloque.top - (sc.clientHeight - bloque.height) / 2;
+        sc.scrollTop = Math.max(0, Math.min(centrado, sc.scrollHeight - sc.clientHeight));
+      });
       const sq = new SearchQuery({
         search: query,
         caseSensitive,
@@ -96,11 +170,13 @@ export function SearchBar({ getView }: { getView: () => EditorView | null }) {
       });
       updateCounts(view, sq);
     },
-    [getView, query, caseSensitive, replaceWith],
+    [getView, getPreview, modoLectura, query, caseSensitive, replaceWith],
   );
 
   const close = useCallback(() => {
     // Esc cierra y elimina los resaltados (CA9)
+    limpiarResaltados();
+    rangosRef.current = [];
     const view = getView();
     if (view) {
       view.dispatch({
@@ -147,21 +223,24 @@ export function SearchBar({ getView }: { getView: () => EditorView | null }) {
         >
           <CaseSensitive size={15} aria-hidden />
         </button>
-        <button
-          type="button"
-          className={replaceOpen ? `${styles.iconButton} ${styles.active}` : styles.iconButton}
-          title="Reemplazar"
-          aria-pressed={replaceOpen}
-          onClick={() => setReplaceOpen((v) => !v)}
-        >
-          <ChevronDown size={15} aria-hidden />
-        </button>
+        {/* Reemplazar edita el documento, así que no se ofrece en lectura. */}
+        {!modoLectura && (
+          <button
+            type="button"
+            className={replaceOpen ? `${styles.iconButton} ${styles.active}` : styles.iconButton}
+            title="Reemplazar"
+            aria-pressed={replaceOpen}
+            onClick={() => setReplaceOpen((v) => !v)}
+          >
+            <ChevronDown size={15} aria-hidden />
+          </button>
+        )}
         <button type="button" className={styles.iconButton} title="Cerrar (Esc)" onClick={close}>
           <X size={15} aria-hidden />
         </button>
       </div>
 
-      {replaceOpen && (
+      {replaceOpen && !modoLectura && (
         <div className={styles.row}>
           <input
             className={styles.input}
