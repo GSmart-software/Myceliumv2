@@ -47,8 +47,8 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-055 | Cambiar de modo de visualización devuelve el documento al principio | ambas (frontend) | ✅ 🌐 (2026-08-17) — se traspasa la **línea** del documento; dos intentos por proporción antes |
 | DEF-056 | La coincidencia del buscador queda tapada por la barra de herramientas | ambas (frontend) | ✅ 🌐 (2026-08-17) — el scroll se calcula a mano; **tres arreglos fallidos antes**, ver nota |
 | DEF-057 | En la vista de lectura el buscador de texto no encuentra nada | ambas (frontend) | ✅ 🌐 (2026-08-17) — búsqueda sobre el DOM del preview, resaltada sin tocarlo |
-| DEF-058 | Al volver de lectura a edición el foco se queda en los botones de vista | ambas (frontend) | 🛠️ desktop (2026-08-17) — se devuelve el foco al editor; sin confirmar |
-| DEF-059 | Con el buscador abierto, las flechas hacen saltar el documento | ambas (frontend) | ⬜ pendiente — **causa identificada** (margen fantasma del panel oculto), sin arreglar |
+| DEF-058 | Al volver de lectura a edición el foco se queda en los botones de vista | ambas (frontend) | 🛠️ desktop (2026-08-17) — se devuelve el foco al editor; **sin reflejar a web** |
+| DEF-059 | Con el buscador abierto, las flechas hacen saltar el documento | ambas (frontend) | ✅ 🌐 (2026-08-17) — el panel pasa a declararse superior; causa hallada por tres investigaciones convergentes |
 
 ## Notas por bug
 
