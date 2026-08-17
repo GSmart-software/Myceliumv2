@@ -44,9 +44,9 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-052 | Abrir un vault se va casi todo en «vigilando los cambios», más que en leer los archivos | desktop | ✅ desktop (2026-08-13) — el poblado del caché respeta `.mycignore` |
 | DEF-053 | Las opciones del grafo se salen de la pantalla si la pestaña es pequeña | ambas (frontend) | 🛠️🌐 (2026-08-13) — portal y posición acotada; sin confirmar |
 | DEF-054 | El grafo no se actualiza si el archivo lo crea algo de fuera de Mycelium | desktop | 🛠️ desktop (2026-08-13) — el watcher marca el grafo desactualizado |
-| DEF-055 | Cambiar de modo de visualización devuelve el documento al principio | ambas (frontend) | 🛠️ desktop (2026-08-16) — el ratio de scroll se traspasa entre los dos scrollers; sin confirmar |
-| DEF-056 | La coincidencia del buscador queda tapada por la barra de herramientas | ambas (frontend) | ✅ desktop (2026-08-17) — el scroll se calcula a mano; **tres arreglos fallidos antes**, ver nota |
-| DEF-057 | En la vista de lectura el buscador de texto no encuentra nada | ambas (frontend) | 🛠️ desktop (2026-08-17) — búsqueda sobre el DOM del preview; sin confirmar |
+| DEF-055 | Cambiar de modo de visualización devuelve el documento al principio | ambas (frontend) | 🛠️🌐 (2026-08-17) — la fracción de contenido se traspasa entre los dos scrollers. **Queda un residuo mínimo**: ver nota |
+| DEF-056 | La coincidencia del buscador queda tapada por la barra de herramientas | ambas (frontend) | ✅ 🌐 (2026-08-17) — el scroll se calcula a mano; **tres arreglos fallidos antes**, ver nota |
+| DEF-057 | En la vista de lectura el buscador de texto no encuentra nada | ambas (frontend) | 🛠️🌐 (2026-08-17) — búsqueda sobre el DOM del preview; sin confirmar |
 
 ## Notas por bug
 
