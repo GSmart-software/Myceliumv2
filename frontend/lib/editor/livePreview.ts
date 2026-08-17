@@ -19,8 +19,29 @@ import {
   type DecorationSet,
 } from "@codemirror/view";
 import { tags } from "@lezer/highlight";
-import { renderMarkdown, tarjetaPropiedadesHtml } from "@/lib/markdown";
-import { separarFrontmatter } from "@/lib/frontmatter";
+import {
+  ponerPropiedad,
+  quitarPropiedad,
+  renombrarPropiedad,
+  separarFrontmatter,
+} from "@/lib/frontmatter";
+import {
+  parsear as parsearTabla,
+  serializar as serializarTabla,
+  type Tabla,
+} from "@/lib/tablas";
+import { aplicarEdicionFrontmatter, aplicarEdicionTabla } from "@/lib/editor/commands";
+import {
+  TarjetaPropiedades,
+  controlPropiedadesDe,
+  esControlDePropiedades,
+  type AccionesPropiedades,
+} from "@/lib/editor/propiedadesWidget";
+import {
+  TablaEnSitio,
+  controlTablaDe,
+  esControlDeTabla,
+} from "@/lib/editor/tablaWidget";
 import { renderExcalidrawInto } from "@/lib/excalidraw";
 import { getAllViews } from "@/lib/editor/viewRegistry";
 import { useUiStore } from "@/stores/uiStore";
@@ -76,64 +97,144 @@ export function refreshAllLiveViews() {
   }
 }
 
-/** Widget de bloque que renderiza una tabla markdown como HTML (HU-01). */
+/**
+ * Pide ver UNA tabla como texto: lleva la posición donde arranca, o `null` para
+ * volver al render. Es el «editar como texto» de `FUN-L-19`: dura hasta que el
+ * cursor sale de esa tabla.
+ */
+const crudoTablaEffect = StateEffect.define<number | null>();
+
+/**
+ * Widget de bloque que renderiza una tabla markdown (HU-01), **editable en
+ * sitio** desde `FUN-L-19`: escribir en una celda, insertar/eliminar/mover
+ * filas y columnas y alinear, sin abrir el markdown en crudo.
+ *
+ * El DOM y sus controles viven en `lib/editor/tablaWidget.ts`; acá está lo que
+ * CodeMirror necesita para que un widget interactivo no reviva
+ * `DEF-031`/`DEF-037`: `updateDOM()` parchea en sitio (nunca se reconstruye
+ * mientras se escribe), `ignoreEvent()` devuelve `true` para los controles y
+ * `estimatedHeight` cuenta las filas. Ver `docs/features/edicion-en-el-render.md`.
+ */
 class TableWidget extends WidgetType {
   constructor(readonly md: string) {
     super();
   }
+
   eq(other: TableWidget) {
     return other.md === this.md;
   }
-  toDOM() {
-    const wrap = document.createElement("div");
-    wrap.className = "mic-preview mic-live-table";
-    wrap.innerHTML = renderMarkdown(this.md);
-    return wrap;
+
+  toDOM(view: EditorView) {
+    // La tabla necesita SU dom para resolver su posición en el documento, y el
+    // dom lo crea ella: las acciones lo miran cuando se las llama, que es
+    // siempre después de que el constructor haya devuelto.
+    const tabla: TablaEnSitio = new TablaEnSitio({
+      editar: (transformar) => editarTabla(view, tabla.dom, transformar),
+      verComoTexto: () => verTablaComoTexto(view, tabla.dom),
+      salirAlEditor: () => view.focus(),
+      // Abrir el editor de una celda o desplegar un menú cambia el alto FUERA
+      // del ciclo de actualización de CodeMirror: sin esto su height-map se
+      // queda con el alto anterior, que es el desfase de `DEF-031`/`DEF-037`.
+      medir: () => view.requestMeasure(),
+    });
+    tabla.sincronizar(this.md);
+    return tabla.dom;
   }
+
+  /**
+   * OBLIGATORIO: sin esto CodeMirror tiraría el DOM y lo volvería a construir en
+   * cada pulsación, y la celda que se está editando perdería el foco a la
+   * primera tecla.
+   */
+  updateDOM(dom: HTMLElement) {
+    const tabla = controlTablaDe(dom);
+    if (!tabla) return false;
+    tabla.sincronizar(this.md);
+    return true;
+  }
+
   /**
    * Altura estimada del widget para el height-map de CodeMirror. Es CLAVE: sin
    * ella (por defecto -1 = desconocida) CM estima mal la altura de las tablas
    * FUERA de pantalla, y el height-map (que posiciona el gutter y el scroll del
    * buscador) diverge del contenido real medido, acumulando desfase cuanto más
    * contenido hay. Estimación: nº de filas (líneas con `|`) × alto de fila
-   * (~36px: fuente 0.875rem·1.7 + padding + borde) + márgenes de tabla/widget.
+   * (~36px: fuente 0.875rem·1.7 + padding + borde) + el pie de controles, que
+   * desde `FUN-L-19` va siempre debajo de la tabla.
    */
   get estimatedHeight() {
     const filas = this.md.split("\n").filter((l) => l.includes("|")).length;
-    return Math.max(1, filas) * 36 + 26;
+    return Math.max(1, filas) * 36 + 26 + 30;
   }
-  ignoreEvent() {
-    return false;
+
+  /**
+   * Invertido respecto de HU-01: lo que nace en un control es NUESTRO (si
+   * CodeMirror se quedara el evento, la celda no recibiría ni el clic ni las
+   * teclas). El resto del bloque sigue siendo del editor.
+   */
+  ignoreEvent(event: Event) {
+    return esControlDeTabla(event.target);
+  }
+
+  /** El widget sale del viewport: la tabla suelta lo que tenga colgado. */
+  destroy(dom: HTMLElement) {
+    controlTablaDe(dom)?.destruir();
   }
 }
 
-type TableState = { decorations: DecorationSet; ranges: [number, number][] };
+type TableState = {
+  decorations: DecorationSet;
+  ranges: [number, number][];
+  /** Posición de la tabla que se está viendo como texto, o null. */
+  crudo: number | null;
+};
+
+/**
+ * Límites (líneas completas) de la tabla que toca `pos`, o null si ahí no hay
+ * ninguna. Se busca por la LÍNEA y no por la posición exacta: dentro de una
+ * cita el nodo `Table` empieza después del `> `, así que resolver la posición
+ * del inicio de la línea caería en el blockquote y no en la tabla.
+ */
+function limitesTabla(state: EditorState, pos: number): [number, number] | null {
+  if (pos > state.doc.length) return null;
+  const linea = state.doc.lineAt(pos);
+  const hallados: [number, number][] = [];
+  syntaxTree(state).iterate({
+    from: linea.from,
+    to: linea.to,
+    enter(node) {
+      if (node.name !== "Table") return undefined;
+      hallados.push([state.doc.lineAt(node.from).from, state.doc.lineAt(node.to).to]);
+      return false;
+    },
+  });
+  return hallados[0] ?? null;
+}
 
 /**
  * Calcula las tablas a renderizar como bloque. Las decoraciones de bloque DEBEN
  * venir de un StateField (un ViewPlugin rompe el layout de CodeMirror).
+ *
+ * A diferencia de HU-01, el cursor dentro de una tabla ya NO la abre en crudo:
+ * se edita renderizada (`FUN-L-19`). La fuente se ve solo a pedido, con «editar
+ * como texto», y solo para ESA tabla.
  */
-function computeTables(state: EditorState): TableState {
+function computeTables(state: EditorState, crudo: number | null): TableState {
   const builder = new RangeSetBuilder<Decoration>();
   const ranges: [number, number][] = [];
-  if (!useUiStore.getState().liveTables) return { decorations: builder.finish(), ranges };
-
-  const doc = state.doc;
-  const active = new Set<number>();
-  for (const r of state.selection.ranges) {
-    const a = doc.lineAt(r.from).number;
-    const b = doc.lineAt(r.to).number;
-    for (let l = a; l <= b; l++) active.add(l);
+  if (!useUiStore.getState().liveTables) {
+    return { decorations: builder.finish(), ranges, crudo: null };
   }
 
+  const doc = state.doc;
   syntaxTree(state).iterate({
     enter(node) {
       if (node.name !== "Table") return undefined;
       const startLine = doc.lineAt(node.from);
       const endLine = doc.lineAt(node.to);
-      for (let l = startLine.number; l <= endLine.number; l++) {
-        if (active.has(l)) return false; // cursor dentro → editar en crudo
-      }
+      // La que se edita como texto no se decora NI se reserva: ahí el resto del
+      // live preview tiene que hacer su trabajo (wikilinks, etiquetas…).
+      if (crudo !== null && crudo >= startLine.from && crudo <= endLine.to) return false;
       const md = doc.sliceString(startLine.from, endLine.to);
       builder.add(
         startLine.from,
@@ -144,19 +245,53 @@ function computeTables(state: EditorState): TableState {
       return false;
     },
   });
-  return { decorations: builder.finish(), ranges };
+  return { decorations: builder.finish(), ranges, crudo };
 }
 
 /** Tablas renderizadas (decoraciones de bloque) — vía StateField. */
 const tableField = StateField.define<TableState>({
-  create: (state) => computeTables(state),
+  create: (state) => computeTables(state, null),
   update(value, tr) {
+    let crudo = value.crudo;
+    if (crudo !== null && tr.docChanged) crudo = tr.changes.mapPos(crudo);
+    let puesto = false;
+    for (const e of tr.effects) {
+      if (e.is(crudoTablaEffect)) {
+        crudo = e.value;
+        puesto = true;
+      }
+    }
+    // Una tabla que se está TECLEANDO se queda en crudo hasta que el cursor
+    // salga. Sin esto, al terminar de escribir la fila de guiones el bloque se
+    // volvería widget con el cursor adentro, y como el rango es atómico la
+    // tecla siguiente caería FUERA de la tabla. No contradice «el render no
+    // desaparece»: ahí el cursor ya estaba en el texto: no entró a un render.
+    // Solo cuenta lo que escribe el usuario a mano — las ediciones del widget
+    // (`input.tabla`) y el deshacer quedan afuera.
     if (
+      crudo === null &&
+      (tr.isUserEvent("input") || tr.isUserEvent("delete")) &&
+      !tr.isUserEvent("input.tabla") &&
+      !tr.isUserEvent("input.propiedad")
+    ) {
+      const lim = limitesTabla(tr.state, tr.state.selection.main.head);
+      if (lim) crudo = lim[0];
+    }
+    // El crudo dura mientras el cursor siga dentro de ESA tabla (spec § 3.4).
+    // En la transacción que lo abre no se comprueba: la selección que la
+    // acompaña es justamente la que lo mantiene abierto.
+    if (crudo !== null && tr.selection && !puesto) {
+      const lim = limitesTabla(tr.state, crudo);
+      if (!lim || tr.state.selection.ranges.every((r) => r.to < lim[0] || r.from > lim[1])) {
+        crudo = null;
+      }
+    }
+    if (
+      crudo !== value.crudo ||
       tr.docChanged ||
-      tr.selection ||
       tr.effects.some((e) => e.is(refreshLiveEffect))
     ) {
-      return computeTables(tr.state);
+      return computeTables(tr.state, crudo);
     }
     return value;
   },
@@ -164,11 +299,66 @@ const tableField = StateField.define<TableState>({
 });
 
 /**
+ * El rango de la tabla que dibuja `dom`, resuelto CONTRA EL DOCUMENTO de ahora.
+ * No se puede guardar en el widget: mientras la tabla no cambie, CodeMirror
+ * reusa el mismo widget aunque el texto de más arriba se mueva.
+ */
+function rangoDeTabla(view: EditorView, dom: HTMLElement): [number, number] | null {
+  let pos: number;
+  try {
+    pos = view.posAtDOM(dom);
+  } catch {
+    return null;
+  }
+  const rangos = view.state.field(tableField, false)?.ranges ?? [];
+  // La holgura de 1 es por el borde: `posAtDOM` puede devolver la posición de
+  // antes del bloque, y una tabla arranca siempre en el inicio de su línea.
+  return rangos.find(([f, t]) => pos >= f - 1 && pos <= t + 1) ?? null;
+}
+
+/** Aplica una operación de `lib/tablas.ts` a la tabla que dibuja `dom`. */
+function editarTabla(view: EditorView, dom: HTMLElement, transformar: (t: Tabla) => Tabla) {
+  const rango = rangoDeTabla(view, dom);
+  if (!rango) return;
+  aplicarEdicionTabla(view, rango[0], rango[1], (md) => {
+    // El documento manda: la tabla se lee de nuevo acá, no se usa la que el
+    // widget tenía pintada (pudo cambiar desde otra vista de la misma nota).
+    const t = parsearTabla(md);
+    return t ? serializarTabla(transformar(t)) : md;
+  });
+}
+
+/** Revela el markdown de esa tabla hasta que el cursor salga de ella. */
+function verTablaComoTexto(view: EditorView, dom: HTMLElement) {
+  const rango = rangoDeTabla(view, dom);
+  if (!rango) return;
+  view.dispatch({
+    effects: crudoTablaEffect.of(rango[0]),
+    // El cursor entra en la tabla: es lo que mantiene el crudo abierto (y lo
+    // que lo cierra al salir).
+    selection: { anchor: rango[0] },
+    scrollIntoView: true,
+  });
+  view.focus();
+}
+
+/**
+ * Pide ver el bloque de propiedades como texto (`true`) o volver a la tarjeta
+ * (`false`). Es el «editar como texto» de `FUN-M-19`: dura hasta que el cursor
+ * sale del bloque.
+ */
+const crudoFrontmatterEffect = StateEffect.define<boolean>();
+
+/**
  * Widget de bloque que reemplaza el frontmatter YAML por la tarjeta de
- * propiedades (`FUN-M-04`). Es de **solo lectura** a propósito: no lleva
- * controles ni edita el documento. Las propiedades se editan en la pestaña
- * PROPIEDADES del panel de la nota o escribiendo el YAML a mano — los widgets
- * interactivos dentro de CodeMirror son de donde salieron `DEF-031`/`DEF-037`.
+ * propiedades (`FUN-M-04`), **editable en sitio** desde `FUN-M-19`: cambiar un
+ * valor, renombrar una clave, agregar y quitar propiedades sin abrir el YAML.
+ *
+ * Lo que sostiene que un widget interactivo no reviva `DEF-031`/`DEF-037` está
+ * repartido entre esta clase y `propiedadesWidget.ts`: `updateDOM()` parchea en
+ * sitio (nunca se reconstruye mientras se escribe), `ignoreEvent()` devuelve
+ * `true` para los controles, el espaciado es `padding` y `estimatedHeight` se
+ * recalcula con las filas. Ver `docs/features/edicion-en-el-render.md` § 2.
  */
 class FrontmatterWidget extends WidgetType {
   /** Filas de la tarjeta, para estimar el alto del bloque (ver abajo). */
@@ -188,18 +378,23 @@ class FrontmatterWidget extends WidgetType {
     return other.texto === this.texto;
   }
 
-  toDOM() {
-    const wrap = document.createElement("div");
-    wrap.className = "mic-preview mic-live-props";
-    wrap.innerHTML = tarjetaPropiedadesHtml(this.texto);
-    // Los enlaces de la tarjeta (wikilinks, `#tag:`) navegan en la vista de
-    // lectura, no acá: dentro del editor un href `#…` cambiaría la URL del
-    // workspace. El clic queda para CodeMirror, que coloca el cursor dentro del
-    // bloque y así revela la fuente.
-    wrap.addEventListener("click", (event) => {
-      if ((event.target as HTMLElement).closest("a")) event.preventDefault();
-    });
-    return wrap;
+  toDOM(view: EditorView) {
+    const tarjeta = new TarjetaPropiedades(accionesPropiedades(view));
+    tarjeta.sincronizar(this.texto);
+    return tarjeta.dom;
+  }
+
+  /**
+   * OBLIGATORIO: sin esto CodeMirror tiraría el DOM y lo volvería a construir en
+   * cada pulsación, y el campo que se está editando perdería el foco a la
+   * primera tecla. Devuelve `false` solo si el DOM no es de esta tarjeta (no
+   * debería pasar) para que CodeMirror lo rehaga.
+   */
+  updateDOM(dom: HTMLElement) {
+    const tarjeta = controlPropiedadesDe(dom);
+    if (!tarjeta) return false;
+    tarjeta.sincronizar(this.texto);
+    return true;
   }
 
   /**
@@ -207,37 +402,81 @@ class FrontmatterWidget extends WidgetType {
    * altura del widget fuera de pantalla y su height-map diverge del layout real,
    * que es exactamente la causa raíz de `DEF-031`/`DEF-037` (gutter corrido,
    * clic que selecciona de más, scroll del buscador roto). Estimación: una fila
-   * por propiedad (~28px) + el padding de la tarjeta y del envoltorio.
+   * por propiedad (~30px) + el pie de «agregar propiedad» y los padding. Se
+   * recalcula sola al cambiar el nº de filas porque el widget se reconstruye en
+   * cada cambio del documento (lo que se conserva es su DOM, no la instancia).
    */
   get estimatedHeight() {
-    return Math.max(1, this.filas) * 28 + 30;
+    return Math.max(1, this.filas) * 30 + 64;
   }
 
-  ignoreEvent() {
-    return false; // el clic lo gestiona CodeMirror (coloca el cursor → revela)
+  /**
+   * Invertido respecto de `FUN-M-04`: lo que nace en un control es NUESTRO (si
+   * CodeMirror se quedara el evento, el campo no recibiría ni el clic ni las
+   * teclas). El resto de la tarjeta sigue siendo del editor, que coloca el
+   * cursor como con cualquier otro bloque.
+   */
+  ignoreEvent(event: Event) {
+    return esControlDePropiedades(event.target);
   }
 }
 
-type FrontmatterState = { decorations: DecorationSet; ranges: [number, number][] };
+/** Las operaciones de la tarjeta, atadas a la vista que la dibuja. */
+function accionesPropiedades(view: EditorView): AccionesPropiedades {
+  const editar = (transformar: (texto: string) => string) =>
+    aplicarEdicionFrontmatter(view, transformar);
+  return {
+    poner: (clave, valor, tipo) => editar((t) => ponerPropiedad(t, clave, valor, tipo)),
+    quitar: (clave) => editar((t) => quitarPropiedad(t, clave)),
+    renombrar: (clave, nueva) => editar((t) => renombrarPropiedad(t, clave, nueva)),
+    verComoTexto: () => {
+      const lim = limitesFrontmatter(view.state);
+      view.dispatch({
+        effects: crudoFrontmatterEffect.of(true),
+        // El cursor entra al bloque: es lo que mantiene el crudo abierto (y lo
+        // que cierra al salir). En un bloque vacío no hay línea de contenido,
+        // así que va al final del `---` de apertura.
+        selection: { anchor: lim ? lim.primeraLinea : 0 },
+        scrollIntoView: true,
+      });
+      view.focus();
+    },
+    // Abrir el editor de un valor cambia el alto del bloque FUERA del ciclo de
+    // actualización de CodeMirror: sin esto su height-map se quedaría con el
+    // alto anterior, que es el desfase de `DEF-031`/`DEF-037`.
+    medir: () => view.requestMeasure(),
+  };
+}
+
+type FrontmatterState = {
+  decorations: DecorationSet;
+  ranges: [number, number][];
+  /** ¿Se está mostrando el bloque como texto («editar como texto»)? */
+  crudo: boolean;
+};
+
+const SIN_FRONTMATTER: FrontmatterState = {
+  decorations: Decoration.none,
+  ranges: [],
+  crudo: false,
+};
+
+type LimitesFrontmatter = {
+  desde: number;
+  hasta: number;
+  /** Posición donde dejar el cursor al abrir el bloque como texto. */
+  primeraLinea: number;
+};
 
 /**
- * Calcula el bloque de frontmatter a renderizar. Igual que las tablas, es una
- * decoración de BLOQUE y por eso vive en un StateField (un ViewPlugin rompe el
- * layout de CodeMirror).
+ * Límites del bloque de frontmatter en el documento, o null si no hay.
  *
- * El rango se devuelve SIEMPRE, esté plegado o no: aunque el cursor esté dentro
- * y se vea el YAML crudo, el resto del live preview debe ignorar esas líneas
- * (el `---` no es una regla horizontal, y los `#` del YAML no son etiquetas).
+ * Mismas reglas de detección que `separarFrontmatter`, pero sobre las líneas del
+ * documento: así no hay que serializar la nota entera en cada pulsación.
  */
-function computeFrontmatter(state: EditorState): FrontmatterState {
-  const builder = new RangeSetBuilder<Decoration>();
-  const ranges: [number, number][] = [];
+function limitesFrontmatter(state: EditorState): LimitesFrontmatter | null {
   const doc = state.doc;
-  const vacio = () => ({ decorations: builder.finish(), ranges });
-
-  // Mismas reglas de detección que `separarFrontmatter`, pero sobre las líneas
-  // del documento: así no hay que serializar la nota entera en cada pulsación.
-  if (doc.lines < 2 || sinCr(doc.line(1).text) !== "---") return vacio();
+  if (doc.lines < 2 || sinCr(doc.line(1).text) !== "---") return null;
   let cierre = 0;
   // El tope acota el coste en el caso patológico: una nota que EMPIEZA con una
   // regla horizontal `---` y no cierra nunca haría recorrer el documento entero
@@ -250,36 +489,66 @@ function computeFrontmatter(state: EditorState): FrontmatterState {
       break;
     }
   }
-  if (cierre === 0) return vacio();
+  if (cierre === 0) return null;
+  return {
+    desde: doc.line(1).from,
+    hasta: doc.line(cierre).to,
+    primeraLinea: cierre > 2 ? doc.line(2).from : doc.line(1).to,
+  };
+}
 
-  const desde = doc.line(1).from;
-  const hasta = doc.line(cierre).to;
-  ranges.push([desde, hasta]);
+/**
+ * Calcula el bloque de frontmatter a renderizar. Igual que las tablas, es una
+ * decoración de BLOQUE y por eso vive en un StateField (un ViewPlugin rompe el
+ * layout de CodeMirror).
+ *
+ * El rango se devuelve SIEMPRE, se dibuje la tarjeta o no: aunque se esté viendo
+ * el YAML crudo, el resto del live preview debe ignorar esas líneas (el `---` no
+ * es una regla horizontal, y los `#` del YAML no son etiquetas).
+ *
+ * A diferencia de `FUN-M-04`, el cursor dentro del bloque ya NO lo abre en
+ * crudo: se edita renderizado (`FUN-M-19`). La fuente se ve solo a pedido, con
+ * «editar como texto».
+ */
+function computeFrontmatter(state: EditorState, crudo: boolean): FrontmatterState {
+  const lim = limitesFrontmatter(state);
+  if (!lim) return SIN_FRONTMATTER;
 
-  // Cursor dentro del bloque → se muestra la fuente (como tablas y callouts).
-  for (const r of state.selection.ranges) {
-    if (doc.lineAt(r.from).number <= cierre) return vacio();
-  }
+  const ranges: [number, number][] = [[lim.desde, lim.hasta]];
+  if (crudo) return { decorations: Decoration.none, ranges, crudo };
 
+  const builder = new RangeSetBuilder<Decoration>();
   builder.add(
-    desde,
-    hasta,
+    lim.desde,
+    lim.hasta,
     Decoration.replace({
-      widget: new FrontmatterWidget(doc.sliceString(desde, hasta)),
+      widget: new FrontmatterWidget(state.doc.sliceString(lim.desde, lim.hasta)),
       block: true,
     }),
   );
-  return { decorations: builder.finish(), ranges };
+  return { decorations: builder.finish(), ranges, crudo };
 }
 
 const sinCr = (linea: string): string => (linea.endsWith("\r") ? linea.slice(0, -1) : linea);
 
 /** Frontmatter renderizado como tarjeta (decoración de bloque) — vía StateField. */
 const frontmatterField = StateField.define<FrontmatterState>({
-  create: (state) => computeFrontmatter(state),
+  create: (state) => computeFrontmatter(state, false),
   update(value, tr) {
-    if (tr.docChanged || tr.selection || tr.effects.some((e) => e.is(refreshLiveEffect))) {
-      return computeFrontmatter(tr.state);
+    let crudo = value.crudo;
+    for (const e of tr.effects) if (e.is(crudoFrontmatterEffect)) crudo = e.value;
+    if (crudo && tr.selection) {
+      // El crudo dura mientras el cursor siga dentro del bloque (spec § 3.4).
+      const lim = limitesFrontmatter(tr.state);
+      if (!lim || tr.state.selection.ranges.every((r) => r.from > lim.hasta)) crudo = false;
+    }
+    if (
+      crudo !== value.crudo ||
+      tr.docChanged ||
+      tr.selection ||
+      tr.effects.some((e) => e.is(refreshLiveEffect))
+    ) {
+      return computeFrontmatter(tr.state, crudo);
     }
     return value;
   },
@@ -295,7 +564,22 @@ export function liveExtensions(
   return [
     syntaxHighlighting(micelioHighlight),
     frontmatterField,
+    // El bloque de propiedades ya NO se abre en crudo con el cursor dentro
+    // (`FUN-M-19`), así que el cursor no puede quedarse DENTRO del YAML
+    // invisible: se lo declara átomo y el clic y las flechas caen en sus bordes
+    // en vez de escribir a ciegas dentro del frontmatter. Mientras se lo edita
+    // como texto no hay decoración, así que tampoco hay átomo.
+    EditorView.atomicRanges.of(
+      (view) => view.state.field(frontmatterField, false)?.decorations ?? Decoration.none,
+    ),
     tableField,
+    // Misma razón que arriba, y el mismo defecto que evita: una tabla que ya no
+    // se abre en crudo deja un rango donde el cursor puede entrar sin verse, y
+    // la tecla siguiente corrompería el markdown a ciegas. La que se está
+    // editando como texto no tiene decoración y por tanto tampoco es átomo.
+    EditorView.atomicRanges.of(
+      (view) => view.state.field(tableField, false)?.decorations ?? Decoration.none,
+    ),
     livePreview(onWikilinkClick, noteExists, notaId),
   ];
 }
