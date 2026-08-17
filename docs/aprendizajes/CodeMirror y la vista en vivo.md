@@ -101,6 +101,44 @@ Lo que hay que sostener cuando un widget deja de ser un adorno y pasa a editar e
 > el `contentDOM` — o sea que un `<input>` enfocado dentro de un widget no pelea con el
 > editor. Lo que hay que cuidar es lo de arriba, no eso.
 
+## Desplazar a una posición: no siempre alcanza con pedírselo
+
+**Caso**: `DEF-056` — el buscador saltaba a la coincidencia y la dejaba fuera de la pantalla,
+por arriba.
+
+`EditorView.scrollIntoView` puede **no cumplirse y darse por cumplido**. Medido en la app: la
+coincidencia quedaba 149 px por encima del área visible, con margen de sobra para desplazarse,
+y el valor era idéntico en el frame siguiente y a los 300 ms. Ni `y: "center"` ni
+`scrollMargins` cambiaban nada, porque los dos le pedían amablemente a quien ya estaba
+ignorando la petición.
+
+> [!tip] Si hay que desplazar con precisión, calculalo
+> Las medidas de CodeMirror **sí** son fiables (`lineBlockAt` coincidió con `coordsAtPos` en
+> 2 px), así que se pueden usar sin él:
+>
+> ```ts
+> const sc = view.scrollDOM;
+> const bloque = view.lineBlockAt(pos);
+> // Offset del inicio del documento dentro del contenido del scroller (el
+> // padding del editor), deducido de lo medido en vez de fijarlo a mano.
+> const origen = view.documentTop - sc.getBoundingClientRect().top + sc.scrollTop;
+> sc.scrollTop = origen + bloque.top - (sc.clientHeight - bloque.height) / 2;
+> ```
+>
+> En el **frame siguiente**, para no pelear con el desplazamiento que la operación anterior
+> dejó pendiente.
+
+> [!warning] Medí antes del segundo intento, no del cuarto
+> Este defecto costó **tres arreglos equivocados**, todos partiendo de suponer la causa a
+> partir del síntoma: la barra tapando, los `estimatedHeight` de los widgets, el contenedor
+> desplazándose solo. Los tres eran plausibles y los tres falsos. Dos diagnósticos —una ronda
+> cada uno, escribiendo en la consola dónde cree CM que está la posición y dónde está de
+> verdad— dieron la respuesta.
+>
+> El editor es el peor sitio para razonar por analogía: hay tres sistemas de coordenadas
+> (height-map, DOM y viewport) y el síntoma no distingue cuál falló. **Un arreglo que no
+> cambia nada no es mala suerte: es la señal de que la causa está en otro lado.**
+
 ## Decoraciones que dependen de la profundidad
 
 **Caso**: `DEF-021` y `DEF-022` — callouts. Dos problemas distintos con la misma

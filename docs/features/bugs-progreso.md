@@ -45,7 +45,7 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-053 | Las opciones del grafo se salen de la pantalla si la pestaña es pequeña | ambas (frontend) | 🛠️🌐 (2026-08-13) — portal y posición acotada; sin confirmar |
 | DEF-054 | El grafo no se actualiza si el archivo lo crea algo de fuera de Mycelium | desktop | 🛠️ desktop (2026-08-13) — el watcher marca el grafo desactualizado |
 | DEF-055 | Cambiar de modo de visualización devuelve el documento al principio | ambas (frontend) | 🛠️ desktop (2026-08-16) — el ratio de scroll se traspasa entre los dos scrollers; sin confirmar |
-| DEF-056 | La coincidencia del buscador queda tapada por la barra de herramientas | ambas (frontend) | 🛠️ desktop (2026-08-16) — se recentra con `scrollIntoView({y:"center"})`; sin confirmar |
+| DEF-056 | La coincidencia del buscador queda tapada por la barra de herramientas | ambas (frontend) | ✅ desktop (2026-08-17) — el scroll se calcula a mano; **tres arreglos fallidos antes**, ver nota |
 
 ## Notas por bug
 
@@ -62,15 +62,27 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
   estabiliza, porque Mermaid, Excalidraw y las imágenes llegan tarde. Cede ante el pendiente
   en píxeles de `DEF-039`, que es una posición exacta y por tanto mejor.
 
-- **DEF-056 — `findNext` desplaza lo mínimo, y lo mínimo deja la coincidencia bajo la barra.**
-  El `scrollIntoView` por defecto de `@codemirror/search` acerca la selección con la
-  estrategia «nearest»: si está por encima del viewport, la pega al borde superior. Ese borde
-  está debajo de la barra de herramientas, así que la palabra encontrada quedaba tapada. Se
-  añade una segunda transacción que la centra (`y: "center"`).
+- **DEF-056 — CodeMirror da por cumplido un `scrollIntoView` que no cumplió.** La causa
+  real, y costó tres arreglos equivocados llegar a ella. Lo medido en la app tras
+  `findNext`: la coincidencia queda **149 px por encima** del área visible, con
+  `scrollTop=1805` de `17955` —o sea, con margen de sobra para moverse— y el valor es
+  **idéntico** en el frame siguiente y a los 300 ms. No se corrige porque CM cree que ya
+  terminó.
 
-  Es pariente de `DEF-037` —que también hablaba de la coincidencia fuera de pantalla por
-  arriba— pero no es el mismo: aquel era el desfase del height-map, corregido en su momento;
-  este es la estrategia de desplazamiento, que nunca se había tocado.
+  Lo que **no** era, y cada una costó una ronda entera: no era la barra de herramientas
+  tapando (está en flujo, no superpuesta: nada puede quedar detrás); no eran los
+  `estimatedHeight` de los widgets (pasa igual en notas sin tablas ni propiedades); no era
+  el contenedor con `overflow: hidden` desplazándose solo (`hostScroll=0`).
+
+  Y tampoco era el height-map: **lo que CM cree y lo que dice el DOM difieren en 2 px**. Esa
+  medición es la que cierra el caso, porque deja una sola explicación en pie y de paso
+  habilita el arreglo — si sus medidas son fiables, se pueden usar sin él. Se lleva el bloque
+  al centro asignando `scrollTop` a mano, en el frame siguiente para no pelear con el
+  desplazamiento pendiente de `findNext`.
+
+  De paso: `gotoMatch` (HU-21 CA8) decía en su comentario que **centraba** la coincidencia y
+  usaba `scrollIntoView: true`, que no centra. El comentario describía una intención que el
+  código nunca cumplió.
 
 - **DEF-052 — el watcher recorre el vault ENTERO, y sin `.mycignore`** (causa raíz
   confirmada el 2026-08-13 leyendo la fuente del crate). `iniciar_watcher` hace dos cosas:
