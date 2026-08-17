@@ -44,7 +44,7 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-052 | Abrir un vault se va casi todo en «vigilando los cambios», más que en leer los archivos | desktop | ✅ desktop (2026-08-13) — el poblado del caché respeta `.mycignore` |
 | DEF-053 | Las opciones del grafo se salen de la pantalla si la pestaña es pequeña | ambas (frontend) | 🛠️🌐 (2026-08-13) — portal y posición acotada; sin confirmar |
 | DEF-054 | El grafo no se actualiza si el archivo lo crea algo de fuera de Mycelium | desktop | 🛠️ desktop (2026-08-13) — el watcher marca el grafo desactualizado |
-| DEF-055 | Cambiar de modo de visualización devuelve el documento al principio | ambas (frontend) | 🛠️🌐 (2026-08-17) — la fracción de contenido se traspasa entre los dos scrollers. **Queda un residuo mínimo**: ver nota |
+| DEF-055 | Cambiar de modo de visualización devuelve el documento al principio | ambas (frontend) | ✅ 🌐 (2026-08-17) — se traspasa la **línea** del documento; dos intentos por proporción antes |
 | DEF-056 | La coincidencia del buscador queda tapada por la barra de herramientas | ambas (frontend) | ✅ 🌐 (2026-08-17) — el scroll se calcula a mano; **tres arreglos fallidos antes**, ver nota |
 | DEF-057 | En la vista de lectura el buscador de texto no encuentra nada | ambas (frontend) | 🛠️🌐 (2026-08-17) — búsqueda sobre el DOM del preview; sin confirmar |
 
@@ -93,6 +93,25 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
   es justo el caso de la edición frente a la lectura. Sigue siendo aproximado: exacto
   exigiría que el HTML del preview conservara la **línea de origen** de cada bloque, que hoy
   no la lleva.
+
+  **Cerrado con un mapeo exacto** (2026-08-17). La proporción no podía clavarlo, y no por
+  estar mal calculada: las dos vistas **miden alturas distintas del mismo texto** —una tabla
+  de diez filas ocupa diez líneas en markdown y una caja compacta renderizada—, así que
+  ninguna regla de tres acierta en todos los puntos. Corregir la magnitud quitó el sesgo
+  sistemático; el error local siguió ahí.
+
+  La moneda común pasa a ser la **línea del documento**. El editor la conoce por definición;
+  el panel de lectura, porque su HTML sale marcado con `data-linea` en cada bloque de primer
+  nivel. «Estabas en la 214» se resuelve **buscando** la 214, no estimándola.
+
+  Tres decisiones del marcado: es **opt-in** —la cadena de plugins se define una sola vez y
+  se instancia dos veces, con y sin el atributo, porque en un PDF o en una tarjeta de canvas
+  esos `data-linea` serían ruido—; el **offset del frontmatter** se suma al generar, ya que
+  el cuerpo se renderiza sin el bloque `---` y sus líneas empezarían en 1; y se marca **solo
+  el primer nivel**, que es el grano al que se desplaza.
+
+  **Habilita algo más**: el scroll sincronizado del modo dividido arrastra el mismo problema
+  desde siempre —usa proporción— y ahora tiene las piezas para arreglarse igual.
 
 - **DEF-056 — CodeMirror da por cumplido un `scrollIntoView` que no cumplió.** La causa
   real, y costó tres arreglos equivocados llegar a ella. Lo medido en la app tras
