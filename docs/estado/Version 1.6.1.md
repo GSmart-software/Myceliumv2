@@ -1,5 +1,10 @@
 # Versión 1.6.1
 
+> [!warning] Esta versión **nunca se publicó**
+> Nadie la tiene instalada: quedó absorbida por la [[Version 1.6.2]], que es la que salta
+> desde la 1.5.0 y cuyo changelog cubre las tres. Esta nota se conserva por el detalle de qué
+> entró y por qué, no como un release que alguien haya recibido.
+
 **Solo desktop** (`desktop-tauri`) · 2026-08-13 · sobre [[Version 1.6.0]]
 
 Dos cosas: **varios vaults abiertos a la vez, uno por ventana** (`FUN-L-16`) y la tanda de

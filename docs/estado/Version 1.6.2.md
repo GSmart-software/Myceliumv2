@@ -14,6 +14,17 @@ Las dos mitades de [[edicion-en-el-render]] —`FUN-M-19` (propiedades) y `FUN-L
 > Queda anotado para que dentro de un tiempo no parezca un descuido. Es la segunda vez que
 > el dígito lo elige el usuario en vez de la regla; la primera fue la [[Version 1.6.1]].
 
+> [!important] Este release entrega también la 1.6.0 y la 1.6.1
+> Ninguna de las dos se publicó nunca, así que **nadie las tiene**: quien actualice salta de
+> la 1.5.0 a esta. Por eso el changelog de acá abajo cubre las tres, y no solo lo que se hizo
+> en la 1.6.2 — si no, el usuario recibiría las bases, los canvas y las ventanas múltiples
+> sin que nada se lo contara.
+>
+> **No se renumeró nada**: el salto `1.5.0` → `1.6.2` ya dice lo correcto —un minor por las
+> funcionalidades nuevas, más los parches— y renumerar reescribiría cuatro notas y el rastro
+> de commits sin que ningún usuario notara la diferencia. Ver [[Version 1.6.0]] y
+> [[Version 1.6.1]] para el detalle de cada una.
+
 ## Qué entra
 
 | Qué | ID |
@@ -24,6 +35,32 @@ Las dos mitades de [[edicion-en-el-render]] —`FUN-M-19` (propiedades) y `FUN-L
 | El separador NUL de las claves compuestas vuelve a su sitio, escrito como escape | — |
 
 <!-- notas-release:inicio -->
+> Esta actualización trae de una vez todo lo que se hizo desde la 1.5.0: las versiones
+> 1.6.0 y 1.6.1 nunca llegaron a publicarse.
+
+## Tu vault, de tres maneras nuevas
+
+- **Tablas.** Un archivo de tipo *base* reúne tus notas por sus propiedades y las muestra
+  en una tabla, con filtros y columnas que elegís vos. Sirve para índices, catálogos y
+  seguimientos, sin salir de Markdown.
+- **Lienzos.** Un *canvas* te deja poner notas y textos en el espacio y unirlos con
+  flechas. Las tarjetas pueden ser una nota de verdad —se ve su contenido en vivo— y los
+  enlaces que escribas dentro funcionan y navegan. También podés pintarlas.
+- **Adoptar un proyecto que ya tenías.** Si abriste Mycelium sobre documentos que se
+  referencian entre sí «a mano» y el grafo se veía vacío, hay una pantalla que los
+  encuentra y los convierte en enlaces de verdad. Audita sin tocar nada, y al convertir
+  deja respaldo y permite deshacer.
+
+Los dos tipos de archivo usan el mismo formato que Obsidian, así que se abren allá y al
+revés.
+
+## Varios vaults a la vez
+
+- **Una ventana por vault.** Desde el selector, «Abrir en una ventana nueva» te deja
+  consultar dos vaults en paralelo — trabajo y personal, o uno de referencia mientras
+  escribís en otro. Cada ventana lleva sus pestañas, su grafo y sus consolas.
+- Un mismo vault no se abre dos veces: si ya está abierto, se levanta su ventana.
+
 ## El editor deja de esconder lo que estás editando
 
 - **Las tablas ya no desaparecen al escribir en ellas.** Poné el cursor en una celda y la
@@ -33,12 +70,28 @@ Las dos mitades de [[edicion-en-el-render]] —`FUN-M-19` (propiedades) y `FUN-L
   casilla se marca, una fecha se elige, una lista se arma con pastillas. Se pueden **agregar
   y quitar propiedades** ahí mismo, y en una nota que no tiene ninguna, crear la primera.
 - Los dos bloques conservan un **«Editar como texto»** para cuando haga falta el markdown
-  crudo: una tabla mal formada, un pegado raro, un YAML que Mycelium no interpreta.
+  crudo.
 
-## Y dos cosas que se veían mal
+## Abrir un vault, más rápido y con menos misterio
 
-- Los **desplegables en modo oscuro** ya no abren una lista blanca ilegible. Pasaba en todos
-  los de la app, y de paso se arregló el calendario de los campos de fecha.
+- Al abrir un vault ahora hay una **pantalla de carga** que dice en qué está trabajando, cómo
+  va y si algo se atascó — en vez de escribir el progreso en todos los botones a la vez.
+- **Es bastante más rápido**: se dejaron de recorrer las carpetas que `.mycignore` ignora.
+- Cada vault **recuerda sus propias pestañas**; ya no aparecen las del anterior.
+- El **grafo se actualiza** también cuando el archivo lo crea algo de fuera de Mycelium.
+
+## Y un montón de cosas que molestaban
+
+- Lo que mandás a la papelera **vuelve a poder recuperarse**, y al borrarlo del todo va a la
+  papelera del sistema.
+- Vuelve a **preguntarse antes de borrar** una carpeta o una plantilla.
+- El **ancho de tabulación** se nota en los documentos que ya tenías escritos.
+- Al cambiar entre edición y lectura **no se pierde el sitio**: seguís donde estabas.
+- El **buscador** (`Ctrl+F`) centra la coincidencia en vez de dejarla fuera de la pantalla, y
+  ahora también funciona en la vista de lectura.
+- Los **desplegables en modo oscuro** ya no abren una lista blanca ilegible.
+- El menú del clic derecho y las opciones del grafo **ya no se salen de la pantalla**.
+- El contenido deja un poco de aire abajo, en vez de morir pegado al borde.
 <!-- notas-release:fin -->
 
 ## Cómo comprobarlo en la app

@@ -46,7 +46,7 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-054 | El grafo no se actualiza si el archivo lo crea algo de fuera de Mycelium | desktop | 🛠️ desktop (2026-08-13) — el watcher marca el grafo desactualizado |
 | DEF-055 | Cambiar de modo de visualización devuelve el documento al principio | ambas (frontend) | ✅ 🌐 (2026-08-17) — se traspasa la **línea** del documento; dos intentos por proporción antes |
 | DEF-056 | La coincidencia del buscador queda tapada por la barra de herramientas | ambas (frontend) | ✅ 🌐 (2026-08-17) — el scroll se calcula a mano; **tres arreglos fallidos antes**, ver nota |
-| DEF-057 | En la vista de lectura el buscador de texto no encuentra nada | ambas (frontend) | 🛠️🌐 (2026-08-17) — búsqueda sobre el DOM del preview; sin confirmar |
+| DEF-057 | En la vista de lectura el buscador de texto no encuentra nada | ambas (frontend) | ✅ 🌐 (2026-08-17) — búsqueda sobre el DOM del preview, resaltada sin tocarlo |
 
 ## Notas por bug
 

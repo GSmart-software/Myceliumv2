@@ -92,7 +92,7 @@ y **priorizar** qué implementar antes.
 | `FUN-L-02` | `SHARING-PUBLICOS-GLOBALES` | Carpeta "Estado Mycelium" con 3 archivos públicos (Ayudas / Bugs / Ideas): editables por autorizados, visibles por todos | web | C-I-06 |
 | `FUN-L-03` 🛠️ | `FILES-BASES-TABLA` | Archivo `.base` (formato de Obsidian) que agrega notas por sus propiedades y las muestra en una tabla, con filtros y columnas configurables. Solo lectura. **Implementado en las dos ramas** el 2026-08-08 (sin confirmar); sale en la [[Version 1.6.0]]; spec en [[bases-tabla]] | ambas | C-I-07b |
 | `FUN-L-04` | `VAULT-MULTIPLE` | Un usuario con varios vaults, seleccionables en Configuración → Vault | ambas | C-G-01 |
-| `FUN-L-19` 🛠️🌐 | `EDITOR-TABLAS-EN-SITIO` | Las tablas **dejan de abrirse en crudo** al entrar el cursor: siguen renderizadas y se editan ahí — escribir en una celda, insertar, eliminar y mover filas y columnas, y alinear — sin ir a la vista raw. Necesita `lib/tablas.ts`, un módulo **puro** de parseo y reescritura que hoy no existe (y que debe manejar el `|` escapado dentro de una celda, que es lo mismo que rompe `DEF-045`). **Implementado en desktop** el 2026-08-16 (sin confirmar) y **reflejado en web** el 2026-08-17. Segunda mitad de [[edicion-en-el-render]]; la primera es `FUN-M-19` | ambas | — |
+| `FUN-L-19` 🟢🌐 | `EDITOR-TABLAS-EN-SITIO` | Las tablas **dejan de abrirse en crudo** al entrar el cursor: siguen renderizadas y se editan ahí — escribir en una celda, insertar, eliminar y mover filas y columnas, y alinear — sin ir a la vista raw. Necesita `lib/tablas.ts`, un módulo **puro** de parseo y reescritura que hoy no existe (y que debe manejar el `|` escapado dentro de una celda, que es lo mismo que rompe `DEF-045`). **Confirmado en desktop** el 2026-08-17 y **reflejado en web** el mismo día. Segunda mitad de [[edicion-en-el-render]]; la primera es `FUN-M-19` | ambas | — |
 | `FUN-L-07` 🟢 | `TERMINAL-INTEGRADA` | Consola nativa integrada (estilo VS Code): abre en la raíz del vault (o en la carpeta elegida), como pestaña normal del workspace (dividir, varias instancias). **Confirmada en desktop** por el usuario en lo esencial, tras varias iteraciones (panel de consolas, shells de fondo, renombrar, selector de shell, tema reactivo); spec en `docs/features/terminal-integrada.md` | desktop | — |
 | `FUN-L-08` 🛠️ | `IA-FRAMEWORK-VAULT` | Framework IA versionado generado en el vault (CLAUDE.md + 2 skills + 6 comandos en `.claude/`) para que Claude Code use el vault como **memoria**: recuperar antes de responder y consolidar lo que valga recordar, navegando por vínculos. Botón opt‑in en Configuración → Vault. **Implementada** (sin confirmar); spec en `docs/features/ia-framework-vault.md` | desktop | — |
 | `FUN-L-09` | `IA-MCP-MYCELIUM` | Servidor MCP de Mycelium: exponer a la IA el índice del vault (búsqueda, backlinks, grafo, metadatos) como herramientas estructuradas, en vez de grep sobre archivos | desktop | — |
@@ -412,7 +412,7 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 
 ### Pendientes — tamaño L
 
-#### `FUN-L-19` 🛠️ · `EDITOR-TABLAS-EN-SITIO` (—)
+#### `FUN-L-19` 🟢 · `EDITOR-TABLAS-EN-SITIO` (—)
 - **Estado**: implementado en `desktop-tauri` el 2026-08-16, **sin confirmar en la app**;
   `scripts/test-tablas.mjs` (30 tests), `tsc` y `next build` en verde. Reflejo a web
   pendiente. Cómo quedó y qué falta probar a mano: [[edicion-en-el-render]] §§ 5 y 7.

@@ -25,13 +25,23 @@ clasifico yo.
 
 ## Defectos sin procesar
 
-*(vacío)*
+1. cuando abro le panel de metadatos en un markdown, este panel se habre en todas las pestañas, esto hace que sea un poco incómodo debido a que si tengo la pantalla dividida en dos o más pestañas, todas van a abrir el panel de metadatos convirtiendose en un estorbo. Estaba pensando en hacer que el panel de metadatos se mostrara únicamente en la pestaña seleccionada y no en todas, para evitar esta incomodidad sin generar demasiada complejidad.
+
+---
+
+2. al exportar un documento, no hay ningún feedback de que se esté descargando o de que se hubiera descargado ya. Me gustaría agregar este feedback como una card que sale desde el lado inferior derecho que indica que se está descargando, y que cuando termine la descarga esta card permanezca unos 10 o 15 segundos con la posibilidad de cerrarlo antes manualmente y que tenga un botón para abrir la carpeta donde se descargó
 
 ---
 
 ## Ideas sin procesar
 
-*(vacío)*
+1. Ampliar la herramienta de busqueda (search). Actualmente permite buscar por contenido y muestra todos los resultados. Eso funciona bien y debería seguir funcionando bien. Pero quiero ampliar el funcionamiento de la herramienta.
+Quiero que tamibén se pueda buscar por nombre de archivo (no contenido), por contenido (no nombre), y por los dos. Además, quiero agregar una funcionalidad que me gustó mucho y que está presente en VS Code y es que los resultados de la búsqueda se pueden mostrar en lista (como ya se hace) o mostrarlos con el modo de "view as tree" que ajusta todos los resultados mostrando el arbol de directorios de cada resultado, y si más de un archivo están en la misma carpeta, no se duplican la carpeta en el resultado sino que se muestran los dos archivos dentro de la carpeta, por eso es "view as tree". La forma normal de la vista es "view as list" que es la forma que funciona normalmente
+
+---
+
+2. en el grafo, al hacer zoom se meustran todos los nombres de los archivos. Esto no está mal, el problema es que cuando hay mucha densidad de nodos, al aparecer todos estos nombres se entorpece la visual. Me gustaría tener una opción para ocultar todos los nombres y que solamente se muestre el nombre del nodo al cual se apunta con el puntero del ratón y los nodos relacionados. Esta opción se debe poder configurar en las opciones del grafo.
+Quiero tres opciones, mostrar todos los nombres, mostrar nombres del nodo apuntado y nodos relacionados, mostrar nombre solo del nodo apuntado. Esta configuración debe persistir por vault
 
 ---
 
