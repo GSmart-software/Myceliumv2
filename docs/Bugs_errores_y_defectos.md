@@ -106,6 +106,11 @@ Al importar archivo, este se importa en el path seleccionado, no al lugar exacto
 Tampoco hay un feedback que muestre y se auto-ajuste indicando el lugar donde se están arrastrando los archivos. 
 Relacionado al `DEF-034`
 
+> [!info] Lo de la herramienta de búsqueda nunca se corrigió: es el `DEF-059`
+> Este reporte y el `DEF-031` describen **dos** situaciones: las tablas y el buscador abierto. Se
+> corrigió la primera —el `margin` del widget de tabla— y se dieron por cerradas las dos. La
+> segunda siguió viva hasta el 2026-08-17.
+
 # DEF-037
 Cuando se habre la herramienta de búsqueda en el mismo archivo, surgen conflictos con el scrill. Al seleccionar intentar seleccionar un texto, no lo selecciona correctamente o surjen dificultades; al presionar las flechas del teclado para desplazarse, esto funciona mal; al darle a siguiente coinsidiencia en el buscador, no se desplaza al lugar correcto, la coinciddencia queda fuera de la pantalla por la parte superior.
 Pareciera que la renderización genera conflictos al abrir el buscador ya que es como si el texto visible estuviera más abajo que el texto real entonces al intentar seleccionar un texto, este selecciona más texto hacia abajo. 

@@ -47,7 +47,7 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-055 | Cambiar de modo de visualización devuelve el documento al principio | ambas (frontend) | ✅ 🌐 (2026-08-17) — se traspasa la **línea** del documento; dos intentos por proporción antes |
 | DEF-056 | La coincidencia del buscador queda tapada por la barra de herramientas | ambas (frontend) | ✅ 🌐 (2026-08-17) — el scroll se calcula a mano; **tres arreglos fallidos antes**, ver nota |
 | DEF-057 | En la vista de lectura el buscador de texto no encuentra nada | ambas (frontend) | ✅ 🌐 (2026-08-17) — búsqueda sobre el DOM del preview, resaltada sin tocarlo |
-| DEF-058 | Al volver de lectura a edición el foco se queda en los botones de vista | ambas (frontend) | 🛠️ desktop (2026-08-17) — se devuelve el foco al editor; **sin reflejar a web** |
+| DEF-058 | Al volver de lectura a edición el foco se queda en los botones de vista | ambas (frontend) | 🛠️🌐 (2026-08-17) — se devuelve el foco al editor; sin confirmar |
 | DEF-059 | Con el buscador abierto, las flechas hacen saltar el documento | ambas (frontend) | ✅ 🌐 (2026-08-17) — el panel pasa a declararse superior; causa hallada por tres investigaciones convergentes |
 
 ## Notas por bug
@@ -108,6 +108,18 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
   **Sin resolver**: la selección arrastrando con el ratón no despacha `scrollIntoView`, así
   que por lectura no debería verse afectada. Si al arrastrar también salta, es un fenómeno
   aparte y hace falta su propia traza.
+
+> [!important] La causa documentada del `DEF-031` era **la mitad**
+> El catálogo atribuye el `DEF-031`/`DEF-037` al `margin` del widget de tabla, que
+> desincronizaba el height-map. Eso era cierto **y se corrigió**, pero aquellos reportes
+> describían **dos** situaciones: las tablas y *«cuando se abre la herramienta de búsqueda»*.
+> La segunda nunca se arregló, y es el `DEF-059`: el panel oculto envenenando el margen de
+> scroll. Convivieron años dos causas distintas bajo un mismo número, y cerrar una dio por
+> cerradas las dos.
+>
+> **La lección**: un reporte que enumera varios síntomas necesita **una causa por síntoma**
+> antes de darse por cerrado. Encontrar *una* explicación que encaje con parte de lo
+> reportado es el momento de más riesgo, no el de terminar.
 
 - **DEF-031 reapareció, y lo había reintroducido el arreglo del `DEF-056`** (2026-08-17,
   encontrado por el usuario). Con el buscador abierto, seleccionar con el ratón o moverse con

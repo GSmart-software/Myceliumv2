@@ -89,6 +89,11 @@ revés.
 - Al cambiar entre edición y lectura **no se pierde el sitio**: seguís donde estabas.
 - El **buscador** (`Ctrl+F`) centra la coincidencia en vez de dejarla fuera de la pantalla, y
   ahora también funciona en la vista de lectura.
+- Y con el buscador abierto, **el documento ya no salta**: moverse con las flechas o
+  seleccionar dejaba el cursor fuera de la pantalla, por encima del borde. Era un defecto
+  viejo, de los que se notan todos los días.
+- Al volver de lectura a edición **se puede escribir directamente**, sin tener que hacer clic
+  en el texto primero.
 - Los **desplegables en modo oscuro** ya no abren una lista blanca ilegible.
 - El menú del clic derecho y las opciones del grafo **ya no se salen de la pantalla**.
 - El contenido deja un poco de aire abajo, en vez de morir pegado al borde.

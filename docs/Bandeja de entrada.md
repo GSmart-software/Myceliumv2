@@ -33,6 +33,40 @@ clasifico yo.
 
 ---
 
+3. en el renderizado de yampl, el input de la clave e un atributo tiene un tamaño del 100% en width, esto hace que se vea como un column con respecto al ícono del tipo de dato que maneja. Estuve probando y lo ideal sería que en lugar de 100% width, tuviera un 90% de width. Con esto se resolvería el problema. La clase en cuestión es `mic-prop-clave-inpút`
+
+---
+
+4. En el modo de edición, muchas veces los títulos no se renderizan y quedan como texto normal. Esto se puede identificar porque se ven los "#", "##", "###", etc. Pero sin renderizarse ni marcarse realmente como título
+
+---
+
+5. el span que contiene el texto de una tabla (`mic-tab-render`) no tiene un width definido por lo que ocupa solo el tamaño de su contenido, si el contenido de la celda no ocupa toda la celda, entonces este span tampoco ocupa toda la celda. Esto es un poco incómodo a la hora de usarlo ya que si el usuario hace clic en una parte vacía de la celda, este no se activa para escribir. Una solución que prové es poner le width en 100%.
+
+--- 
+
+6. en ocaciones el renderizado de las tablas no funciona, quedan sin renderizar y toca recargar el documento, cambiar de vista y volver a la edición, o desactivar y volver a activar el renderizado. Esto es una incomodidad que vale la pena solucionar
+
+---
+
+7. si se tiene "plegado" un título, cuando se cambia a otra pestaña y se vuelve, este título vuelve a estar desplegado. Me gustaría que esto no sucediera, al volver a la pestaña, continuara plegado. Pero que esto sea únicamente un estado de la pestaña. Si se cierra la pestaña, al volver a abrirla todo estaría nuevamente desplegado (como funciona actualmente)
+ 
+---
+
+8. El botón de la barra de herramientas al abrir una pestaña de una nota, está el botón donde están las opciones de exportar. Este botón tiene el nombre de "exportar nota", sin embargo, contiene otra opción más y puede que agregue más opciones en el futuro por lo que este nombre se debe cambiar a algo más descriptivo como "más", "opciones", "otros", "más herramientas", "más opciones", etc. Algo que sea más descriptivo, no tiene por que ser alguna de las opciones que nombré yo.
+
+---
+
+9. el menú de autocompletado no tiene aplicado los estilos visuales de mycelium como si lo tiene aplicado por ejemplo un input (ejemplo, el input en los yaml de los frontmater)
+
+---
+
+10. el estilo de los inputs (como el del yaml de los frontmater) la opción marcada se ve en blanco, no estoy seguro de si se eligió ese color realmente para las opcion seleccionada o si esto es un bug. Tengo esta duda ya que el color utilizado pareciera ser el color del texto en el modo oscuro de mycelium y no es tan representativo del estilo mycelium
+
+---
+
+11. cuando se está viendo un archivo. Este se marca en el explorador como feedback de cual es el archivo visto, pero no se marca las carpetas y subcarpetas que los contienen. La carpeta que queda marcada es la última que seleccionó el usuario
+
 ## Ideas sin procesar
 
 1. Ampliar la herramienta de busqueda (search). Actualmente permite buscar por contenido y muestra todos los resultados. Eso funciona bien y debería seguir funcionando bien. Pero quiero ampliar el funcionamiento de la herramienta.
@@ -42,6 +76,9 @@ Quiero que tamibén se pueda buscar por nombre de archivo (no contenido), por co
 
 2. en el grafo, al hacer zoom se meustran todos los nombres de los archivos. Esto no está mal, el problema es que cuando hay mucha densidad de nodos, al aparecer todos estos nombres se entorpece la visual. Me gustaría tener una opción para ocultar todos los nombres y que solamente se muestre el nombre del nodo al cual se apunta con el puntero del ratón y los nodos relacionados. Esta opción se debe poder configurar en las opciones del grafo.
 Quiero tres opciones, mostrar todos los nombres, mostrar nombres del nodo apuntado y nodos relacionados, mostrar nombre solo del nodo apuntado. Esta configuración debe persistir por vault
+
+---
+
 
 ---
 
