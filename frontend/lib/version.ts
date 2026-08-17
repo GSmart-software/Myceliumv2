@@ -10,4 +10,4 @@
  *         (ver `docs/decisiones/Versionado del sistema.md`). Las dos líneas NO
  *         comparten numeración: cada una cuenta lo suyo.
  */
-export const APP_VERSION = "1.1.0";
+export const APP_VERSION = "1.2.0";
