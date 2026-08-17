@@ -50,6 +50,31 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 
 ## Notas por bug
 
+- **DEF-031 reapareció, y lo había reintroducido el arreglo del `DEF-056`** (2026-08-17,
+  encontrado por el usuario). Con el buscador abierto, seleccionar con el ratón o moverse con
+  las flechas dejaba lo seleccionado más arriba de lo visible: el síntoma exacto del
+  `DEF-031`.
+
+  **Causa**: un `EditorView.scrollMargins` con `top: 56`. CodeMirror no lo usa solo para
+  desplazar — en el **auto-scroll del arrastre** compara `event.clientY - margins.top` contra
+  el borde del scroller (`@codemirror/view`, `index.js:4735`), así que con 56 px de margen
+  empieza a desplazarse hacia arriba 56 px antes de tiempo. Mientras se selecciona cerca del
+  borde superior, el editor se va solo.
+
+  **No lleva `DEF-*` propio**: nunca llegó a una versión publicada. Pero deja una lección que
+  sí vale escribir.
+
+> [!warning] Un intento fallido que se deja "porque no molesta" es deuda, no cortesía
+> `scrollMargins` fue el **segundo** de los tres intentos fallidos del `DEF-056`. El arreglo
+> real fue calcular el scroll a mano, y aun así lo dejé en el árbol diciendo que no molestaba.
+> Molestaba: rompía la selección con el ratón, se reflejó a web y volvió como una regresión de
+> un defecto cerrado hace meses.
+>
+> **Si un cambio no resultó ser el arreglo, se revierte.** Aunque parezca inocuo, aunque
+> "tenga sentido igual": nadie lo eligió por sus méritos y nadie lo probó por lo que hace.
+> Con él se fue también el anclaje del contenedor —el tercer intento—, que guardaba una
+> condición que el propio diagnóstico había medido como inexistente (`hostScroll=0`).
+
 - **DEF-057 — el buscador solo sabía buscar en CodeMirror.** `SearchBar` trabajaba
   exclusivamente contra la vista del editor: `setSearchQuery`, `findNext`, `replaceAll`. En
   modo lectura el editor sigue montado pero **oculto** (`display: none`), y lo que se ve es el
