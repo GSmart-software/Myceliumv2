@@ -213,6 +213,9 @@ escribe, y no encuentra nada ni resalta nada. En la vista de edición sí funcio
 
 *Viene de antes de las correcciones del `DEF-055`/`DEF-056`: no lo causaron ellas.*
 
+# DEF-058
+Al volver de la vista de lectura a la de edición, el **foco se queda en los botones que cambian de vista**: las flechas del teclado mueven el foco de un botón a otro en vez de mover el cursor, y hay que volver a hacer clic dentro del texto para poder escribir.
+
 ---
 
 > [!warning] Defectos sin reporte original
