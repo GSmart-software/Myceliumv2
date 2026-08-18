@@ -25,62 +25,11 @@ clasifico yo.
 
 ## Defectos sin procesar
 
-1. cuando abro le panel de metadatos en un markdown, este panel se habre en todas las pestañas, esto hace que sea un poco incómodo debido a que si tengo la pantalla dividida en dos o más pestañas, todas van a abrir el panel de metadatos convirtiendose en un estorbo. Estaba pensando en hacer que el panel de metadatos se mostrara únicamente en la pestaña seleccionada y no en todas, para evitar esta incomodidad sin generar demasiada complejidad.
-
----
-
-2. al exportar un documento, no hay ningún feedback de que se esté descargando o de que se hubiera descargado ya. Me gustaría agregar este feedback como una card que sale desde el lado inferior derecho que indica que se está descargando, y que cuando termine la descarga esta card permanezca unos 10 o 15 segundos con la posibilidad de cerrarlo antes manualmente y que tenga un botón para abrir la carpeta donde se descargó
-
----
-
-3. en el renderizado de yampl, el input de la clave e un atributo tiene un tamaño del 100% en width, esto hace que se vea como un column con respecto al ícono del tipo de dato que maneja. Estuve probando y lo ideal sería que en lugar de 100% width, tuviera un 90% de width. Con esto se resolvería el problema. La clase en cuestión es `mic-prop-clave-inpút`
-
----
-
-4. En el modo de edición, muchas veces los títulos no se renderizan y quedan como texto normal. Esto se puede identificar porque se ven los "#", "##", "###", etc. Pero sin renderizarse ni marcarse realmente como título
-
----
-
-5. el span que contiene el texto de una tabla (`mic-tab-render`) no tiene un width definido por lo que ocupa solo el tamaño de su contenido, si el contenido de la celda no ocupa toda la celda, entonces este span tampoco ocupa toda la celda. Esto es un poco incómodo a la hora de usarlo ya que si el usuario hace clic en una parte vacía de la celda, este no se activa para escribir. Una solución que prové es poner le width en 100%.
-
---- 
-
-6. en ocaciones el renderizado de las tablas no funciona, quedan sin renderizar y toca recargar el documento, cambiar de vista y volver a la edición, o desactivar y volver a activar el renderizado. Esto es una incomodidad que vale la pena solucionar
-
----
-
-7. si se tiene "plegado" un título, cuando se cambia a otra pestaña y se vuelve, este título vuelve a estar desplegado. Me gustaría que esto no sucediera, al volver a la pestaña, continuara plegado. Pero que esto sea únicamente un estado de la pestaña. Si se cierra la pestaña, al volver a abrirla todo estaría nuevamente desplegado (como funciona actualmente)
- 
----
-
-8. El botón de la barra de herramientas al abrir una pestaña de una nota, está el botón donde están las opciones de exportar. Este botón tiene el nombre de "exportar nota", sin embargo, contiene otra opción más y puede que agregue más opciones en el futuro por lo que este nombre se debe cambiar a algo más descriptivo como "más", "opciones", "otros", "más herramientas", "más opciones", etc. Algo que sea más descriptivo, no tiene por que ser alguna de las opciones que nombré yo.
-
----
-
-9. el menú de autocompletado no tiene aplicado los estilos visuales de mycelium como si lo tiene aplicado por ejemplo un input (ejemplo, el input en los yaml de los frontmater)
-
----
-
-10. el estilo de los inputs (como el del yaml de los frontmater) la opción marcada se ve en blanco, no estoy seguro de si se eligió ese color realmente para las opcion seleccionada o si esto es un bug. Tengo esta duda ya que el color utilizado pareciera ser el color del texto en el modo oscuro de mycelium y no es tan representativo del estilo mycelium
-
----
-
-11. cuando se está viendo un archivo. Este se marca en el explorador como feedback de cual es el archivo visto, pero no se marca las carpetas y subcarpetas que los contienen. La carpeta que queda marcada es la última que seleccionó el usuario
+*(vacío)*
 
 ## Ideas sin procesar
 
-1. Ampliar la herramienta de busqueda (search). Actualmente permite buscar por contenido y muestra todos los resultados. Eso funciona bien y debería seguir funcionando bien. Pero quiero ampliar el funcionamiento de la herramienta.
-Quiero que tamibén se pueda buscar por nombre de archivo (no contenido), por contenido (no nombre), y por los dos. Además, quiero agregar una funcionalidad que me gustó mucho y que está presente en VS Code y es que los resultados de la búsqueda se pueden mostrar en lista (como ya se hace) o mostrarlos con el modo de "view as tree" que ajusta todos los resultados mostrando el arbol de directorios de cada resultado, y si más de un archivo están en la misma carpeta, no se duplican la carpeta en el resultado sino que se muestran los dos archivos dentro de la carpeta, por eso es "view as tree". La forma normal de la vista es "view as list" que es la forma que funciona normalmente
-
----
-
-2. en el grafo, al hacer zoom se meustran todos los nombres de los archivos. Esto no está mal, el problema es que cuando hay mucha densidad de nodos, al aparecer todos estos nombres se entorpece la visual. Me gustaría tener una opción para ocultar todos los nombres y que solamente se muestre el nombre del nodo al cual se apunta con el puntero del ratón y los nodos relacionados. Esta opción se debe poder configurar en las opciones del grafo.
-Quiero tres opciones, mostrar todos los nombres, mostrar nombres del nodo apuntado y nodos relacionados, mostrar nombre solo del nodo apuntado. Esta configuración debe persistir por vault
-
----
-
-
----
+*(vacío)*
 
 ## Qué hago yo al procesarla
 
@@ -110,6 +59,21 @@ lo digo.
 | 2026-08-03 | Al cambiar de vault siguen abiertas las pestañas del anterior | `DEF-044` · bloque **F** |
 | 2026-08-03 | Varios vaults abiertos a la vez, cada uno en su ventana | `FUN-L-16` `VAULT-VENTANAS-MULTIPLES` · bloque **F** |
 | 2026-08-03 | ¿Se pueden poner referencias en un Excalidraw? → mejor un canvas como el de Obsidian | `FUN-L-18` `FILES-CANVAS` · spec en [[canvas]] |
+| 2026-08-17 | El panel de metadatos se abre en todas las pestañas | `DEF-060` |
+| 2026-08-17 | Al exportar no hay feedback de que se esté descargando | `FUN-M-22` `EXPORT-FEEDBACK-DESCARGA` — **reclasificada**: es UI nueva, no un arreglo |
+| 2026-08-17 | El input de la clave al 100 % empuja el ícono del tipo abajo | `DEF-061` (con tu prueba del 90 % anotada) |
+| 2026-08-17 | En edición, a veces los títulos no se renderizan | `DEF-062` |
+| 2026-08-17 | El span de la celda no ocupa la celda: el clic en el hueco no edita | `DEF-063` (con tu prueba del 100 % anotada) |
+| 2026-08-17 | A veces las tablas no se renderizan hasta forzar un repintado | `DEF-064` |
+| 2026-08-17 | El plegado de un título se pierde al cambiar de pestaña | `DEF-065` |
+| 2026-08-17 | «Exportar nota» ya no describe lo que hace ese menú | `DEF-066` |
+| 2026-08-17 | El menú de autocompletado no lleva los estilos de Mycelium | `DEF-067` |
+| 2026-08-17 | La opción marcada de un campo se ve en blanco | `DEF-068` |
+| 2026-08-17 | El explorador no marca las carpetas que contienen el archivo abierto | `DEF-069` |
+| 2026-08-17 | Buscar por nombre, por contenido o por los dos, y ver los resultados como árbol | `FUN-M-20` `SEARCH-MODOS-Y-ARBOL` |
+| 2026-08-17 | Tres modos para los nombres del grafo, persistentes por vault | `FUN-M-21` `GRAPH-NOMBRES-SEGUN-FOCO` |
+| 2026-08-17 | El ícono del tipo de documento en cada pestaña | `FUN-S-11` `TABS-ICONO-TIPO` |
+| 2026-08-17 | Colores por consola, reflejados en su pestaña y atenuados sin foco | `FUN-S-12` `TERMINAL-COLOR-POR-CONSOLA` |
 
 > [!note] Esta tabla se puede vaciar cuando moleste
 > Es una comodidad para que veas en qué terminó cada cosa, no un registro canónico. La

@@ -228,6 +228,36 @@ Pasa en notas **sin tablas y sin frontmatter**, y también con el render de tabl
 
 *Es la mitad del `DEF-037` que nunca se corrigió: aquel describía este mismo síntoma junto al de las tablas, y lo que se arregló fue lo de las tablas.*
 
+# DEF-060
+El **panel de propiedades** se abre en **todas** las pestañas a la vez. Con la pantalla dividida en dos o más, abrirlo en una lo abre en todas, y en las que no hacía falta estorba.
+
+# DEF-061
+En el bloque de propiedades, el campo de la **clave** ocupa el 100 % del ancho, así que el ícono del tipo de dato no le entra al lado y queda **debajo**, como si fueran dos filas. (Clase `mic-prop-clave-input`.)
+
+# DEF-062
+En el modo de edición, **muchas veces los títulos no se renderizan** y quedan como texto normal: se ven los `#`, `##`, `###` sin aplicar el estilo de título.
+
+# DEF-063
+En una tabla, el texto de la celda vive en un `span` (`mic-tab-render`) que **no ocupa el ancho de la celda**, sino solo el de su contenido. Al hacer clic en la parte vacía de una celda **no se activa la edición**, y hay que apuntar justo al texto.
+
+# DEF-064
+**A veces las tablas no se renderizan** y se quedan en markdown crudo. Para que aparezcan hay que recargar el documento, cambiar de vista y volver, o apagar y encender el renderizado de tablas.
+
+# DEF-065
+Si se **pliega un título** y se cambia a otra pestaña, al volver el título está **desplegado** otra vez. El plegado debería sobrevivir al cambio de pestaña —pero solo mientras la pestaña siga abierta: al cerrarla y reabrirla, empezar de nuevo con todo desplegado, como ahora.
+
+# DEF-066
+El botón de la barra de herramientas se llama **«Exportar nota»**, pero su menú ya tiene más de una opción y va a tener más. El nombre describe una sola de las cosas que hace.
+
+# DEF-067
+El **menú de autocompletado** no tiene aplicados los estilos de Mycelium, a diferencia de otros controles —por ejemplo los campos del bloque de propiedades—.
+
+# DEF-068
+En los campos del bloque de propiedades, la **opción marcada se ve en blanco**. No queda claro si ese color se eligió a propósito: parece el color del texto del modo oscuro y no el de un elemento seleccionado.
+
+# DEF-069
+Al estar viendo un archivo, el explorador **lo marca a él pero no a las carpetas que lo contienen**. La carpeta que aparece marcada es la última que seleccionó el usuario, que puede no tener nada que ver.
+
 ---
 
 > [!warning] Defectos sin reporte original

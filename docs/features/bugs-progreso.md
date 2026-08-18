@@ -49,6 +49,16 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-057 | En la vista de lectura el buscador de texto no encuentra nada | ambas (frontend) | ✅ 🌐 (2026-08-17) — búsqueda sobre el DOM del preview, resaltada sin tocarlo |
 | DEF-058 | Al volver de lectura a edición el foco se queda en los botones de vista | ambas (frontend) | 🛠️🌐 (2026-08-17) — se devuelve el foco al editor; sin confirmar |
 | DEF-059 | Con el buscador abierto, las flechas hacen saltar el documento | ambas (frontend) | ✅ 🌐 (2026-08-17) — el panel pasa a declararse superior; causa hallada por tres investigaciones convergentes |
+| DEF-060 | El panel de propiedades se abre en todas las pestañas a la vez | ambas (frontend) | ⬜ pendiente |
+| DEF-061 | El campo de la clave ocupa todo el ancho y empuja el ícono del tipo abajo | ambas (frontend) | ⬜ pendiente — el usuario ya probó que `width: 90%` lo resuelve |
+| DEF-062 | En edición, a veces los títulos no se renderizan y se ven los `#` | ambas (frontend) | ⬜ pendiente — probable pariente del `DEF-064` |
+| DEF-063 | El texto de una celda no ocupa la celda: el clic en el hueco no edita | ambas (frontend) | ⬜ pendiente — el usuario ya probó que `width: 100%` lo resuelve |
+| DEF-064 | A veces las tablas se quedan sin renderizar hasta forzar un repintado | ambas (frontend) | ⬜ pendiente — probable pariente del `DEF-062` |
+| DEF-065 | El plegado de un título se pierde al cambiar de pestaña | ambas (frontend) | ⬜ pendiente — misma familia que `DEF-039` |
+| DEF-066 | El botón «Exportar nota» ya no describe lo que hace su menú | ambas (frontend) | ⬜ pendiente |
+| DEF-067 | El menú de autocompletado no lleva los estilos de Mycelium | ambas (frontend) | ⬜ pendiente |
+| DEF-068 | La opción marcada de un campo se ve en blanco, fuera de la paleta | ambas (frontend) | ⬜ pendiente |
+| DEF-069 | El explorador no marca las carpetas que contienen el archivo abierto | ambas (frontend) | ⬜ pendiente |
 
 ## Notas por bug
 
