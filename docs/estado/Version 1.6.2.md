@@ -118,8 +118,9 @@ Dos comportamientos que sorprenden si no se los espera, y son intencionales:
 
 - **El reflejo a `web-cloud`** de las dos mitades, que se hace junto porque comparten
   archivos. Web sigue en `1.0.0`.
-- **Publicar.** Ni la 1.6.0, ni la 1.6.1, ni esta se subieron a R2: quien se actualice sigue
-  recibiendo la 1.5.0, que borra sin preguntar (`DEF-051`).
+- ~~Publicar~~ — **hecho el 2026-08-17**. Es la primera publicación desde la 1.5.0, así que
+  cierra de una vez el hueco de tres versiones: quien se actualice deja atrás la 1.5.0, que
+  borraba sin preguntar (`DEF-051`).
 - El **framework de IA** sigue en `1.4.0` y no conoce nada de esto.
 - `FUN-M-16` (modo avanzado del updater) sigue sin probarse.
 

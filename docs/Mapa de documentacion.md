@@ -98,11 +98,12 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
 
 - [[Estado del proyecto]] — situación actual, pendientes y deuda.
 - [[Version 1.6.2]] — release actual de desktop: las tablas y las propiedades se editan
-  renderizadas, sin abrir el crudo. **Sin publicar todavía**.
+  renderizadas, sin abrir el crudo. **Publicada el 2026-08-17**, y con ella llegaron también
+  la 1.6.0 y la 1.6.1, que nunca habían salido.
 - [[Version 1.6.1]] — varios vaults a la vez, uno por ventana,
-  y una tanda de correcciones. **Sin publicar todavía**.
+  y una tanda de correcciones. **Nunca se publicó**: absorbida por la 1.6.2.
 - [[Version 1.6.0]] — bases, canvas y la pantalla de
-  referencias. **Sin publicar todavía**.
+  referencias. **Nunca se publicó**: absorbida por la 1.6.2.
 - [[Version 1.5.0]] — la anterior (ancho de tabulación). Salió fallando y se
   **rehizo y confirmó** el 2026-08-03; el binario publicado en R2 todavía no lleva esas
   correcciones (hace falta una `1.5.1`).

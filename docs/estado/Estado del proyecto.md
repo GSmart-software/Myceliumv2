@@ -6,7 +6,7 @@ Foto de dónde está Mycelium hoy. Para el detalle de cada tema, seguir los enla
 
 ## Resumen
 
-- **Versión: desktop `1.6.2`** ([[Version 1.6.2]], **sin publicar**) · **web `1.1.0`**
+- **Versión: desktop `1.6.2`** ([[Version 1.6.2]], **publicada el 2026-08-17**) · **web `1.1.0`**
   ([[Version 1.1.0 de web]], 2026-08-08). Las dos líneas **no comparten numeración**.
   Web se puso al día con todo lo que le aplicaba; lo que sigue solo en desktop es lo que
   por naturaleza no le aplica (terminal, framework de IA, autoactualización).
