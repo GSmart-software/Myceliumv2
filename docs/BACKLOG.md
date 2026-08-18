@@ -81,7 +81,7 @@ y **priorizar** qué implementar antes.
 | `FUN-M-13` | `VAULT-INDEX-UN-RECORRIDO` | Fusionar `listar_archivos_meta` y `listar_directorios` en un solo comando que devuelva `{archivos, directorios}`: hoy el vault se recorre **dos veces** por apertura. Continuación de `FUN-M-12` | desktop | — |
 | `FUN-M-14` | `VAULT-WATCH-REINDEX-DIRIGIDO` | El watcher emite `vault-cambios` **con las rutas afectadas** y `lib/vaultWatch.ts` las descarta: reindexa el vault entero ante cualquier cambio. Usar esas rutas para reindexar solo lo tocado. Continuación de `FUN-M-12` | desktop | — |
 | `FUN-M-15` | `LINKS-POR-ALIAS` | Resolver `[[enlaces]]` por la propiedad `aliases` de la nota destino: hoy se parsea e indexa pero **no tiene comportamiento**. Toca la resolución de wikilinks, el autocompletado y el grafo. Continuación de `FUN-M-04` | ambas | — |
-| `FUN-M-16` 🛠️ | `UPDATER-SELECCION-VERSION` | Elegir e instalar **cualquier versión publicada**, incluida una anterior, desde un modo avanzado oculto (siete clics en el número de versión). Deja la app fijada en esa versión. Herramienta de desarrollo, no para el usuario normal. **Implementado, SIN confirmar**: su diálogo de confirmación estuvo roto hasta `DEF-051` (2026-08-03), así que elegir una versión no llegaba a hacer nada. Es lo único de la [[Version 1.4.0]] que queda por probar. Spec en `docs/features/autoactualizacion.md` § 4.3 | desktop | — |
+| `FUN-M-16` 🟢 | `UPDATER-SELECCION-VERSION` | Elegir e instalar **cualquier versión publicada**, incluida una anterior, desde un modo avanzado oculto (siete clics en el número de versión). Deja la app fijada en esa versión. Herramienta de desarrollo, no para el usuario normal. **Confirmado en desktop** el 2026-08-18, con el bloque **L** por fin cerrado de punta a punta. Estuvo dos semanas sin poder probarse: su diálogo de confirmación estuvo roto hasta `DEF-051` (2026-08-03) y después no hubo publicaciones nuevas contra las que elegir, hasta la 1.6.2. Spec en `docs/features/autoactualizacion.md` § 4.3 | desktop | — |
 | `FUN-M-18` | `EDITOR-REINDENTAR` | Reindentar las notas al ancho de tabulación configurado, para que el cambio se vea también en la vista en vivo y no solo al leer. Es una **edición masiva del vault**: reutiliza el respaldo, el manifiesto y el deshacer de `FUN-M-17`. Continuación de `FUN-S-02` | ambas | — |
 | `FUN-M-20` | `SEARCH-MODOS-Y-ARBOL` | Ampliar la búsqueda del vault: elegir si busca por **nombre de archivo**, por **contenido** o por los dos, y poder ver los resultados **como árbol** de carpetas además de como lista —agrupando los que comparten carpeta, al estilo de VS Code— | ambas | — |
 | `FUN-M-21` | `GRAPH-NOMBRES-SEGUN-FOCO` | Tres modos para los nombres del grafo: **todos**, **solo el nodo apuntado y sus vecinos**, o **solo el apuntado**. Con mucha densidad de nodos, todos los nombres a la vez entorpecen la vista. La elección **persiste por vault** | ambas | — |
@@ -692,7 +692,7 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 - **Lo único que queda abierto es operativo, no de código**: la **copia de seguridad de la
   clave privada** fuera de la máquina. Si se pierde, nadie puede volver a actualizarse — y
   además `tauri build` ya no compila sin ella.
-- **Sin confirmar**: el modo avanzado de `FUN-M-16`, roto hasta `DEF-051`.
+- **Confirmado** el 2026-08-18, incluido el modo avanzado de `FUN-M-16`.
 
 #### `FUN-L-16` · `VAULT-VENTANAS-MULTIPLES` (—) — 🛠️ desktop
 - **Qué es**: poder tener **varios vaults abiertos simultáneamente**, cada uno en su propia

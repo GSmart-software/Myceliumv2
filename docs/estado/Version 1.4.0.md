@@ -16,9 +16,9 @@ avanzado.
 >
 > **La otra mitad quedó verificada el mismo día** con la [[Version 1.5.0]]: una 1.4.0
 > instalada detectó la versión posterior, la descargó, verificó la firma, la instaló y
-> reinició. Lo único que sigue sin probarse es el **modo avanzado** (`FUN-M-16`): su
-> diálogo de confirmación estuvo roto hasta `DEF-051`, así que elegir una versión de la
-> lista no llegaba a hacer nada.
+> reinició. El **modo avanzado** (`FUN-M-16`) quedó confirmado más tarde, el 2026-08-18:
+> su diálogo estuvo roto hasta `DEF-051` y después faltaron versiones publicadas contra
+> las que probarlo, hasta que salió la [[Version 1.6.2]].
 
 > [!warning] La 1.4.0 hay que instalarla a mano, una vez
 > Es la primera versión que lleva la clave pública, así que ninguna anterior puede

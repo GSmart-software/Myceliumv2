@@ -122,7 +122,7 @@ Dos comportamientos que sorprenden si no se los espera, y son intencionales:
   cierra de una vez el hueco de tres versiones: quien se actualice deja atrás la 1.5.0, que
   borraba sin preguntar (`DEF-051`).
 - El **framework de IA** sigue en `1.4.0` y no conoce nada de esto.
-- `FUN-M-16` (modo avanzado del updater) sigue sin probarse.
+- ~~`FUN-M-16` (modo avanzado del updater) sigue sin probarse~~ — **confirmado el 2026-08-18**: esta publicación es la que por fin le dio versiones contra las que elegir.
 
 ## Relacionadas
 
