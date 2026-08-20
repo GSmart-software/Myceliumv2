@@ -66,6 +66,8 @@ y **priorizar** qué implementar antes.
 | `FUN-S-09` | `CODE-RESALTADO-SINTAXIS` | Colorear los archivos de código al visualizarlos según su lenguaje (palabras reservadas, tipos, cadenas). **Depende de `FUN-L-11`**: sin visor de código no hay nada que colorear | ambas | — |
 | `FUN-S-10` | `ENLACES-AVISO-REFERENCIA` | Hook que avisa cuando se escribe una referencia a otra nota que Mycelium **no** cuenta como enlace (un `[texto](otra.md)`, o una forma ya registrada en el léxico escrita sin corchetes). Prevención, para que el problema que arregla `FUN-M-17` no vuelva a crecer | ambas | — |
 | `FUN-S-11` | `TABS-ICONO-TIPO` | Cada pestaña muestra, junto al nombre, el **ícono del tipo de documento** que contiene (markdown, Excalidraw, canvas, base, consola). Con un ajuste en Configuración para desactivarlo | ambas | — |
+| `FUN-S-14` | `BASES-BUSCADOR` | Buscador dentro de un archivo tabla (`.base`) para encontrar una fila concreta sin tocar los filtros, con **coincidencia parcial** (`*XYZ*`) o **exacta**. Los filtros definen *qué* entra en la tabla; esto es para encontrar algo dentro de lo que ya entró | ambas | — |
+| `FUN-S-15` | `BASES-ORDENAR` | Ordenar las filas de un archivo tabla por **cualquiera de las columnas mostradas**, ascendente o descendente. Hoy el orden lo decide la agregación y no se puede cambiar | ambas | — |
 | `FUN-S-13` | `TABS-HISTORIAL-RUEDA` | Clic con la **rueda** en las flechas de atrás/adelante: abre en una **pestaña nueva** el documento anterior o siguiente del historial, en vez de navegar en la actual. Misma convención que la rueda sobre un archivo del explorador | ambas | — |
 | `FUN-S-12` | `TERMINAL-COLOR-POR-CONSOLA` | Asignar un **color a cada consola**, reflejado en su pestaña, que se **atenúa cuando no tiene el foco**. Permite distinguirlas de un vistazo sin perder cuál se está viendo | desktop | — |
 
@@ -86,6 +88,7 @@ y **priorizar** qué implementar antes.
 | `FUN-M-18` | `EDITOR-REINDENTAR` | Reindentar las notas al ancho de tabulación configurado, para que el cambio se vea también en la vista en vivo y no solo al leer. Es una **edición masiva del vault**: reutiliza el respaldo, el manifiesto y el deshacer de `FUN-M-17`. Continuación de `FUN-S-02` | ambas | — |
 | `FUN-M-20` | `SEARCH-MODOS-Y-ARBOL` | Ampliar la búsqueda del vault: elegir si busca por **nombre de archivo**, por **contenido** o por los dos, y poder ver los resultados **como árbol** de carpetas además de como lista —agrupando los que comparten carpeta, al estilo de VS Code— | ambas | — |
 | `FUN-M-21` | `GRAPH-NOMBRES-SEGUN-FOCO` | Tres modos para los nombres del grafo: **todos**, **solo el nodo apuntado y sus vecinos**, o **solo el apuntado**. Con mucha densidad de nodos, todos los nombres a la vez entorpecen la vista. La elección **persiste por vault** | ambas | — |
+| `FUN-M-25` | `BASES-ANCHO-COLUMNAS` | Ajustar el **ancho de cada columna** de un archivo tabla arrastrando su borde. Es M y no S por **dónde se guarda**: el `.base` es formato de Obsidian y meterle una clave nuestra rompería la interoperabilidad, así que hay que decidir entre guardarlo aparte (local, por vault) o no persistirlo. Ver la advertencia del bloque | ambas | — |
 | `FUN-M-24` | `EDITOR-TITULO-RENOMBRA` | El **título del documento** que se muestra arriba de la nota pasa a ser **editable**, y escribir en él **renombra el archivo** — como en Obsidian. Hoy es de solo lectura y renombrar obliga a ir al explorador. **Ojo con el orden**: mientras `FUN-M-08` siga pendiente, renombrar rompe los `[[enlaces]]` que apuntaban al título viejo, y esto hace el renombrado mucho más fácil de disparar —incluso sin querer, escribiendo en lo que parece texto—. Ver el bloque **C** | ambas | — |
 | `FUN-M-23` | `MERMAID-VISOR` | Visor propio para los diagramas Mermaid en la vista de lectura: al hacer clic se abre una ventana interna donde el diagrama se maneja como una imagen —**zoom** y **desplazamiento**—, porque hoy uno grande no se puede leer. **Segunda fase, si la primera sale bien**: sobre esa ventana, un **dibujo efímero** con unos pocos colores (se borra al cerrar, no se guarda nada) y un **puntero láser** para señalar sin dibujar. Pensado para explicar un diagrama a alguien | ambas | — |
 | `FUN-M-22` | `EXPORT-FEEDBACK-DESCARGA` | Avisar de la exportación: una tarjeta abajo a la derecha que indica que se está descargando, permanece 10-15 s al terminar —con cierre manual— y ofrece **abrir la carpeta** donde quedó el archivo. Hoy exportar no da ninguna señal | ambas (difiere) | — |
@@ -1022,6 +1025,17 @@ gana el del contenedor**. `FUN-S-01` da estilo al checkbox según su símbolo; `
 corrige que el título de un callout le pise el color a lo que lleva dentro. Comparten
 `lib/markdown.ts`, `livePreview.ts` y `editor.css`. El minor de `FUN-S-01` **absorbe** la
 corrección.
+
+#### O · Las tablas de `.base` se vuelven usables — `FUN-S-14` + `FUN-S-15` + `FUN-M-25` · minor · ambas
+Buscar dentro de la tabla, ordenar por una columna y ajustar anchos. Las tres viven en el
+mismo componente (`components/bases/BaseView.tsx`) y son lo que separa una tabla de mirar
+de una tabla de trabajar. Hacerlas por separado significa rediseñar su cabecera tres veces.
+
+> [!warning] Dónde se guarda lo que el usuario elige
+> El `.base` es **formato de Obsidian**, y ahí está la gracia: los archivos se abren en las dos
+> apps. Guardar el orden o los anchos como claves propias dentro de ese archivo rompería esa
+> promesa. El orden **sí** tiene sitio en el formato; los anchos, no. Hay que decidirlo antes
+> de escribir código, no después. Ver [[bases-tabla]].
 
 #### N · Editar sin salir del render — `FUN-M-19` + `FUN-L-19` · patch · ambas
 Las dos mitades de [[edicion-en-el-render]]: el bloque de propiedades y las tablas dejan de

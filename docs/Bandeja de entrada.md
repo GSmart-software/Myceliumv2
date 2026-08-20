@@ -79,6 +79,9 @@ lo digo.
 | 2026-08-18 | La rueda sobre las flechas de historial debería abrir en pestaña nueva | `FUN-S-13` `TABS-HISTORIAL-RUEDA` — **reclasificada**: no falla nada, es un gesto nuevo |
 | 2026-08-18 | La numeración de las consolas no se reutiliza y puede repetirse | `DEF-072` |
 | 2026-08-18 | Zoom y desplazamiento en los Mermaid, con dibujo efímero y puntero láser | `FUN-M-23` `MERMAID-VISOR` |
+| 2026-08-18 | Buscador dentro de las tablas, por coincidencia o exacto | `FUN-S-14` `BASES-BUSCADOR` |
+| 2026-08-18 | Ordenar las tablas por cualquiera de los campos mostrados | `FUN-S-15` `BASES-ORDENAR` |
+| 2026-08-18 | Ajustar el ancho de las columnas de las tablas | `FUN-M-25` `BASES-ANCHO-COLUMNAS` |
 
 > [!note] Esta tabla se puede vaciar cuando moleste
 > Es una comodidad para que veas en qué terminó cada cosa, no un registro canónico. La
