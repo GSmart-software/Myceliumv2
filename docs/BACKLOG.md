@@ -146,7 +146,7 @@ en `FUTURE_IMPLEMENTATIONS.md`, hoy consolidadas aquí). Varias son **solo web**
 | `FUN-M-05` | `TAGS-PANEL` | Panel de tags del rail (listado, conteo, filtrado por tag); hoy es placeholder | ambas | HU-28 |
 | `FUN-M-06` | `TAGS-GRAFO-NODOS` | Mostrar tags como nodos en el mini‑grafo y el grafo global | ambas | HU-30 |
 | `FUN-M-07` | `DAILY-NOTE` | Nota diaria (crear/abrir la del día con plantilla); ícono del rail es placeholder | ambas | HU-28 |
-| `FUN-M-08` | `LINKS-REESCRITURA-RENOMBRAR` | Reescribir los `[[enlaces]]` que apuntan al título viejo al renombrar una nota | ambas | HU-23 |
+| `FUN-M-08` 🛠️ | `LINKS-REESCRITURA-RENOMBRAR` | Reescribir los `[[enlaces]]` que apuntan al título viejo al renombrar una nota. **Implementado el 2026-08-18** (sin confirmar): núcleo puro `reescribirEnlaces` en `lib/enlaces.ts` con 10 tests, conectado a `renameNota` del store. Va por `api()`, así que el código es **el mismo en las dos versiones**. Solo recorre las notas que ya enlazaban, no el vault entero | ambas | HU-23 |
 | `FUN-M-09` | `EXPORT-ZIP-SERVIDOR` | Exportar ZIP de vaults ≥ 200 MB en el servidor con progreso (hoy 100% cliente) | web | HU-09 |
 | `FUN-M-10` | `AUTH-OAUTH-GITHUB` | Login con GitHub (requiere registrar OAuth App + credenciales) | web | HU-32 |
 | `FUN-S-07` | `COLLAB-PRESENCIA-AJUSTES` | Afinar timeout de cursor (5 s) y agrupado "+N más" (8 cursores) | web | HU-06 |
@@ -436,9 +436,11 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 > —basta con escribir sobre lo que parece texto normal—, y una molestia conocida se convierte
 > en pérdida de datos diaria. **Sacar `FUN-M-08` antes, o las dos juntas.**
 
-- **A definir**: si se confirma con `Enter` y se descarta con `Escape` (coherente con las
-  celdas y las propiedades); qué pasa si el nombre nuevo ya existe; y si el archivo tiene un
-  título `# ` en el cuerpo, cuál manda.
+- **Decidido** (2026-08-18): `Enter` confirma y `Escape` descarta, igual que en las celdas y
+  en las propiedades. Si el nombre ya existe o lleva símbolos inválidos, **se muestra un
+  mensaje de error y se vuelve al nombre original** — el error se dice, no se traga en
+  silencio. Y los títulos `#` del cuerpo **no intervienen**: el que manda es siempre el nombre
+  del archivo que se muestra al inicio del documento.
 
 ### Pendientes — tamaño L
 
@@ -978,12 +980,11 @@ Las dos cambian **a qué apunta un `[[enlace]]`** y obligan a tocar la misma cap
 resolución de wikilinks, autocompletado y grafo. `FUN-M-08` reescribe los enlaces al
 renombrar; `FUN-M-15` los resuelve por `aliases`. Separadas, esa capa se toca dos veces.
 
-> [!warning] `FUN-M-24` vuelve este bloque urgente
-> Poner el renombrado en el **título del documento** —donde uno escribe sin pensar— multiplica
-> las veces que se renombra, y hoy cada renombrado **rompe en silencio** los `[[enlaces]]` que
-> apuntaban al nombre viejo. Conviene que `FUN-M-08` salga **antes**, o al menos junto con
-> ella; si no, la funcionalidad nueva convierte una molestia conocida en pérdida de datos
-> cotidiana.
+> [!success] `FUN-M-08` ya está: el camino quedó despejado para `FUN-M-24`
+> Se implementó el 2026-08-18, **antes** que el renombrado desde el título, que es el orden
+> que hacía falta: poner el renombrado donde uno escribe sin pensar habría convertido una
+> molestia conocida —enlaces rotos en silencio— en pérdida de datos cotidiana. Queda por
+> confirmar en la app y por reflejar a web.
 
 #### M · Adoptar un vault que ya existía — `FUN-M-15` + `FUN-M-17` + `FUN-S-10` · minor · ambas
 El **caso de entrada** de Mycelium: alguien abre su proyecto de siempre y no tiene ni una
