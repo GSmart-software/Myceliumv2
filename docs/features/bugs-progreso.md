@@ -59,6 +59,9 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-067 | El menú de autocompletado no lleva los estilos de Mycelium | ambas (frontend) | ⬜ pendiente |
 | DEF-068 | La opción marcada de un campo se ve en blanco, fuera de la paleta | ambas (frontend) | ⬜ pendiente |
 | DEF-069 | El explorador no marca las carpetas que contienen el archivo abierto | ambas (frontend) | ⬜ pendiente |
+| DEF-070 | El tipo de una propiedad no se puede cambiar sin borrarla y rehacerla | ambas (frontend) | ⬜ pendiente |
+| DEF-071 | Un `[[wikilink]]` en una propiedad no enlaza dentro de un archivo tabla | ambas (frontend) | ⬜ pendiente |
+| DEF-072 | La numeración de las consolas no se reutiliza y puede repetirse | desktop | ⬜ pendiente |
 
 ## Notas por bug
 

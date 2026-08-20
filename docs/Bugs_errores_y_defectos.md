@@ -258,6 +258,15 @@ En los campos del bloque de propiedades, la **opción marcada se ve en blanco**.
 # DEF-069
 Al estar viendo un archivo, el explorador **lo marca a él pero no a las carpetas que lo contienen**. La carpeta que aparece marcada es la última que seleccionó el usuario, que puede no tener nada que ver.
 
+# DEF-070
+El **tipo** de una propiedad no se puede cambiar una vez creada. Para pasar, por ejemplo, de texto a fecha hay que **borrar la propiedad y volver a crearla**, perdiendo su valor.
+
+# DEF-071
+Un `[[wikilink]]` escrito en una propiedad de tipo texto **no se muestra como enlace en un archivo tabla** (`.base`): aparece como texto plano. No se puede hacer clic para ir al documento referenciado, así que desde una tabla no se navega.
+
+# DEF-072
+La **numeración de las consolas nunca se reutiliza**: si se abren tres y se cierra una, la siguiente es la 4 y no la 3. Peor, se pueden llegar a **repetir números** — con una consola 5 abierta y solo tres en total, la siguiente sería la 4 y la de después otra 5.
+
 ---
 
 > [!warning] Defectos sin reporte original

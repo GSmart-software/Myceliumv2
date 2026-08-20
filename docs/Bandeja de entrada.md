@@ -74,6 +74,11 @@ lo digo.
 | 2026-08-17 | Tres modos para los nombres del grafo, persistentes por vault | `FUN-M-21` `GRAPH-NOMBRES-SEGUN-FOCO` |
 | 2026-08-17 | El ícono del tipo de documento en cada pestaña | `FUN-S-11` `TABS-ICONO-TIPO` |
 | 2026-08-17 | Colores por consola, reflejados en su pestaña y atenuados sin foco | `FUN-S-12` `TERMINAL-COLOR-POR-CONSOLA` |
+| 2026-08-18 | El tipo de un atributo del YAML no se puede cambiar sin borrarlo | `DEF-070` |
+| 2026-08-18 | Un wikilink en una propiedad no enlaza dentro de una base | `DEF-071` |
+| 2026-08-18 | La rueda sobre las flechas de historial debería abrir en pestaña nueva | `FUN-S-13` `TABS-HISTORIAL-RUEDA` — **reclasificada**: no falla nada, es un gesto nuevo |
+| 2026-08-18 | La numeración de las consolas no se reutiliza y puede repetirse | `DEF-072` |
+| 2026-08-18 | Zoom y desplazamiento en los Mermaid, con dibujo efímero y puntero láser | `FUN-M-23` `MERMAID-VISOR` |
 
 > [!note] Esta tabla se puede vaciar cuando moleste
 > Es una comodidad para que veas en qué terminó cada cosa, no un registro canónico. La

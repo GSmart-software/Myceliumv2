@@ -116,8 +116,8 @@ Dos comportamientos que sorprenden si no se los espera, y son intencionales:
 
 ## Lo que sigue pendiente
 
-- **El reflejo a `web-cloud`** de las dos mitades, que se hace junto porque comparten
-  archivos. Web sigue en `1.0.0`.
+- ~~El reflejo a `web-cloud`~~ — **hecho el 2026-08-17**, las dos mitades juntas porque
+  comparten archivos. Web quedó en `1.2.0`.
 - ~~Publicar~~ — **hecho el 2026-08-17**. Es la primera publicación desde la 1.5.0, así que
   cierra de una vez el hueco de tres versiones: quien se actualice deja atrás la 1.5.0, que
   borraba sin preguntar (`DEF-051`).
