@@ -86,6 +86,7 @@ y **priorizar** qué implementar antes.
 | `FUN-M-18` | `EDITOR-REINDENTAR` | Reindentar las notas al ancho de tabulación configurado, para que el cambio se vea también en la vista en vivo y no solo al leer. Es una **edición masiva del vault**: reutiliza el respaldo, el manifiesto y el deshacer de `FUN-M-17`. Continuación de `FUN-S-02` | ambas | — |
 | `FUN-M-20` | `SEARCH-MODOS-Y-ARBOL` | Ampliar la búsqueda del vault: elegir si busca por **nombre de archivo**, por **contenido** o por los dos, y poder ver los resultados **como árbol** de carpetas además de como lista —agrupando los que comparten carpeta, al estilo de VS Code— | ambas | — |
 | `FUN-M-21` | `GRAPH-NOMBRES-SEGUN-FOCO` | Tres modos para los nombres del grafo: **todos**, **solo el nodo apuntado y sus vecinos**, o **solo el apuntado**. Con mucha densidad de nodos, todos los nombres a la vez entorpecen la vista. La elección **persiste por vault** | ambas | — |
+| `FUN-M-24` | `EDITOR-TITULO-RENOMBRA` | El **título del documento** que se muestra arriba de la nota pasa a ser **editable**, y escribir en él **renombra el archivo** — como en Obsidian. Hoy es de solo lectura y renombrar obliga a ir al explorador. **Ojo con el orden**: mientras `FUN-M-08` siga pendiente, renombrar rompe los `[[enlaces]]` que apuntaban al título viejo, y esto hace el renombrado mucho más fácil de disparar —incluso sin querer, escribiendo en lo que parece texto—. Ver el bloque **C** | ambas | — |
 | `FUN-M-23` | `MERMAID-VISOR` | Visor propio para los diagramas Mermaid en la vista de lectura: al hacer clic se abre una ventana interna donde el diagrama se maneja como una imagen —**zoom** y **desplazamiento**—, porque hoy uno grande no se puede leer. **Segunda fase, si la primera sale bien**: sobre esa ventana, un **dibujo efímero** con unos pocos colores (se borra al cerrar, no se guarda nada) y un **puntero láser** para señalar sin dibujar. Pensado para explicar un diagrama a alguien | ambas | — |
 | `FUN-M-22` | `EXPORT-FEEDBACK-DESCARGA` | Avisar de la exportación: una tarjeta abajo a la derecha que indica que se está descargando, permanece 10-15 s al terminar —con cierre manual— y ofrece **abrir la carpeta** donde quedó el archivo. Hoy exportar no da ninguna señal | ambas (difiere) | — |
 | `FUN-M-19` 🟢🌐 | `EDITOR-PROPIEDADES-EN-SITIO` | El bloque de propiedades **deja de abrirse en crudo** al entrar el cursor: sigue renderizado y se edita ahí — cambiar un valor, renombrar una clave, **agregar y quitar** propiedades — sin ir a la vista raw, más «editar como texto» por bloque. Invierte el «widget de solo lectura» de `FUN-M-04`, cuyo motor (`ponerPropiedad`, `quitarPropiedad`, `renombrarPropiedad`) ya está hecho y probado. **Confirmado en desktop** por el usuario el 2026-08-16 y **reflejado en web** el 2026-08-17, junto con `FUN-L-19` porque tocan los mismos archivos compartidos. Primera mitad de [[edicion-en-el-render]]; la segunda es `FUN-L-19` | ambas | — |
@@ -416,6 +417,28 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   el `margin` en un widget de bloque, no la interactividad. Ver [[edicion-en-el-render]] § 2.
 - **A definir**: nada bloqueante. La única decisión de diseño —despachar el rango del bloque
   y no el documento entero— está resuelta en la spec.
+
+#### `FUN-M-24` · `EDITOR-TITULO-RENOMBRA` (—)
+- **Qué es**: el título que se muestra arriba de la nota deja de ser un adorno de solo
+  lectura y pasa a **renombrar el archivo** cuando se escribe en él, como en Obsidian.
+- **Por qué**: hoy renombrar obliga a salir al explorador, buscar el archivo y usar su menú.
+  El nombre está a la vista justo donde se está trabajando; es el sitio natural para cambiarlo.
+- **Ya hay patrón**: ese título es un **widget de bloque de CodeMirror** (`lib/editor/docTitle.ts`),
+  así que aplica entero el caso de referencia de `FUN-M-19` y las **seis reglas** del widget
+  interactivo ([[CodeMirror y la vista en vivo]]). No hay que inventar el mecanismo.
+- **Reutiliza**: la validación de nombres de `lib/db/nombres.ts` y el renombrado que ya usa el
+  explorador. Lo nuevo es la edición en sitio y qué hacer ante un nombre inválido o repetido.
+
+> [!warning] Depende de `FUN-M-08` más de lo que parece
+> Mientras los `[[enlaces]]` no se reescriban al renombrar, cada renombrado deja enlaces rotos
+> **sin avisar**. Eso hoy se tolera porque renombrar es un acto deliberado: hay que ir al
+> explorador a buscarlo. Poner el renombrado en el título lo vuelve **cotidiano y accidental**
+> —basta con escribir sobre lo que parece texto normal—, y una molestia conocida se convierte
+> en pérdida de datos diaria. **Sacar `FUN-M-08` antes, o las dos juntas.**
+
+- **A definir**: si se confirma con `Enter` y se descarta con `Escape` (coherente con las
+  celdas y las propiedades); qué pasa si el nombre nuevo ya existe; y si el archivo tiene un
+  título `# ` en el cuerpo, cuál manda.
 
 ### Pendientes — tamaño L
 
@@ -954,6 +977,13 @@ diseñarlo pesa más el dibujado que la agregación.
 Las dos cambian **a qué apunta un `[[enlace]]`** y obligan a tocar la misma capa:
 resolución de wikilinks, autocompletado y grafo. `FUN-M-08` reescribe los enlaces al
 renombrar; `FUN-M-15` los resuelve por `aliases`. Separadas, esa capa se toca dos veces.
+
+> [!warning] `FUN-M-24` vuelve este bloque urgente
+> Poner el renombrado en el **título del documento** —donde uno escribe sin pensar— multiplica
+> las veces que se renombra, y hoy cada renombrado **rompe en silencio** los `[[enlaces]]` que
+> apuntaban al nombre viejo. Conviene que `FUN-M-08` salga **antes**, o al menos junto con
+> ella; si no, la funcionalidad nueva convierte una molestia conocida en pérdida de datos
+> cotidiana.
 
 #### M · Adoptar un vault que ya existía — `FUN-M-15` + `FUN-M-17` + `FUN-S-10` · minor · ambas
 El **caso de entrada** de Mycelium: alguien abre su proyecto de siempre y no tiene ni una
