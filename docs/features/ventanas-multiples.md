@@ -137,10 +137,18 @@ no cuesta nada —las asociaciones de archivo apuntan al ejecutable **instalado*
 camino no se puede ejercitar en `tauri dev` de todos modos— y a cambio se puede tener el
 Mycelium instalado abierto al lado del que se está desarrollando.
 
-Para levantar un segundo Mycelium de desarrollo hay `npm run tauri:otra`, que reutiliza el
-`next dev` ya en marcha (`--config` con `beforeDevCommand: null`) en vez de arrancar otro
-servidor en un puerto que `devUrl` no mira. **Es una herramienta de desarrollo, no un modo
-de uso**: dos procesos pueden abrir el mismo vault, que es justo lo que la instancia única
+Para levantar un segundo Mycelium de desarrollo hay `npm run tauri:otra`, que **ejecuta
+directamente el binario ya compilado** (`src-tauri/target/debug/app.exe`). Como está
+construido en modo desarrollo, se conecta solo al `next dev` que ya esté en marcha.
+
+> [!warning] No sirve un segundo `tauri dev`
+> El primer intento fue `tauri dev` con el `beforeDevCommand` anulado, para no pelear por el
+> puerto 3000. **No funciona**: `tauri dev` siempre corre `cargo run`, que **reenlaza el
+> binario**, y Windows no deja reemplazar un `.exe` que se está ejecutando — falla con
+> «Acceso denegado (os error 5)». El puerto era solo la mitad del problema.
+
+**Es una herramienta de desarrollo, no un modo de uso**: dos procesos tienen cada uno su
+`VentanasState`, así que **sí pueden abrir el mismo vault** — justo lo que la instancia única
 impide en producción.
 
 ---
