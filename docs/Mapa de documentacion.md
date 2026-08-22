@@ -68,6 +68,8 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
   (`FUN-L-03`). Continuación directa de [[metadata-yaml]].
 - [[edicion-en-el-render]] — las propiedades y las tablas dejan de abrirse en crudo con el
   cursor dentro y se editan renderizadas (`FUN-M-19` · `FUN-L-19`).
+- [[otros-tipos-de-archivo]] — abrir texto, código, PDF e imágenes en un visor propio
+  (`FUN-L-11`). Solo-desktop.
 - [[esporas-plantillas]] — plantillas de notas ("Esporas") con variables (`FUN-M-03`).
 - [[autoactualizacion]] — aviso diario de versión nueva, actualización con un clic y
   selección de versión en modo avanzado (`FUN-L-14` + `FUN-M-16`).
