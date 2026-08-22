@@ -5,7 +5,7 @@ Un vault no tiene solo markdown. Tiene el PDF que descargaste, la captura que pe
 **lista** (`FUN-S-03`); esto es poder **abrirlos**.
 
 > [!info] Estado
-> Especificada el 2026-08-18. **Sin implementar.**
+> Especificada el 2026-08-18. **Implementada en desktop** el 2026-08-22 (sin confirmar).
 >
 > **Solo-desktop**, y no por comodidad: en web los archivos que no son notas no existen en
 > ninguna parte. No hay carpeta que recorrer, y subirlos a R2 sería una funcionalidad entera
@@ -103,6 +103,37 @@ convierte en una.
   4. Dividir el panel con un visor abierto, y arrastrar su pestaña a otro panel.
   5. Cerrar el vault, **borrar el archivo desde fuera** y reabrir → la pestaña no reaparece rota.
   6. Comprobar que ninguno de esos archivos aparece en la búsqueda, en el grafo ni al escribir `[[`.
+
+---
+
+## 7. Cómo quedó implementado (2026-08-22)
+
+| Pieza | Dónde |
+|---|---|
+| Pestaña `archivo:<ruta>` | `lib/otrosArchivos.ts` (prefijo y helpers) · `stores/tabsStore.ts` (`esSentinela`) |
+| Visor por tipo | `components/visor/VisorArchivo.tsx` |
+| Texto/código | comando Rust `leer_archivo_visor` (`src-tauri/src/archivos.rs`) |
+| PDF e imagen | protocolo `asset:` + `convertFileSrc`; ámbito en `ventanas::registrar_vault` |
+| Abrir con el sistema | comando Rust `abrir_con_sistema` (`src-tauri/src/vault_fs.rs`) |
+| Pestañas fantasma | `tabsStore.reconcileArchivos` desde `app/(workspace)/workspace/page.tsx` |
+
+Tres decisiones que la spec no fijaba y hubo que tomar:
+
+- **`leer_archivos` no se reutilizó**, aunque la § 3 lo daba por hecho. Ese comando omite
+  **en silencio** lo que no es UTF-8 —que es lo correcto para el indexador, que solo quiere
+  lo que puede indexar— y no tiene noción de tamaño. El visor necesita justo lo contrario:
+  distinguir «no existe» de «no es texto» de «es demasiado grande», porque cada caso se le
+  cuenta al usuario distinto (§ 4). De ahí `leer_archivo_visor`, que devuelve el fragmento
+  más `bytes`, `truncado` y `binario`.
+- **El ámbito del protocolo `asset:` se abre en runtime**, al registrar el vault, y no en
+  `tauri.conf.json`: la carpeta la elige el usuario. Es de la app y no de la ventana, así
+  que con varios vaults abiertos (`FUN-L-16`) quedan permitidas todas sus carpetas —siguen
+  siendo carpetas que el usuario abrió—. Revocar al cerrar **no** es opción: el `forbid` del
+  scope tiene prioridad sobre el `allow`, así que prohibir una carpeta impediría reabrirla
+  en toda la corrida.
+- **El corte por tamaño es de 2 MB** (`MAX_BYTES_VISOR`), con tope duro de 8 MB en Rust, y
+  se corta en el último salto de línea. Un carácter multibyte partido por el corte **no**
+  cuenta como «no es UTF-8»: se distingue por `Utf8Error::error_len() == None`.
 
 ## Relacionadas
 
