@@ -267,6 +267,12 @@ Un `[[wikilink]]` escrito en una propiedad de tipo texto **no se muestra como en
 # DEF-072
 La **numeración de las consolas nunca se reutiliza**: si se abren tres y se cierra una, la siguiente es la 4 y no la 3. Peor, se pueden llegar a **repetir números** — con una consola 5 abierta y solo tres en total, la siguiente sería la 4 y la de después otra 5.
 
+# DEF-073
+**Abrir varias ventanas no funciona**, que es lo que prometía `FUN-L-16`. Dos formas:
+
+1. Con Mycelium abierto, **doble clic en el acceso directo o en el ejecutable no abre nada**: se levanta la ventana que ya estaba.
+2. El botón **«Abrir en una ventana nueva»** del selector de vaults **rompe la app**: la ventana original queda **congelada** y la nueva se abre **en blanco**.
+
 ---
 
 > [!warning] Defectos sin reporte original

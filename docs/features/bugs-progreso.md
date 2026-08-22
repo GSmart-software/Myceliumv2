@@ -62,8 +62,34 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-070 | El tipo de una propiedad no se puede cambiar sin borrarla y rehacerla | ambas (frontend) | ⬜ pendiente |
 | DEF-071 | Un `[[wikilink]]` en una propiedad no enlaza dentro de un archivo tabla | ambas (frontend) | ⬜ pendiente |
 | DEF-072 | La numeración de las consolas no se reutiliza y puede repetirse | desktop | ⬜ pendiente |
+| DEF-073 | Abrir varias ventanas no funciona: congela la app o no abre nada | desktop | 🛠️ desktop (2026-08-18) — el comando pasa a `async`; sin confirmar |
 
 ## Notas por bug
+
+- **DEF-073 — `build()` de una ventana se cuelga si se lo llama desde un comando síncrono.**
+  Está en la documentación de Tauri, en el propio método: *«On Windows, this function
+  deadlocks when used in a synchronous command and event handlers»*
+  (`tauri-2.11.5/src/webview/webview_window.rs:115`). Es un problema de WebView2.
+
+  El motivo: los comandos **síncronos** de Tauri corren en el **hilo principal**, que es el
+  que atiende el bucle de eventos que la creación de la ventana necesita. Se esperan
+  mutuamente. De ahí el síntoma exacto: la ventana original congelada —su hilo está
+  bloqueado— y la nueva en blanco —su webview nunca termina de inicializarse—. Se corrige
+  haciendo el comando `async`, que corre fuera del hilo principal.
+
+  La segunda mitad, que el doble clic en el acceso directo no abriera nada, **no era un
+  fallo sino una decisión mal tomada**: el callback de instancia única levantaba la ventana
+  existente. Tiene sentido para una asociación de archivo —la nota va donde estás mirando—
+  pero no para un lanzamiento a secas, que es justo pedir otra ventana. Ahora, sin archivos
+  en el `argv`, se abre una ventana nueva en el selector de vaults. También va por el
+  runtime asíncrono: el callback corre en el hilo principal y `build()` ahí se cuelga igual.
+
+> [!warning] `FUN-L-16` se publicó sin haberse confirmado nunca
+> Salió en la 1.6.1 marcada como «implementada, sin confirmar», y la 1.6.1 quedó absorbida
+> por la 1.6.2 sin que nadie la probara empaquetada. Yo mismo escribí que se podía probar en
+> desarrollo — y es cierto para casi todo, **menos justo para esto**: el bloqueo es de
+> WebView2 en Windows y no se manifiesta igual con el servidor de desarrollo. Una
+> funcionalidad cuya verificación depende del paquete **no puede darse por buena en dev**.
 
 - **DEF-059 — el panel de búsqueda oculto envenena el margen de scroll.** Causa encontrada
   el 2026-08-17 por **tres investigaciones independientes que convergieron**, tras cinco
