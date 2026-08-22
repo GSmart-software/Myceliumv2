@@ -135,6 +135,51 @@ Tres decisiones que la spec no fijaba y hubo que tomar:
   se corta en el último salto de línea. Un carácter multibyte partido por el corte **no**
   cuenta como «no es UTF-8»: se distingue por `Utf8Error::error_len() == None`.
 
+## 7. Editar los archivos de texto (`FUN-M-26`)
+
+Añadido el 2026-08-18, encima de lo anterior. **El visor sigue abriéndose en solo lectura**;
+editar es un modo al que se entra a propósito, con un botón. «Abrir con el sistema» se queda
+donde está.
+
+### Por qué no se edita de entrada
+
+Estos archivos **no tienen la red de seguridad que tienen las notas**: no se indexan, no van a
+la papelera de Mycelium, no hay historial ni respaldo. Un guardado equivocado no se deshace
+desde la app. Por eso el modo de solo lectura es el default y editar es una decisión
+consciente, no el estado en el que te encontrás sin querer.
+
+### Lo que NO se puede editar, y hay que impedirlo
+
+> [!danger] Un archivo truncado no se guarda jamás
+> El visor corta a 2 MB y muestra el principio. Si se pudiera editar y guardar **ese
+> fragmento**, se borraría todo el resto del archivo — silenciosamente y sin vuelta atrás. El
+> botón de editar **no existe** para un archivo truncado; no alcanza con deshabilitarlo.
+
+Tampoco se edita lo que no decodificó como UTF-8: si Mycelium no pudo leerlo, no puede
+reescribirlo sin destruirlo.
+
+### Cómo se guarda
+
+- **Guardado explícito** (`Ctrl+S`), no automático. Las notas se autoguardan porque tienen
+  papelera e historial detrás; esto no. Que el usuario decida cuándo escribir es parte de la
+  misma prudencia.
+- **Indicador de cambios sin guardar**, y aviso al cerrar la pestaña con cambios pendientes.
+- **Escritura atómica**, como la de `vault_fs`: escribir a un temporal y renombrar. Un corte a
+  mitad de escritura no debe dejar el archivo a medias.
+- **Detección de conflicto**: se guarda el `mtime` al abrir y se comprueba antes de escribir.
+  Si el archivo cambió desde fuera, **no se pisa**: se avisa y se deja elegir.
+
+### El editor
+
+CodeMirror en configuración mínima —deshacer, selección, números de línea— y **sin** vista en
+vivo, sin markdown y sin resaltado de sintaxis (eso sigue siendo `FUN-S-09`). Es el mismo
+motor que ya usa el editor de notas: no se suma nada al bundle y el deshacer viene resuelto.
+
+### Lo que sigue igual
+
+No entran al índice: ni búsqueda del vault, ni autocompletado de `[[`, ni grafo. Editar un
+`.json` no lo convierte en una nota.
+
 ## Relacionadas
 
 - [[BACKLOG]] — `FUN-L-11`, y `FUN-S-09` (resaltado) que depende de este.
