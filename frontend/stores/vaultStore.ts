@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { api } from "@/lib/api";
+import { reescribirEnlaces } from "@/lib/enlaces";
 import { useAuthStore } from "@/stores/authStore";
 import { useGraphStore } from "@/stores/graphStore";
 import { refreshAllLiveViews } from "@/lib/editor/livePreview";
@@ -98,6 +99,46 @@ let treeSeq = 0;
 // expira por seguridad pasado el período (si el servidor nunca confirma).
 const pendingMoves = new Map<string, { parent: string | null; ts: number }>();
 const MOVE_GRACE_MS = 60_000;
+
+
+/**
+ * Reescribe los `[[enlaces]]` de las notas que apuntaban a `viejo` (`FUN-M-08`).
+ *
+ * Va por `api()`, así que sirve igual en las dos versiones: acá es el backend
+ * .NET y en desktop el dispatcher local.
+ *
+ * **Solo toca las notas que ya enlazaban** —las que devolvió `conexiones`—, no
+ * el vault entero: renombrar tiene que costar lo que cuesta el renombrado, no
+ * una pasada por todos los archivos.
+ *
+ * Si una nota falla se sigue con las demás: es preferible reparar nueve de diez
+ * enlaces que abortar y dejar los diez rotos.
+ */
+async function reescribirEnlacesEntrantes(
+  entrantes: { id: string }[],
+  viejo: string,
+  nuevo: string,
+  token: string | null | undefined,
+): Promise<void> {
+  for (const { id } of entrantes) {
+    try {
+      const actual = await api<{ contenido: string | null }>(
+        `/notas/${encodeURIComponent(id)}/contenido`,
+        { token },
+      );
+      const texto = actual.contenido ?? "";
+      const { texto: nuevoTexto, cambios } = reescribirEnlaces(texto, viejo, nuevo);
+      if (cambios === 0) continue;
+      await api(`/notas/${encodeURIComponent(id)}/contenido`, {
+        method: "PUT",
+        token,
+        body: { contenido: nuevoTexto },
+      });
+    } catch {
+      // Una nota ilegible o un fallo de red no debe frenar al resto.
+    }
+  }
+}
 
 export const useVaultStore = create<VaultState>()(
   persist(
@@ -263,7 +304,32 @@ export const useVaultStore = create<VaultState>()(
       },
 
       async renameNota(id, titulo) {
+        // FUN-M-08: los `[[enlaces]]` resuelven por titulo, asi que renombrar
+        // los rompe todos. Se leen los retroenlaces ANTES de renombrar —despues
+        // ya no apuntan a nada y el grafo no los encuentra— y se reescriben
+        // despues, cuando el titulo nuevo ya es el bueno.
+        const anterior = get().notas.find((n) => n.id === id)?.titulo ?? null;
+        const cambiaTitulo = anterior !== null && anterior !== titulo;
+        let entrantes: { id: string }[] = [];
+        if (cambiaTitulo) {
+          try {
+            const con = await api<{ retro: { id: string }[] }>(
+              `/notas/${encodeURIComponent(id)}/conexiones`,
+              { token: token() },
+            );
+            entrantes = con.retro;
+          } catch {
+            // Sin retroenlaces no se puede reescribir, pero el renombrado en si
+            // no depende de esto: se sigue igual.
+            entrantes = [];
+          }
+        }
+
         await api(`/notas/${id}`, { method: "PATCH", token: token(), body: { titulo } });
+
+        if (cambiaTitulo) {
+          await reescribirEnlacesEntrantes(entrantes, anterior!, titulo, token());
+        }
         await get().loadTree(get().vaultId!);
         markGraphStale();
       },
