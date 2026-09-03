@@ -129,13 +129,36 @@ entre ramas):
   > Misma trampa que con las Esporas: acá el id de una carpeta es un **UUID** y no dice
   > nada del nombre, así que `file.folder` y `file.inFolder()` no significarían nada sin
   > subir por los padres hasta la raíz. En desktop el id **es** la ruta y sale gratis.
-- **Auditoría y re-enlazado (`FUN-L-17` + núcleo de `FUN-M-17`, 2026-08-08, hoy solo-desktop)**:
-  `frontend/lib/enlaces.ts` (núcleo puro), `scripts/test-enlaces.mjs` y
-  `components/enlaces/RelinkView.tsx` son **compartibles** y se traerían enteros. Lo que
-  **no** existe en web es su cimiento: `frontend/lib/db/enlaces.ts` respalda en
-  `.mycelium/` y lee el léxico de `.claude/`, dos rutas del sistema de archivos. Llevarlo a
-  web **no es un reflejo**: hay que decidir dónde vive el léxico y cómo se respalda sin
-  disco. Ver [[auditoria-y-relinkeado]] § 17.
+- **Auditoría y re-enlazado (`FUN-L-17` + núcleo de `FUN-M-17`, 2026-08-08)**:
+  `frontend/lib/enlaces.ts` (núcleo puro) y `scripts/test-enlaces.mjs` **ya están en las dos
+  ramas** desde el reflejo de `FUN-M-08` (2026-09-03): son idénticos y se traen enteros con
+  un `checkout`. `components/enlaces/RelinkView.tsx` es igual de compartible pero **todavía
+  no está en web**, porque **no** existe su cimiento: `frontend/lib/db/enlaces.ts` respalda
+  en `.mycelium/` y lee el léxico de `.claude/`, dos rutas del sistema de archivos. Llevar
+  la *pantalla* a web **no es un reflejo**: hay que decidir dónde vive el léxico y cómo se
+  respalda sin disco. Ver [[auditoria-y-relinkeado]] § 17.
+  > [!info] En web, `lib/enlaces.ts` hoy solo se usa por `reescribirEnlaces`
+  > El resto del módulo viaja igual, a propósito: mantenerlo idéntico entre ramas hace que
+  > el próximo reflejo siga siendo un `checkout` directo en vez de una cirugía.
+- **Reescritura de enlaces al renombrar (`FUN-M-08`, las dos ramas, ✅ reflejado 2026-09-03)**:
+  `frontend/lib/enlaces.ts` y `scripts/test-enlaces.mjs` se traen **enteros**; el cableado
+  vive en `frontend/stores/vaultStore.ts`, que **diverge**, y se aplica a mano. La lógica es
+  la misma —los dos leen `/notas/{id}/conexiones` antes del `PATCH` y reescriben el
+  contenido después, todo por `api()`—; lo único que cambia es que en desktop el renombrado
+  **cambia el id** (=ruta) y hay que remapear la pestaña abierta, mientras que en web el id
+  es un UUID y no se mueve. Desktop `4735cb5`, web `1134b91`.
+- **Extensión en el nombre (`FUN-S-03`, ✅ reflejado 2026-09-03, a medias por naturaleza)**:
+  la mitad visible —`EXTENSION_POR_TIPO` y el `<span>` del nombre en `ExplorerPanel.tsx`—
+  se aplica **a mano** (el archivo diverge) y queda igual en las dos. La otra mitad —**dejar
+  de ocultar los archivos que Mycelium no indexa**— es **solo-desktop**: se apoya en
+  `listar_otros_archivos` de `src-tauri/src/archivos.rs` y en `lib/otrosArchivos.ts`, que
+  recorren la carpeta del vault. En web no hay carpeta que recorrer. Desktop `0993166` +
+  `083ae26` + `3ae4167`, web `ec7d01e`.
+- **Visor de otros tipos y su edición (`FUN-L-11` + `FUN-M-26`, solo-desktop)**:
+  `lib/otrosArchivos.ts` y `components/visor/VisorArchivo.tsx` **no se reflejan**. Leen y
+  escriben archivos sueltos de la carpeta del vault por comandos de Tauri (`asset:` para
+  PDF e imagen), y esos archivos **no existen en ninguna parte** en web. Ver
+  [[otros-tipos-de-archivo]] y [[Diferencias funcionales aceptadas entre versiones]].
 - **Canvas (`FUN-L-18`, las dos ramas, 2026-08-08)**: `frontend/lib/canvas.ts`,
   `scripts/test-canvas.mjs` y `components/canvas/*` son **compartidos** y se traen enteros.
   Lo que hay que aplicar a mano es el tipo de archivo, que toca los mismos sitios que ya

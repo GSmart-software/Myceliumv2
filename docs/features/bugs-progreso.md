@@ -62,7 +62,7 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-070 | El tipo de una propiedad no se puede cambiar sin borrarla y rehacerla | ambas (frontend) | ⬜ pendiente |
 | DEF-071 | Un `[[wikilink]]` en una propiedad no enlaza dentro de un archivo tabla | ambas (frontend) | ⬜ pendiente |
 | DEF-072 | La numeración de las consolas no se reutiliza y puede repetirse | desktop | ⬜ pendiente |
-| DEF-073 | Abrir varias ventanas no funciona: congela la app o no abre nada | desktop | 🛠️ desktop (2026-08-18) — el comando pasa a `async`; sin confirmar |
+| DEF-073 | Abrir varias ventanas no funciona: congela la app o no abre nada | desktop | ✅ desktop (2026-08-18) — el comando pasa a `async`; **confirmado sobre el binario de release** el 2026-09-03 |
 
 ## Notas por bug
 
