@@ -273,6 +273,21 @@ La **numeración de las consolas nunca se reutiliza**: si se abren tres y se cie
 1. Con Mycelium abierto, **doble clic en el acceso directo o en el ejecutable no abre nada**: se levanta la ventana que ya estaba.
 2. El botón **«Abrir en una ventana nueva»** del selector de vaults **rompe la app**: la ventana original queda **congelada** y la nueva se abre **en blanco**.
 
+# DEF-074
+El texto envuelto en **guiones bajos** (`_texto_`, `__texto__`, `___texto___`) **no recibe el estilo propio de Mycelium**: se ve igual que el equivalente con asteriscos. Debería distinguirse — el guion bajo tiene su propio tratamiento visual, y esa es justamente la diferencia por la que existen las dos sintaxis en Mycelium, que en Markdown estándar son intercambiables.
+
+El reporte lo emparenta con `DEF-062` y `DEF-064`, los otros dos casos de algo que **queda sin renderizar** en el editor.
+
+> [!question] Falta acotar en qué vista
+> El reporte no dice si pasa en la vista en vivo, en la de lectura o en las dos, ni si es
+> constante o intermitente como sus dos parientes. Los tres niveles (`_`, `__`, `___`)
+> pueden comportarse distinto.
+
+# DEF-075
+En la **vista de lectura**, los títulos que se pliegan **vuelven a quedar desplegados solos** al poco rato, sin que el usuario toque nada ni cambie de pestaña.
+
+Es de la misma familia que `DEF-065` —el plegado se pierde al cambiar de pestaña— pero se dispara **sin ninguna acción**: acá el plegado no sobrevive a la simple permanencia en la nota.
+
 ---
 
 > [!warning] Defectos sin reporte original

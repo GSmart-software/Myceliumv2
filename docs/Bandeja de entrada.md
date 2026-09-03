@@ -82,6 +82,8 @@ lo digo.
 | 2026-08-18 | Buscador dentro de las tablas, por coincidencia o exacto | `FUN-S-14` `BASES-BUSCADOR` |
 | 2026-08-18 | Ordenar las tablas por cualquiera de los campos mostrados | `FUN-S-15` `BASES-ORDENAR` |
 | 2026-08-18 | Ajustar el ancho de las columnas de las tablas | `FUN-M-25` `BASES-ANCHO-COLUMNAS` |
+| 2026-09-03 | Lo que va entre guiones bajos no se renderiza con su estilo propio | `DEF-074` (queda por acotar en qué vista) |
+| 2026-09-03 | En lectura, los títulos plegados se vuelven a desplegar solos | `DEF-075` |
 
 > [!note] Esta tabla se puede vaciar cuando moleste
 > Es una comodidad para que veas en qué terminó cada cosa, no un registro canónico. La
