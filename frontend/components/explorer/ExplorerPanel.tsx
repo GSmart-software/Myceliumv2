@@ -1000,7 +1000,17 @@ function NoteRow({
       {rename.renaming ? (
         <RenameInput {...rename} />
       ) : (
-        <span className={styles.name}>{nota.titulo}</span>
+        // FUN-S-03: un `.excalidraw`, un `.base` y un `.canvas` se veian iguales
+        // que un markdown, porque el titulo va sin extension. Va PEGADA al
+        // nombre y no en un `<span>` aparte: el usuario lee `nota.md`, un solo
+        // texto, y no dos cosas separadas. El renombrado sigue editando solo el
+        // titulo —la extension la decide el tipo de archivo, no el usuario— y
+        // este texto no identifica nada: los ids salen del indice.
+        <span className={styles.name}>
+          {EXTENSION_POR_TIPO[nota.tipo] !== undefined
+            ? `${nota.titulo}.${EXTENSION_POR_TIPO[nota.tipo]}`
+            : nota.titulo}
+        </span>
       )}
       {shared && !rename.renaming && (
         <Users size={12} className={styles.sharedIcon} aria-label="Compartido" />
@@ -1008,6 +1018,21 @@ function NoteRow({
     </div>
   );
 }
+
+/**
+ * Extensión que se muestra junto al nombre, por tipo de nota (`FUN-S-03`).
+ *
+ * **También el markdown**: omitirlo haría que la única fila sin extensión sea la
+ * más común, y se leería como si le faltara algo en vez de como el caso normal.
+ * Con todas puestas, la columna es uniforme y la extensión pasa a ser
+ * información y no una excepción.
+ */
+const EXTENSION_POR_TIPO: Record<string, string | undefined> = {
+  markdown: "md",
+  excalidraw: "excalidraw",
+  base: "base",
+  canvas: "canvas",
+};
 
 /** Zona raíz: soltar aquí mueve a la raíz del vault; clic limpia la carpeta activa. */
 function RootDropZone({
