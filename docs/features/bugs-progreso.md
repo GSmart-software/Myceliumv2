@@ -49,7 +49,7 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-057 | En la vista de lectura el buscador de texto no encuentra nada | ambas (frontend) | ✅ 🌐 (2026-08-17) — búsqueda sobre el DOM del preview, resaltada sin tocarlo |
 | DEF-058 | Al volver de lectura a edición el foco se queda en los botones de vista | ambas (frontend) | ✅ 🌐 (2026-08-17) — se devuelve el foco al editor |
 | DEF-059 | Con el buscador abierto, las flechas hacen saltar el documento | ambas (frontend) | ✅ 🌐 (2026-08-17) — el panel pasa a declararse superior; causa hallada por tres investigaciones convergentes |
-| DEF-060 | El panel de propiedades se abre en todas las pestañas a la vez | ambas (frontend) | ⬜ pendiente |
+| DEF-060 | El panel de propiedades se abre en todas las pestañas a la vez | ambas (frontend) | ✅ ambas (2026-09-04) — el estado pasa a vivir en el propio pane; **confirmado en la app** y reflejado a web |
 | DEF-061 | El campo de la clave ocupa todo el ancho y empuja el ícono del tipo abajo | ambas (frontend) | ⬜ pendiente — el usuario ya probó que `width: 90%` lo resuelve |
 | DEF-062 | En edición, a veces los títulos no se renderizan y se ven los `#` | ambas (frontend) | ✅ ambas (2026-09-03) — el árbol de sintaxis llegaba a medias y nada recalculaba al completarse; **confirmado en la app** y reflejado a web |
 | DEF-063 | El texto de una celda no ocupa la celda: el clic en el hueco no edita | ambas (frontend) | ⬜ pendiente — el usuario ya probó que `width: 100%` lo resuelve |
@@ -68,6 +68,34 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-076 | Un `[[wikilink]]` dentro de una tabla no navega al hacerle clic | ambas (frontend) | ✅ ambas (2026-09-04) — el widget anulaba el `href` y no hacía nada más; **confirmado en la app** y reflejado a web |
 
 ## Notas por bug
+
+- **DEF-060 — el estado era del pane, y estaba en el store equivocado.**
+  `rightOpen` era **un** booleano en `panelLayoutStore` que leían los tres consumidores (cada
+  `NoteEditor`, la barra y `Ctrl+Shift+\`), así que con la pantalla dividida abrirlo en un
+  pane lo abría en todos.
+
+  Lo obvio era un mapa `paneId → bool` en el mismo store. **No se hizo**: ese mapa acumularía
+  entradas de panes ya cerrados y habría que acordarse de podarlas — el problema exacto que
+  `cleanLinks` tuvo que resolver para los vínculos de preview (HU-27 CA5). En su lugar vive en
+  el propio pane (`LeafPane.panelAbierto`), junto a `linkedTo` y `linkedScrollSync`: se
+  persiste con el layout, muere con el pane y `pruneEmpty` lo limpia solo.
+
+  El campo es **opcional** a propósito, siguiendo el patrón que el propio store documenta para
+  `historial`/`indice`: los layouts guardados antes no lo traen y se leen como cerrado, así
+  que no hay que subir la versión del `persist` de pestañas — subirla sin `migrate` haría que
+  zustand descartara el estado y el usuario perdiera todas sus pestañas.
+
+  El **ancho** se queda global a propósito: con el panel abierto en dos panes, anchos
+  distintos no aportan nada y obligarían a redimensionar uno por uno. La versión del persist
+  de *layout* (otro store) sube a 2 solo para descartar la clave `rightOpen`.
+
+  Desktop `1d7732d`, web `a9e9b49`. **El reflejo no fue un `checkout`**: de los cinco archivos
+  solo `EditorToolbar.tsx` era compartido; `tabsStore`, `panelLayoutStore`, `NoteEditor` y la
+  página del workspace divergen (el `RailSection` sin `terminal`, y todo lo que web tiene de
+  auth y de sesión), así que el cambio se aplicó a mano en cada uno.
+
+  **Efecto visible al actualizar**: el panel arranca cerrado en todos los panes, sin importar
+  cómo hubiera quedado el booleano global.
 
 - **DEF-076 — el evento tenía que atenderse en el widget, y en `mousedown`.**
   El widget de la tabla anulaba el `href` de todos sus enlaces y no hacía nada más, dando
