@@ -58,7 +58,7 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-066 | El botón «Exportar nota» ya no describe lo que hace su menú | ambas (frontend) | ✅ ambas (2026-09-04) — pasa a «Más opciones»; el `aria-label` ya lo decía y el que se había quedado atrás era el `title`; **confirmado en la app** y reflejado a web (desktop `5a7211a`, web `7aa85af`) |
 | DEF-067 | El menú de autocompletado no lleva los estilos de Mycelium | ambas (frontend) | ✅ ambas (2026-09-04) — es el de `[[`; las reglas ya existían y perdían por especificidad; **confirmado en la app** y reflejado a web |
 | DEF-068 | La opción marcada de un campo se ve en blanco, fuera de la paleta | ambas (frontend) | ✅ ambas (2026-09-04) — faltaba `select option:checked`; **confirmado en la app** y reflejado a web |
-| DEF-069 | El explorador no marca las carpetas que contienen el archivo abierto | ambas (frontend) | ⬜ pendiente |
+| DEF-069 | El explorador no marca las carpetas que contienen el archivo abierto | ambas (frontend) | ✅ ambas (2026-09-04) — el fondo pasa a derivarse del archivo abierto en vez de ser un estado de clic; **confirmado en la app** y reflejado a web |
 | DEF-070 | El tipo de una propiedad no se puede cambiar sin borrarla y rehacerla | ambas (frontend) | ⬜ pendiente |
 | DEF-071 | Un `[[wikilink]]` en una propiedad no enlaza dentro de un archivo tabla | ambas (frontend) | ⬜ pendiente |
 | DEF-072 | La numeración de las consolas no se reutiliza y puede repetirse | desktop | ⬜ pendiente |
@@ -69,6 +69,33 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-077 | Las sugerencias de clave del campo «Nueva propiedad» no llevan los estilos de Mycelium | ambas (frontend) | ✅ ambas (2026-09-04) — era un `<datalist>`, que no deja estilar nada; se reemplazó por una lista propia; **confirmado en la app** y reflejado a web |
 
 ## Notas por bug
+
+- **DEF-069 — el arreglo no era sincronizar mejor, era dejar de sincronizar.**
+  La única carpeta marcada era `activeFolderId`: «la última carpeta pulsada», que además es el
+  destino de «nota nueva», «carpeta nueva» e importar. Podía no tener nada que ver con lo que
+  se estaba mirando.
+
+  Los **dos primeros intentos fallaron por la misma razón**, y vale la pena que quede escrito:
+
+  1. Marcar la rama del archivo *aparte* dejaba el fondo donde estaba → dos marcas compitiendo
+     y ninguna decía «dónde estoy».
+  2. Sincronizar `activeFolderId` con el archivo en un `useEffect` sobre `activeNoteId` seguía
+     fallando en dos casos que el usuario encontró enseguida: pulsar una carpeta la dejaba
+     sombreada igual, y **recuperar el foco en el archivo no devolvía la marca** —porque el
+     foco no cambia `activeNoteId`, así que había que pulsar la pestaña—.
+
+  Lo que resolvió el defecto fue cambiar la naturaleza del dato: el fondo se **deriva** de qué
+  archivo está abierto. Siendo derivado no puede quedarse viejo ni necesita refresco, y los dos
+  casos desaparecen por construcción en vez de por un efecto que los persiga.
+
+  > [!tip] La regla
+  > Si una marca describe «dónde estás», tiene que **calcularse** de dónde estás. En cuanto es
+  > un estado que alguien prende con un clic, hace falta acordarse de apagarlo — y siempre
+  > queda un camino por el que nadie se acordó.
+
+  `activeFolderId` conserva su trabajo pero pierde el fondo, y queda con una marca propia y
+  discreta que solo se pinta cuando **no** coincide con la carpeta del archivo. Desktop
+  `b853b88`, web `6a89a76`; los dos archivos divergen y el cambio se aplicó a mano.
 
 - **DEF-067 — las reglas ya estaban escritas y perdían por especificidad.**
   El menú es el del autocompletado de `[[`, y `styles/editor.css` ya tenía sus colores desde
