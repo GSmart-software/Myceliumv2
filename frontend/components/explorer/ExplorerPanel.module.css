@@ -125,8 +125,42 @@
   background-color: color-mix(in srgb, var(--mic-glow) 15%, transparent);
 }
 
+/* Dónde estás: la carpeta del archivo abierto (DEF-069). Se DERIVA de qué
+   archivo se está mirando, así que no puede quedar marcada una carpeta que no
+   tiene nada que ver ni hace falta refrescarla a mano. */
 .rowActive {
   background-color: color-mix(in srgb, var(--mic-glow) 12%, transparent);
+}
+
+/* La carpeta pulsada, que es otra cosa: el destino de «nota nueva», «carpeta
+   nueva» e importar. Antes se llevaba el fondo y por eso mentía sobre dónde
+   estabas; ahora lleva una marca aparte y a propósito discreta —el destino solo
+   importa en el momento de crear—. El `outline` no ocupa espacio, así que no
+   mueve la fila ni desalinea el árbol. */
+.rowSeleccionada {
+  outline: 1px dashed color-mix(in srgb, var(--mic-text-muted) 55%, transparent);
+  outline-offset: -2px;
+}
+
+/* El rastro hasta el archivo abierto (DEF-069).
+
+   El fondo marca la carpeta donde estás; esta barra marca el CAMINO hasta ella,
+   para que en un árbol hondo se vea de dónde cuelga y para que una carpeta
+   plegada avise de que el archivo está adentro. La carpeta madre lleva las dos,
+   y así se lee: el rastro termina donde está el fondo.
+
+   El `inset` va dentro de la caja para no correr el texto ni cambiar el alto de
+   la fila, que es lo que haría un `border-left`. */
+.rowEnRuta {
+  box-shadow: inset 2px 0 0 color-mix(in srgb, var(--mic-glow) 70%, transparent);
+}
+
+/* El nombre en seminegrita: la barra sola es discreta a propósito, y en un
+   árbol hondo conviene poder seguir la rama de un vistazo. El color NO se toca
+   —`.row` ya usa `--mic-text-primary`— para no competir con el resaltado de la
+   nota abierta, que es el que tiene que llevarse la vista. */
+.rowEnRuta .name {
+  font-weight: 600;
 }
 
 /* Carpeta destino resaltada durante el drag (HU-24 CA2 / HU-07) */

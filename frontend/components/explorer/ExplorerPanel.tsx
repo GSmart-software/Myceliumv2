@@ -200,6 +200,29 @@ export function ExplorerPanel() {
     () => new Map(store.carpetas.map((c) => [c.id, c])),
     [store.carpetas],
   );
+  /** Carpeta que contiene el archivo abierto (null si está en la raíz). */
+  const carpetaDelActivo = useMemo(
+    () => store.notas.find((n) => n.id === activeNoteId)?.carpetaId ?? null,
+    [activeNoteId, store.notas],
+  );
+
+  /**
+   * La rama que lleva al archivo abierto, de su carpeta hasta la raíz
+   * (`DEF-069`). Se marca entera y no solo la carpeta madre: se lee como un
+   * rastro, y una carpeta plegada avisa igual de que el archivo está adentro.
+   */
+  const carpetasDelActivo = useMemo(() => {
+    const cadena = new Set<string>();
+    let actual = carpetaDelActivo;
+    // Corta si vuelve a pasar por una carpeta ya vista: el árbol no debería
+    // tener ciclos, pero recorrerlo a ciegas colgaría el panel.
+    while (actual !== null && !cadena.has(actual)) {
+      cadena.add(actual);
+      actual = carpetasById.get(actual)?.padreId ?? null;
+    }
+    return cadena;
+  }, [carpetaDelActivo, carpetasById]);
+
   const isCarpetaShared = useCallback(
     (id: string | null): boolean => {
       let current = id;
@@ -481,7 +504,16 @@ export function ExplorerPanel() {
 
   function renderCarpeta(carpeta: TreeCarpeta, depth: number) {
     const isExpanded = store.expanded[carpeta.id] ?? false;
-    const isActive = store.activeFolderId === carpeta.id;
+    // El fondo marca DÓNDE ESTÁS, y eso se deriva del archivo abierto: no es un
+    // estado que alguien prenda y apague (`DEF-069`). Antes era
+    // `activeFolderId`, o sea «la última carpeta pulsada», que se quedaba
+    // marcada aunque estuvieras leyendo un archivo de otro lado y no volvía
+    // sola al recuperar el foco en él.
+    const isActive = carpetaDelActivo === carpeta.id;
+    // La carpeta pulsada, que es OTRA cosa: el destino de «nota nueva»,
+    // «carpeta nueva» e importar. Lleva una marca discreta y distinta, y solo
+    // cuando no coincide con la de arriba, para no marcar dos veces lo mismo.
+    const isSeleccionada = store.activeFolderId === carpeta.id && !isActive;
 
     return (
       <FolderDropZone
@@ -500,6 +532,8 @@ export function ExplorerPanel() {
           depth={depth}
           expanded={isExpanded}
           active={isActive}
+          seleccionada={isSeleccionada}
+          contieneActivo={carpetasDelActivo.has(carpeta.id)}
           dropOver={dropOver || osDropTarget === carpeta.id}
           shared={isCarpetaShared(carpeta.id)}
           renaming={renaming?.type === "carpeta" && renaming.id === carpeta.id}
@@ -878,6 +912,8 @@ function FolderRow({
   depth,
   expanded,
   active,
+  seleccionada,
+  contieneActivo,
   shared,
   dropOver,
   onToggle,
@@ -888,7 +924,12 @@ function FolderRow({
   carpeta: TreeCarpeta;
   depth: number;
   expanded: boolean;
+  /** Es la carpeta del archivo abierto: dónde estás (`DEF-069`). */
   active: boolean;
+  /** Es la carpeta pulsada, destino de «nota nueva» e importar. Marca discreta. */
+  seleccionada: boolean;
+  /** Está en la rama que lleva al archivo abierto (`DEF-069`). */
+  contieneActivo: boolean;
   shared: boolean;
   /** Resaltado de destino: arrastre interno sobre la zona de la carpeta o
    *  archivos del SO sobre ella (DEF-036b). Lo decide `FolderDropZone`. */
@@ -902,6 +943,8 @@ function FolderRow({
   const className = [
     styles.row,
     active ? styles.rowActive : "",
+    seleccionada ? styles.rowSeleccionada : "",
+    contieneActivo ? styles.rowEnRuta : "",
     dropOver ? styles.rowDropTarget : "",
     drag.isDragging ? styles.rowDragging : "",
   ]
