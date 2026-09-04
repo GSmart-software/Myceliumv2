@@ -16,6 +16,18 @@ public static partial class SearchEndpoints
     [GeneratedRegex(@"\[\[([^\[\]]+)\]\]")]
     private static partial Regex WikilinkRegex();
 
+    /// <summary>
+    /// El separador entre destino y alias de un `[[wikilink]]`. La barra
+    /// invertida es OPCIONAL (`DEF-045`): dentro de una tabla la barra vertical
+    /// separa celdas, así que la única forma de escribir un alias ahí es
+    /// escaparla (`[[Destino\|alias]]`), y las dos formas son el mismo enlace.
+    ///
+    /// Equivale a `SEPARADOR_ALIAS` de `frontend/lib/wikilinks.ts`. Acá va
+    /// aparte porque el grafo de la web lo arma el backend, no el cliente.
+    /// </summary>
+    [GeneratedRegex(@"\\?\|")]
+    private static partial Regex SeparadorAliasRegex();
+
     // #tag al inicio o tras un espacio/paréntesis (igual que el cliente).
     [GeneratedRegex(@"(?:^|[\s(])#([\p{L}\p{N}_/-]+)")]
     private static partial Regex TagRegex();
@@ -281,10 +293,12 @@ public static partial class SearchEndpoints
             foreach (Match m in WikilinkRegex().Matches(contenido))
             {
                 // [[destino|alias]] y [[Carpeta/destino]]: el enlace apunta al
-                // título (parte antes del `|`, último segmento de la ruta).
+                // título (parte antes del `|`, último segmento de la ruta). La
+                // barra puede venir escapada si el enlace vive en una tabla
+                // (`DEF-045`), y ahí también separa el alias.
                 var inner = m.Groups[1].Value;
-                var pipe = inner.IndexOf('|');
-                if (pipe >= 0) inner = inner[..pipe];
+                var alias = SeparadorAliasRegex().Match(inner);
+                if (alias.Success) inner = inner[..alias.Index];
                 var slash = inner.LastIndexOf('/');
                 var destino = (slash >= 0 ? inner[(slash + 1)..] : inner).Trim();
                 if (porTitulo.TryGetValue(destino, out var destinoId) && destinoId != notaId)
