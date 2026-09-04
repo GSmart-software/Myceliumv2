@@ -51,9 +51,9 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-059 | Con el buscador abierto, las flechas hacen saltar el documento | ambas (frontend) | ✅ 🌐 (2026-08-17) — el panel pasa a declararse superior; causa hallada por tres investigaciones convergentes |
 | DEF-060 | El panel de propiedades se abre en todas las pestañas a la vez | ambas (frontend) | ⬜ pendiente |
 | DEF-061 | El campo de la clave ocupa todo el ancho y empuja el ícono del tipo abajo | ambas (frontend) | ⬜ pendiente — el usuario ya probó que `width: 90%` lo resuelve |
-| DEF-062 | En edición, a veces los títulos no se renderizan y se ven los `#` | ambas (frontend) | ⬜ pendiente — probable pariente del `DEF-064` |
+| DEF-062 | En edición, a veces los títulos no se renderizan y se ven los `#` | ambas (frontend) | 🛠️ desktop (2026-09-03) — el árbol de sintaxis llegaba a medias y nada recalculaba al completarse; sin confirmar |
 | DEF-063 | El texto de una celda no ocupa la celda: el clic en el hueco no edita | ambas (frontend) | ⬜ pendiente — el usuario ya probó que `width: 100%` lo resuelve |
-| DEF-064 | A veces las tablas se quedan sin renderizar hasta forzar un repintado | ambas (frontend) | ⬜ pendiente — probable pariente del `DEF-062` |
+| DEF-064 | A veces las tablas se quedan sin renderizar hasta forzar un repintado | ambas (frontend) | 🛠️ desktop (2026-09-03) — el árbol de sintaxis llegaba a medias y nada recalculaba al completarse; sin confirmar |
 | DEF-065 | El plegado de un título se pierde al cambiar de pestaña | ambas (frontend) | ⬜ pendiente — misma familia que `DEF-039` |
 | DEF-066 | El botón «Exportar nota» ya no describe lo que hace su menú | ambas (frontend) | ⬜ pendiente |
 | DEF-067 | El menú de autocompletado no lleva los estilos de Mycelium | ambas (frontend) | ⬜ pendiente |
@@ -63,10 +63,26 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-071 | Un `[[wikilink]]` en una propiedad no enlaza dentro de un archivo tabla | ambas (frontend) | ⬜ pendiente |
 | DEF-072 | La numeración de las consolas no se reutiliza y puede repetirse | desktop | ⬜ pendiente |
 | DEF-073 | Abrir varias ventanas no funciona: congela la app o no abre nada | desktop | ✅ desktop (2026-08-18) — el comando pasa a `async`; **confirmado sobre el binario de release** el 2026-09-03 |
-| DEF-074 | El estilo propio del énfasis con `_` no se aplica: se ve como el de `*` | ambas (frontend) | ⬜ pendiente — falta acotar en qué vista; el reporte lo empareja con `DEF-062`/`DEF-064` |
+| DEF-074 | El estilo propio del énfasis con `_` no se aplica: se ve como el de `*` | ambas (frontend) | 🛠️ desktop (2026-09-03) — el árbol de sintaxis llegaba a medias y nada recalculaba al completarse; sin confirmar; era la vista en vivo, y la asimetría con `*` fue la pista |
 | DEF-075 | En lectura, los títulos plegados se despliegan solos al poco rato | ambas (frontend) | ⬜ pendiente — misma familia que `DEF-065` y `DEF-039` |
 
 ## Notas por bug
+
+- **DEF-062 · DEF-064 · DEF-074 — el árbol de sintaxis llega incompleto y nada lo reintenta.**
+  Los tres eran el mismo defecto con tres caras. CodeMirror parsea unos 20 ms al abrir el
+  documento y sigue en segundo plano: con la configuración real del editor, una nota de
+  **2 KB nace con el 13 % del árbol** (3 títulos de 20, 2 tablas de 20, 3 énfasis de 20) y
+  una de 40 KB con el 7 %. El live preview decora leyendo `syntaxTree`, así que lo que el
+  parser no vio no se decora — y cuando el parser avanza despacha una transacción que **no
+  cambia el documento, ni la selección, ni el viewport**, que eran las únicas condiciones
+  que disparaban el recálculo. Lo que nacía crudo se quedaba crudo.
+
+  Los rodeos que ya se conocían —teclear, cambiar de vista y volver, apagar y encender el
+  renderizado de tablas— son, todos, formas de provocar la transacción que faltaba.
+
+  El arreglo compara el árbol por identidad en `tableField` y en el ViewPlugin de
+  decoraciones inline, igual que hace el resaltador del propio CodeMirror. Medición,
+  asimetría y principio general en [[CodeMirror y la vista en vivo]].
 
 - **DEF-073 — `build()` de una ventana se cuelga si se lo llama desde un comando síncrono.**
   Está en la documentación de Tauri, en el propio método: *«On Windows, this function

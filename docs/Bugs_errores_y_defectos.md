@@ -278,11 +278,6 @@ El texto envuelto en **guiones bajos** (`_texto_`, `__texto__`, `___texto___`) *
 
 El reporte lo emparenta con `DEF-062` y `DEF-064`, los otros dos casos de algo que **queda sin renderizar** en el editor.
 
-> [!question] Falta acotar en qué vista
-> El reporte no dice si pasa en la vista en vivo, en la de lectura o en las dos, ni si es
-> constante o intermitente como sus dos parientes. Los tres niveles (`_`, `__`, `___`)
-> pueden comportarse distinto.
-
 # DEF-075
 En la **vista de lectura**, los títulos que se pliegan **vuelven a quedar desplegados solos** al poco rato, sin que el usuario toque nada ni cambie de pestaña.
 

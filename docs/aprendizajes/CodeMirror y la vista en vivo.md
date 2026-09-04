@@ -163,6 +163,65 @@ raíz conceptual: el estado del parser se llevaba en variables planas.
 > del recorrido debe ser una **pila por nivel**. Un `let tipoActual` funciona en el
 > caso simple y falla en cuanto hay anidación o cortes.
 
+## El árbol de sintaxis llega **incompleto**, y nadie te avisa
+
+**Caso**: `DEF-062` (los `#` de un título a la vista), `DEF-064` (una tabla en markdown
+pelado) y `DEF-074` (`_texto_` sin su color). Tres síntomas distintos, **un solo
+defecto**, abierto meses porque cada uno parecía cosa suya.
+
+CodeMirror **no parsea el documento entero al abrirlo**. Gasta unos 20 ms al aplicar el
+estado, prioriza el viewport y sigue en segundo plano dentro de `requestIdleCallback`.
+Medido con la configuración real del editor (`markdown({ extensions: GFM })`), al crear
+el `EditorState`:
+
+| Documento | Árbol parseado | Títulos vistos | Tablas vistas |
+|---|---|---|---|
+| 2 KB | **13 %** | 3 de 20 | 2 de 20 |
+| 6 KB | 49 % | 30 de 60 | 29 de 60 |
+| 15 KB | 20 % | 30 de 150 | 29 de 150 |
+| 40 KB | **7 %** | 30 de 400 | 29 de 400 |
+
+El tope es el mismo en los tres últimos —unos **3000 caracteres**— porque es lo que
+entra en el presupuesto inicial. Una nota de 2 KB ya nace con el 87 % sin parsear: no
+hace falta un documento grande para verlo.
+
+**Lo que faltaba**: cuando el parser avanza, despacha una transacción con el efecto
+`Language.setState` (`@codemirror/language`, `ParseWorker.work`). Esa transacción **no
+cambia el documento, ni la selección, ni el viewport**, y esas tres eran las únicas
+condiciones que disparaban el recálculo de las decoraciones. Así que lo que nació crudo
+**se quedaba crudo para siempre**: no había nada que lo volviera a intentar.
+
+De ahí los rodeos que el usuario había aprendido solo —teclear, cambiar de vista y
+volver, apagar y encender el renderizado de tablas—: los tres son, sin saberlo, formas
+de provocar la transacción que faltaba.
+
+> [!tip] Principio
+> **Toda decoración que lea `syntaxTree` debe recalcularse cuando el árbol cambia.**
+> La comprobación es por identidad —el árbol es inmutable— y es la que hace el propio
+> CodeMirror en `TreeHighlighter.update`: `tree != this.tree`.
+>
+> ```ts
+> const arbolCambio = (tr: Transaction) =>
+>   syntaxTree(tr.startState) !== syntaxTree(tr.state);   // StateField
+>
+> syntaxTree(update.startState) !== syntaxTree(update.state)  // ViewPlugin
+> ```
+
+> [!warning] La pista estaba en la asimetría, y se leyó al revés
+> El reporte de `DEF-074` decía que `*cursiva*` se veía bien y `_cursiva_` no. Eso
+> parecía apuntar a un fallo del propio código del `_`, y por eso se registró aparte
+> de `DEF-062` y `DEF-064`. Era exactamente lo contrario: **la asimetría es la firma de
+> esta causa**. La cursiva la pone el resaltador de CodeMirror, que **sí** se recupera
+> solo; el color propio del `_` lo ponía el live preview, que **no**. Lo mismo con los
+> títulos: el tamaño venía del resaltador, y lo que faltaba —los `#` ocultos, la clase
+> `mic-live-h*`— era lo nuestro.
+>
+> **Cuando parte de un renderizado aparece y parte no, sospechá de quién recalcula y
+> quién no, antes que del código de lo que falta.**
+
+Un `StateField` que detecta su bloque **leyendo líneas** en vez del árbol no necesita
+nada de esto: `frontmatterField` busca el `---` de la primera línea y quedó intacto.
+
 ## Otros detalles del editor
 
 - **Caret invisible en el editor CSS** (`DEF-026`): CodeMirror necesitaba
@@ -181,4 +240,5 @@ raíz conceptual: el estado del parser se llevaba en variables planas.
 - [[Aprendizajes tecnicos]] — mapa del área.
 - [[Drag and drop en Mycelium]] — el editor como participante involuntario del arrastre.
 - [[DESIGN_SYSTEM]] — tokens y estilos que usan estas decoraciones.
-- [[bugs-progreso]] — trazabilidad de `DEF-021`, `DEF-022`, `DEF-026`, `DEF-031/037`.
+- [[bugs-progreso]] — trazabilidad de `DEF-021`, `DEF-022`, `DEF-026`, `DEF-031/037`,
+  `DEF-062/064/074`.
