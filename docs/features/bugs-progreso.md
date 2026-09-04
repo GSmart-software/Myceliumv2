@@ -54,7 +54,7 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-062 | En edición, a veces los títulos no se renderizan y se ven los `#` | ambas (frontend) | ✅ ambas (2026-09-03) — el árbol de sintaxis llegaba a medias y nada recalculaba al completarse; **confirmado en la app** y reflejado a web |
 | DEF-063 | El texto de una celda no ocupa la celda: el clic en el hueco no edita | ambas (frontend) | ✅ ambas (2026-09-04) — `.mic-tab-render` pasa de `inline-block` a `block`; **confirmado en la app** y reflejado a web |
 | DEF-064 | A veces las tablas se quedan sin renderizar hasta forzar un repintado | ambas (frontend) | ✅ ambas (2026-09-03) — el árbol de sintaxis llegaba a medias y nada recalculaba al completarse; **confirmado en la app** y reflejado a web |
-| DEF-065 | El plegado de un título se pierde al cambiar de pestaña | ambas (frontend) | 🛠️ desktop (2026-09-04) — el plegado estaba atado a la identidad del DOM; **confirmado en la app**, **pendiente de reflejar a web** |
+| DEF-065 | El plegado de un título se pierde al cambiar de pestaña | ambas (frontend) | ✅ ambas (2026-09-04) — el plegado estaba atado a la identidad del DOM; **confirmado en la app** y reflejado a web |
 | DEF-066 | El botón «Exportar nota» ya no describe lo que hace su menú | ambas (frontend) | ⬜ pendiente |
 | DEF-067 | El menú de autocompletado no lleva los estilos de Mycelium | ambas (frontend) | ⬜ pendiente |
 | DEF-068 | La opción marcada de un campo se ve en blanco, fuera de la paleta | ambas (frontend) | ⬜ pendiente |
@@ -64,7 +64,7 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-072 | La numeración de las consolas no se reutiliza y puede repetirse | desktop | ⬜ pendiente |
 | DEF-073 | Abrir varias ventanas no funciona: congela la app o no abre nada | desktop | ✅ desktop (2026-08-18) — el comando pasa a `async`; **confirmado sobre el binario de release** el 2026-09-03 |
 | DEF-074 | El estilo propio del énfasis con `_` no se aplica: se ve como el de `*` | ambas (frontend) | ✅ ambas (2026-09-03) — el árbol de sintaxis llegaba a medias y nada recalculaba al completarse; **confirmado en la app** y reflejado a web; era la vista en vivo, y la asimetría con `*` fue la pista |
-| DEF-075 | En lectura, los títulos plegados se despliegan solos al poco rato | ambas (frontend) | 🛠️ desktop (2026-09-04) — el plegado estaba atado a la identidad del DOM; **confirmado en la app**, **pendiente de reflejar a web**; era el mismo defecto que el `DEF-065` |
+| DEF-075 | En lectura, los títulos plegados se despliegan solos al poco rato | ambas (frontend) | ✅ ambas (2026-09-04) — el plegado estaba atado a la identidad del DOM; **confirmado en la app** y reflejado a web; era el mismo defecto que el `DEF-065` |
 | DEF-076 | Un `[[wikilink]]` dentro de una tabla no navega al hacerle clic | ambas (frontend) | ✅ ambas (2026-09-04) — el widget anulaba el `href` y no hacía nada más; **confirmado en la app** y reflejado a web |
 
 ## Notas por bug
@@ -92,7 +92,9 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
   otra y su `instanceId` también. De paso `headingFold.ts` deja de tener estado propio: el
   conjunto se lo pasa quien llama, que es quien sabe cuánto tiene que durar.
 
-  Desktop `a68124f`. **Sin reflejar a web todavía.**
+  Desktop `a68124f`, web `25e1b9f`. `headingFold.ts` era compartido y se trajo entero;
+  `NoteEditor.tsx` **diverge** y los seis bloques se aplicaron a mano, aunque los cinco puntos
+  de anclaje resultaron idénticos entre ramas.
 
 - **DEF-063 — `block` en vez de `inline-block` + `width: 100%`.**
   `.mic-tab-render` medía solo lo que medía su contenido, así que el hueco a los lados era
