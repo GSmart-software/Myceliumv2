@@ -55,7 +55,7 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-063 | El texto de una celda no ocupa la celda: el clic en el hueco no edita | ambas (frontend) | ✅ ambas (2026-09-04) — `.mic-tab-render` pasa de `inline-block` a `block`; **confirmado en la app** y reflejado a web |
 | DEF-064 | A veces las tablas se quedan sin renderizar hasta forzar un repintado | ambas (frontend) | ✅ ambas (2026-09-03) — el árbol de sintaxis llegaba a medias y nada recalculaba al completarse; **confirmado en la app** y reflejado a web |
 | DEF-065 | El plegado de un título se pierde al cambiar de pestaña | ambas (frontend) | ✅ ambas (2026-09-04) — el plegado estaba atado a la identidad del DOM; **confirmado en la app** y reflejado a web |
-| DEF-066 | El botón «Exportar nota» ya no describe lo que hace su menú | ambas (frontend) | ⬜ pendiente |
+| DEF-066 | El botón «Exportar nota» ya no describe lo que hace su menú | ambas (frontend) | ✅ ambas (2026-09-04) — pasa a «Más opciones»; el `aria-label` ya lo decía y el que se había quedado atrás era el `title`; **confirmado en la app** y reflejado a web (desktop `5a7211a`, web `7aa85af`) |
 | DEF-067 | El menú de autocompletado no lleva los estilos de Mycelium | ambas (frontend) | ✅ ambas (2026-09-04) — es el de `[[`; las reglas ya existían y perdían por especificidad; **confirmado en la app** y reflejado a web |
 | DEF-068 | La opción marcada de un campo se ve en blanco, fuera de la paleta | ambas (frontend) | ✅ ambas (2026-09-04) — faltaba `select option:checked`; **confirmado en la app** y reflejado a web |
 | DEF-069 | El explorador no marca las carpetas que contienen el archivo abierto | ambas (frontend) | ⬜ pendiente |
