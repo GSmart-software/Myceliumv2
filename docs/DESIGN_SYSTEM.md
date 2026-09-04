@@ -116,6 +116,12 @@ Hay 4 combinaciones posibles: Bio Claro · Bio Oscuro · Cant Claro · Cant Oscu
 > |---|---|
 > | `styles/tokens.css` | `color-scheme: light` en `:root` y `color-scheme: dark` en `[data-dark='true']` |
 > | `app/globals.css` | `select option` con `--mic-text-primary` sobre `--mic-bg-surface` |
+> | `app/globals.css` | `select option:checked` con `--mic-raw-canvas` sobre `--mic-accent` (`DEF-068`) |
+>
+> La fila del `:checked` se agregó después, y muestra que esto **se le dice al navegador una
+> cosa por vez**: con `select option` resuelto, la opción marcada seguía saliendo casi blanca
+> en modo oscuro, porque esa la pintaba el navegador con su propio resaltado. Lo que no se
+> nombra, lo decide él.
 >
 > `color-scheme` es la pieza que no se puede omitir: es lo único que le dice al navegador
 > **con qué luz dibujar lo suyo** — esta lista, el calendario de un `input[type="date"]`, los
@@ -132,6 +138,23 @@ Qué hacer al construir un desplegable:
   buscador— entonces sí vive en el documento y va estilado con tokens como cualquier panel.
   El caso de referencia es `GraphOptionsMenu`, que además se **acota a la pantalla**
   (`DEF-047`/`DEF-053`).
+
+> [!danger] `<datalist>` no tiene arreglo: no lo uses
+> Un `<select>` deja estilar al menos sus `option`. Un `<datalist>` **no deja estilar nada**:
+> su desplegable lo dibuja entero el navegador, y `color-scheme` es lo único que se le puede
+> decir. En un panel con los estilos de Mycelium aparecía con la pinta del sistema
+> (`DEF-067`).
+>
+> Si hace falta sugerir mientras se escribe, **dibujá la lista vos**. El caso de referencia es
+> `SugerenciasClave` en `components/editor/PropiedadesTab.tsx`: `role="combobox"` en el input,
+> `role="listbox"` en la lista, flechas para moverse, Enter para elegir, Escape para cerrar, y
+> `position: fixed` calculado desde el input —el panel tiene scroll, y una lista absoluta la
+> recorta su contenedor, que es el mismo defecto que ya había aparecido en el menú de la
+> tabla—.
+>
+> Detalle que cuesta encontrar: los ítems responden en **`mousedown`**, no en `click`. El
+> `blur` del input cierra la lista, así que para cuando llegaría el `click` el botón ya no
+> existe.
 - **Probalo en modo oscuro antes de darlo por terminado**, y con la lista **abierta**. Con la
   lista cerrada este defecto no se ve: es exactamente lo que lo dejó pasar tantas veces.
 
