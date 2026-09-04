@@ -291,6 +291,9 @@ El enlace se **ve** bien —con su estilo, y si el destino no existe, con el col
 # DEF-077
 En la pestaña PROPIEDADES, el campo **«Nueva propiedad»** sugiere las claves que ya existen en el vault, y esa lista **no tiene los estilos de Mycelium**: aparece con la pinta del sistema en medio de un panel que sí los tiene.
 
+# DEF-078
+En la lista desplegada de un `<select>`, las opciones **van pegadas al borde**: no tienen aire alrededor del texto. Con varias seguidas se lee como un bloque y queda feo.
+
 > [!info] Se encontró al procesar el `DEF-067`
 > No lo reportó el usuario: salió de leer «menú de autocompletado» como el de este campo. El defecto era otro —el de `[[`—, pero este también existía, y por eso se registra aparte en vez de darlo por parte de aquel.
 

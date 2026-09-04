@@ -117,6 +117,7 @@ Hay 4 combinaciones posibles: Bio Claro · Bio Oscuro · Cant Claro · Cant Oscu
 > | `styles/tokens.css` | `color-scheme: light` en `:root` y `color-scheme: dark` en `[data-dark='true']` |
 > | `app/globals.css` | `select option` con `--mic-text-primary` sobre `--mic-bg-surface` |
 > | `app/globals.css` | `select option:checked` con `--mic-raw-canvas` sobre `--mic-accent` (`DEF-068`) |
+> | `app/globals.css` | `select option` con `padding`, o las opciones van pegadas al borde (`DEF-078`) |
 >
 > La fila del `:checked` se agregó después, y muestra que esto **se le dice al navegador una
 > cosa por vez**: con `select option` resuelto, la opción marcada seguía saliendo casi blanca
