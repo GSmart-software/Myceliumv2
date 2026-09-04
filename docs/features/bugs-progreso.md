@@ -52,7 +52,7 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-060 | El panel de propiedades se abre en todas las pestañas a la vez | ambas (frontend) | ✅ ambas (2026-09-04) — el estado pasa a vivir en el propio pane; **confirmado en la app** y reflejado a web |
 | DEF-061 | El campo de la clave ocupa todo el ancho y empuja el ícono del tipo abajo | ambas (frontend) | ✅ ambas (2026-09-04) — `.mic-prop-clave` no era contenedor flex; **confirmado en la app** y reflejado a web |
 | DEF-062 | En edición, a veces los títulos no se renderizan y se ven los `#` | ambas (frontend) | ✅ ambas (2026-09-03) — el árbol de sintaxis llegaba a medias y nada recalculaba al completarse; **confirmado en la app** y reflejado a web |
-| DEF-063 | El texto de una celda no ocupa la celda: el clic en el hueco no edita | ambas (frontend) | ⬜ pendiente — el usuario ya probó que `width: 100%` lo resuelve |
+| DEF-063 | El texto de una celda no ocupa la celda: el clic en el hueco no edita | ambas (frontend) | ✅ ambas (2026-09-04) — `.mic-tab-render` pasa de `inline-block` a `block`; **confirmado en la app** y reflejado a web |
 | DEF-064 | A veces las tablas se quedan sin renderizar hasta forzar un repintado | ambas (frontend) | ✅ ambas (2026-09-03) — el árbol de sintaxis llegaba a medias y nada recalculaba al completarse; **confirmado en la app** y reflejado a web |
 | DEF-065 | El plegado de un título se pierde al cambiar de pestaña | ambas (frontend) | ⬜ pendiente — misma familia que `DEF-039` |
 | DEF-066 | El botón «Exportar nota» ya no describe lo que hace su menú | ambas (frontend) | ⬜ pendiente |
@@ -68,6 +68,24 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-076 | Un `[[wikilink]]` dentro de una tabla no navega al hacerle clic | ambas (frontend) | ✅ ambas (2026-09-04) — el widget anulaba el `href` y no hacía nada más; **confirmado en la app** y reflejado a web |
 
 ## Notas por bug
+
+- **DEF-063 — `block` en vez de `inline-block` + `width: 100%`.**
+  `.mic-tab-render` medía solo lo que medía su contenido, así que el hueco a los lados era
+  celda pero no era el span — y el editor se abre en el `focus` del span. El `width: 100%` que
+  se había probado funciona (hay `box-sizing: border-box` global), pero un bloque **sin ancho
+  declarado ya llena su contenedor** y no depende de ese reset, que es una condición fácil de
+  perder de vista si alguien lo toca.
+
+  Dos cosas que podían romperse y no lo hicieron: la **alineación** de la columna la da el
+  `text-align` de la celda y un bloque hijo lo hereda; y el **tirador de la columna** del
+  encabezado es un `float: right` que reserva su sitio siempre (usa `visibility`, no
+  `display`), así que las líneas de texto lo esquivan igual que antes.
+
+  **Mejora `DEF-076` de paso**: al hacer que pulsar un enlace navegue, quedaba justo cómo
+  editar una celda que es solo un enlace. Ahora el span llena la celda y el `<a>` sigue
+  midiendo solo su texto, así que hay **más** zona editable al lado, no menos.
+
+  Desktop `c6b9bff`, web `a83d054`; `editor.css` era idéntico entre ramas.
 
 - **DEF-061 — no era cuánto pedía el input, era que nadie repartía el espacio.**
   El ícono del tipo y el `<input>` de la clave son hermanos dentro de `.mic-prop-clave`, que
