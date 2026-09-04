@@ -292,7 +292,9 @@ El enlace se **ve** bien —con su estilo, y si el destino no existe, con el col
 En la pestaña PROPIEDADES, el campo **«Nueva propiedad»** sugiere las claves que ya existen en el vault, y esa lista **no tiene los estilos de Mycelium**: aparece con la pinta del sistema en medio de un panel que sí los tiene.
 
 # DEF-078
-En la lista desplegada de un `<select>`, las opciones **van pegadas al borde**: no tienen aire alrededor del texto. Con varias seguidas se lee como un bloque y queda feo.
+**Retirado el 2026-09-04, el mismo día que se registró.** Se anotó como que las opciones de *cualquier* `<select>` iban pegadas al borde, y no era cierto: pasaba **solo** en el selector de tipo de una propiedad, porque ese `<select>` —recién agregado por `FUN`/`DEF-070`, todavía sin consolidar— era el único de la app con `appearance: none` y `padding: 0`, y el navegador toma esas dos propiedades de la caja para dibujar la lista.
+
+O sea que era una regresión de trabajo en curso, no un defecto de lo entregado, y [[CLAUDE]] es explícito: eso **no lleva número**, se corrige dentro de esa implementación. El número queda quemado a propósito: no se reutiliza.
 
 > [!info] Se encontró al procesar el `DEF-067`
 > No lo reportó el usuario: salió de leer «menú de autocompletado» como el de este campo. El defecto era otro —el de `[[`—, pero este también existía, y por eso se registra aparte en vez de darlo por parte de aquel.

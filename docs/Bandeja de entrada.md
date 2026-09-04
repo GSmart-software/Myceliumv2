@@ -29,6 +29,12 @@ clasifico yo.
 
 ---
 
+2. Los filtros en las .base funcionan con selectores, pero podría ser mucho más útil si se utilizara lógica condicional, por ejemplo "||" para indicar un o, poder negar una condición con !, etc. Por ejemplo, ahora mismo no se podría plantear un caso para todos aquellos que el nombre no empiece con X símbolo. Los filtros deberían tener más capacidad lógica
+
+---
+
+3. Ahora mismo si se añade una condición y no se completa el campo de información, esta se elimina automáticamente. Estos nuevos filtros deben permanecer aunque no se agregue un valor. Si el valor está vacio, entonces no debería aplicarse el filtro pero tampoco eliminarse automáticamente
+
 ## Ideas sin procesar
 
 *(vacío)*

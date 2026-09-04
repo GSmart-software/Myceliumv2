@@ -117,7 +117,18 @@ Hay 4 combinaciones posibles: Bio Claro · Bio Oscuro · Cant Claro · Cant Oscu
 > | `styles/tokens.css` | `color-scheme: light` en `:root` y `color-scheme: dark` en `[data-dark='true']` |
 > | `app/globals.css` | `select option` con `--mic-text-primary` sobre `--mic-bg-surface` |
 > | `app/globals.css` | `select option:checked` con `--mic-raw-canvas` sobre `--mic-accent` (`DEF-068`) |
-> | `app/globals.css` | `select option` con `padding`, o las opciones van pegadas al borde (`DEF-078`) |
+
+> [!warning] La caja gobierna la lista: cuidado con `appearance: none`
+> El navegador dibuja la lista desplegada tomando propiedades de la **caja
+> cerrada**. Un `appearance: none` le saca los estilos del tema a la lista, y un
+> `padding: 0` le pega las opciones al borde — aunque esas reglas se hayan
+> puesto pensando solo en cómo se ve el control cerrado.
+>
+> Apareció con el selector de tipo de una propiedad, que es un `<select>`
+> invisible superpuesto a un ícono (`DEF-070`): siendo invisible por `opacity`
+> no necesitaba ninguna de las dos, y quitarlas fue todo el arreglo. **Si un
+> desplegable necesita otra pinta cerrado, estilá el color, el borde y el fondo
+> — no `appearance` ni el `padding`.**
 >
 > La fila del `:checked` se agregó después, y muestra que esto **se le dice al navegador una
 > cosa por vez**: con `select option` resuelto, la opción marcada seguía saliendo casi blanca
