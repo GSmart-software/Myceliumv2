@@ -288,6 +288,12 @@ Un `[[wikilink]]` **dentro de una tabla no navega**: al hacerle clic no pasa nad
 
 El enlace se **ve** bien —con su estilo, y si el destino no existe, con el color de faltante—, así que nada indica que no vaya a ninguna parte.
 
+# DEF-077
+En la pestaña PROPIEDADES, el campo **«Nueva propiedad»** sugiere las claves que ya existen en el vault, y esa lista **no tiene los estilos de Mycelium**: aparece con la pinta del sistema en medio de un panel que sí los tiene.
+
+> [!info] Se encontró al procesar el `DEF-067`
+> No lo reportó el usuario: salió de leer «menú de autocompletado» como el de este campo. El defecto era otro —el de `[[`—, pero este también existía, y por eso se registra aparte en vez de darlo por parte de aquel.
+
 ---
 
 > [!warning] Defectos sin reporte original

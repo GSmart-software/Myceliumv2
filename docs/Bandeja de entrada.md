@@ -25,7 +25,9 @@ clasifico yo.
 
 ## Defectos sin procesar
 
-*(vacío)*
+1. Cuando habro claude code desde la consola dentro de mycelium, en el cli de claude code no se puede copiar ni pegar texto con ctrl+c y ctrl+v. Solo se puede pegar texto con click y pegar, pero esto pega el texto dos veces. Si no tiene solución por ser un tema dela dependencia utilizada, me gustaría ver que alternativas tenemos
+
+---
 
 ## Ideas sin procesar
 

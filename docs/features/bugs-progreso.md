@@ -56,8 +56,8 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-064 | A veces las tablas se quedan sin renderizar hasta forzar un repintado | ambas (frontend) | ✅ ambas (2026-09-03) — el árbol de sintaxis llegaba a medias y nada recalculaba al completarse; **confirmado en la app** y reflejado a web |
 | DEF-065 | El plegado de un título se pierde al cambiar de pestaña | ambas (frontend) | ✅ ambas (2026-09-04) — el plegado estaba atado a la identidad del DOM; **confirmado en la app** y reflejado a web |
 | DEF-066 | El botón «Exportar nota» ya no describe lo que hace su menú | ambas (frontend) | ⬜ pendiente |
-| DEF-067 | El menú de autocompletado no lleva los estilos de Mycelium | ambas (frontend) | ⬜ pendiente |
-| DEF-068 | La opción marcada de un campo se ve en blanco, fuera de la paleta | ambas (frontend) | ⬜ pendiente |
+| DEF-067 | El menú de autocompletado no lleva los estilos de Mycelium | ambas (frontend) | 🛠️ desktop (2026-09-04) — es el de `[[`; las reglas ya existían y perdían por especificidad. **Sin confirmar** |
+| DEF-068 | La opción marcada de un campo se ve en blanco, fuera de la paleta | ambas (frontend) | 🛠️ desktop (2026-09-04) — faltaba `select option:checked`; **confirmado en la app**, pendiente de reflejar |
 | DEF-069 | El explorador no marca las carpetas que contienen el archivo abierto | ambas (frontend) | ⬜ pendiente |
 | DEF-070 | El tipo de una propiedad no se puede cambiar sin borrarla y rehacerla | ambas (frontend) | ⬜ pendiente |
 | DEF-071 | Un `[[wikilink]]` en una propiedad no enlaza dentro de un archivo tabla | ambas (frontend) | ⬜ pendiente |
@@ -66,8 +66,48 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-074 | El estilo propio del énfasis con `_` no se aplica: se ve como el de `*` | ambas (frontend) | ✅ ambas (2026-09-03) — el árbol de sintaxis llegaba a medias y nada recalculaba al completarse; **confirmado en la app** y reflejado a web; era la vista en vivo, y la asimetría con `*` fue la pista |
 | DEF-075 | En lectura, los títulos plegados se despliegan solos al poco rato | ambas (frontend) | ✅ ambas (2026-09-04) — el plegado estaba atado a la identidad del DOM; **confirmado en la app** y reflejado a web; era el mismo defecto que el `DEF-065` |
 | DEF-076 | Un `[[wikilink]]` dentro de una tabla no navega al hacerle clic | ambas (frontend) | ✅ ambas (2026-09-04) — el widget anulaba el `href` y no hacía nada más; **confirmado en la app** y reflejado a web |
+| DEF-077 | Las sugerencias de clave del campo «Nueva propiedad» no llevan los estilos de Mycelium | ambas (frontend) | 🛠️ desktop (2026-09-04) — era un `<datalist>`, que no deja estilar nada; se reemplazó por una lista propia. **Sin confirmar** |
 
 ## Notas por bug
+
+- **DEF-067 — las reglas ya estaban escritas y perdían por especificidad.**
+  El menú es el del autocompletado de `[[`, y `styles/editor.css` ya tenía sus colores desde
+  siempre. No se aplicaban: CodeMirror declara los suyos con el prefijo del tema —`&light` es
+  `.cm-editor.cm-light`—, así que su `.cm-editor.cm-light .cm-tooltip` (3 clases) le ganaba a
+  un `.cm-tooltip` pelado (1 clase). Lo mismo con la fila marcada, donde su
+  `.cm-editor.cm-light .cm-tooltip-autocomplete ul li[aria-selected]` tapaba a la nuestra y
+  se veía su azul `#17c` en vez del acento.
+
+  **Peor en modo oscuro**: el editor no declara su tema como oscuro, así que siempre es
+  `cm-light` — el popup salía claro incluso con Mycelium en oscuro.
+
+  El **empate alcanza** para ganar: `style-mod` monta la hoja de CodeMirror con
+  `insertBefore(styleTag, head.firstChild)`, o sea siempre primera, así que a igual
+  especificidad manda la nuestra. Por eso se replicó su forma en vez de inventar una más
+  específica o tirar de `!important`. Se conserva el selector pelado al lado, por si algún día
+  el tooltip se monta fuera del editor con `tooltips({ parent })`.
+
+  > [!warning] Se identificó mal la primera vez
+  > «Menú de autocompletado» se leyó como el `<datalist>` del campo «Nueva propiedad», que
+  > está en el bloque de propiedades y también salía sin estilos. Eso llevó a arreglar otra
+  > cosa —real, pero distinta—, hoy registrada como `DEF-077`. La lección es de método: ante
+  > dos candidatos plausibles para el mismo enunciado, **preguntar cuál** cuesta menos que
+  > arreglar el que no era.
+
+- **DEF-068 — el navegador decide todo lo que no se le nombra.**
+  `select option` estaba resuelto globalmente desde el arreglo de los desplegables, pero
+  `:checked` no: esa fila la pintaba el navegador con su propio resaltado, casi blanco en modo
+  oscuro. Es la misma familia que la lista desplegada, y muestra que a los controles nativos
+  se les dice **una cosa por vez**. La regla nueva está en `app/globals.css` y la fila
+  correspondiente en [[DESIGN_SYSTEM]].
+
+- **DEF-077 — un `<datalist>` no tiene arreglo posible.**
+  A un `<select>` se le puede estilar el `option`; a un `<datalist>` **no se le puede estilar
+  nada**: su desplegable lo dibuja el navegador entero. La única salida fue dibujar la lista,
+  y quedó `SugerenciasClave` como caso de referencia en [[DESIGN_SYSTEM]]. Dos detalles que
+  costaron: va en `position: fixed` calculado desde el input —el panel tiene scroll y una
+  lista absoluta la recorta su contenedor—, y los ítems responden en `mousedown` y no en
+  `click`, porque el `blur` del input cierra la lista antes de que el clic llegue.
 
 - **DEF-065 · DEF-075 — el plegado estaba atado a la identidad del DOM, no a la del documento.**
   Los dos eran el mismo defecto. En **lectura**, el conjunto de plegados guardaba los propios
