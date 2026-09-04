@@ -65,6 +65,7 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-073 | Abrir varias ventanas no funciona: congela la app o no abre nada | desktop | ✅ desktop (2026-08-18) — el comando pasa a `async`; **confirmado sobre el binario de release** el 2026-09-03 |
 | DEF-074 | El estilo propio del énfasis con `_` no se aplica: se ve como el de `*` | ambas (frontend) | ✅ ambas (2026-09-03) — el árbol de sintaxis llegaba a medias y nada recalculaba al completarse; **confirmado en la app** y reflejado a web; era la vista en vivo, y la asimetría con `*` fue la pista |
 | DEF-075 | En lectura, los títulos plegados se despliegan solos al poco rato | ambas (frontend) | ⬜ pendiente — misma familia que `DEF-065` y `DEF-039` |
+| DEF-076 | Un `[[wikilink]]` dentro de una tabla no navega al hacerle clic | ambas (frontend) | ⬜ pendiente |
 
 ## Notas por bug
 

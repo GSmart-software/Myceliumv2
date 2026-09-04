@@ -283,6 +283,11 @@ En la **vista de lectura**, los títulos que se pliegan **vuelven a quedar despl
 
 Es de la misma familia que `DEF-065` —el plegado se pierde al cambiar de pestaña— pero se dispara **sin ninguna acción**: acá el plegado no sobrevive a la simple permanencia en la nota.
 
+# DEF-076
+Un `[[wikilink]]` **dentro de una tabla no navega**: al hacerle clic no pasa nada, y el documento enlazado no se abre. Fuera de la tabla, el mismo enlace sí funciona.
+
+El enlace se **ve** bien —con su estilo, y si el destino no existe, con el color de faltante—, así que nada indica que no vaya a ninguna parte.
+
 ---
 
 > [!warning] Defectos sin reporte original
