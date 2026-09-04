@@ -159,6 +159,16 @@ entre ramas):
   escriben archivos sueltos de la carpeta del vault por comandos de Tauri (`asset:` para
   PDF e imagen), y esos archivos **no existen en ninguna parte** en web. Ver
   [[otros-tipos-de-archivo]] y [[Diferencias funcionales aceptadas entre versiones]].
+- **Partir un `[[wikilink]]` (`DEF-045`, ✅ reflejado 2026-09-03)**: `frontend/lib/wikilinks.ts`
+  y `scripts/test-wikilinks.mjs` son **compartidos** y se traen enteros, igual que los cinco
+  consumidores del frontend. Lo que **diverge es quién arma el grafo**: en desktop
+  `lib/db/grafo.ts`, en web el backend .NET, así que la misma regla vive dos veces —
+  `SEPARADOR_ALIAS` en el cliente y `SearchEndpoints.SeparadorAliasRegex` en C#. Tocar una
+  sin la otra deja el grafo de una versión sin las aristas de las tablas.
+  > [!warning] Dos módulos llevan la regla copiada a propósito
+  > `lib/canvas.ts` y `lib/enlaces.ts` son **puros y sin imports** —así los transpilan sus
+  > tests sin build— y no pueden importar `lib/wikilinks.ts`. Cada uno cubre el caso en su
+  > propia suite: es lo único que impide que diverjan.
 - **Canvas (`FUN-L-18`, las dos ramas, 2026-08-08)**: `frontend/lib/canvas.ts`,
   `scripts/test-canvas.mjs` y `components/canvas/*` son **compartidos** y se traen enteros.
   Lo que hay que aplicar a mano es el tipo de archivo, que toca los mismos sitios que ya

@@ -34,7 +34,7 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-042 | El progreso del indexado sale en todos los botones de vault; falta una pantalla de carga | desktop | ✅ desktop (2026-08-13) — pantalla propia, con etapas y aviso de atasco |
 | DEF-043 | El ícono de las Esporas es un brote de planta, no evoca una espora | ambas (frontend) | ✅ 🌐 (web: 2026-08-08) |
 | DEF-044 | Al cambiar de vault siguen abiertas las pestañas del vault anterior | desktop | ✅ desktop (2026-08-13) — un almacén por vault, y el árbol se vacía al cambiar |
-| DEF-045 | `[[destino\|alias]]` dentro de una tabla: o rompe la tabla, o rompe el grafo | ambas (frontend) | ⬜ pendiente — causa raíz ya identificada |
+| DEF-045 | `[[destino\|alias]]` dentro de una tabla: o rompe la tabla, o rompe el grafo | ambas | ✅ ambas (2026-09-03) — el separador pasa a ser `\|` **o** `|`; **confirmado en la app** y reflejado a web |
 | DEF-046 | Lo eliminado no aparece en la papelera, ni en la de Windows: no hay recuperación | desktop | ✅ desktop (2026-08-03) — las dos mitades |
 | DEF-047 | El menú contextual se sale de la pantalla en los archivos de abajo | ambas (frontend) | ✅ desktop · 🌐 (2026-08-13) — se mide y se vuelca |
 | DEF-048 | Falta margen inferior en toda la app: el contenido queda pegado al borde | ambas (frontend) | 🛠️🌐 (2026-08-13) — token `--mic-gap-inferior`; sin confirmar |
@@ -599,6 +599,32 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
   - **Hasta que se arregle, no documentar `\|` como solución**: en lectura se ve bien y el
     grafo pierde la conexión en silencio, que es peor que el fallo visible. Dentro de tablas,
     `[[Destino]]` sin alias funciona en los cuatro sitios.
+
+  **Resuelto el 2026-09-03** (desktop `65579f4`, web `e279734`). Al reproducirlo con el
+  pipeline real aparecieron **dos** cosas que el diagnóstico de agosto no tenía:
+
+  - **No eran cuatro sitios sino seis.** `lib/canvas.ts` hacía el mismo `split("|")`, y
+    sobre todo `reescribirEnlaces` (`FUN-M-08`, posterior al diagnóstico) buscaba
+    `Destino\` y no coincidía: **renombrar una nota dejaba rotos justo los enlaces de las
+    tablas**, los únicos que obligan a escapar. Ahora los repara y **conserva el escape**,
+    porque quitarlo partiría la fila.
+  - **El helper único no se pudo llevar a los seis.** `lib/canvas.ts` y `lib/enlaces.ts` son
+    **puros y sin imports** a propósito —así los transpilan sus tests sin build— y un solo
+    `import` lo rompe. Romper esa invariante por un arreglo de una línea salía más caro que
+    la duplicación, así que llevan la regla copiada con un comentario que nombra la
+    canónica, y **cada uno gana los casos en su propia suite**: eso es lo que impide que
+    diverjan otra vez, que era el temor del diagnóstico original.
+
+  La regla canónica vive en `frontend/lib/wikilinks.ts` (nuevo, puro, con
+  `scripts/test-wikilinks.mjs`) y la consumen `markdown.ts`, `livePreview.ts`,
+  `editor/wikilink.ts` y `db/grafo.ts`. **En web diverge quién arma el grafo**: no es el
+  navegador sino el backend, así que la misma regla va aparte en
+  `SearchEndpoints.SeparadorAliasRegex` (verificado con `dotnet build`).
+
+  Detalle fácil de pasar por alto: con el escape hay que saltar **dos** caracteres y no uno.
+  La vista en vivo lo necesita para saber hasta dónde ocultar el `[[Destino\|`.
+
+  **Ya se puede documentar `\|` como la forma de poner un alias dentro de una tabla.**
 
 - **DEF-017 / DEF-020 / DEF-033 / DEF-035 — corregidos antes de existir el catálogo**
   (auditoría del 2026-08-02): estaban resueltos y con commit, pero **el defecto en sí
