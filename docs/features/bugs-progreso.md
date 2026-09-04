@@ -56,8 +56,8 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-064 | A veces las tablas se quedan sin renderizar hasta forzar un repintado | ambas (frontend) | ✅ ambas (2026-09-03) — el árbol de sintaxis llegaba a medias y nada recalculaba al completarse; **confirmado en la app** y reflejado a web |
 | DEF-065 | El plegado de un título se pierde al cambiar de pestaña | ambas (frontend) | ✅ ambas (2026-09-04) — el plegado estaba atado a la identidad del DOM; **confirmado en la app** y reflejado a web |
 | DEF-066 | El botón «Exportar nota» ya no describe lo que hace su menú | ambas (frontend) | ⬜ pendiente |
-| DEF-067 | El menú de autocompletado no lleva los estilos de Mycelium | ambas (frontend) | 🛠️ desktop (2026-09-04) — es el de `[[`; las reglas ya existían y perdían por especificidad. **Sin confirmar** |
-| DEF-068 | La opción marcada de un campo se ve en blanco, fuera de la paleta | ambas (frontend) | 🛠️ desktop (2026-09-04) — faltaba `select option:checked`; **confirmado en la app**, pendiente de reflejar |
+| DEF-067 | El menú de autocompletado no lleva los estilos de Mycelium | ambas (frontend) | ✅ ambas (2026-09-04) — es el de `[[`; las reglas ya existían y perdían por especificidad; **confirmado en la app** y reflejado a web |
+| DEF-068 | La opción marcada de un campo se ve en blanco, fuera de la paleta | ambas (frontend) | ✅ ambas (2026-09-04) — faltaba `select option:checked`; **confirmado en la app** y reflejado a web |
 | DEF-069 | El explorador no marca las carpetas que contienen el archivo abierto | ambas (frontend) | ⬜ pendiente |
 | DEF-070 | El tipo de una propiedad no se puede cambiar sin borrarla y rehacerla | ambas (frontend) | ⬜ pendiente |
 | DEF-071 | Un `[[wikilink]]` en una propiedad no enlaza dentro de un archivo tabla | ambas (frontend) | ⬜ pendiente |
@@ -66,7 +66,7 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-074 | El estilo propio del énfasis con `_` no se aplica: se ve como el de `*` | ambas (frontend) | ✅ ambas (2026-09-03) — el árbol de sintaxis llegaba a medias y nada recalculaba al completarse; **confirmado en la app** y reflejado a web; era la vista en vivo, y la asimetría con `*` fue la pista |
 | DEF-075 | En lectura, los títulos plegados se despliegan solos al poco rato | ambas (frontend) | ✅ ambas (2026-09-04) — el plegado estaba atado a la identidad del DOM; **confirmado en la app** y reflejado a web; era el mismo defecto que el `DEF-065` |
 | DEF-076 | Un `[[wikilink]]` dentro de una tabla no navega al hacerle clic | ambas (frontend) | ✅ ambas (2026-09-04) — el widget anulaba el `href` y no hacía nada más; **confirmado en la app** y reflejado a web |
-| DEF-077 | Las sugerencias de clave del campo «Nueva propiedad» no llevan los estilos de Mycelium | ambas (frontend) | 🛠️ desktop (2026-09-04) — era un `<datalist>`, que no deja estilar nada; se reemplazó por una lista propia. **Sin confirmar** |
+| DEF-077 | Las sugerencias de clave del campo «Nueva propiedad» no llevan los estilos de Mycelium | ambas (frontend) | ✅ ambas (2026-09-04) — era un `<datalist>`, que no deja estilar nada; se reemplazó por una lista propia; **confirmado en la app** y reflejado a web |
 
 ## Notas por bug
 
@@ -81,11 +81,27 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
   **Peor en modo oscuro**: el editor no declara su tema como oscuro, así que siempre es
   `cm-light` — el popup salía claro incluso con Mycelium en oscuro.
 
+  > [!warning] El primer arreglo no podía funcionar: `cm-light` no existe
+  > Se escribió `.cm-editor.cm-light .cm-tooltip` dando por hecho que el `&light` de
+  > CodeMirror compila a una clase legible. **No**: `buildTheme` lo reemplaza por una clase
+  > **generada** (`StyleModule.newName()`, familia `ͼ…`) que el editor lleva puesta
+  > (`grep -c "cm-light"` en `@codemirror/view` da **0**). El selector no casaba con nada.
+  >
+  > La cuenta real es más simple: la suya es `.ͼX .cm-tooltip`, **dos** clases, contra un
+  > `.cm-tooltip` pelado que es una. Alcanza con `.cm-editor .cm-tooltip`, que empata.
+
   El **empate alcanza** para ganar: `style-mod` monta la hoja de CodeMirror con
   `insertBefore(styleTag, head.firstChild)`, o sea siempre primera, así que a igual
-  especificidad manda la nuestra. Por eso se replicó su forma en vez de inventar una más
-  específica o tirar de `!important`. Se conserva el selector pelado al lado, por si algún día
-  el tooltip se monta fuera del editor con `tooltips({ parent })`.
+  especificidad manda la nuestra — sin `!important`. Se conserva el selector pelado al lado,
+  por si algún día el tooltip se monta fuera del editor con `tooltips({ parent })`.
+
+  > [!tip] La pista estaba en la captura del usuario y no se leyó
+  > La fila marcada **sí** tomaba el acento mientras el fondo no. Esa regla ya empataba en
+  > especificidad, o sea que las reglas llegaban y el problema era la **cuenta**, no el
+  > alcance. Cuando parte de un estilo se aplica y parte no, la diferencia está en la
+  > especificidad de cada regla, no en si la hoja carga.
+
+  Desktop `585a7b8`, web `dbf032e`.
 
   > [!warning] Se identificó mal la primera vez
   > «Menú de autocompletado» se leyó como el `<datalist>` del campo «Nueva propiedad», que
