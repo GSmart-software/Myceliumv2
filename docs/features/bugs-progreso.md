@@ -65,9 +65,36 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-073 | Abrir varias ventanas no funciona: congela la app o no abre nada | desktop | ✅ desktop (2026-08-18) — el comando pasa a `async`; **confirmado sobre el binario de release** el 2026-09-03 |
 | DEF-074 | El estilo propio del énfasis con `_` no se aplica: se ve como el de `*` | ambas (frontend) | ✅ ambas (2026-09-03) — el árbol de sintaxis llegaba a medias y nada recalculaba al completarse; **confirmado en la app** y reflejado a web; era la vista en vivo, y la asimetría con `*` fue la pista |
 | DEF-075 | En lectura, los títulos plegados se despliegan solos al poco rato | ambas (frontend) | ⬜ pendiente — misma familia que `DEF-065` y `DEF-039` |
-| DEF-076 | Un `[[wikilink]]` dentro de una tabla no navega al hacerle clic | ambas (frontend) | ⬜ pendiente |
+| DEF-076 | Un `[[wikilink]]` dentro de una tabla no navega al hacerle clic | ambas (frontend) | ✅ ambas (2026-09-04) — el widget anulaba el `href` y no hacía nada más; **confirmado en la app** y reflejado a web |
 
 ## Notas por bug
+
+- **DEF-076 — el evento tenía que atenderse en el widget, y en `mousedown`.**
+  El widget de la tabla anulaba el `href` de todos sus enlaces y no hacía nada más, dando
+  por hecho que ya navegarían en la vista de lectura. En la vista en vivo el enlace quedaba
+  muerto, pero **con su estilo puesto** —incluido el color de faltante—, así que nada
+  delataba que no llevara a ninguna parte.
+
+  Dos cosas obligaron a resolverlo distinto de como parece:
+
+  - **No sirve `click`.** El `span` de la celda es enfocable y abre el editor al recibir el
+    foco. El foco se mueve en el `mousedown`, así que para cuando llegaría el `click` el
+    enlace ya fue reemplazado por el `<input>` y el evento no tiene sobre qué dispararse.
+    Y el `preventDefault()` del `mousedown` es justo lo que impide ese foco: el mismo
+    mecanismo resuelve las dos mitades, navegar **en vez de** abrir la celda a editar.
+  - **No se podía atender desde el `ViewPlugin`.** `ignoreEvent()` del widget devuelve
+    `true` para todo lo que cuelga de una celda, y `eventBelongsToEditor`
+    (`@codemirror/view`, `index.js:4833`) descarta esos eventos **antes** de llegar a los
+    handlers de los plugins. El evento es del widget o de nadie.
+
+  El «abrí esta nota» llega por un `Facet` y no por un parámetro: los widgets de bloque los
+  construye un `StateField`, que no ve el closure de `livePreview()` — lo único que tiene a
+  mano es el `EditorView`. Desktop `5949624`, web `b51360f`; los dos archivos eran idénticos
+  entre ramas.
+
+  **Efecto de borde aceptado**: pulsar un enlace ya no abre esa celda a editar. Es lo que
+  hace Obsidian; para una celda que es solo un enlace quedan el resto de la celda, el
+  teclado y «Editar como texto».
 
 - **DEF-062 · DEF-064 · DEF-074 — el árbol de sintaxis llega incompleto y nada lo reintenta.**
   Los tres eran el mismo defecto con tres caras. CodeMirror parsea unos 20 ms al abrir el
