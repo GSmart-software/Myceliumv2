@@ -49,7 +49,33 @@
 }
 
 /* ── Tooltips de CodeMirror (autocompletado / lint) temáticos ─────── */
-.cm-tooltip {
+
+/* DEF-067: estas reglas ya existían y NO se aplicaban, por especificidad.
+
+   CodeMirror declara las suyas dentro del ámbito del tema
+   (`&light .cm-tooltip`, con `backgroundColor: #f5f5f5`). Ese `&light` **no**
+   compila a una clase legible: `buildTheme` lo reemplaza por una clase GENERADA
+   —`StyleModule.newName()`, de la familia `ͼ…`— que el editor lleva puesta. O
+   sea que su selector real es `.ͼX .cm-tooltip`, **dos** clases, contra el
+   `.cm-tooltip` pelado de acá, que es una. Ganaba el suyo, y el menú de `[[`
+   salía con su gris.
+
+   Peor en oscuro: el editor no declara su tema como oscuro, así que la clase
+   puesta es siempre la del ámbito claro y el popup salía CLARO.
+
+   > No existen `cm-light` ni `cm-dark`: son nombres generados. Un selector
+   > escrito contra ellos no casa con nada — que es el primer arreglo que se
+   > intentó acá, y por eso este comentario es largo.
+
+   La cuenta es lo único que hace falta: `.cm-editor .cm-tooltip` **empata** en
+   dos clases, y el empate alcanza porque `style-mod` monta la hoja de CodeMirror
+   con `insertBefore(styleTag, head.firstChild)` —siempre la primera—, así que a
+   igual especificidad manda la nuestra. Por eso no hace falta `!important`.
+
+   El selector pelado se conserva al lado por si el tooltip llegara a montarse
+   fuera del editor (`tooltips({ parent })`), donde el prefijo no casaría. */
+.cm-tooltip,
+.cm-editor .cm-tooltip {
   background: var(--mic-bg-surface);
   border: 1px solid var(--mic-border);
   color: var(--mic-text-primary);
@@ -67,6 +93,11 @@
   padding: 0.15em 0.5em;
 }
 
+/* La fila marcada. Acá la cuenta ya salía empatada —la suya es
+   `.ͼX .cm-tooltip-autocomplete ul li[aria-selected]`, la nuestra lleva dos
+   clases más el atributo—, y por eso ESTA sí se veía bien mientras el fondo no.
+   Fue la pista que delató que el problema era de especificidad y no de que las
+   reglas no llegaran. */
 .cm-tooltip.cm-tooltip-autocomplete > ul > li[aria-selected] {
   background: var(--mic-accent);
   color: var(--mic-raw-canvas);
