@@ -51,9 +51,9 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-059 | Con el buscador abierto, las flechas hacen saltar el documento | ambas (frontend) | ✅ 🌐 (2026-08-17) — el panel pasa a declararse superior; causa hallada por tres investigaciones convergentes |
 | DEF-060 | El panel de propiedades se abre en todas las pestañas a la vez | ambas (frontend) | ⬜ pendiente |
 | DEF-061 | El campo de la clave ocupa todo el ancho y empuja el ícono del tipo abajo | ambas (frontend) | ⬜ pendiente — el usuario ya probó que `width: 90%` lo resuelve |
-| DEF-062 | En edición, a veces los títulos no se renderizan y se ven los `#` | ambas (frontend) | 🛠️ desktop (2026-09-03) — el árbol de sintaxis llegaba a medias y nada recalculaba al completarse; sin confirmar |
+| DEF-062 | En edición, a veces los títulos no se renderizan y se ven los `#` | ambas (frontend) | ✅ ambas (2026-09-03) — el árbol de sintaxis llegaba a medias y nada recalculaba al completarse; **confirmado en la app** y reflejado a web |
 | DEF-063 | El texto de una celda no ocupa la celda: el clic en el hueco no edita | ambas (frontend) | ⬜ pendiente — el usuario ya probó que `width: 100%` lo resuelve |
-| DEF-064 | A veces las tablas se quedan sin renderizar hasta forzar un repintado | ambas (frontend) | 🛠️ desktop (2026-09-03) — el árbol de sintaxis llegaba a medias y nada recalculaba al completarse; sin confirmar |
+| DEF-064 | A veces las tablas se quedan sin renderizar hasta forzar un repintado | ambas (frontend) | ✅ ambas (2026-09-03) — el árbol de sintaxis llegaba a medias y nada recalculaba al completarse; **confirmado en la app** y reflejado a web |
 | DEF-065 | El plegado de un título se pierde al cambiar de pestaña | ambas (frontend) | ⬜ pendiente — misma familia que `DEF-039` |
 | DEF-066 | El botón «Exportar nota» ya no describe lo que hace su menú | ambas (frontend) | ⬜ pendiente |
 | DEF-067 | El menú de autocompletado no lleva los estilos de Mycelium | ambas (frontend) | ⬜ pendiente |
@@ -63,7 +63,7 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-071 | Un `[[wikilink]]` en una propiedad no enlaza dentro de un archivo tabla | ambas (frontend) | ⬜ pendiente |
 | DEF-072 | La numeración de las consolas no se reutiliza y puede repetirse | desktop | ⬜ pendiente |
 | DEF-073 | Abrir varias ventanas no funciona: congela la app o no abre nada | desktop | ✅ desktop (2026-08-18) — el comando pasa a `async`; **confirmado sobre el binario de release** el 2026-09-03 |
-| DEF-074 | El estilo propio del énfasis con `_` no se aplica: se ve como el de `*` | ambas (frontend) | 🛠️ desktop (2026-09-03) — el árbol de sintaxis llegaba a medias y nada recalculaba al completarse; sin confirmar; era la vista en vivo, y la asimetría con `*` fue la pista |
+| DEF-074 | El estilo propio del énfasis con `_` no se aplica: se ve como el de `*` | ambas (frontend) | ✅ ambas (2026-09-03) — el árbol de sintaxis llegaba a medias y nada recalculaba al completarse; **confirmado en la app** y reflejado a web; era la vista en vivo, y la asimetría con `*` fue la pista |
 | DEF-075 | En lectura, los títulos plegados se despliegan solos al poco rato | ambas (frontend) | ⬜ pendiente — misma familia que `DEF-065` y `DEF-039` |
 
 ## Notas por bug
@@ -83,6 +83,10 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
   El arreglo compara el árbol por identidad en `tableField` y en el ViewPlugin de
   decoraciones inline, igual que hace el resaltador del propio CodeMirror. Medición,
   asimetría y principio general en [[CodeMirror y la vista en vivo]].
+
+  Desktop `1373a25`, web `9fab778`. Los tres archivos tocados eran **idénticos entre
+  ramas**, así que el reflejo fue un `checkout` directo: se verificó en un worktree de
+  `web-cloud` con `npm ci` + `tsc` + `next build`.
 
 - **DEF-073 — `build()` de una ventana se cuelga si se lo llama desde un comando síncrono.**
   Está en la documentación de Tauri, en el propio método: *«On Windows, this function
