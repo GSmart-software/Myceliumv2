@@ -59,7 +59,7 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-067 | El menú de autocompletado no lleva los estilos de Mycelium | ambas (frontend) | ✅ ambas (2026-09-04) — es el de `[[`; las reglas ya existían y perdían por especificidad; **confirmado en la app** y reflejado a web |
 | DEF-068 | La opción marcada de un campo se ve en blanco, fuera de la paleta | ambas (frontend) | ✅ ambas (2026-09-04) — faltaba `select option:checked`; **confirmado en la app** y reflejado a web |
 | DEF-069 | El explorador no marca las carpetas que contienen el archivo abierto | ambas (frontend) | ✅ ambas (2026-09-04) — el fondo pasa a derivarse del archivo abierto en vez de ser un estado de clic; **confirmado en la app** y reflejado a web |
-| DEF-070 | El tipo de una propiedad no se puede cambiar sin borrarla y rehacerla | ambas (frontend) | ⬜ pendiente |
+| DEF-070 | El tipo de una propiedad no se puede cambiar sin borrarla y rehacerla | ambas (frontend) | ✅ ambas (2026-09-04) — `convertirValor` conserva el valor y el ícono del tipo pasa a ser un control; **confirmado en la app** y reflejado a web |
 | DEF-071 | Un `[[wikilink]]` en una propiedad no enlaza dentro de un archivo tabla | ambas (frontend) | ⬜ pendiente |
 | DEF-072 | La numeración de las consolas no se reutiliza y puede repetirse | desktop | ⬜ pendiente |
 | DEF-073 | Abrir varias ventanas no funciona: congela la app o no abre nada | desktop | ✅ desktop (2026-08-18) — el comando pasa a `async`; **confirmado sobre el binario de release** el 2026-09-03 |
@@ -70,6 +70,33 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-078 | ~~Las opciones de un desplegable van pegadas al borde~~ | — | ⛔ **retirado** — no pasaba en todos los `<select>` sino solo en el del `DEF-070`, sin consolidar: era una regresión propia y no lleva número. Número quemado |
 
 ## Notas por bug
+
+- **DEF-070 — el valor se convierte, y la interfaz no suma un control.**
+  El núcleo es `convertirValor` en `lib/frontmatter.ts`, puro y con 13 tests. Una sola regla:
+  **conservar todo lo que se pueda**, y caer al valor inicial del tipo destino solo cuando lo
+  que hay no significa nada ahí. Ninguna conversión inventa datos, y lo que se pierde queda
+  escrito en el documento —deshacible con `Ctrl+Z`—, no desaparece en silencio. El caso que
+  más importó: de lista a escalar se **aplana y se relee** con las reglas del destino, así que
+  `["2026-03-04"]` → `fecha` conserva la fecha en vez de tirarla.
+
+  No hizo falta una acción nueva: `poner(clave, valor, tipo)` ya aceptaba el tipo.
+
+  > [!warning] Dos intentos de UI antes de acertar, los dos por lo mismo
+  > 1. **`<select>` disfrazado de ícono** (`appearance: none`, ancho de 1.25em): un select
+  >    cerrado muestra el texto de su `<option>`, y esos dicen «T Texto» porque la lista
+  >    abierta necesita el nombre. Recortarlo no dejaba el ícono, dejaba **«T T»**. No hay
+  >    forma de que un select muestre una cosa cerrado y otra abierto.
+  > 2. **Con `appearance: none` y `padding: 0`**: el navegador dibuja la lista tomando esas
+  >    propiedades de la **caja**, así que le quitaban los estilos del tema y el aire entre
+  >    opciones. Era el único `<select>` de la app con esas dos cosas — y por eso el único
+  >    cuya lista se veía mal, cosa que el usuario notó cuando yo lo había generalizado a
+  >    todos (ver el `DEF-078` retirado).
+  >
+  > Lo que funcionó: el `<span>` pinta el ícono y un `<select>` **invisible por `opacity`**
+  > va encima, llevándose el clic, el foco y el teclado — sin tocar `appearance` ni el
+  > `padding`, que son de la lista aunque parezcan de la caja.
+
+  Desktop `baa7e35`, web `6cce7b4`; los seis archivos eran idénticos entre ramas.
 
 - **DEF-069 — el arreglo no era sincronizar mejor, era dejar de sincronizar.**
   La única carpeta marcada era `activeFolderId`: «la última carpeta pulsada», que además es el
