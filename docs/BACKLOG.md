@@ -89,6 +89,7 @@ y **priorizar** qué implementar antes.
 | `FUN-M-20` | `SEARCH-MODOS-Y-ARBOL` | Ampliar la búsqueda del vault: elegir si busca por **nombre de archivo**, por **contenido** o por los dos, y poder ver los resultados **como árbol** de carpetas además de como lista —agrupando los que comparten carpeta, al estilo de VS Code— | ambas | — |
 | `FUN-M-21` | `GRAPH-NOMBRES-SEGUN-FOCO` | Tres modos para los nombres del grafo: **todos**, **solo el nodo apuntado y sus vecinos**, o **solo el apuntado**. Con mucha densidad de nodos, todos los nombres a la vez entorpecen la vista. La elección **persiste por vault** | ambas | — |
 | `FUN-M-26` 🛠️ | `FILES-EDITAR-TEXTO` | Editar dentro de Mycelium los archivos de texto y código que hoy solo se leen (`FUN-L-11`). **Solo lectura por defecto**: se entra a editar con un botón, y «Abrir con el sistema» se queda. Guardado explícito, escritura atómica y detección de conflicto — estos archivos no tienen papelera, historial ni respaldo, así que un guardado equivocado no se deshace. **Un archivo truncado no se edita nunca**: guardar el fragmento borraría el resto. **Implementado y confirmado en la app** el 2026-09-03, sobre el binario de release. Spec en [[otros-tipos-de-archivo]] § 7 | desktop | — |
+| `FUN-M-27` | `BASES-FILTROS-LOGICOS` | El constructor de filtros de un archivo tabla solo arma una lista plana unida toda por `y` o toda por `o`. No se puede **negar** una condición ni **agrupar** («A y (B o C)»), así que casos como «los que NO empiezan por X» no se pueden expresar. **El motor ya sabe hacerlo**: `Filtro` tiene `and`/`or`/`not` y `evaluar` los resuelve — lo que falta es la interfaz, y por eso el trabajo es de UI y de ida y vuelta con el YAML, no de evaluación. Ojo con `condicionesPlanas`, que devuelve `null` a propósito cuando el filtro no cabe en el constructor: esa guarda es lo que hoy impide destruir un filtro complejo al guardar, y hay que conservarla o reemplazarla por algo igual de estricto | ambas | — |
 | `FUN-M-25` | `BASES-ANCHO-COLUMNAS` | Ajustar el **ancho de cada columna** de un archivo tabla arrastrando su borde. Es M y no S por **dónde se guarda**: el `.base` es formato de Obsidian y meterle una clave nuestra rompería la interoperabilidad, así que hay que decidir entre guardarlo aparte (local, por vault) o no persistirlo. Ver la advertencia del bloque | ambas | — |
 | `FUN-M-24` | `EDITOR-TITULO-RENOMBRA` | El **título del documento** que se muestra arriba de la nota pasa a ser **editable**, y escribir en él **renombra el archivo** — como en Obsidian. Hoy es de solo lectura y renombrar obliga a ir al explorador. **Ojo con el orden**: mientras `FUN-M-08` siga pendiente, renombrar rompe los `[[enlaces]]` que apuntaban al título viejo, y esto hace el renombrado mucho más fácil de disparar —incluso sin querer, escribiendo en lo que parece texto—. Ver el bloque **C** | ambas | — |
 | `FUN-M-23` | `MERMAID-VISOR` | Visor propio para los diagramas Mermaid en la vista de lectura: al hacer clic se abre una ventana interna donde el diagrama se maneja como una imagen —**zoom** y **desplazamiento**—, porque hoy uno grande no se puede leer. **Segunda fase, si la primera sale bien**: sobre esa ventana, un **dibujo efímero** con unos pocos colores (se borra al cerrar, no se guarda nada) y un **puntero láser** para señalar sin dibujar. Pensado para explicar un diagrama a alguien | ambas | — |
@@ -1027,10 +1028,16 @@ corrige que el título de un callout le pise el color a lo que lleva dentro. Com
 `lib/markdown.ts`, `livePreview.ts` y `editor.css`. El minor de `FUN-S-01` **absorbe** la
 corrección.
 
-#### O · Las tablas de `.base` se vuelven usables — `FUN-S-14` + `FUN-S-15` + `FUN-M-25` · minor · ambas
+#### O · Las tablas de `.base` se vuelven usables — `FUN-S-14` + `FUN-S-15` + `FUN-M-25` + `FUN-M-27` · minor · ambas
 Buscar dentro de la tabla, ordenar por una columna y ajustar anchos. Las tres viven en el
 mismo componente (`components/bases/BaseView.tsx`) y son lo que separa una tabla de mirar
 de una tabla de trabajar. Hacerlas por separado significa rediseñar su cabecera tres veces.
+
+`FUN-M-27` —negar y agrupar condiciones— se sumó acá el 2026-09-04: toca el mismo
+componente y responde a la misma pregunta, que es qué se puede hacer con una tabla además
+de mirarla. Va junto con `DEF-080`, que es del mismo constructor de filtros: una condición
+a medias no debería borrarse sola, y eso se vuelve mucho más molesto en cuanto los filtros
+admitan grupos.
 
 > [!warning] Dónde se guarda lo que el usuario elige
 > El `.base` es **formato de Obsidian**, y ahí está la gracia: los archivos se abren en las dos

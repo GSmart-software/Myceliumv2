@@ -67,6 +67,9 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-075 | En lectura, los títulos plegados se despliegan solos al poco rato | ambas (frontend) | ✅ ambas (2026-09-04) — el plegado estaba atado a la identidad del DOM; **confirmado en la app** y reflejado a web; era el mismo defecto que el `DEF-065` |
 | DEF-076 | Un `[[wikilink]]` dentro de una tabla no navega al hacerle clic | ambas (frontend) | ✅ ambas (2026-09-04) — el widget anulaba el `href` y no hacía nada más; **confirmado en la app** y reflejado a web |
 | DEF-077 | Las sugerencias de clave del campo «Nueva propiedad» no llevan los estilos de Mycelium | ambas (frontend) | ✅ ambas (2026-09-04) — era un `<datalist>`, que no deja estilar nada; se reemplazó por una lista propia; **confirmado en la app** y reflejado a web |
+| DEF-079 | En la terminal, `Ctrl+C`/`Ctrl+V` no copian ni pegan; el botón derecho pega dos veces | desktop | ⬜ pendiente |
+| DEF-080 | Una condición de filtro sin valor se borra sola en vez de quedarse inactiva | ambas (frontend) | ⬜ pendiente — la causa está en `filtroDeCondiciones`, que descarta las de valor vacío |
+| DEF-081 | El explorador no muestra el nombre completo al dejar el puntero encima | ambas (frontend) | ⬜ pendiente |
 | DEF-078 | ~~Las opciones de un desplegable van pegadas al borde~~ | — | ⛔ **retirado** — no pasaba en todos los `<select>` sino solo en el del `DEF-070`, sin consolidar: era una regresión propia y no lleva número. Número quemado |
 
 ## Notas por bug

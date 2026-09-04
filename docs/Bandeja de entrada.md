@@ -25,15 +25,7 @@ clasifico yo.
 
 ## Defectos sin procesar
 
-1. Cuando habro claude code desde la consola dentro de mycelium, en el cli de claude code no se puede copiar ni pegar texto con ctrl+c y ctrl+v. Solo se puede pegar texto con click y pegar, pero esto pega el texto dos veces. Si no tiene solución por ser un tema dela dependencia utilizada, me gustaría ver que alternativas tenemos
-
----
-
-2. Los filtros en las .base funcionan con selectores, pero podría ser mucho más útil si se utilizara lógica condicional, por ejemplo "||" para indicar un o, poder negar una condición con !, etc. Por ejemplo, ahora mismo no se podría plantear un caso para todos aquellos que el nombre no empiece con X símbolo. Los filtros deberían tener más capacidad lógica
-
----
-
-3. Ahora mismo si se añade una condición y no se completa el campo de información, esta se elimina automáticamente. Estos nuevos filtros deben permanecer aunque no se agregue un valor. Si el valor está vacio, entonces no debería aplicarse el filtro pero tampoco eliminarse automáticamente
+*(vacío)*
 
 ## Ideas sin procesar
 
@@ -92,6 +84,10 @@ lo digo.
 | 2026-08-18 | Ajustar el ancho de las columnas de las tablas | `FUN-M-25` `BASES-ANCHO-COLUMNAS` |
 | 2026-09-03 | Lo que va entre guiones bajos no se renderiza con su estilo propio | `DEF-074` (queda por acotar en qué vista) |
 | 2026-09-03 | En lectura, los títulos plegados se vuelven a desplegar solos | `DEF-075` |
+| 2026-09-04 | En la terminal no se copia ni pega con Ctrl+C/Ctrl+V, y el botón derecho pega dos veces | `DEF-079` |
+| 2026-09-04 | Los filtros de las `.base` necesitan lógica: negar, `o`, agrupar | `FUN-M-27` `BASES-FILTROS-LOGICOS` — **es funcionalidad**: el motor ya sabe `and`/`or`/`not`, lo que falta es la interfaz |
+| 2026-09-04 | Una condición de filtro sin valor se borra sola | `DEF-080` (causa localizada: `filtroDeCondiciones` descarta las de valor vacío) |
+| 2026-09-04 | Falta el globo con el nombre completo al pasar el puntero por el explorador | `DEF-081` |
 
 > [!note] Esta tabla se puede vaciar cuando moleste
 > Es una comodidad para que veas en qué terminó cada cosa, no un registro canónico. La

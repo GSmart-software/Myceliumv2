@@ -296,6 +296,17 @@ En la pestaña PROPIEDADES, el campo **«Nueva propiedad»** sugiere las claves 
 
 O sea que era una regresión de trabajo en curso, no un defecto de lo entregado, y [[CLAUDE]] es explícito: eso **no lleva número**, se corrige dentro de esa implementación. El número queda quemado a propósito: no se reutiliza.
 
+# DEF-079
+En la **terminal integrada**, con el CLI de Claude Code corriendo dentro, **no se puede copiar ni pegar con `Ctrl+C` / `Ctrl+V`**. Pegar con el botón derecho sí funciona, pero **pega el texto dos veces**.
+
+# DEF-080
+En el constructor de filtros de un archivo tabla (`.base`), una condición a la que **todavía no se le puso valor se borra sola**. No se puede dejarla a medias mientras se piensa el resto: desaparece.
+
+Lo esperado es que se quede: **una condición sin valor no filtra**, pero tampoco se elimina.
+
+# DEF-081
+En el explorador, **dejar el puntero sobre un archivo o una carpeta no muestra su nombre completo**. Los nombres largos se cortan con puntos suspensivos y no hay forma de leer el resto sin abrir el archivo o ensanchar el panel.
+
 > [!info] Se encontró al procesar el `DEF-067`
 > No lo reportó el usuario: salió de leer «menú de autocompletado» como el de este campo. El defecto era otro —el de `[[`—, pero este también existía, y por eso se registra aparte en vez de darlo por parte de aquel.
 
