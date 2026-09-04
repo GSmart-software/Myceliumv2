@@ -50,7 +50,7 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-058 | Al volver de lectura a edición el foco se queda en los botones de vista | ambas (frontend) | ✅ 🌐 (2026-08-17) — se devuelve el foco al editor |
 | DEF-059 | Con el buscador abierto, las flechas hacen saltar el documento | ambas (frontend) | ✅ 🌐 (2026-08-17) — el panel pasa a declararse superior; causa hallada por tres investigaciones convergentes |
 | DEF-060 | El panel de propiedades se abre en todas las pestañas a la vez | ambas (frontend) | ✅ ambas (2026-09-04) — el estado pasa a vivir en el propio pane; **confirmado en la app** y reflejado a web |
-| DEF-061 | El campo de la clave ocupa todo el ancho y empuja el ícono del tipo abajo | ambas (frontend) | ⬜ pendiente — el usuario ya probó que `width: 90%` lo resuelve |
+| DEF-061 | El campo de la clave ocupa todo el ancho y empuja el ícono del tipo abajo | ambas (frontend) | ✅ ambas (2026-09-04) — `.mic-prop-clave` no era contenedor flex; **confirmado en la app** y reflejado a web |
 | DEF-062 | En edición, a veces los títulos no se renderizan y se ven los `#` | ambas (frontend) | ✅ ambas (2026-09-03) — el árbol de sintaxis llegaba a medias y nada recalculaba al completarse; **confirmado en la app** y reflejado a web |
 | DEF-063 | El texto de una celda no ocupa la celda: el clic en el hueco no edita | ambas (frontend) | ⬜ pendiente — el usuario ya probó que `width: 100%` lo resuelve |
 | DEF-064 | A veces las tablas se quedan sin renderizar hasta forzar un repintado | ambas (frontend) | ✅ ambas (2026-09-03) — el árbol de sintaxis llegaba a medias y nada recalculaba al completarse; **confirmado en la app** y reflejado a web |
@@ -68,6 +68,23 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-076 | Un `[[wikilink]]` dentro de una tabla no navega al hacerle clic | ambas (frontend) | ✅ ambas (2026-09-04) — el widget anulaba el `href` y no hacía nada más; **confirmado en la app** y reflejado a web |
 
 ## Notas por bug
+
+- **DEF-061 — no era cuánto pedía el input, era que nadie repartía el espacio.**
+  El ícono del tipo y el `<input>` de la clave son hermanos dentro de `.mic-prop-clave`, que
+  **no era un contenedor flex**. Con `width: 100%` el input pedía el ancho entero de la clave,
+  así que el ícono no le entraba al lado y caía a una segunda línea.
+
+  El `width: 90%` que se había probado funciona y confirmó el diagnóstico, pero está calibrado
+  contra el ícono de hoy: si el ícono cambia de tamaño, o si el usuario sube la fuente del
+  editor (que es una preferencia), el `1.25em` deja de ser el 10 %. Se resolvió haciendo flex
+  el contenedor y dándole al input lo que sobre, así no queda ningún número que mantener.
+
+  **Solo en edición.** En lectura la clave es un nodo de texto suelto al lado del ícono, y
+  volverlo un ítem flex anónimo cambiaría cómo parte las claves largas: `overflow-wrap:
+  anywhere` necesita un `min-width: 0` que a un ítem anónimo no se le puede poner. Ahí
+  funciona bien y no se tocó.
+
+  Desktop `42b8ad5`, web `3def6a0`; `editor.css` era idéntico entre ramas.
 
 - **DEF-060 — el estado era del pane, y estaba en el store equivocado.**
   `rightOpen` era **un** booleano en `panelLayoutStore` que leían los tres consumidores (cada
