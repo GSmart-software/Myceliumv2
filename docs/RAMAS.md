@@ -125,6 +125,11 @@ entre ramas):
   `lib/db/types.ts`, `extDeTipo` en `lib/db/vaultFs.ts`, `tipo_de`/`es_importable` en
   `src-tauri/src/archivos.rs` (solo desktop), y `VaultEndpoints`/`VaultRepository` en .NET.
   Ver [[bases-tabla]].
+  > [!success] El constructor de filtros siguió siendo compartido (`FUN-M-27`, 2026-09-05)
+  > Reescribirlo entero —de lista plana a árbol, con `FiltrosBuilder.tsx` nuevo— no movió
+  > la línea: los cinco archivos siguen trayéndose enteros. Es la prueba de que la
+  > decisión de no bajar el filtrado a SQL sigue pagando: un cambio grande del lenguaje de
+  > filtros cuesta un `git checkout` en web, no una segunda implementación en C#.
   > [!warning] En web hay que reconstruir la ruta de la carpeta
   > Misma trampa que con las Esporas: acá el id de una carpeta es un **UUID** y no dice
   > nada del nombre, así que `file.folder` y `file.inFolder()` no significarían nada sin
