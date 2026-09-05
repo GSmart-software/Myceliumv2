@@ -19,17 +19,14 @@ import {
   ChevronDown,
   ChevronRight,
   FilePlus,
-  FileText,
-  LayoutDashboard,
-  Table2,
   Folder,
   FolderPlus,
-  Shapes,
   Upload,
   Users,
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ICONO_POR_TIPO } from "@/lib/iconosDeTipo";
 import { api } from "@/lib/api";
 import { baseInicial } from "@/lib/bases";
 import { canvasInicial } from "@/lib/canvas";
@@ -111,6 +108,14 @@ type RenameState = { type: "carpeta" | "nota"; id: string; valor: string } | nul
  * Explorer del vault (HU-22/23/24): árbol de carpetas anidadas y notas,
  * menú contextual, rename inline, drag & drop y deshacer con Ctrl+Z.
  */
+
+// Alias de los íconos de «crear»: JSX necesita un identificador con mayúscula.
+// Salen del mismo mapa que el árbol y las pestañas, para que el botón que crea
+// una tabla lleve el ícono con el que esa tabla se va a ver después.
+const IconoDibujo = ICONO_POR_TIPO.excalidraw;
+const IconoBase = ICONO_POR_TIPO.base;
+const IconoCanvas = ICONO_POR_TIPO.canvas;
+
 export function ExplorerPanel() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -262,6 +267,8 @@ export function ExplorerPanel() {
   const [dragGhost, setDragGhost] = useState<
     { kind: "nota" | "carpeta"; nombre: string; tipo?: NotaTipo } | null
   >(null);
+  // JSX necesita un identificador con mayúscula, no un acceso a propiedad.
+  const IconoArrastrado = ICONO_POR_TIPO[dragGhost?.tipo ?? "markdown"];
 
   /**
    * DEF-023 P2: coordenada de pantalla del puntero durante un drag de dnd-kit. Se
@@ -690,7 +697,7 @@ export function ExplorerPanel() {
           title="Nuevo dibujo Excalidraw"
           onClick={() => void store.createNota(store.activeFolderId, "excalidraw").then(openNota)}
         >
-          <Shapes size={16} aria-hidden />
+          <IconoDibujo size={16} aria-hidden />
         </button>
         <button
           type="button"
@@ -698,7 +705,7 @@ export function ExplorerPanel() {
           title="Nueva base (tabla de notas)"
           onClick={() => void crearBase(store.activeFolderId)}
         >
-          <Table2 size={16} aria-hidden />
+          <IconoBase size={16} aria-hidden />
         </button>
         <button
           type="button"
@@ -706,7 +713,7 @@ export function ExplorerPanel() {
           title="Nuevo canvas (notas en el espacio)"
           onClick={() => void crearCanvas(store.activeFolderId)}
         >
-          <LayoutDashboard size={16} aria-hidden />
+          <IconoCanvas size={16} aria-hidden />
         </button>
         <button
           type="button"
@@ -793,14 +800,11 @@ export function ExplorerPanel() {
             <div className={styles.dragGhost}>
               {dragGhost.kind === "carpeta" ? (
                 <Folder size={15} className={styles.folderIcon} aria-hidden />
-              ) : dragGhost.tipo === "excalidraw" ? (
-                <Shapes size={15} className={styles.noteIcon} aria-hidden />
-              ) : dragGhost.tipo === "base" ? (
-                <Table2 size={15} className={styles.noteIcon} aria-hidden />
-              ) : dragGhost.tipo === "canvas" ? (
-                <LayoutDashboard size={15} className={styles.noteIcon} aria-hidden />
               ) : (
-                <FileText size={15} className={styles.noteIcon} aria-hidden />
+                // El MISMO mapa que usa la fila del árbol y la pestaña: la
+                // sombra que sigue al puntero tiene que ser reconocible como lo
+                // que se está arrastrando (`FUN-S-11`).
+                <IconoArrastrado size={15} className={styles.noteIcon} aria-hidden />
               )}
               <span className={styles.name}>{dragGhost.nombre}</span>
             </div>
@@ -1009,15 +1013,9 @@ function NoteRow({
 } & RowRenameProps) {
   const drag = useDraggable({ id: `nota:${nota.id}` });
   // Un ícono por tipo de archivo: markdown, dibujo y base se distinguen de un
-  // vistazo en el árbol (antes una base se veía igual que una nota).
-  const Icon =
-    nota.tipo === "excalidraw"
-      ? Shapes
-      : nota.tipo === "base"
-        ? Table2
-        : nota.tipo === "canvas"
-          ? LayoutDashboard
-          : FileText;
+  // vistazo en el árbol (antes una base se veía igual que una nota). El mapa
+  // vive en `lib/iconosDeTipo` porque la pestaña contesta lo mismo (`FUN-S-11`).
+  const Icon = ICONO_POR_TIPO[nota.tipo];
 
   // Lo que se lee en la fila, extensión incluida (`FUN-S-03`). Se calcula una
   // vez para que el texto y su `title` no puedan decir cosas distintas.

@@ -4,6 +4,8 @@ import { ArrowLeft, ArrowRight, MoreHorizontal, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { exportNoteMd, exportNotePdfActive } from "@/lib/export";
+import { ICONO_GRAFO, ICONO_POR_TIPO } from "@/lib/iconosDeTipo";
+import { usePreferencesStore } from "@/stores/preferencesStore";
 import { useSyncStore } from "@/stores/syncStore";
 import {
   allLeaves,
@@ -23,6 +25,7 @@ export function TabBar({ pane }: { pane: LeafPane }) {
   const notas = useVaultStore((s) => s.notas);
   const carpetas = useVaultStore((s) => s.carpetas);
   const syncByNota = useSyncStore((s) => s.byNota);
+  const iconosEnPestanas = usePreferencesStore((s) => s.prefs.iconosEnPestanas);
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuPos, setMenuPos] = useState<{ top: number; right: number }>({ top: 0, right: 0 });
   const menuRef = useRef<HTMLDivElement>(null);
@@ -61,6 +64,25 @@ export function TabBar({ pane }: { pane: LeafPane }) {
 
   function titleOf(tab: Tab) {
     return tituloDeNotaId(tab.notaId);
+  }
+
+  /**
+   * El ícono del tipo de documento de una pestaña (`FUN-S-11`).
+   *
+   * El grafo se resuelve **antes** de mirar `notas`, porque no tiene fila ahí.
+   * Lo que no es el grafo es una nota del vault y toma el ícono de su tipo; si
+   * todavía no llegó el índice, el de markdown, que es lo que casi siempre
+   * resulta ser.
+   *
+   * En desktop esta función contesta también por las consolas, las referencias
+   * del vault y los archivos que no se indexan — tres cosas que en web no
+   * existen. El mapa por tipo, que es lo que tiene que dar la MISMA respuesta
+   * que el explorador, sí es compartido (`lib/iconosDeTipo.ts`).
+   */
+  function iconoDeTab(notaId: string) {
+    if (notaId === GRAPH_TAB_ID) return ICONO_GRAFO;
+    const tipo = notas.find((n) => n.id === notaId)?.tipo;
+    return ICONO_POR_TIPO[tipo ?? "markdown"];
   }
 
   // Historial de la pestaña activa de ESTE pane (DEF-040).
@@ -127,6 +149,7 @@ export function TabBar({ pane }: { pane: LeafPane }) {
       {pane.tabs.map((tab, index) => {
         const sync = syncByNota[tab.notaId] ?? "synced";
         const isActiveTab = tab.id === pane.activeTabId;
+        const Icono = iconoDeTab(tab.notaId);
         return (
           <div
             key={tab.id}
@@ -171,6 +194,9 @@ export function TabBar({ pane }: { pane: LeafPane }) {
               store.setDragging(null);
             }}
           >
+            {iconosEnPestanas && (
+              <Icono size={13} className={styles.tabIcono} aria-hidden />
+            )}
             <span className={styles.tabTitle}>{titleOf(tab)}</span>
             {tab.notaId !== GRAPH_TAB_ID && sync !== "synced" && (
               <span
