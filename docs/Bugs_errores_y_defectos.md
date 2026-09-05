@@ -307,6 +307,11 @@ Lo esperado es que se quede: **una condición sin valor no filtra**, pero tampoc
 # DEF-081
 En el explorador, **dejar el puntero sobre un archivo o una carpeta no muestra su nombre completo**. Los nombres largos se cortan con puntos suspensivos y no hay forma de leer el resto sin abrir el archivo o ensanchar el panel.
 
+# DEF-082
+Un `[[wikilink]]` en una propiedad **tampoco navega desde el bloque de propiedades**, en la vista en vivo: se ve como enlace y al hacerle clic no pasa nada.
+
+Es el hermano del `DEF-071` —que era el mismo problema dentro de un archivo tabla— en el otro sitio donde se muestran las propiedades. En la vista de **lectura** sí funciona.
+
 > [!info] Se encontró al procesar el `DEF-067`
 > No lo reportó el usuario: salió de leer «menú de autocompletado» como el de este campo. El defecto era otro —el de `[[`—, pero este también existía, y por eso se registra aparte en vez de darlo por parte de aquel.
 

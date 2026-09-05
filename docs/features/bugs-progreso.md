@@ -70,6 +70,7 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-079 | En la terminal, `Ctrl+C`/`Ctrl+V` no copian ni pegan; el botón derecho pega dos veces | desktop | ⬜ pendiente |
 | DEF-080 | Una condición de filtro sin valor se borra sola en vez de quedarse inactiva | ambas (frontend) | ⬜ pendiente — la causa está en `filtroDeCondiciones`, que descarta las de valor vacío |
 | DEF-081 | El explorador no muestra el nombre completo al dejar el puntero encima | ambas (frontend) | ⬜ pendiente |
+| DEF-082 | Un `[[wikilink]]` de una propiedad no navega desde el bloque de propiedades | ambas (frontend) | ⬜ pendiente — hermano del `DEF-071`, y el mismo código que el `DEF-076` |
 | DEF-078 | ~~Las opciones de un desplegable van pegadas al borde~~ | — | ⛔ **retirado** — no pasaba en todos los `<select>` sino solo en el del `DEF-070`, sin consolidar: era una regresión propia y no lleva número. Número quemado |
 
 ## Notas por bug
