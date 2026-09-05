@@ -52,6 +52,7 @@ public static partial class SearchEndpoints
             string vaultId,
             string? q,
             bool? exacto,
+            string? campo,
             ClaimsPrincipal user,
             VaultRepository repo,
             ID1Client d1,
@@ -68,7 +69,10 @@ public static partial class SearchEndpoints
             var (filtros, resto) = SepararFiltrosPropiedad(q ?? "");
 
             // Por defecto (exacto=false) la búsqueda es por coincidencia (prefijo).
-            var match = BuildFtsQuery(resto, prefix: !(exacto ?? false));
+            // `campo` (FUN-M-20) restringe a una columna de `notas_fts`; es
+            // opcional, y lo que no se reconozca busca en las dos — que es lo
+            // que hacía antes de que se pudiera elegir.
+            var match = BuildFtsQuery(resto, prefix: !(exacto ?? false), campo: campo);
             if (match.Length == 0 && filtros.Count == 0)
             {
                 return Results.Ok(new { resultados = Array.Empty<object>() });
@@ -97,11 +101,19 @@ public static partial class SearchEndpoints
                 return Results.Ok(new { resultados = soloFiltros.Results });
             }
 
+            // Buscando SOLO por nombre no se devuelve fragmento: la coincidencia
+            // es el título, que el cliente ya muestra encima. Un `snippet` del
+            // cuerpo ahí sería el principio del documento sin nada marcado —
+            // ruido que se lee como si el resaltado se hubiera roto.
+            var fragmento = campo == "nombre"
+                ? "'' AS fragmento"
+                : "snippet(notas_fts, 2, '«', '»', '…', 10) AS fragmento";
+
             // Marcadores no-HTML: el cliente escapa el texto y los convierte a <mark>
             var result = await d1.QueryAsync(
                 $"""
                 SELECT f.nota_id, n.titulo, n.carpeta_id,
-                       snippet(notas_fts, 2, '«', '»', '…', 10) AS fragmento
+                       {fragmento}
                 FROM notas_fts f
                 JOIN notas n ON n.id = f.nota_id
                 WHERE notas_fts MATCH ?
@@ -336,17 +348,37 @@ public static partial class SearchEndpoints
     }
 
     /// <summary>
+    /// La columna de <c>notas_fts</c> que le toca a cada modo de búsqueda
+    /// (FUN-M-20). Cualquier otro valor —o ninguno— busca en las dos, que es lo
+    /// que hacía antes de que se pudiera elegir.
+    /// </summary>
+    private static string? ColumnaDe(string? campo) => campo switch
+    {
+        "nombre" => "titulo",
+        "contenido" => "contenido",
+        _ => null,
+    };
+
+    /// <summary>
     /// Query del usuario → expresión FTS5 segura (HU-21 CA5/CA6/CA7):
     /// AND implícito, frases entre comillas, `tag:x` y `#x` buscan el tag.
     /// </summary>
-    internal static string BuildFtsQuery(string raw, bool prefix = false)
+    internal static string BuildFtsQuery(string raw, bool prefix = false, string? campo = null)
     {
         // `prefix` (búsqueda por coincidencia, por defecto): cada término se trata
         // como prefijo (`"perr"*` encuentra "perro"). Si es false (búsqueda
         // exacta), solo coincide la palabra completa.
+        //
+        // `campo` (FUN-M-20) restringe a una columna. El filtro se aplica a CADA
+        // término y no a la consulta entera: `titulo : "a"* "b"*` limitaría solo
+        // el primero —el operador de columna alcanza a la frase que le sigue, no
+        // a lo que venga después— y el segundo se buscaría en todo el documento.
+        // Un resultado que casi cumple el filtro es peor que ninguno.
         var parts = new List<string>();
         var tokens = Regex.Matches(raw, "\"[^\"]+\"|\\S+");
         var star = prefix ? "*" : "";
+        var columna = ColumnaDe(campo);
+        var en = columna is null ? "" : $"{columna} : ";
 
         foreach (Match token in tokens)
         {
@@ -356,7 +388,7 @@ public static partial class SearchEndpoints
             {
                 // Frase exacta: escapar comillas internas (en modo coincidencia, el
                 // `*` aplica el prefijo al último término de la frase).
-                parts.Add($"\"{text[1..^1].Replace("\"", "\"\"")}\"{star}");
+                parts.Add($"{en}\"{text[1..^1].Replace("\"", "\"\"")}\"{star}");
                 continue;
             }
 
@@ -369,7 +401,7 @@ public static partial class SearchEndpoints
             var sanitized = text.Replace("\"", "\"\"");
             if (sanitized.Length > 0)
             {
-                parts.Add($"\"{sanitized}\"{star}");
+                parts.Add($"{en}\"{sanitized}\"{star}");
             }
         }
 
