@@ -61,7 +61,7 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-069 | El explorador no marca las carpetas que contienen el archivo abierto | ambas (frontend) | ✅ ambas (2026-09-04) — el fondo pasa a derivarse del archivo abierto en vez de ser un estado de clic; **confirmado en la app** y reflejado a web |
 | DEF-070 | El tipo de una propiedad no se puede cambiar sin borrarla y rehacerla | ambas (frontend) | ✅ ambas (2026-09-04) — `convertirValor` conserva el valor y el ícono del tipo pasa a ser un control; **confirmado en la app** y reflejado a web |
 | DEF-071 | Un `[[wikilink]]` en una propiedad no enlaza dentro de un archivo tabla | ambas (frontend) | ✅ ambas (2026-09-04) — la celda pintaba texto plano; **confirmado en la app** y reflejado a web |
-| DEF-072 | La numeración de las consolas no se reutiliza y puede repetirse | desktop | ⬜ pendiente |
+| DEF-072 | La numeración de las consolas no se reutiliza y puede repetirse | desktop | ✅ desktop (2026-09-04) — se quitó el contador y el número se deriva de los títulos en uso; **confirmado en la app**. **Sin reflejo**: la terminal es solo-desktop |
 | DEF-073 | Abrir varias ventanas no funciona: congela la app o no abre nada | desktop | ✅ desktop (2026-08-18) — el comando pasa a `async`; **confirmado sobre el binario de release** el 2026-09-03 |
 | DEF-074 | El estilo propio del énfasis con `_` no se aplica: se ve como el de `*` | ambas (frontend) | ✅ ambas (2026-09-03) — el árbol de sintaxis llegaba a medias y nada recalculaba al completarse; **confirmado en la app** y reflejado a web; era la vista en vivo, y la asimetría con `*` fue la pista |
 | DEF-075 | En lectura, los títulos plegados se despliegan solos al poco rato | ambas (frontend) | ✅ ambas (2026-09-04) — el plegado estaba atado a la identidad del DOM; **confirmado en la app** y reflejado a web; era el mismo defecto que el `DEF-065` |
@@ -70,6 +70,7 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-079 | En la terminal, `Ctrl+C`/`Ctrl+V` no copian ni pegan; el botón derecho pega dos veces | desktop | ⬜ pendiente |
 | DEF-080 | Una condición de filtro sin valor se borra sola en vez de quedarse inactiva | ambas (frontend) | ⬜ pendiente — la causa está en `filtroDeCondiciones`, que descarta las de valor vacío |
 | DEF-081 | El explorador no muestra el nombre completo al dejar el puntero encima | ambas (frontend) | ⬜ pendiente |
+| DEF-083 | La terminal dibuja el texto corrupto: símbolos y texto repetido donde no corresponde | desktop | ⬜ pendiente — probablemente emparentado con el `DEF-079` |
 | DEF-082 | Un `[[wikilink]]` de una propiedad no navega desde el bloque de propiedades | ambas (frontend) | ✅ ambas (2026-09-04) — era el mismo código que el `DEF-076`; **confirmado en la app** y reflejado a web |
 | DEF-078 | ~~Las opciones de un desplegable van pegadas al borde~~ | — | ⛔ **retirado** — no pasaba en todos los `<select>` sino solo en el del `DEF-070`, sin consolidar: era una regresión propia y no lleva número. Número quemado |
 

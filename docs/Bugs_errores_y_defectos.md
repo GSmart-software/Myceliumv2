@@ -312,6 +312,14 @@ Un `[[wikilink]]` en una propiedad **tampoco navega desde el bloque de propiedad
 
 Es el hermano del `DEF-071` —que era el mismo problema dentro de un archivo tabla— en el otro sitio donde se muestran las propiedades. En la vista de **lectura** sí funciona.
 
+# DEF-083
+En la **terminal integrada**, el texto **se dibuja corrupto**: aparecen letras y símbolos en lugares que parecen aleatorios, se repite texto que está en otro lado, y a veces se ve texto que no existe.
+
+Se detectó usando el CLI de Claude Code dentro de la consola. No se vio con la shell por defecto — pero eso puede ser solo porque se usa mucho menos, no una diferencia real.
+
+> [!info] Probablemente emparentado con el `DEF-079`
+> Los dos aparecen con la misma aplicación adentro: una TUI que toma la pantalla completa y redibuja por su cuenta. Conviene mirarlos juntos antes de tocar nada.
+
 > [!info] Se encontró al procesar el `DEF-067`
 > No lo reportó el usuario: salió de leer «menú de autocompletado» como el de este campo. El defecto era otro —el de `[[`—, pero este también existía, y por eso se registra aparte en vez de darlo por parte de aquel.
 
