@@ -169,6 +169,29 @@ entre ramas):
   > `lib/canvas.ts` y `lib/enlaces.ts` son **puros y sin imports** —así los transpilan sus
   > tests sin build— y no pueden importar `lib/wikilinks.ts`. Cada uno cubre el caso en su
   > propia suite: es lo único que impide que diverjan.
+- **Preferencias por vault (`FUN-M-28` + `FUN-M-21`, 2026-09-05, hoy solo-desktop)**: esto
+  **NO es un reflejo pendiente, es una funcionalidad nueva de web**, y por eso está en el
+  [[BACKLOG]] como `FUN-M-29` en vez de esperar un `checkout`.
+
+  El almacén (`src-tauri/src/prefs_vault.rs` + `stores/prefsVaultStore.ts`) escribe
+  `.mycelium/preferencias.json` **dentro de la carpeta del vault**, y esa elección tuvo un
+  motivo: que los ajustes **viajen con él**. En web no hay carpeta, y además
+  `stores/vaultSessionStore.ts` —donde se cargan al abrir y se limpian al salir— **no
+  existe en esa rama**: ahí el vault es una entidad de la base, no una sesión sobre un
+  directorio. O sea que no falta traer un archivo: falta **decidir dónde viven y quién los
+  carga**.
+
+  > [!warning] La decisión no es técnica, es de producto
+  > `localStorage` por `vaultId` no necesita backend, pero los ajustes quedan **en ese
+  > navegador**: abrir el vault en otra máquina los pierde. Un endpoint `.NET` conserva la
+  > propiedad que motivó todo el diseño, y cuesta más. Improvisar el primero sin decirlo
+  > convertiría «viajan con el vault» en una promesa que solo cumple una de las dos
+  > versiones.
+
+  Mientras tanto **todo el grupo queda anclado**: `MiniGraph.tsx`,
+  `GraphOptionsMenu.tsx`, `EditorSection.tsx` y `editor.css` son compartidos y ya están
+  listos, pero leen el store, así que no pueden viajar solos. `NoteEditor.tsx` diverge y
+  `lib/editor/numerosDeLinea.ts` es nuevo y compartible.
 - **Canvas (`FUN-L-18`, las dos ramas, 2026-08-08)**: `frontend/lib/canvas.ts`,
   `scripts/test-canvas.mjs` y `components/canvas/*` son **compartidos** y se traen enteros.
   Lo que hay que aplicar a mano es el tipo de archivo, que toca los mismos sitios que ya

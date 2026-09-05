@@ -70,6 +70,10 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
   cursor dentro y se editan renderizadas (`FUN-M-19` · `FUN-L-19`).
 - [[otros-tipos-de-archivo]] — abrir texto, código, PDF e imágenes en un visor propio
   (`FUN-L-11`). Solo-desktop.
+- [[preferencias-por-vault]] — ajustes que son del vault y no de la persona, guardados
+  dentro de su carpeta (`FUN-M-28` · `FUN-M-21`).
+- [[numeros-de-linea]] — el número de línea al costado del texto, y por qué no está en la
+  vista de lectura (`FUN-M-28`).
 - [[esporas-plantillas]] — plantillas de notas ("Esporas") con variables (`FUN-M-03`).
 - [[autoactualizacion]] — aviso diario de versión nueva, actualización con un clic y
   selección de versión en modo avanzado (`FUN-L-14` + `FUN-M-16`).
