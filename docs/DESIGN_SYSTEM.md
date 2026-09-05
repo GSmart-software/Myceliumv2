@@ -361,6 +361,37 @@ outline-offset: 2px;
 | Botones de modo (Editor/Dividido/Lectura) | `border: 1px solid var(--mic-accent)` + `background: var(--mic-bg-surface)` |
 | Ítem de archivo en el explorador | `background: color-mix(in srgb, var(--mic-glow) 12%, transparent)` |
 
+### Atenuado / incompleto — **nunca** con `opacity` sobre un contenedor
+
+Para marcar algo «apagado», «a medias» o «deshabilitado», usá el color del texto, un
+borde, o `opacity` **sobre la hoja concreta** (el ícono, la etiqueta). Nunca sobre la fila
+o el panel que lo contiene.
+
+```css
+/* NO */                          /* SÍ */
+.fila { opacity: 0.65; }          .fila { border-left: 2px dashed var(--mic-text-muted); }
+                                  .fila .etiqueta { color: var(--mic-text-muted); }
+```
+
+Dos motivos, y cada uno alcanza por sí solo:
+
+- **De producto.** Atenuar la fila atenúa también el campo que el usuario está
+  **escribiendo ahí mismo**. Justo lo que hay que mantener legible es lo que se apaga.
+- **Técnico.** `opacity` menor que 1 crea un *stacking context* y **compone el subárbol
+  entero como una sola imagen**. De eso no escapa nada: ni `position: fixed`, ni un
+  `z-index` alto, ni un fondo de token opaco. Un desplegable, un tooltip o un menú que
+  cuelgue de ese subárbol saldrá translúcido y no habrá CSS propio que lo arregle.
+
+  Lo mismo vale para `transform` y `filter`, que también crean contexto de composición —
+  y además vuelven a `fixed` relativo a ese ancestro en vez de al viewport.
+
+> [!tip] La salida es el portal
+> Un menú que se dibuja sobre otras cosas no debe vivir dentro de la fila que lo abre:
+> `createPortal(…, document.body)` con `position: fixed` calculado a partir del
+> `getBoundingClientRect()` del disparador. Así no depende de ninguna opacidad, transform
+> ni `overflow` que aparezca más arriba. Es el patrón de `GraphOptionsMenu` (`DEF-053`),
+> `SugerenciasClave` (`DEF-077`) y el buscador de campos de las bases (`FUN-S-16`).
+
 ### Barra indicadora del rail (patrón `::before`)
 
 ```css

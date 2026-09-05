@@ -44,6 +44,14 @@ y qué principio general dejó.
    por el carácter que **sí** puede aparecer dentro de una ruta. Se escribe `\u0000`: mismo
    valor en runtime, archivo de texto para git. **Si algo parece un descuido y está en
    producción, buscá para qué sirve antes de limpiarlo.**
+6. **`position: fixed` sale del flujo, pero NO de la composición.** Un `opacity` (o un
+   `transform`, o un `filter`) en cualquier ancestro compone el subárbol entero como una
+   imagen, y el elemento «suelto» se pinta dentro de ella igual. El buscador de campos de
+   las bases se veía translúcido con un fondo de token opaco, y la causa estaba tres
+   niveles más arriba: un `opacity: 0.65` puesto para marcar una condición incompleta.
+   Cuando un elemento se ve mal y su propio CSS es correcto, **subí por los ancestros
+   antes de tocarle nada**. La salida es el portal al `body`. Regla completa en
+   [[DESIGN_SYSTEM]] § Estados visuales comunes.
 
 ## Relacionadas
 

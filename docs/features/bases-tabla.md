@@ -163,7 +163,7 @@ que es la definición de la consulta. Tres controles en la cabecera:
 
 | Control | Qué hace |
 |---|---|
-| **Filtros** | Lista de condiciones `propiedad · operador · valor`, unidas por «todas» (`and`) o «alguna» (`or`) |
+| **Filtros** | Condiciones `propiedad · operador · valor` en grupos anidables; cada grupo une por «todas» (`and`) o «alguna» (`or`), y tanto una condición como un grupo entero se pueden **negar** (ver abajo) |
 | **Columnas** | Casillas con los campos del archivo y todas las claves de propiedad del vault |
 | **Fuente** | El YAML crudo, editable. <kbd>Ctrl</kbd>+<kbd>S</kbd> guarda |
 
@@ -175,8 +175,63 @@ que es la definición de la consulta. Tres controles en la cabecera:
 > Por eso `motivosNoEditable()` audita el archivo y, si encuentra algo, **deshabilita los
 > controles con el motivo** y deja solo la edición de la fuente — que no reescribe nada.
 > El mismo criterio, un escalón más abajo: el constructor de filtros se declara incapaz
-> (`condicionesPlanas()` devuelve `null`) ante un filtro anidado o un `not`, en vez de
-> enseñar una versión simplificada que al guardar destruiría el original.
+> (`arbolDeFiltro()` devuelve `null`) ante una expresión que no sabe representar, en vez
+> de enseñar una versión simplificada que al guardar destruiría el original. Lo que
+> cambió con `FUN-M-27` es **dónde cae esa línea**, no que exista: los anidamientos y el
+> `not` pasaron a ser representables, así que ya no la disparan.
+
+### El constructor de filtros — `FUN-M-27` · `FUN-S-16` · `DEF-080`
+
+El primer constructor armaba **una lista plana** unida toda por `and` o toda por `or`. El
+motor nunca tuvo esa limitación —`Filtro` tiene `and`, `or` y `not`, y `evaluar` los
+resuelve desde el día uno—: la limitación era de la interfaz, y dejaba fuera cosas tan
+corrientes como «los que **no** empiezan por X» o «A y (B o C)».
+
+Se reemplazó por un **árbol**, porque el filtro lo es:
+
+```ts
+type NodoFiltro =
+  | { tipo: "grupo"; combinador: "and" | "or"; negado: boolean; hijos: NodoFiltro[] }
+  | { tipo: "cond";                            negado: boolean; cond: Condicion };
+```
+
+`arbolDeFiltro()` lee el YAML a este árbol y `filtroDeArbol()` lo devuelve. La UI
+(`components/bases/FiltrosBuilder.tsx`) es recursiva por la misma razón que el dato: un
+grupo dibuja sus condiciones y sus grupos hijos, con el mismo componente.
+
+Tres decisiones que no son obvias:
+
+- **`not` de un solo hijo es una marca, no un nivel.** Para quien filtra, «no es activo»
+  es **una** condición, no dos anidadas. Al leer, un `not` con un único hijo se colapsa en
+  el `negado` de ese hijo; al escribir, se vuelve a envolver. Un `not` de varios hijos sí
+  es un grupo negado, porque niega su conjunción.
+- **La guarda sigue en pie.** `arbolDeFiltro()` devuelve `null` ante cualquier expresión
+  fuera del subconjunto representable (`file.hasTag("a", "b")`, por ejemplo). Es la misma
+  regla del § 2: antes que enseñar una versión simplificada que al guardar destruiría el
+  original, el constructor se declara incapaz.
+- **Lo incompleto se conserva en pantalla (`DEF-080`).** Una condición sin valor **no se
+  escribe en el archivo** —un filtro a medias en disco cambiaría lo que la tabla muestra y
+  lo que otra app lee— pero **tampoco se borra de la pantalla** mientras se la termina de
+  armar. Los dos lados consultan la misma función, `condicionAplicable()`: si la regla
+  viviera duplicada, el constructor perdería justo lo que el archivo descarta.
+
+  > [!warning] Acá NO va `opacity`
+  > La marca de «incompleta» es un **borde punteado**, no una atenuación, y por dos
+  > motivos independientes. Uno de producto: atenuar la fila apaga también el campo de
+  > valor que el usuario está tecleando, que es lo último que conviene volver ilegible.
+  > Uno técnico: `opacity` **compone todo el subárbol**, y de eso no escapa ni un
+  > `position: fixed` — el buscador de campos se veía transparente por heredar la
+  > atenuación de su fila. Está también en [[Aprendizajes tecnicos]].
+
+**El buscador de campos** (`FUN-S-16`) es el otro cambio del constructor. Un `<select>`
+alcanza con cinco propiedades y deja de alcanzar con cincuenta: hay que recorrer la lista
+con la vista. Se dibuja a mano —la lista de un `<select>` la pinta el navegador fuera del
+documento y no admite un campo de texto adentro— siguiendo el patrón ya probado de
+`SugerenciasClave` (`DEF-077`): input que filtra sin acentos ni mayúsculas, ↑/↓ para
+moverse, <kbd>Enter</kbd> elige, <kbd>Esc</kbd> cierra, el clic se atiende en `mousedown`
+para llegar antes que el `blur`. Va en un **portal colgado del `body`**, como
+`GraphOptionsMenu` (`DEF-053`): así no depende de la opacidad, el `transform` ni el
+`overflow` de ningún ancestro.
 
 ### La tabla
 
@@ -241,6 +296,7 @@ Es una decisión reversible de una línea si más adelante pesa más la identida
 | `frontend/lib/bases.ts` | **Nuevo.** Parser del `.base` + evaluador de filtros. Puro, sin imports |
 | `frontend/scripts/test-bases.mjs` | **Nuevo.** Un test por caso borde |
 | `frontend/components/bases/BaseView.tsx` + `.module.css` | **Nuevo.** La tabla |
+| `frontend/components/bases/FiltrosBuilder.tsx` | **Nuevo** (`FUN-M-27`). El constructor de filtros, recursivo, y el buscador de campos (`FUN-S-16`) |
 | `frontend/lib/db/tabla.ts` (desktop) | **Nuevo.** La consulta local |
 | `backend/…/TablaEndpoints.cs` (web) | **Nuevo.** El endpoint equivalente |
 | `NotaTipo`, `vaultFs.ts`, `notas.ts`, `EditorPane.tsx`, `ExplorerPanel.tsx` | Tipo de archivo nuevo: extensión, creación, ícono, enrutado del pane |
@@ -254,7 +310,8 @@ Es una decisión reversible de una línea si más adelante pesa más la identida
   cada comparador · cada función de archivo · propiedad ausente (no es lo mismo que vacía)
   · comparar número contra texto · fechas · listas con `contains` · **filtro no soportado
   dentro de un `and` y dentro de un `or`** (§ 2) · YAML inválido · `limit` · `sort` por
-  varias columnas.
+  varias columnas · el **árbol de filtros** en las dos direcciones, con el `not` de un
+  hijo colapsado y la guarda intacta (`FUN-M-27`).
 - La prueba que importa: una base sobre el vault real, comprobando a mano una muestra de
   las filas — y en particular que **no aparece ninguna nota que el filtro excluía**.
 
