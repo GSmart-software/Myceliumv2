@@ -121,6 +121,32 @@
   color: var(--mic-text-primary);
 }
 
+/* ── Sangría y guías de indentación (FUN-S-17) ────────────────────────────── */
+
+/* La sangría la da el ANIDAMIENTO, no un `padding` por nivel en cada fila. Con
+   padding se veía igual, pero no había ningún elemento que abarcara la rama, y
+   sin él no hay dónde colgar la línea — que es lo que dice hasta dónde llega el
+   contenido de una carpeta cuando hay tres o cuatro niveles abiertos.
+
+   Los 14 px de cada nivel son los mismos de antes: 11 de margen + 2 de relleno
+   + 1 de línea. El margen deja la línea centrada bajo la flecha de la carpeta
+   que abre la rama. */
+.rama {
+  margin-left: 11px;
+  padding-left: 2px;
+  border-left: 1px solid color-mix(in srgb, var(--mic-text-muted) 26%, transparent);
+}
+
+/* Una carpeta arranca donde su flecha; una hoja va corrida el ancho de esa
+   flecha, para que los NOMBRES queden en la misma columna. */
+.rowCarpeta {
+  padding-left: 4px;
+}
+
+.rowHoja {
+  padding-left: 22px;
+}
+
 .row:hover {
   background-color: color-mix(in srgb, var(--mic-glow) 15%, transparent);
 }
@@ -144,10 +170,11 @@
 
 /* El rastro hasta el archivo abierto (DEF-069).
 
-   El fondo marca la carpeta donde estás; esta barra marca el CAMINO hasta ella,
-   para que en un árbol hondo se vea de dónde cuelga y para que una carpeta
-   plegada avise de que el archivo está adentro. La carpeta madre lleva las dos,
-   y así se lee: el rastro termina donde está el fondo.
+   El fondo (`.rowActive`) marca la carpeta donde estás —que desde el arreglo es
+   siempre la del archivo abierto—; esta barra marca el CAMINO hasta ella, para
+   que en un árbol hondo se vea de dónde cuelga y para que una carpeta plegada
+   avise de que el archivo está adentro. La carpeta madre lleva las dos, y así
+   se lee: el rastro termina donde está el fondo.
 
    El `inset` va dentro de la caja para no correr el texto ni cambiar el alto de
    la fila, que es lo que haría un `border-left`. */
@@ -229,4 +256,16 @@
   font-size: 0.8125rem;
   color: var(--mic-text-muted);
   padding: 0.5rem 0.25rem;
+}
+
+/* ── Archivos que Mycelium lista pero no indexa (FUN-S-03) ───────────────
+   Atenuados: la diferencia con una nota tiene que verse sin leer el nombre.
+   Desde `FUN-L-11` sí se abren —en un visor de solo lectura—, así que el
+   cursor vuelve a ser el de una fila que responde al clic. */
+.rowOtro {
+  opacity: 0.62;
+}
+
+.rowOtro:hover {
+  opacity: 0.85;
 }

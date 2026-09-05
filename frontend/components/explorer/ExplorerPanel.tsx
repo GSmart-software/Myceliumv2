@@ -509,7 +509,7 @@ export function ExplorerPanel() {
     setRenaming(null);
   }
 
-  function renderCarpeta(carpeta: TreeCarpeta, depth: number) {
+  function renderCarpeta(carpeta: TreeCarpeta) {
     const isExpanded = store.expanded[carpeta.id] ?? false;
     // El fondo marca DÓNDE ESTÁS, y eso se deriva del archivo abierto: no es un
     // estado que alguien prenda y apague (`DEF-069`). Antes era
@@ -536,7 +536,6 @@ export function ExplorerPanel() {
           <>
         <FolderRow
           carpeta={carpeta}
-          depth={depth}
           expanded={isExpanded}
           active={isActive}
           seleccionada={isSeleccionada}
@@ -561,14 +560,15 @@ export function ExplorerPanel() {
             setRenaming({ type: "carpeta", id: carpeta.id, valor: carpeta.nombre })
           }
         />
+        {/* Este contenedor ya existía; lo nuevo es que ADEMÁS sangra y dibuja
+            la guía vertical (`FUN-S-17`). La sangría deja de calcularse por
+            fila (`depth * 14`): con padding se veía igual, pero no había
+            ningún elemento que abarcara la rama del que colgar la línea, y es
+            la línea la que dice hasta dónde llega cada carpeta. */}
         {isExpanded && (
-          <div>
-            {(carpetasPorPadre.get(carpeta.id) ?? []).map((sub) =>
-              renderCarpeta(sub, depth + 1),
-            )}
-            {(notasPorCarpeta.get(carpeta.id) ?? []).map((nota) =>
-              renderNota(nota, depth + 1),
-            )}
+          <div className={styles.rama}>
+            {(carpetasPorPadre.get(carpeta.id) ?? []).map((sub) => renderCarpeta(sub))}
+            {(notasPorCarpeta.get(carpeta.id) ?? []).map((nota) => renderNota(nota))}
           </div>
         )}
           </>
@@ -577,12 +577,11 @@ export function ExplorerPanel() {
     );
   }
 
-  function renderNota(nota: TreeNota, depth: number) {
+  function renderNota(nota: TreeNota) {
     return (
       <NoteRow
         key={nota.id}
         nota={nota}
-        depth={depth}
         active={activeNoteId === nota.id}
         shared={isCarpetaShared(nota.carpetaId)}
         renaming={renaming?.type === "nota" && renaming.id === nota.id}
@@ -759,8 +758,8 @@ export function ExplorerPanel() {
           />
           {!archivosCollapsed && (
             <RootDropZone onClearActive={() => store.setActiveFolder(null)}>
-              {(carpetasPorPadre.get(null) ?? []).map((carpeta) => renderCarpeta(carpeta, 0))}
-              {(notasPorCarpeta.get(null) ?? []).map((nota) => renderNota(nota, 0))}
+              {(carpetasPorPadre.get(null) ?? []).map((carpeta) => renderCarpeta(carpeta))}
+              {(notasPorCarpeta.get(null) ?? []).map((nota) => renderNota(nota))}
               {store.carpetas.length === 0 && store.notas.length === 0 && (
                 <p className={styles.empty}>
                   Vault vacío. Creá tu primera nota con el botón de arriba.
@@ -913,7 +912,6 @@ function FolderDropZone({
 
 function FolderRow({
   carpeta,
-  depth,
   expanded,
   active,
   seleccionada,
@@ -926,7 +924,6 @@ function FolderRow({
   ...rename
 }: {
   carpeta: TreeCarpeta;
-  depth: number;
   expanded: boolean;
   /** Es la carpeta del archivo abierto: dónde estás (`DEF-069`). */
   active: boolean;
@@ -946,6 +943,7 @@ function FolderRow({
 
   const className = [
     styles.row,
+    styles.rowCarpeta,
     active ? styles.rowActive : "",
     seleccionada ? styles.rowSeleccionada : "",
     contieneActivo ? styles.rowEnRuta : "",
@@ -959,7 +957,6 @@ function FolderRow({
     <div
       ref={drag.setNodeRef}
       className={className}
-      style={{ paddingLeft: `${depth * 14 + 4}px` }}
       onClick={onToggle}
       onContextMenu={onContextMenu}
       onDoubleClick={onDoubleClick}
@@ -993,7 +990,6 @@ function FolderRow({
 
 function NoteRow({
   nota,
-  depth,
   active,
   shared,
   onOpen,
@@ -1003,7 +999,6 @@ function NoteRow({
   ...rename
 }: {
   nota: TreeNota;
-  depth: number;
   active: boolean;
   shared: boolean;
   onOpen: () => void;
@@ -1024,6 +1019,7 @@ function NoteRow({
 
   const className = [
     styles.row,
+    styles.rowHoja,
     active ? styles.rowActive : "",
     drag.isDragging ? styles.rowDragging : "",
   ]
@@ -1034,7 +1030,6 @@ function NoteRow({
     <div
       ref={drag.setNodeRef}
       className={className}
-      style={{ paddingLeft: `${depth * 14 + 22}px` }}
       onClick={onOpen}
       // Evita el auto-scroll del navegador al pulsar la rueda sobre la fila.
       onMouseDown={(e) => e.button === 1 && e.preventDefault()}
