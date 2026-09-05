@@ -10,6 +10,7 @@ import { LeftPanel } from "@/components/workspace/LeftPanel";
 import { Rail } from "@/components/workspace/Rail";
 import { SettingsDrawer } from "@/components/workspace/SettingsDrawer";
 import { useAuthStore } from "@/stores/authStore";
+import { usePrefsVaultStore } from "@/stores/prefsVaultStore";
 import { usePanelLayoutStore } from "@/stores/panelLayoutStore";
 import { useCssStore } from "@/stores/cssStore";
 import { usePreferencesStore } from "@/stores/preferencesStore";
@@ -91,6 +92,15 @@ function WorkspaceShell() {
     if (vaultId && useVaultStore.getState().vaultId !== vaultId) {
       void useVaultStore.getState().loadTree(vaultId);
     }
+  }, [vaultId]);
+
+  // Preferencias DEL VAULT (`FUN-M-29`): números de línea, nombres del grafo,
+  // anchos de las tablas. En desktop las carga `vaultSessionStore` al entrar a
+  // una carpeta; acá el equivalente es entrar al workspace con un vault activo.
+  // `cargar` es idempotente para el mismo vault, así que no molesta que este
+  // efecto se repita.
+  useEffect(() => {
+    void usePrefsVaultStore.getState().cargar(vaultId);
   }, [vaultId]);
 
   // Una vez cargado el árbol, descartar del layout restaurado las pestañas cuyas

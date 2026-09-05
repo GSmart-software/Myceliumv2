@@ -45,6 +45,8 @@ import { useGraphStore } from "@/stores/graphStore";
 import { usePreferencesStore } from "@/stores/preferencesStore";
 import { useSyncStore } from "@/stores/syncStore";
 import { panelMetaAbierto, useTabsStore } from "@/stores/tabsStore";
+import { usePrefVault } from "@/stores/prefsVaultStore";
+import { numerosDeLineaExt } from "@/lib/editor/numerosDeLinea";
 import { useVaultStore } from "@/stores/vaultStore";
 import { useUiStore } from "@/stores/uiStore";
 import { EditorToolbar, type EditorMode, type SyncState } from "./EditorToolbar";
@@ -228,6 +230,8 @@ export function NoteEditor({
   // Ancho de tabulación (FUN-S-02): en compartimento propio para poder
   // reconfigurarlo al vuelo, sin recrear la vista ni perder cursor y scroll.
   const tabCompartment = useRef(new Compartment());
+  /** Números de línea (`FUN-M-28`): se prende y apaga sin recrear la vista. */
+  const numerosCompartment = useRef(new Compartment());
   const collabRef = useRef<CollabHandle | null>(null);
   const brokerApplyRef = useRef(false);
   // DEF-039: posición de scroll capturada EN VIVO (ver `instanceCache`).
@@ -431,6 +435,11 @@ export function NoteEditor({
             // Plegar secciones por título (raw + edición en vivo): flecha en el
             // gutter sobre cada título; pliega hasta el próximo título <= nivel.
             codeFolding(),
+            // El orden de los márgenes es el orden en que se declaran, y el
+            // de números va PRIMERO: así queda a la izquierda y la flecha de
+            // plegar pegada al texto, como en VS Code. Al revés —que es como
+            // estaba— el número quedaba lejos de la línea que numera.
+            numerosCompartment.current.of(numerosDeLinea ? numerosDeLineaExt() : []),
             foldGutter({ openText: "⌄", closedText: "›" }),
             headingFoldService,
             // Título (nombre del archivo) como bloque al inicio del documento.
@@ -1040,6 +1049,9 @@ export function NoteEditor({
 
   const showFileTitle = usePreferencesStore((s) => s.prefs.showFileTitle);
   const tabWidth = usePreferencesStore((s) => s.prefs.tabWidth);
+  // Números de línea (`FUN-M-28`). Es una preferencia DEL VAULT, no del
+  // usuario: abrir otro vault trae la suya.
+  const numerosDeLinea = usePrefVault("numerosDeLinea");
   // Panel de metadatos embebido a la derecha de ESTE editor, y su toggle es de
   // ESTE pane (`DEF-060`). Leerlo como selector hace que abrirlo en un pane no
   // redibuje los demás.
@@ -1052,6 +1064,17 @@ export function NoteEditor({
       effects: tabCompartment.current.reconfigure(extensionesTab(tabWidth)),
     });
   }, [tabWidth]);
+
+  // Igual con los números de línea (`FUN-M-28`): reconfigurar, no recrear. Si se
+  // recreara la vista, prender el interruptor perdería el cursor, el scroll y el
+  // deshacer de cada editor abierto.
+  useEffect(() => {
+    viewRef.current?.dispatch({
+      effects: numerosCompartment.current.reconfigure(
+        numerosDeLinea ? numerosDeLineaExt() : [],
+      ),
+    });
+  }, [numerosDeLinea]);
 
   // Mantener el título del bloque del editor al renombrar o togglear la opción.
   useEffect(() => {
@@ -1097,7 +1120,10 @@ export function NoteEditor({
       <div className={`${styles.content} ${styles[`layout_${mode}`]}`}>
         <div
           ref={hostRef}
-          className={`mic-editor-host ${styles.editorPane}`}
+          // `mic-con-numeros` le cede al margen el relleno izquierdo del
+          // scroller, para que un rango como `34-40` entre sin que el margen
+          // cambie de ancho al hacer scroll (`FUN-M-28`).
+          className={`mic-editor-host ${numerosDeLinea ? "mic-con-numeros" : ""} ${styles.editorPane}`}
           onDragOver={(e) => {
             if (Array.from(e.dataTransfer.items).some((i) => i.kind === "file")) {
               e.preventDefault();
