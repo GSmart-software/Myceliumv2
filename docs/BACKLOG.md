@@ -63,7 +63,7 @@ y **priorizar** qué implementar antes.
 | `FUN-S-04` | `TRASH-MULTISELECT` | Seleccionar varios archivos para borrar en la papelera | ambas | C-M-14 |
 | `FUN-S-05` | `VAULT-EJEMPLO-DEFAULT` | Al crear un vault nuevo, generar un archivo de ejemplo por defecto | ambas | C-G-02 |
 | `FUN-S-08` | `NOTE-CSSCLASSES` | Aplicar a la nota las clases CSS que declare su propiedad `cssclasses`: hoy se parsea e indexa pero **no tiene comportamiento**. Continuación de `FUN-M-04` | ambas | — |
-| `FUN-S-09` | `CODE-RESALTADO-SINTAXIS` | Colorear los archivos de código al visualizarlos según su lenguaje (palabras reservadas, tipos, cadenas). **Depende de `FUN-L-11`**: sin visor de código no hay nada que colorear | ambas | — |
+| `FUN-S-09` | `CODE-RESALTADO-SINTAXIS` | Colorear los archivos de código al visualizarlos según su lenguaje (palabras reservadas, tipos, cadenas). **Depende de `FUN-L-11`**: sin visor de código no hay nada que colorear — y como ese visor es **solo-desktop**, esta también lo es (figuraba como «ambas», corregido el 2026-09-04) | desktop | — |
 | `FUN-S-10` | `ENLACES-AVISO-REFERENCIA` | Hook que avisa cuando se escribe una referencia a otra nota que Mycelium **no** cuenta como enlace (un `[texto](otra.md)`, o una forma ya registrada en el léxico escrita sin corchetes). Prevención, para que el problema que arregla `FUN-M-17` no vuelva a crecer | ambas | — |
 | `FUN-S-11` | `TABS-ICONO-TIPO` | Cada pestaña muestra, junto al nombre, el **ícono del tipo de documento** que contiene (markdown, Excalidraw, canvas, base, consola). Con un ajuste en Configuración para desactivarlo | ambas | — |
 | `FUN-S-14` | `BASES-BUSCADOR` | Buscador dentro de un archivo tabla (`.base`) para encontrar una fila concreta sin tocar los filtros, con **coincidencia parcial** (`*XYZ*`) o **exacta**. Los filtros definen *qué* entra en la tabla; esto es para encontrar algo dentro de lo que ya entró | ambas | — |
@@ -93,7 +93,7 @@ y **priorizar** qué implementar antes.
 | `FUN-S-16` | `BASES-FILTRO-BUSCADOR` | Buscador dentro del desplegable que elige **por qué campo** filtrar en un archivo tabla. Hoy es una lista sin más, y con muchas propiedades en el vault encontrar la que se busca cuesta. Hay dónde copiar: `SugerenciasClave` de la pestaña PROPIEDADES (`DEF-077`) ya resuelve el mismo problema —input que filtra, flechas para moverse, Enter para elegir, Escape para cerrar, `position: fixed` para no quedar recortado— | ambas | — |
 | `FUN-M-27` | `BASES-FILTROS-LOGICOS` | El constructor de filtros de un archivo tabla solo arma una lista plana unida toda por `y` o toda por `o`. No se puede **negar** una condición ni **agrupar** («A y (B o C)»), así que casos como «los que NO empiezan por X» no se pueden expresar. **El motor ya sabe hacerlo**: `Filtro` tiene `and`/`or`/`not` y `evaluar` los resuelve — lo que falta es la interfaz, y por eso el trabajo es de UI y de ida y vuelta con el YAML, no de evaluación. Ojo con `condicionesPlanas`, que devuelve `null` a propósito cuando el filtro no cabe en el constructor: esa guarda es lo que hoy impide destruir un filtro complejo al guardar, y hay que conservarla o reemplazarla por algo igual de estricto | ambas | — |
 | `FUN-M-25` | `BASES-ANCHO-COLUMNAS` | Ajustar el **ancho de cada columna** de un archivo tabla arrastrando su borde. Es M y no S por **dónde se guarda**: el `.base` es formato de Obsidian y meterle una clave nuestra rompería la interoperabilidad, así que hay que decidir entre guardarlo aparte (local, por vault) o no persistirlo. Ver la advertencia del bloque | ambas | — |
-| `FUN-M-24` | `EDITOR-TITULO-RENOMBRA` | El **título del documento** que se muestra arriba de la nota pasa a ser **editable**, y escribir en él **renombra el archivo** — como en Obsidian. Hoy es de solo lectura y renombrar obliga a ir al explorador. **Ojo con el orden**: mientras `FUN-M-08` siga pendiente, renombrar rompe los `[[enlaces]]` que apuntaban al título viejo, y esto hace el renombrado mucho más fácil de disparar —incluso sin querer, escribiendo en lo que parece texto—. Ver el bloque **C** | ambas | — |
+| `FUN-M-24` | `EDITOR-TITULO-RENOMBRA` | El **título del documento** que se muestra arriba de la nota pasa a ser **editable**, y escribir en él **renombra el archivo** — como en Obsidian. Hoy es de solo lectura y renombrar obliga a ir al explorador. El riesgo que tenía —renombrar rompía los `[[enlaces]]`— **ya no existe**: `FUN-M-08` se implementó y confirmó el 2026-09-03, así que el renombrado los repara solo. Queda más simple de lo que su ficha sugería | ambas | — |
 | `FUN-M-23` | `MERMAID-VISOR` | Visor propio para los diagramas Mermaid en la vista de lectura: al hacer clic se abre una ventana interna donde el diagrama se maneja como una imagen —**zoom** y **desplazamiento**—, porque hoy uno grande no se puede leer. **Segunda fase, si la primera sale bien**: sobre esa ventana, un **dibujo efímero** con unos pocos colores (se borra al cerrar, no se guarda nada) y un **puntero láser** para señalar sin dibujar. Pensado para explicar un diagrama a alguien | ambas | — |
 | `FUN-M-22` | `EXPORT-FEEDBACK-DESCARGA` | Avisar de la exportación: una tarjeta abajo a la derecha que indica que se está descargando, permanece 10-15 s al terminar —con cierre manual— y ofrece **abrir la carpeta** donde quedó el archivo. Hoy exportar no da ninguna señal | ambas (difiere) | — |
 | `FUN-M-19` 🟢🌐 | `EDITOR-PROPIEDADES-EN-SITIO` | El bloque de propiedades **deja de abrirse en crudo** al entrar el cursor: sigue renderizado y se edita ahí — cambiar un valor, renombrar una clave, **agregar y quitar** propiedades — sin ir a la vista raw, más «editar como texto» por bloque. Invierte el «widget de solo lectura» de `FUN-M-04`, cuyo motor (`ponerPropiedad`, `quitarPropiedad`, `renombrarPropiedad`) ya está hecho y probado. **Confirmado en desktop** por el usuario el 2026-08-16 y **reflejado en web** el 2026-08-17, junto con `FUN-L-19` porque tocan los mismos archivos compartidos. Primera mitad de [[edicion-en-el-render]]; la segunda es `FUN-L-19` | ambas | — |
@@ -275,6 +275,10 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   motor que use el visor de `FUN-L-11`, para no mantener dos paletas), y de dónde sale el
   lenguaje (extensión del archivo).
 - **Depende de `FUN-L-11`**: sin visor de código no hay nada que colorear.
+- **Solo-desktop, por herencia** (corregido el 2026-09-04): figuraba como «ambas», pero
+  `FUN-L-11` es solo-desktop —en web esos archivos no existen en ninguna parte— así que en
+  web no hay nada que colorear. El alcance de una funcionalidad no puede ser más amplio que
+  el de aquella de la que depende.
 
 ### Pendientes — tamaño M
 
@@ -436,12 +440,16 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 - **Reutiliza**: la validación de nombres de `lib/db/nombres.ts` y el renombrado que ya usa el
   explorador. Lo nuevo es la edición en sitio y qué hacer ante un nombre inválido o repetido.
 
-> [!warning] Depende de `FUN-M-08` más de lo que parece
-> Mientras los `[[enlaces]]` no se reescriban al renombrar, cada renombrado deja enlaces rotos
-> **sin avisar**. Eso hoy se tolera porque renombrar es un acto deliberado: hay que ir al
-> explorador a buscarlo. Poner el renombrado en el título lo vuelve **cotidiano y accidental**
-> —basta con escribir sobre lo que parece texto normal—, y una molestia conocida se convierte
-> en pérdida de datos diaria. **Sacar `FUN-M-08` antes, o las dos juntas.**
+> [!success] El bloqueo de `FUN-M-08` se levantó el 2026-09-03
+> La advertencia decía: mientras los `[[enlaces]]` no se reescribieran al renombrar, poner el
+> renombrado en el título volvería **cotidiano y accidental** algo que hoy es deliberado, y
+> una molestia conocida se convertiría en pérdida de datos diaria. Por eso pedía sacar
+> `FUN-M-08` antes, o las dos juntas.
+>
+> **`FUN-M-08` está hecho, reflejado a las dos ramas y confirmado en la app**: el renombrado
+> repara los enlaces entrantes solo. El riesgo desapareció y esta funcionalidad quedó más
+> simple de lo que su ficha sugería. Se conserva el aviso, tachado, porque explica **por qué
+> se hizo en este orden** — no era una preferencia.
 
 - **Decidido** (2026-08-18): `Enter` confirma y `Escape` descarta, igual que en las celdas y
   en las propiedades. Si el nombre ya existe o lleva símbolos inválidos, **se muestra un
@@ -958,6 +966,27 @@ tocar los mismos archivos dos veces y probar lo mismo dos veces.
 >
 > Y no se agrupa por agrupar: lo que no tiene parentesco real **va solo**, aunque sea
 > pequeño. Un release de una sola unidad es perfectamente válido.
+
+> [!important] Decidido el 2026-09-04: qué entra en el próximo release
+> Doce funcionalidades, elegidas por el usuario. **Todas juntas son UN minor**
+> —desktop `1.7.0`, web `1.3.0`—: el tamaño del salto lo decide el cambio más
+> significativo, nunca cuántos cambios lleva (ver [[Versionado del sistema]]). Los bloques
+> de abajo siguen siendo candidatos independientes; esta tanda los atraviesa.
+>
+> Se agruparon por **qué código y qué decisión comparten**, que es lo único que ahorra
+> trabajo. Dos funcionalidades van juntas si hacerlas por separado significa abrir el mismo
+> archivo dos veces o tomar la misma decisión dos veces:
+>
+> | Grupo | Qué comparten |
+> |---|---|
+> | **Preferencias por vault** — `FUN-M-28` + `FUN-M-21` | Las dos dicen «persiste por vault» y **eso no existe**: hoy las preferencias son por usuario. Hay que crear el almacén, y crearlo dos veces sería el desperdicio. De paso le da casa al ancho de columnas de `FUN-M-25`, cuya única razón de ser `M` es no saber dónde guardarlo |
+> | **El archivo tabla** — `FUN-S-16` + `FUN-M-27`, después `FUN-S-15` + `FUN-M-25` + `FUN-S-14` | Las cinco viven en `BaseView.tsx`, en dos mitades: el constructor de filtros —que `FUN-M-27` reescribe entero, así que el buscador de `FUN-S-16` va con esa reescritura o se hace dos veces— y la cabecera de la tabla |
+> | **Las pestañas** — `FUN-S-11` + `FUN-S-12` | Las dos agregan una marca visual a la misma tira, y `FUN-S-11` incluye la consola entre los tipos |
+> | **Sueltas** — `FUN-S-09`, `FUN-M-20`, `FUN-M-24` | Sin parentesco real con el resto: el visor, el panel de búsqueda y el editor. Van solas a propósito |
+>
+> **Orden acordado**: preferencias por vault primero, porque desbloquea sus dos y resuelve
+> la duda de `FUN-M-25`. Si fuera después, la decisión habría que tomarla igual pero peor:
+> con `FUN-M-25` ya escrito de otra forma.
 
 ### Bloques
 
