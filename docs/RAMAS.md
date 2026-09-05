@@ -239,6 +239,23 @@ entre ramas):
   > `paletaSintaxis.ts` es el mismo caso al revés: en web no cambia nada de lo que se ve,
   > y se trae para que `livePreview.ts` —que es grande y se refleja seguido— siga siendo
   > idéntico.
+- **Búsqueda: modos y árbol (`FUN-M-20`) + guías del explorador (`FUN-S-17`), las dos
+  ramas, 2026-09-05)**: el frontend es **compartido** —`SearchPanel.tsx` + su CSS,
+  `lib/search.ts`, `preferencesStore.ts`, `ExplorerPanel.module.css`— y se trae entero. Lo
+  que **no** es un reflejo es la consulta: en desktop la arma `lib/db/fts.ts` y en web
+  `backend/…/SearchEndpoints.cs`, así que el filtro de columna de `FUN-M-20` se escribió
+  **dos veces**, una en TS y otra en C#. Es la misma duplicación deliberada que ya tenían
+  `BuildFtsQuery` y `SepararFiltrosPropiedad`.
+
+  `ExplorerPanel.tsx` diverge: el parche de tres vías de `FUN-S-17` chocó tres veces, y las
+  tres por lo mismo —`OtroRow` y `otrosPorCarpeta`, el visor de archivos sueltos de
+  `FUN-L-11`, que en web no existe—. Se resolvieron dejándolo fuera.
+
+  > [!tip] Un test que vale en las dos ramas aunque la mitad no aplique
+  > `scripts/test-search.mjs` cubre `lib/search.ts` (compartido) y `lib/db/fts.ts`
+  > (solo-desktop). En vez de partirlo en dos archivos, la carga del segundo es **opcional**
+  > y sus siete casos se marcan `skip` con el motivo. Así el archivo es el mismo en las dos
+  > ramas y el porqué queda escrito en la salida del test, no en la cabeza de alguien.
 - **Canvas (`FUN-L-18`, las dos ramas, 2026-08-08)**: `frontend/lib/canvas.ts`,
   `scripts/test-canvas.mjs` y `components/canvas/*` son **compartidos** y se traen enteros.
   Lo que hay que aplicar a mano es el tipo de archivo, que toca los mismos sitios que ya

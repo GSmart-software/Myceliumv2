@@ -60,6 +60,8 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
 - [[navegacion-por-pestana]] — scroll, historial por pestaña y previsualización (`DEF-039/040/041`).
 - [[marcas-en-las-pestanas]] — el ícono del tipo en cada pestaña y el color por consola
   (`FUN-S-11` · `FUN-S-12`).
+- [[busqueda-modos-y-arbol]] — elegir dónde busca el panel del vault, ver los resultados
+  por carpeta, y las guías de indentación (`FUN-M-20` · `FUN-S-17`).
 - [[metadata-yaml]] — frontmatter YAML como propiedades: ver, editar e indexar (`FUN-M-04`).
 - [[ventanas-multiples]] — varios vaults abiertos a la vez, uno por ventana (`FUN-L-16`).
 - [[auditoria-y-relinkeado]] — adoptar un vault que ya existía: descubrir cómo se
