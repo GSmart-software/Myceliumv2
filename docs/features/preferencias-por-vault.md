@@ -78,15 +78,20 @@ gusta.
 
 ## 4. Ciclo de vida
 
-Se cargan al **abrir** el vault y se limpian al **salir**, en
-`vaultSessionStore`. La carga no se espera: si tarda o falla, el vault se abre
-igual con los valores por defecto — un ajuste de aspecto no puede demorar la
-apertura.
+Se cargan al **abrir** el vault y se limpian al **salir**: en desktop lo hace
+`vaultSessionStore`; en web, el efecto del workspace cuando hay vault activo. La
+carga no se espera: si tarda o falla, el vault se abre igual con los valores por
+defecto — un ajuste de aspecto no puede demorar la apertura.
 
 En Configuración, un control cuya preferencia es del vault se **desactiva**
-cuando no hay ninguno abierto, en vez de aceptar un cambio que se perdería.
+mientras no haya dónde escribir. La pregunta se le hace al **propio almacén**
+(`prefsVaultStore.ruta !== null`) y no a la sesión del vault: lo que decide si el
+control sirve no es que haya un vault abierto, sino que `cargar` ya haya
+terminado de leer, que es exactamente cuando un cambio deja de perderse. Es
+además lo único que las dos versiones responden igual, y por eso
+`EditorSection.tsx` sigue siendo un archivo compartido.
 
-## 5. Sus dos consumidores
+## 5. Sus consumidores
 
 ### `FUN-M-28` — números de línea
 
@@ -100,18 +105,47 @@ Tres modos: todos, el apuntado y sus vecinos, o solo el apuntado. El control
 está en el menú del grafo y no en Configuración: es una opción de esa vista y se
 toca mientras se la mira.
 
-## 6. Lo que falta
+### `FUN-M-25` — ancho de las columnas de un archivo tabla
 
-> [!warning] En web no hay carpeta, así que esto no se refleja tal cual
-> El almacén es un comando de Tauri sobre el sistema de archivos. Llevar las dos
-> funcionalidades a web **no es un reflejo**: hay que decidir dónde viven ahí y
-> aceptar que la propiedad que motivó la elección —que viajen con el vault— solo
-> se conserva si las guarda el backend. Ver [[RAMAS]].
+`anchosTabla`: `id del .base` → `referencia de columna` → píxeles. Es el único
+valor con forma de diccionario anidado, así que es el único donde un archivo
+editado a mano puede colar un `0` — y un `0` que llegara al `<col>` dejaría una
+columna invisible sin forma evidente de recuperarla. Por eso `normalizarAnchos`
+descarta todo lo que no sea un número por encima de `ANCHO_MIN`. Ver
+[[bases-tabla]] § La cabecera de la tabla.
+
+## 6. El porte a web (`FUN-M-29`, 2026-09-05)
+
+En web no hay carpeta, así que **no fue un reflejo**: se decidió dónde viven y
+quién las carga.
+
+Viven en `localStorage`, con la clave `mycelium:prefs-vault:<vaultId>`. La
+consecuencia está aceptada y anotada en el propio módulo: **quedan en ese
+navegador**, y el mismo vault abierto desde otro equipo arranca con los valores
+por defecto. Es justo la propiedad que motivó el diseño en desktop, y se cede: la
+alternativa —un endpoint `.NET` que las guardara junto al vault— cuesta backend,
+migración y una llamada de red en el arranque, y todo eso por unos ajustes de
+aspecto. Si algún día tienen que viajar, lo único que cambia es el cuerpo de
+`cargar` y de `guardarDiferido`.
+
+> [!important] Lo que hace valioso al porte no es el `localStorage`
+> Es que `prefsVaultStore` expone **la misma superficie** en las dos ramas
+> —`POR_DEFECTO`, `normalizar`, `cargar`, `set`, `usePrefVault`, y hasta el
+> nombre `ruta`, que en web es el `vaultId`—. Eso es lo único que evita que sus
+> consumidores diverjan: `BaseView`, `NoteEditor`, `EditorSection`, `MiniGraph` y
+> `GraphOptionsMenu` se siguen trayendo enteros con un `git checkout`. Un almacén
+> con otra forma habría convertido a cinco componentes compartidos en cinco
+> archivos que hay que mantener dos veces.
+>
+> El caso que lo hizo evidente fue `FUN-M-25`: sin el porte, guardar los anchos
+> habría metido un import solo-desktop en `BaseView.tsx`, que es de los últimos
+> componentes grandes que quedan compartidos enteros.
 
 ## Relacionadas
 
 - [[numeros-de-linea]] — el primer consumidor, y el que más pulido necesitó.
-- [[BACKLOG]] — `FUN-M-28`, `FUN-M-21` y `FUN-M-25`, que hereda este almacén.
-- [[RAMAS]] — la divergencia con web.
+- [[bases-tabla]] — `FUN-M-25`, el consumidor que forzó el porte a web.
+- [[BACKLOG]] — `FUN-M-28`, `FUN-M-21`, `FUN-M-25` y `FUN-M-29`.
+- [[RAMAS]] — la divergencia con web: qué se trae entero y qué no.
 - [[mycignore]] — por qué `.mycelium/` no aparece en la app.
 - [[Mapa de documentacion]] — índice general.

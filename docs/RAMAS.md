@@ -174,29 +174,37 @@ entre ramas):
   > `lib/canvas.ts` y `lib/enlaces.ts` son **puros y sin imports** —así los transpilan sus
   > tests sin build— y no pueden importar `lib/wikilinks.ts`. Cada uno cubre el caso en su
   > propia suite: es lo único que impide que diverjan.
-- **Preferencias por vault (`FUN-M-28` + `FUN-M-21`, 2026-09-05, hoy solo-desktop)**: esto
-  **NO es un reflejo pendiente, es una funcionalidad nueva de web**, y por eso está en el
-  [[BACKLOG]] como `FUN-M-29` en vez de esperar un `checkout`.
+- **Preferencias por vault (`FUN-M-28` + `FUN-M-21` + `FUN-M-25`; portadas a web el
+  2026-09-05 como `FUN-M-29`)**: el único archivo que **diverge de verdad** es
+  `stores/prefsVaultStore.ts`. Todo lo que lo consume es compartido y se trae entero.
 
-  El almacén (`src-tauri/src/prefs_vault.rs` + `stores/prefsVaultStore.ts`) escribe
-  `.mycelium/preferencias.json` **dentro de la carpeta del vault**, y esa elección tuvo un
-  motivo: que los ajustes **viajen con él**. En web no hay carpeta, y además
-  `stores/vaultSessionStore.ts` —donde se cargan al abrir y se limpian al salir— **no
-  existe en esa rama**: ahí el vault es una entidad de la base, no una sesión sobre un
-  directorio. O sea que no falta traer un archivo: falta **decidir dónde viven y quién los
-  carga**.
+  | Rama | Dónde viven | Quién las carga |
+  |---|---|---|
+  | `desktop-tauri` | `.mycelium/preferencias.json` dentro del vault (`src-tauri/src/prefs_vault.rs`) | `stores/vaultSessionStore.ts`, al entrar y salir de una carpeta |
+  | `web-cloud` | `localStorage`, clave `mycelium:prefs-vault:<vaultId>` | el efecto del workspace, cuando hay vault activo |
 
-  > [!warning] La decisión no es técnica, es de producto
-  > `localStorage` por `vaultId` no necesita backend, pero los ajustes quedan **en ese
-  > navegador**: abrir el vault en otra máquina los pierde. Un endpoint `.NET` conserva la
-  > propiedad que motivó todo el diseño, y cuesta más. Improvisar el primero sin decirlo
-  > convertiría «viajan con el vault» en una promesa que solo cumple una de las dos
-  > versiones.
+  No fue un reflejo: en web no hay carpeta, y `vaultSessionStore.ts` **no existe** en esa
+  rama —ahí el vault es una entidad de la base, no una sesión sobre un directorio—. Se
+  decidió `localStorage`, con la consecuencia asumida y escrita en el módulo: los ajustes
+  **quedan en ese navegador**. La propiedad que motivó el diseño en desktop —que viajen con
+  el vault— se cede a cambio de no montar backend, migración y una llamada de red en el
+  arranque por unos ajustes de aspecto.
 
-  Mientras tanto **todo el grupo queda anclado**: `MiniGraph.tsx`,
-  `GraphOptionsMenu.tsx`, `EditorSection.tsx` y `editor.css` son compartidos y ya están
-  listos, pero leen el store, así que no pueden viajar solos. `NoteEditor.tsx` diverge y
-  `lib/editor/numerosDeLinea.ts` es nuevo y compartible.
+  > [!important] Lo que hay que conservar es la SUPERFICIE, no la implementación
+  > Las dos versiones del store exportan lo mismo: `POR_DEFECTO`, `normalizar`, `cargar`,
+  > `set`, `usePrefVault` — y hasta el nombre del campo `ruta`, que en web es el `vaultId`.
+  > Eso es lo único que mantiene compartidos a `BaseView.tsx`, `NoteEditor.tsx`,
+  > `EditorSection.tsx`, `MiniGraph.tsx` y `GraphOptionsMenu.tsx`. Si algún día las
+  > preferencias tienen que viajar de verdad, lo que cambia es **el cuerpo de `cargar` y de
+  > `guardarDiferido`**, y nada más.
+  >
+  > Al portar apareció un caso de esto: `EditorSection.tsx` preguntaba «¿hay vault?» a
+  > `vaultSessionStore`. Se cambió a preguntárselo al propio almacén (`ruta !== null`), que
+  > además es más correcto —lo que importa es que ya haya dónde escribir— y el archivo
+  > siguió siendo compartido.
+
+  `NoteEditor.tsx` sí diverge (web no tiene watcher del vault ni guardado pendiente): los
+  cambios de `FUN-M-28` se le aplicaron con parche de tres vías, limpio.
 - **Canvas (`FUN-L-18`, las dos ramas, 2026-08-08)**: `frontend/lib/canvas.ts`,
   `scripts/test-canvas.mjs` y `components/canvas/*` son **compartidos** y se traen enteros.
   Lo que hay que aplicar a mano es el tipo de archivo, que toca los mismos sitios que ya

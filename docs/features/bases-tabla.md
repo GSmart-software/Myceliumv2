@@ -242,8 +242,86 @@ para llegar antes que el `blur`. Va en un **portal colgado del `body`**, como
   y las etiquetas siguen siendo clicables.
 - Clic en una fila → abre la nota. Es una pestaña de previsualización, como en el
   explorador.
-- Ordenar por una columna desde su cabecera. El orden inicial sale de `sort`.
+- Ordenar por una columna desde su cabecera (§ La cabecera de la tabla). El orden inicial
+  sale de `sort`.
 - `limit` recorta las filas y se dice cuántas se ocultaron; nunca se recorta en silencio.
+
+### La cabecera de la tabla — `FUN-S-15` · `FUN-S-14` · `FUN-M-25`
+
+Las tres viven en el mismo `<th>` y salieron juntas: separarlas habría significado
+rediseñarlo tres veces.
+
+#### Ordenar (`FUN-S-15`)
+
+El motor ya ordenaba por lo que dijera `sort`; lo que faltaba era cambiarlo desde la
+cabecera. El clic recorre **ascendente → descendente → sin orden**, y ese tercer paso no es
+un adorno: sin él, una tabla ordenada una vez no podría volver al orden que trae la
+agregación.
+
+<kbd>Shift</kbd>+clic **suma** la columna a las que ya ordenan en vez de reemplazarlas. El
+formato admite varios criterios, y un clic que siempre los borra dejaría un `sort` de dos
+columnas imposible de rehacer desde la interfaz. Cuando hay más de uno, cada flecha lleva
+su número: dos flechas sin número se leen como dos órdenes compitiendo, no como uno detrás
+del otro.
+
+Se guarda en el `sort` del archivo — el orden **sí** tiene sitio en el formato de Obsidian.
+Y como reescribe el YAML, sigue la misma regla que los filtros y las columnas: si el
+archivo trae algo que Mycelium no modela, las cabeceras no ordenan y el `title` dice por
+qué.
+
+> [!important] Lo que no tiene valor va SIEMPRE al final
+> En las dos direcciones, y es un cambio deliberado sobre cómo ordenaba antes. Siguiendo el
+> orden natural, una columna que la mitad de las notas no tiene empezaba en ascendente por
+> un bloque de celdas vacías: justo lo que no se estaba buscando, tapando lo que sí.
+
+#### Buscar dentro (`FUN-S-14`)
+
+Va en la cabecera y **no** en el panel de filtros, porque no es un filtro: los filtros
+deciden *qué notas entran* y viven en el archivo; esto mira lo que ya entró y se va con la
+pestaña. De ahí las tres decisiones que lo definen:
+
+| Decisión | Por qué |
+|---|---|
+| Se aplica **después** del `limit` | El límite es parte de la consulta. Buscar dentro de la tabla es buscar dentro de lo que la tabla muestra |
+| Solo mira las columnas **mostradas** | Buscar contra propiedades que no están en pantalla traería filas sin nada resaltado, y sin forma de saber por qué están ahí |
+| No se guarda en ningún lado | No define la consulta. Persistirla haría que abrir la base mañana mostrara media tabla sin motivo visible |
+
+Ignora tildes y mayúsculas (`normalizarTexto`): quien escribe en el buscador no está
+citando el valor, está tratando de llegar a él. Parcial o exacta se elige con un
+**interruptor** y no con la sintaxis `*XYZ*` que decía el enunciado: un interruptor se ve
+—la sintaxis con comodines hay que saberla— y además deja buscar un asterisco literal.
+
+Si la búsqueda no encuentra nada, el mensaje dice que es **la búsqueda** y ofrece vaciarla.
+Decir «ninguna nota cumple los filtros» ahí sería mentir: los filtros sí devolvieron notas.
+
+#### Ancho de columna (`FUN-M-25`)
+
+Era `M` por **dónde se guarda**, y la respuesta llegó con [[preferencias-por-vault]]: en
+`.mycelium/preferencias.json`, nunca dentro del `.base`. Meterle una clave nuestra a un
+formato de Obsidian rompería la promesa de que los dos programas abren el mismo archivo —
+y a diferencia del orden, los anchos no tienen sitio en ese formato.
+
+Cómo se comporta:
+
+- La tabla conserva el **reparto automático** del navegador hasta que alguien arrastra un
+  borde. Una base que nadie ajustó se ve exactamente como antes.
+- Al empezar el arrastre se congela en el reparto que ya tenía —midiendo los `<th>`— para
+  que el primer píxel no dé un salto.
+- Durante el arrastre se escribe **directamente en los `<col>`**, no en el estado: pasar
+  cada píxel por React volvería a dibujar todas las filas. Se guarda una sola vez al
+  soltar.
+- Una **columna de relleno** sin ancho se queda con el sobrante cuando las demás no llenan
+  la pantalla. La alternativa —un `min-width: 100%` sobre la tabla— hace que el navegador
+  reparta el hueco entre las columnas reales, y entonces el ancho que el usuario eligió
+  deja de ser el que se ve.
+- Doble clic en un tirador vuelve a los anchos automáticos.
+- Las vistas de una misma base **comparten** el ancho de una columna: la clave es la
+  referencia, no el par vista+referencia.
+
+> [!warning] La clave es el id del archivo
+> Renombrar un `.base` deja sus anchos huérfanos y la tabla vuelve a los automáticos. Es
+> el mismo límite que ya arrastra el renombrado en todo Mycelium, y el costo de
+> equivocarse acá es que hay que volver a arrastrar tres bordes.
 
 ### Estados
 
@@ -271,6 +349,9 @@ Es una decisión reversible de una línea si más adelante pesa más la identida
   N archivos y habría que resolver el conflicto con el editor abierto y el deshacer — que
   es de donde salieron `DEF-031`/`DEF-037`. La **base** sí se edita (ver arriba).
 - **No agrega ni resume** (`summaries`, `groupBy`): fuera de v1.
+- **No guarda los anchos de columna en el `.base`** (`FUN-M-25`). El orden sí —el formato
+  tiene `sort`—; los anchos no tienen dónde ir sin inventar una clave propia, así que van
+  a las preferencias del vault.
 - **No es una vista de tarjetas**: el backlog ya la dejaba fuera de alcance.
 - **No aporta aristas al grafo.** Una base **sí** es un destino válido —`[[Mi base]]`
   navega, y aparece como nodo—, pero su contenido **no se escanea**: es la definición de
@@ -297,6 +378,7 @@ Es una decisión reversible de una línea si más adelante pesa más la identida
 | `frontend/scripts/test-bases.mjs` | **Nuevo.** Un test por caso borde |
 | `frontend/components/bases/BaseView.tsx` + `.module.css` | **Nuevo.** La tabla |
 | `frontend/components/bases/FiltrosBuilder.tsx` | **Nuevo** (`FUN-M-27`). El constructor de filtros, recursivo, y el buscador de campos (`FUN-S-16`) |
+| `frontend/stores/prefsVaultStore.ts` | Los anchos de columna (`FUN-M-25`). **Diverge**: archivo en desktop, `localStorage` en web (`FUN-M-29`) |
 | `frontend/lib/db/tabla.ts` (desktop) | **Nuevo.** La consulta local |
 | `backend/…/TablaEndpoints.cs` (web) | **Nuevo.** El endpoint equivalente |
 | `NotaTipo`, `vaultFs.ts`, `notas.ts`, `EditorPane.tsx`, `ExplorerPanel.tsx` | Tipo de archivo nuevo: extensión, creación, ícono, enrutado del pane |
@@ -311,7 +393,9 @@ Es una decisión reversible de una línea si más adelante pesa más la identida
   · comparar número contra texto · fechas · listas con `contains` · **filtro no soportado
   dentro de un `and` y dentro de un `or`** (§ 2) · YAML inválido · `limit` · `sort` por
   varias columnas · el **árbol de filtros** en las dos direcciones, con el `not` de un
-  hijo colapsado y la guarda intacta (`FUN-M-27`).
+  hijo colapsado y la guarda intacta (`FUN-M-27`) · el **ciclo del orden** y las celdas sin
+  valor al final (`FUN-S-15`) · la **búsqueda** después del límite y solo sobre las
+  columnas mostradas (`FUN-S-14`).
 - La prueba que importa: una base sobre el vault real, comprobando a mano una muestra de
   las filas — y en particular que **no aparece ninguna nota que el filtro excluía**.
 
