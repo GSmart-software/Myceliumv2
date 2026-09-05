@@ -28,8 +28,9 @@ Estos archivos Mycelium no los indexa ni los respalda: escribir en algo que no e
 cuidado es la peor combinación posible. Si después hace falta editarlos, se agrega encima sin
 rehacer nada.
 
-**Fuera de alcance**: el resaltado de sintaxis del código, que es `FUN-S-09` y depende de
-esto; y editar, que no tiene ítem porque todavía nadie lo pidió.
+**Fuera de alcance en v1**: el resaltado de sintaxis del código y la edición. Las dos
+llegaron después, encima de esto y sin rehacer nada: `FUN-M-26` (editar, 2026-09-03) y
+`FUN-S-09` (resaltado, 2026-09-05, § 8).
 
 ---
 
@@ -171,18 +172,89 @@ reescribirlo sin destruirlo.
 
 ### El editor
 
-CodeMirror en configuración mínima —deshacer, selección, números de línea— y **sin** vista en
-vivo, sin markdown y sin resaltado de sintaxis (eso sigue siendo `FUN-S-09`). Es el mismo
-motor que ya usa el editor de notas: no se suma nada al bundle y el deshacer viene resuelto.
+CodeMirror en configuración mínima —deshacer, selección, números de línea y el resaltado de
+`FUN-S-09`— y **sin** vista en vivo ni markdown. Es el mismo motor que ya usa el editor de
+notas: no se suma nada al bundle y el deshacer viene resuelto.
 
 ### Lo que sigue igual
 
 No entran al índice: ni búsqueda del vault, ni autocompletado de `[[`, ni grafo. Editar un
 `.json` no lo convierte en una nota.
 
+---
+
+## 8. Resaltado de sintaxis (`FUN-S-09`, 2026-09-05)
+
+Un archivo de código se ve **coloreado según su lenguaje**. Lo que costó no fue pintar: fue
+elegir con qué.
+
+### El lector cambia de motor
+
+El lector eran dos `<pre>` —números y contenido— con el scroll sincronizado a mano, y
+estaban elegidos **por rendimiento**: un elemento por línea era un panel que tardaba
+segundos con 2 MB. Pasa a ser CodeMirror en solo lectura.
+
+> [!important] CodeMirror resolvió el motivo por el que no se usaba
+> Dibuja **solo las líneas visibles**, así que el archivo grande le cuesta menos que a los
+> dos `<pre>`, que obligaban al navegador a maquetar el texto entero. Lo que parecía la
+> opción pesada era la liviana.
+>
+> Y siendo el mismo motor que el modo edición, leer y editar el mismo archivo dejan de
+> **poder** verse distinto. Con dos implementaciones era cuestión de tiempo.
+
+Lo que se paga a cambio: **la búsqueda pasa del DOM a CodeMirror**. No es una preferencia,
+es obligatorio — `buscarEnDom` recorre nodos y fuera del viewport no hay ninguno. Buscar
+algo del final de un archivo largo no habría encontrado nada.
+
+Eso obligó a un ajuste en `SearchBar`: una prop `sinReemplazo`. `modoLectura` no servía,
+porque ese flag dice **dónde** se busca (en el DOM en vez de en el editor), y acá hace falta
+buscar en un editor **sin** ofrecer un reemplazo que sobre un documento de solo lectura no
+escribiría nada y solo parecería roto.
+
+### El lenguaje sale del nombre del archivo
+
+No del contenido. Es lo único que se sabe con certeza antes de leerlo, y la heurística por
+contenido acierta poco justo en los archivos cortos, que son la mayoría de los que se abren
+de paso. Se busca por **nombre completo** y no solo por extensión, así que `Dockerfile` y
+`Makefile` también se reconocen.
+
+### La gramática se carga bajo demanda
+
+`@codemirror/language-data` no trae las gramáticas: trae descriptores con un `load()` que
+las importa. Un vault con un `.rs`, un `.py` y un `.go` no paga por los otros cuarenta
+lenguajes, y **el bundle no crece por soportarlos**.
+
+Por eso no puede ser una extensión a secas: cuando la gramática llega, la vista ya está
+montada, y hay que **reconfigurar un compartimento** en vez de recrearla. Una gramática que
+no cargue deja el archivo en texto plano — exactamente lo que se veía antes.
+
+### Los colores son los de siempre
+
+Salen de `--mic-syntax-*` (`tokens.css`), que ya tenía juego claro y oscuro. La lista de
+reglas `token → color` se subió a `lib/editor/paletaSintaxis.ts`: vivía dentro de
+`livePreview` y el visor iba a ser la segunda copia.
+
+> [!important] Que el mismo código se vea igual en un archivo y pegado en una nota no es cosmética
+> Un fragmento pegado en una nota y el archivo del que salió son lo mismo. Si una `keyword`
+> es azul en un lado y verde en el otro, el lector deja de leer color y pasa a leer «esto es
+> otra cosa» — que es justo lo contrario de lo que el resaltado existe para decir.
+
+El editor de CSS personalizado (`cssExtensions`) conserva su propia lista, y **no** por
+descuido: ahí los mismos tags significan otra cosa —`propertyName` es una propiedad CSS,
+`className` un selector, `atom` un valor como `flex`— y unificarlos perdería justo lo que
+hace legible una hoja de estilos. Comparten los tokens, que es donde vive la coherencia.
+
+### Qué se reflejó a web
+
+`FUN-S-09` es **solo-desktop** por herencia: sin el visor de `FUN-L-11`, en web no hay nada
+que colorear. Sí viajaron `paletaSintaxis.ts`, `livePreview.ts` y `SearchBar.tsx`, que son
+compartidos — y con `SearchBar` se **cerró** una divergencia que arrastraba de `FUN-L-11`:
+allá nunca había recibido la prop `placeholder`.
+
 ## Relacionadas
 
-- [[BACKLOG]] — `FUN-L-11`, y `FUN-S-09` (resaltado) que depende de este.
+- [[BACKLOG]] — `FUN-L-11`, `FUN-M-26` (editar) y `FUN-S-09` (resaltado), las dos que
+  llegaron encima.
 - [[terminal-integrada]] — el precedente de una pestaña que no es una nota.
 - [[Diferencias funcionales aceptadas entre versiones]] — por qué esto no va a web.
 - [[Mapa de documentacion]] — índice general.

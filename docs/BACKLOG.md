@@ -63,7 +63,7 @@ y **priorizar** qué implementar antes.
 | `FUN-S-04` | `TRASH-MULTISELECT` | Seleccionar varios archivos para borrar en la papelera | ambas | C-M-14 |
 | `FUN-S-05` | `VAULT-EJEMPLO-DEFAULT` | Al crear un vault nuevo, generar un archivo de ejemplo por defecto | ambas | C-G-02 |
 | `FUN-S-08` | `NOTE-CSSCLASSES` | Aplicar a la nota las clases CSS que declare su propiedad `cssclasses`: hoy se parsea e indexa pero **no tiene comportamiento**. Continuación de `FUN-M-04` | ambas | — |
-| `FUN-S-09` | `CODE-RESALTADO-SINTAXIS` | Colorear los archivos de código al visualizarlos según su lenguaje (palabras reservadas, tipos, cadenas). **Depende de `FUN-L-11`**: sin visor de código no hay nada que colorear — y como ese visor es **solo-desktop**, esta también lo es (figuraba como «ambas», corregido el 2026-09-04) | desktop | — |
+| `FUN-S-09` 🟢 | `CODE-RESALTADO-SINTAXIS` | Colorear los archivos de código al visualizarlos según su lenguaje (palabras reservadas, tipos, cadenas). **Depende de `FUN-L-11`**: sin visor de código no hay nada que colorear — y como ese visor es **solo-desktop**, esta también lo es (figuraba como «ambas», corregido el 2026-09-04). **Implementado y confirmado en la app** el 2026-09-05. Lo hace **CodeMirror**, no `highlight.js`: el lector pasó de dos `<pre>` a un editor de solo lectura, que dibuja solo las líneas visibles —así que el archivo grande le cuesta **menos**, que era justo el motivo por el que no se usaba— y de paso leer y editar dejan de poder verse distinto. El lenguaje sale del **nombre** del archivo y la gramática se carga bajo demanda, así que el bundle no crece por soportar cuarenta lenguajes. Spec en [[otros-tipos-de-archivo]] § 8 | desktop | — |
 | `FUN-S-10` | `ENLACES-AVISO-REFERENCIA` | Hook que avisa cuando se escribe una referencia a otra nota que Mycelium **no** cuenta como enlace (un `[texto](otra.md)`, o una forma ya registrada en el léxico escrita sin corchetes). Prevención, para que el problema que arregla `FUN-M-17` no vuelva a crecer | ambas | — |
 | `FUN-S-11` 🟢🌐 | `TABS-ICONO-TIPO` | Cada pestaña muestra, junto al nombre, el **ícono del tipo de documento** que contiene (markdown, Excalidraw, canvas, base, consola). Con un ajuste en Configuración para desactivarlo. **Implementado en desktop y confirmado en la app** el 2026-09-05, y **reflejado a web** el mismo día. Vale para las dos tiras: las pestañas del área de trabajo y las ancladas en el panel lateral. Lo que trajo de fondo fue centralizar el mapa `tipo → ícono` en `lib/iconosDeTipo.ts`: la pregunta se contestaba en **tres** sitios de `ExplorerPanel` y la pestaña iba a ser el cuarto — un archivo que en el árbol es una tabla y en su pestaña un documento no se lee como una variante, se lee como un error. Spec en [[marcas-en-las-pestanas]] | ambas | — |
 | `FUN-S-14` 🟢🌐 | `BASES-BUSCADOR` | Buscador dentro de un archivo tabla (`.base`) para encontrar una fila concreta sin tocar los filtros, con **coincidencia parcial** (`*XYZ*`) o **exacta**. Los filtros definen *qué* entra en la tabla; esto es para encontrar algo dentro de lo que ya entró. **Implementado en desktop y confirmado en la app** el 2026-09-05, y **reflejado a web** el mismo día. Se aplica **después** del `limit` y solo sobre las **columnas mostradas**; parcial o exacta se elige con un interruptor y no con la sintaxis `*XYZ*` del enunciado, que hay que saberla y además impediría buscar un asterisco literal. No se guarda en ningún lado: no define la consulta. Spec en [[bases-tabla]] | ambas | — |
@@ -272,9 +272,12 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 - **Es S solo porque la infraestructura ya está**: el proyecto usa `highlight.js` (vía
   `rehype-highlight`, para los bloques cercados) y tiene `@codemirror/language-data`, que
   carga gramáticas de decenas de lenguajes bajo demanda. Lo que falta es el visor.
-- **A definir**: si el resaltado lo hace CodeMirror o `highlight.js` (conviene el mismo
-  motor que use el visor de `FUN-L-11`, para no mantener dos paletas), y de dónde sale el
-  lenguaje (extensión del archivo).
+- **Resuelto el 2026-09-05**: lo hace **CodeMirror**, y el lector del visor pasó a serlo
+  también. `highlight.js` habría obligado a un fondo oscuro —su tema es `atom-one-dark`— y
+  entonces leer y editar el mismo archivo se verían distinto. El lenguaje sale del **nombre
+  completo** del archivo (así entran `Dockerfile` y `Makefile`), no de su contenido: la
+  heurística acierta poco en los archivos cortos, que son la mayoría de los que se abren de
+  paso.
 - **Depende de `FUN-L-11`**: sin visor de código no hay nada que colorear.
 - **Solo-desktop, por herencia** (corregido el 2026-09-04): figuraba como «ambas», pero
   `FUN-L-11` es solo-desktop —en web esos archivos no existen en ninguna parte— así que en
@@ -983,7 +986,7 @@ tocar los mismos archivos dos veces y probar lo mismo dos veces.
 > | **Preferencias por vault** — `FUN-M-28` + `FUN-M-21` ✅ (+ `FUN-M-29` ✅) | Las dos decían «persiste por vault» y **eso no existía**: las preferencias eran por usuario. Se creó el almacén y las dos van encima ([[preferencias-por-vault]], 2026-09-05). Le quedó servida la casa al ancho de columnas de `FUN-M-25`, cuya única razón de ser `M` era no saber dónde guardarlo — y fue ese consumidor el que forzó a portar el almacén a web (`FUN-M-29`, mismo día) para no volver divergente a `BaseView.tsx` |
 > | **El archivo tabla** — `FUN-S-16` + `FUN-M-27` ✅, después `FUN-S-15` + `FUN-M-25` + `FUN-S-14` ✅ | Las cinco viven en `BaseView.tsx`, en dos mitades: el constructor de filtros —que `FUN-M-27` reescribe entero, así que el buscador de `FUN-S-16` va con esa reescritura o se hace dos veces— y la cabecera de la tabla |
 > | **Las pestañas** — `FUN-S-11` + `FUN-S-12` ✅ | Las dos agregan una marca visual a la misma tira, y `FUN-S-11` incluye la consola entre los tipos |
-> | **Sueltas** — `FUN-S-09`, `FUN-M-20`, `FUN-M-24` | Sin parentesco real con el resto: el visor, el panel de búsqueda y el editor. Van solas a propósito |
+> | **Sueltas** — `FUN-S-09` ✅, `FUN-M-20`, `FUN-M-24` | Sin parentesco real con el resto: el visor, el panel de búsqueda y el editor. Van solas a propósito |
 >
 > **Orden acordado**: preferencias por vault primero, porque desbloquea sus dos y resuelve
 > la duda de `FUN-M-25`. Si fuera después, la decisión habría que tomarla igual pero peor:

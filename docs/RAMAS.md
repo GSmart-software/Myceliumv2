@@ -223,6 +223,22 @@ entre ramas):
   (`revelarEnSistema`) y en `OtroRow`, el visor de `FUN-L-11`; los dos quedaron fuera y el
   mapa de íconos entró igual. `SidebarDock.tsx`, `terminalStore.ts` y `TerminalPanel.tsx`
   no existen en web.
+- **Resaltado de sintaxis (`FUN-S-09`, solo-desktop, 2026-09-05)**: la funcionalidad no se
+  refleja —sin el visor de `FUN-L-11` no hay nada que colorear— pero **tres archivos
+  compartidos sí**: `lib/editor/paletaSintaxis.ts` (nuevo), `lib/editor/livePreview.ts` y
+  `components/editor/SearchBar.tsx`. `lib/editor/resaltadoCodigo.ts` y
+  `components/visor/*` se quedan en desktop.
+
+  > [!tip] Un reflejo que CIERRA una divergencia en vez de abrirla
+  > `SearchBar.tsx` diverge desde `FUN-L-11`: web nunca había recibido la prop
+  > `placeholder`. Al traerlo entero —con `placeholder` y con la nueva
+  > `sinReemplazo`, las dos opcionales y con el comportamiento de siempre por defecto— el
+  > archivo vuelve a ser uno solo. Traer de más no siempre es de más: acá costó cero y
+  > quitó una fila de esta lista.
+  >
+  > `paletaSintaxis.ts` es el mismo caso al revés: en web no cambia nada de lo que se ve,
+  > y se trae para que `livePreview.ts` —que es grande y se refleja seguido— siga siendo
+  > idéntico.
 - **Canvas (`FUN-L-18`, las dos ramas, 2026-08-08)**: `frontend/lib/canvas.ts`,
   `scripts/test-canvas.mjs` y `components/canvas/*` son **compartidos** y se traen enteros.
   Lo que hay que aplicar a mano es el tipo de archivo, que toca los mismos sitios que ya
