@@ -8,7 +8,7 @@ solo divergen en la capa de datos.
 | Rama | Versión | Capa de datos | Notas |
 |---|---|---|---|
 | **`desktop-tauri`** | **Desktop** (app Tauri) | `frontend/lib/db/*` → SQLite nativo (`tauri-plugin-sql`); `lib/api.ts` = dispatcher local | Rama principal de trabajo del escritorio. Antes se llamaba `reestructuracion`. |
-| **`web-cloud`** | **Web** (Next.js + .NET) | backend `.NET` → D1/blobs; `lib/api.ts` = cliente HTTP | Antes se llamaba `desktop-cloud`. En `origin` sigue como `desktop-cloud` (pendiente de renombrar en el remoto). |
+| **`web-cloud`** | **Web** (Next.js + .NET) | backend `.NET` → D1/blobs; `lib/api.ts` = cliente HTTP | Antes se llamaba `desktop-cloud`. **Publicada en `origin` el 2026-09-04** con su nombre nuevo; la vieja `desktop-cloud` se conserva a propósito. |
 
 **Topología lineal:** `desktop-tauri` = `web-cloud` + la capa Tauri encima (contiene
 toda la historia de la web). Comparten el 100% del frontend salvo unos ~17 commits
@@ -267,15 +267,25 @@ trabajo que no esté acá: está simplemente **desactualizado**, no divergente.
 > de `desktop-tauri`. Nada de lo hecho desde entonces (Tauri, 1.0.0, 1.1.0, terminal,
 > framework de IA) está publicado.
 
-Para alinear el remoto (opcional, **nada de esto se hace sin pedirlo** — ver
-[[Convenciones de commits]]):
+### Hecho el 2026-09-04: las dos ramas de trabajo están publicadas
 
 ```sh
-git push origin web-cloud          # sube la rama renombrada
-git push origin --delete desktop-cloud   # borra la antigua (acción destructiva: confirmar)
-git push origin desktop-tauri      # sube la rama de escritorio (aún local)
-git push origin --delete deploy/cloudflare   # ya integrada en web-cloud
+git push -u origin desktop-tauri   # d5f677e — rama nueva en el remoto
+git push -u origin web-cloud       # f164e56 — rama nueva en el remoto
 ```
+
+Las dos entraron como **ramas nuevas** (se comprobó con `--dry-run` antes): no se
+sobreescribió ni se borró nada, y las dos quedaron con rastreo (`-u`).
+
+**Las tres ramas viejas del remoto se conservan a propósito**, por decisión del usuario:
+son parte del historial y no molestan. O sea que `desktop-cloud` y `deploy/cloudflare`
+**no** se borran, aunque estén contenidas en `web-cloud`.
+
+> [!warning] `main` sigue siendo la rama por defecto del repo, y está vieja
+> `origin/main` sigue en `a4374bd` (2026-06-11), ahora **205 commits** por detrás de
+> `desktop-tauri`: quien entre a GitHub ve esa foto. Se decidió dejarlo así por ahora —no
+> aporta, pero tampoco estorba—. Cambiar la rama por defecto se hace desde la interfaz de
+> GitHub, no desde acá.
 
 ## Relacionadas
 
