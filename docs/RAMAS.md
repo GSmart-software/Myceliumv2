@@ -205,6 +205,24 @@ entre ramas):
 
   `NoteEditor.tsx` sí diverge (web no tiene watcher del vault ni guardado pendiente): los
   cambios de `FUN-M-28` se le aplicaron con parche de tres vías, limpio.
+- **Marcas en las pestañas (`FUN-S-11` en las dos ramas + `FUN-S-12` solo-desktop,
+  2026-09-05)**: `frontend/lib/iconosDeTipo.ts` es **compartido** y se trae entero — es
+  justamente lo que tiene que dar la misma respuesta en las dos ramas y en los cuatro
+  sitios que la hacen. `preferencesStore.ts`, `EditorSection.tsx`, `panes.module.css` y
+  `styles/tokens.css` también.
+
+  > [!tip] Dos archivos compartidos llevan código que en web no pinta nadie
+  > `panes.module.css` tiene las reglas de `.tabConColor` y `tokens.css` los seis
+  > `--mic-consola-*`, y en web no hay consolas. Se trajeron igual, a propósito: que los
+  > archivos sigan siendo **idénticos** vale más que ahorrar seis variables muertas. Un
+  > CSS que diverge por seis reglas hay que mantenerlo dos veces para siempre.
+
+  Lo que se adaptó a mano: `TabBar.tsx` (su reparto de ids especiales en web solo conoce
+  el grafo — no hay consolas, ni referencias del vault, ni archivos sin indexar) y
+  `ExplorerPanel.tsx`, donde el parche de tres vías chocó en los imports
+  (`revelarEnSistema`) y en `OtroRow`, el visor de `FUN-L-11`; los dos quedaron fuera y el
+  mapa de íconos entró igual. `SidebarDock.tsx`, `terminalStore.ts` y `TerminalPanel.tsx`
+  no existen en web.
 - **Canvas (`FUN-L-18`, las dos ramas, 2026-08-08)**: `frontend/lib/canvas.ts`,
   `scripts/test-canvas.mjs` y `components/canvas/*` son **compartidos** y se traen enteros.
   Lo que hay que aplicar a mano es el tipo de archivo, que toca los mismos sitios que ya

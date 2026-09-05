@@ -65,6 +65,8 @@ diferencia funcional entre versiones es aceptada). Idea y decisiones: `docs/BACK
 ## Relacionadas
 
 - [[Terminal integrada - PTY y xterm]] — aprendizajes de implementación (PTY, tema, layout).
+- [[marcas-en-las-pestanas]] — el color con el que se distingue una consola de otra
+  (`FUN-S-12`, 2026-09-05).
 - [[Mycelium como memoria de la IA]] — para qué existe esta terminal.
 - [[ia-framework-vault]] — lo que corre dentro de ella.
 - [[Diferencias funcionales aceptadas entre versiones]] — por qué es solo-desktop.
