@@ -30,11 +30,25 @@ export function SearchBar({
   getView,
   getPreview,
   modoLectura,
+  sinReemplazo = false,
+  placeholder = "Buscar en la nota…",
 }: {
   getView: () => EditorView | null;
   /** Panel de la vista de lectura, donde se busca cuando el editor no se ve. */
   getPreview: () => HTMLElement | null;
   modoLectura: boolean;
+  /**
+   * Oculta el reemplazo aunque se busque en un editor.
+   *
+   * `modoLectura` no alcanza para esto: dice *dónde* se busca —en el DOM en vez
+   * de en CodeMirror— y son dos cosas distintas. El visor de archivos
+   * (`FUN-S-09`) busca en un CodeMirror que es de solo lectura: necesita la
+   * búsqueda del editor y **no** el reemplazo, que ahí no escribiría nada y solo
+   * parecería roto.
+   */
+  sinReemplazo?: boolean;
+  /** Texto del campo. Lo cambia el visor de archivos (`FUN-L-11`), que no abre notas. */
+  placeholder?: string;
 }) {
   const open = useUiStore((s) => s.searchInNoteOpen);
   const setOpen = useUiStore((s) => s.setSearchInNoteOpen);
@@ -182,7 +196,7 @@ export function SearchBar({
         <input
           ref={inputRef}
           className={styles.input}
-          placeholder="Buscar en la nota…"
+          placeholder={placeholder}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={(e) => {
@@ -208,8 +222,10 @@ export function SearchBar({
         >
           <CaseSensitive size={15} aria-hidden />
         </button>
-        {/* Reemplazar edita el documento, así que no se ofrece en lectura. */}
-        {!modoLectura && (
+        {/* Reemplazar edita el documento, así que no se ofrece si no hay dónde
+            escribir: ni en la vista de lectura, ni sobre un editor de solo
+            lectura. */}
+        {!modoLectura && !sinReemplazo && (
           <button
             type="button"
             className={replaceOpen ? `${styles.iconButton} ${styles.active}` : styles.iconButton}
@@ -225,7 +241,7 @@ export function SearchBar({
         </button>
       </div>
 
-      {replaceOpen && !modoLectura && (
+      {replaceOpen && !modoLectura && !sinReemplazo && (
         <div className={styles.row}>
           <input
             className={styles.input}
