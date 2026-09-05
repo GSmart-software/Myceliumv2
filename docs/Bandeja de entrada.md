@@ -91,6 +91,7 @@ lo digo.
 | 2026-09-04 | La consola dibuja el texto corrupto: símbolos y texto repetido donde no va | `DEF-083` (probablemente emparentado con el `DEF-079`) |
 | 2026-09-04 | Números de línea en los markdown, apagados por defecto y por vault | `FUN-M-28` `EDITOR-NUMEROS-DE-LINEA` — es M por el «por vault»: hoy las preferencias son por USUARIO |
 | 2026-09-04 | El desplegable de campos del filtro necesita buscador | `FUN-S-16` `BASES-FILTRO-BUSCADOR` · bloque **O**, con el resto del constructor |
+| 2026-09-05 | En el explorador faltan las líneas verticales de indentación que sí tiene VS Code | `FUN-S-17` `EXPLORER-GUIAS-INDENTACION` — surgió al probar el árbol de resultados de `FUN-M-20`, y **entra en esta misma versión**. La técnica ya quedó resuelta ahí: la sangría la da el anidamiento, no un `padding` por nivel |
 
 > [!note] Esta tabla se puede vaciar cuando moleste
 > Es una comodidad para que veas en qué terminó cada cosa, no un registro canónico. La
