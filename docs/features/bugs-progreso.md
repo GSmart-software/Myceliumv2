@@ -60,7 +60,7 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-068 | La opción marcada de un campo se ve en blanco, fuera de la paleta | ambas (frontend) | ✅ ambas (2026-09-04) — faltaba `select option:checked`; **confirmado en la app** y reflejado a web |
 | DEF-069 | El explorador no marca las carpetas que contienen el archivo abierto | ambas (frontend) | ✅ ambas (2026-09-04) — el fondo pasa a derivarse del archivo abierto en vez de ser un estado de clic; **confirmado en la app** y reflejado a web |
 | DEF-070 | El tipo de una propiedad no se puede cambiar sin borrarla y rehacerla | ambas (frontend) | ✅ ambas (2026-09-04) — `convertirValor` conserva el valor y el ícono del tipo pasa a ser un control; **confirmado en la app** y reflejado a web |
-| DEF-071 | Un `[[wikilink]]` en una propiedad no enlaza dentro de un archivo tabla | ambas (frontend) | ⬜ pendiente |
+| DEF-071 | Un `[[wikilink]]` en una propiedad no enlaza dentro de un archivo tabla | ambas (frontend) | ✅ ambas (2026-09-04) — la celda pintaba texto plano; **confirmado en la app** y reflejado a web |
 | DEF-072 | La numeración de las consolas no se reutiliza y puede repetirse | desktop | ⬜ pendiente |
 | DEF-073 | Abrir varias ventanas no funciona: congela la app o no abre nada | desktop | ✅ desktop (2026-08-18) — el comando pasa a `async`; **confirmado sobre el binario de release** el 2026-09-03 |
 | DEF-074 | El estilo propio del énfasis con `_` no se aplica: se ve como el de `*` | ambas (frontend) | ✅ ambas (2026-09-03) — el árbol de sintaxis llegaba a medias y nada recalculaba al completarse; **confirmado en la app** y reflejado a web; era la vista en vivo, y la asimetría con `*` fue la pista |
@@ -70,10 +70,35 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-079 | En la terminal, `Ctrl+C`/`Ctrl+V` no copian ni pegan; el botón derecho pega dos veces | desktop | ⬜ pendiente |
 | DEF-080 | Una condición de filtro sin valor se borra sola en vez de quedarse inactiva | ambas (frontend) | ⬜ pendiente — la causa está en `filtroDeCondiciones`, que descarta las de valor vacío |
 | DEF-081 | El explorador no muestra el nombre completo al dejar el puntero encima | ambas (frontend) | ⬜ pendiente |
-| DEF-082 | Un `[[wikilink]]` de una propiedad no navega desde el bloque de propiedades | ambas (frontend) | ⬜ pendiente — hermano del `DEF-071`, y el mismo código que el `DEF-076` |
+| DEF-082 | Un `[[wikilink]]` de una propiedad no navega desde el bloque de propiedades | ambas (frontend) | ✅ ambas (2026-09-04) — era el mismo código que el `DEF-076`; **confirmado en la app** y reflejado a web |
 | DEF-078 | ~~Las opciones de un desplegable van pegadas al borde~~ | — | ⛔ **retirado** — no pasaba en todos los `<select>` sino solo en el del `DEF-070`, sin consolidar: era una regresión propia y no lleva número. Número quemado |
 
 ## Notas por bug
+
+- **DEF-071 · DEF-082 · DEF-076 — el mismo comentario equivocado, en tres widgets.**
+  Los tres widgets de bloque anulaban el `href` de sus enlaces y no hacían nada más, con la
+  misma frase: *«navegan en la vista de lectura, no acá»*. En lectura es cierto —la tarjeta y
+  la tabla cuelgan del contenedor que atiende `#wikilink:`—, pero en la vista en vivo el
+  enlace quedaba **muerto y con pinta de enlace**, que es lo peor de los dos mundos.
+
+  El arreglo es el mismo en los tres, y depende de dos cosas encadenadas que no se ven:
+
+  1. Va en **`mousedown`**, no en `click`. El render del valor (o de la celda) es enfocable y
+     abre el editor al recibir el foco; el foco se mueve en el `mousedown`, así que para
+     cuando llegaría el `click` el enlace ya fue reemplazado por el `<input>`.
+  2. El `preventDefault()` de ese `mousedown` es justo lo que impide ese foco. Un solo
+     mecanismo resuelve las dos mitades: navegar **en vez de** abrir a editar.
+
+  El «abrí esta nota» llega por el `Facet navegarPorTitulo`, porque los widgets de bloque los
+  construye un `StateField` que no ve el closure de `livePreview()`.
+
+  `DEF-071` es distinto en su mitad de tabla: ahí el valor se pintaba como texto plano, y hubo
+  que renderizar el enlace además de atenderlo. Y el clic **no puede burbujear**, porque la
+  fila entera abre su nota — sin `stopPropagation` un enlace habría abierto la nota de la
+  fila. Se reutilizan `resolveWikilink` y `partirWikilink`, así que el alias y la barra
+  escapada del `DEF-045` funcionan sin código nuevo.
+
+  Desktop `f70dfdf` + `a4d1448`, web `e62878d`.
 
 - **DEF-070 — el valor se convierte, y la interfaz no suma un control.**
   El núcleo es `convertirValor` en `lib/frontmatter.ts`, puro y con 13 tests. Una sola regla:
