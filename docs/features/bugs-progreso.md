@@ -67,14 +67,47 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-075 | En lectura, los títulos plegados se despliegan solos al poco rato | ambas (frontend) | ✅ ambas (2026-09-04) — el plegado estaba atado a la identidad del DOM; **confirmado en la app** y reflejado a web; era el mismo defecto que el `DEF-065` |
 | DEF-076 | Un `[[wikilink]]` dentro de una tabla no navega al hacerle clic | ambas (frontend) | ✅ ambas (2026-09-04) — el widget anulaba el `href` y no hacía nada más; **confirmado en la app** y reflejado a web |
 | DEF-077 | Las sugerencias de clave del campo «Nueva propiedad» no llevan los estilos de Mycelium | ambas (frontend) | ✅ ambas (2026-09-04) — era un `<datalist>`, que no deja estilar nada; se reemplazó por una lista propia; **confirmado en la app** y reflejado a web |
-| DEF-079 | En la terminal, `Ctrl+C`/`Ctrl+V` no copian ni pegan; el botón derecho pega dos veces | desktop | ⬜ pendiente |
-| DEF-080 | Una condición de filtro sin valor se borra sola en vez de quedarse inactiva | ambas (frontend) | ⬜ pendiente — la causa está en `filtroDeCondiciones`, que descarta las de valor vacío |
+| DEF-079 | En la terminal, `Ctrl+C`/`Ctrl+V` no copian ni pegan; el botón derecho pega dos veces | desktop | 🛠️ desktop (2026-09-04) — **implementado, SIN CONFIRMAR**: hay que probarlo con una TUI adentro. **Sin reflejo**: la terminal es solo-desktop |
+| DEF-080 | Una condición de filtro sin valor se borra sola en vez de quedarse inactiva | ambas (frontend) | ✅ ambas (2026-09-04) — se perdía en el viaje al archivo; **confirmado en la app** y reflejado a web |
 | DEF-081 | El explorador no muestra el nombre completo al dejar el puntero encima | ambas (frontend) | ⬜ pendiente |
-| DEF-083 | La terminal dibuja el texto corrupto: símbolos y texto repetido donde no corresponde | desktop | ⬜ pendiente — probablemente emparentado con el `DEF-079` |
+| DEF-083 | La terminal dibuja el texto corrupto: símbolos y texto repetido donde no corresponde | desktop | 🛠️ desktop (2026-09-04) — **implementado, SIN CONFIRMAR**: hay que probarlo con una TUI adentro. **Sin reflejo**: la terminal es solo-desktop |
 | DEF-082 | Un `[[wikilink]]` de una propiedad no navega desde el bloque de propiedades | ambas (frontend) | ✅ ambas (2026-09-04) — era el mismo código que el `DEF-076`; **confirmado en la app** y reflejado a web |
 | DEF-078 | ~~Las opciones de un desplegable van pegadas al borde~~ | — | ⛔ **retirado** — no pasaba en todos los `<select>` sino solo en el del `DEF-070`, sin consolidar: era una regresión propia y no lleva número. Número quemado |
 
 ## Notas por bug
+
+- **DEF-079 · DEF-083 — el mismo origen: una TUI a pantalla completa.**
+  El usuario los reportó por separado y sospechó que estaban emparentados. Lo estaban, aunque
+  no por la misma línea de código: los dos solo se notan con una aplicación que toma la
+  pantalla y la redibuja, y casi nunca con una shell que imprime ASCII y avanza hacia abajo.
+
+  **`DEF-083`** era una línea de Rust: el PTY se lee en trozos de 8 KB y cada trozo se
+  decodificaba **solo**, con `from_utf8_lossy`. Un carácter UTF-8 ocupa hasta cuatro bytes, y
+  si queda partido entre dos lecturas **las dos mitades** se vuelven el carácter de reemplazo.
+  Lo grave no es el símbolo raro: si esos bytes eran parte de una **secuencia de escape**, la
+  secuencia llega rota y el emulador la interpreta mal — texto donde no va, repetido, o texto
+  que ya no debería estar. Ahora el carácter truncado espera al próximo trozo; los bytes
+  inválidos de verdad se reemplazan en el momento y **no** se arrastran, o uno suelto trabaría
+  el flujo para siempre. Seis tests en Rust, uno de ellos partiendo una secuencia de escape en
+  trozos de dos bytes.
+
+  **`DEF-079`** era la ausencia total de manejo de portapapeles. Se siguió la convención de
+  Windows Terminal y VS Code, que es la única que hace convivir las dos cosas: `Ctrl+C` copia
+  **solo si hay selección**, y si no interrumpe — perder el `Ctrl+C` de interrumpir sería peor
+  que no poder copiar con él.
+
+  > [!tip] El pegado doble eran dos caminos, no un manejador equivocado
+  > El WebView insertaba en el textarea oculto de xterm —que lo manda al PTY como si se
+  > hubiera tecleado— **y además** disparaba el evento `paste`, que xterm también atiende. Se
+  > atiende ahora en **captura** sobre el contenedor, antes que xterm, con `preventDefault` y
+  > `stopPropagation`: queda un único camino. Por eso `Ctrl+V` **no** lee el portapapeles a
+  > mano: solo se le impide a xterm mandar el `0x16` y se deja que el pegado del navegador
+  > dispare ese mismo evento. Leerlo a mano sería reintroducir el segundo camino.
+  >
+  > Y el manejador va en el contenedor de React, no en `term.element`, que sobrevive a los
+  > remounts: ahí se acumularía uno por montaje — el mismo pegado múltiple por otra puerta.
+
+  Desktop `7ada54c`. **Sin confirmar**: hay que probarlos con una TUI adentro.
 
 - **DEF-071 · DEF-082 · DEF-076 — el mismo comentario equivocado, en tres widgets.**
   Los tres widgets de bloque anulaban el `href` de sus enlaces y no hacían nada más, con la
