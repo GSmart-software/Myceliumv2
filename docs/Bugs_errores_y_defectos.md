@@ -323,6 +323,32 @@ Se detectó usando el CLI de Claude Code dentro de la consola. No se vio con la 
 > [!info] Se encontró al procesar el `DEF-067`
 > No lo reportó el usuario: salió de leer «menú de autocompletado» como el de este campo. El defecto era otro —el de `[[`—, pero este también existía, y por eso se registra aparte en vez de darlo por parte de aquel.
 
+# DEF-084
+Al **renombrar** una nota con un carácter que Mycelium no admite en un nombre de archivo
+—`? : * | " < > \ /`—, el archivo se guarda con el nombre corregido (los caracteres se
+sustituyen por `-`) pero **todos los `[[enlaces]]` que apuntaban a esa nota se reescriben
+con el nombre que se pidió**, no con el que el archivo obtuvo. Quedan apuntando a una nota
+que no existe.
+
+No hay ningún aviso. La nota sigue abierta y con su contenido intacto; lo que se rompe está
+en **otros** archivos, que el usuario no está mirando.
+
+Se detectó el 2026-09-05 al preparar el commit de `FUN-M-24`: `git status` mostraba 17
+archivos de `docs/` modificados que nadie había tocado, con **21 enlaces**
+`[[bugs-progreso]]` convertidos en `[[bugs-progreso///]]`. Salió de probar a mano el
+rechazo de caracteres inválidos.
+
+> [!danger] Es peor que no haber hecho nada
+> Antes de `FUN-M-08` renombrar dejaba los enlaces apuntando al **nombre viejo**: rotos,
+> pero recuperables — el nombre viejo es un dato real y una búsqueda lo encuentra. Ahora
+> apuntan a un nombre que **nunca existió en disco**, así que ni siquiera se puede
+> reconstruir a qué se referían sin mirar el historial.
+
+> [!info] Se dispara desde cualquier sitio que renombre
+> El explorador y —desde `FUN-M-24`— el título del documento. Este último valida y rechaza
+> esos caracteres antes de llamar, así que por ahí ya no se llega; el explorador no valida,
+> y por ahí sí.
+
 ---
 
 > [!warning] Defectos sin reporte original

@@ -256,6 +256,23 @@ entre ramas):
   > (solo-desktop). En vez de partirlo en dos archivos, la carga del segundo es **opcional**
   > y sus siete casos se marcan `skip` con el motivo. Así el archivo es el mismo en las dos
   > ramas y el porqué queda escrito en la salida del test, no en la cabeza de alguien.
+- **El título renombra (`FUN-M-24`) y `DEF-084`, las dos ramas, 2026-09-05)**:
+  `lib/tituloEditable.ts` (nuevo), `lib/editor/docTitle.ts` y `styles/editor.css` son
+  **compartidos** y se traen enteros. `NoteEditor.tsx` y `vaultStore.ts` divergen: el
+  primero aplicó con parche de tres vías limpio; el segundo chocó en el `PATCH` —en web la
+  ruta no va codificada y el guardia de «cambia el título» está factorizado aparte— y se
+  resolvió a mano.
+
+  > [!info] `DEF-084` no se reproduce en web, y el arreglo se trajo igual
+  > Allá el título de una nota es texto de la base y no pasa por ningún saneo —`r2_key` es
+  > invariante—, así que el nombre que se pide y el que se obtiene siempre coinciden; el
+  > endpoint **ya devolvía** `{ id, titulo }`. Se trajo el cambio de todos modos: leer el
+  > título del servidor en vez de darlo por supuesto cuesta cero y deja el código diciendo
+  > lo correcto si algún día web empieza a normalizarlo.
+
+  `scripts/test-titulo.mjs` es el mismo archivo en las dos ramas: de sus 14 casos, el que
+  compara la lista de caracteres rechazados con la que sanea `lib/db/nombres.ts` se **salta**
+  en web, porque ese módulo es solo-desktop. Mismo patrón que `test-search.mjs`.
 - **Canvas (`FUN-L-18`, las dos ramas, 2026-08-08)**: `frontend/lib/canvas.ts`,
   `scripts/test-canvas.mjs` y `components/canvas/*` son **compartidos** y se traen enteros.
   Lo que hay que aplicar a mano es el tipo de archivo, que toca los mismos sitios que ya

@@ -72,9 +72,33 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-081 | El explorador no muestra el nombre completo al dejar el puntero encima | ambas (frontend) | ✅ ambas (2026-09-04) — un `title` en cada fila; **confirmado en la app** y reflejado a web. En web van dos de las tres filas: la de archivos no indexados es solo-desktop |
 | DEF-083 | La terminal dibuja el texto corrupto: símbolos y texto repetido donde no corresponde | desktop | 🛠️ desktop (2026-09-04) — **implementado, SIN CONFIRMAR**: hay que probarlo con una TUI adentro. **Sin reflejo**: la terminal es solo-desktop |
 | DEF-082 | Un `[[wikilink]]` de una propiedad no navega desde el bloque de propiedades | ambas (frontend) | ✅ ambas (2026-09-04) — era el mismo código que el `DEF-076`; **confirmado en la app** y reflejado a web |
+| DEF-084 | Renombrar con un carácter inválido reescribe los `[[enlaces]]` entrantes con el nombre **pedido**, no con el que el archivo obtuvo | ambas (frontend) | ✅ ambas (2026-09-05) — `renombrarNota` devuelve ahora el título **efectivo**; **confirmado en la app** y reflejado a web. En web no se reproducía —el título no pasa por ningún saneo— pero el cambio se trajo igual |
 | DEF-078 | ~~Las opciones de un desplegable van pegadas al borde~~ | — | ⛔ **retirado** — no pasaba en todos los `<select>` sino solo en el del `DEF-070`, sin consolidar: era una regresión propia y no lleva número. Número quemado |
 
 ## Notas por bug
+
+- **DEF-084 — el renombrado reescribía los enlaces con un nombre que nunca existió.**
+  `renameNota` le pasaba al reescritor de `[[enlaces]]` el título que el usuario **pidió**,
+  y el que el archivo obtiene es otro: `sanearNombre` sustituye por `-` lo que un nombre de
+  archivo no admite. Renombrar `bugs-progreso///` dejaba el archivo como
+  `bugs-progreso---` y **todos** los enlaces entrantes apuntando a `bugs-progreso///`.
+
+  > [!danger] Peor que no haber hecho nada
+  > Antes de `FUN-M-08` renombrar dejaba los enlaces apuntando al nombre **viejo**: rotos,
+  > pero recuperables — el nombre viejo es un dato real y una búsqueda lo encuentra. Con
+  > esto apuntaban a uno que **nunca existió en disco**.
+
+  Se detectó de la peor forma posible y de la mejor: preparando el commit de `FUN-M-24`,
+  `git status` mostró 17 archivos de `docs/` modificados que nadie había tocado, con 21
+  enlaces convertidos. Sin `git` no se habría notado — el daño está en archivos que quien
+  renombra no está mirando, y no hay ningún aviso.
+
+  El arreglo: `renombrarNota` devuelve también el título **efectivo**. El servidor es quien
+  sabe cómo terminó llamándose el archivo y ya lo tenía calculado; derivarlo en el cliente
+  desde el id habría metido parseo de rutas en código compartido. Al arreglarlo apareció un
+  segundo caso que el reporte no cubría: si el saneo devuelve el nombre que **ya tenía**
+  —`a-b` → `a?b` da `a-b`—, antes se reescribían igual los enlaces, rompiéndolos sin que
+  hubiera habido renombrado alguno.
 
 - **DEF-079 · DEF-083 — el mismo origen: una TUI a pantalla completa.**
   El usuario los reportó por separado y sospechó que estaban emparentados. Lo estaban, aunque
