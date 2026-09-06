@@ -325,10 +325,20 @@ export const useVaultStore = create<VaultState>()(
           }
         }
 
-        await api(`/notas/${id}`, { method: "PATCH", token: token(), body: { titulo } });
+        const res = await api<{ id: string; titulo?: string }>(`/notas/${id}`, {
+          method: "PATCH",
+          token: token(),
+          body: { titulo },
+        });
 
-        if (cambiaTitulo) {
-          await reescribirEnlacesEntrantes(entrantes, anterior!, titulo, token());
+        // DEF-084: el titulo que la nota OBTUVO, no el que se pidio. Aca los dos
+        // coinciden —el titulo es texto de la base y no pasa por ningun saneo,
+        // que en desktop es lo que los separa— pero se lee del servidor igual:
+        // si algun dia web empieza a normalizarlo, los `[[enlaces]]` no van a
+        // quedar apuntando a una nota que nunca existio.
+        const efectivo = res.titulo ?? titulo;
+        if (anterior !== null && anterior !== efectivo) {
+          await reescribirEnlacesEntrantes(entrantes, anterior, efectivo, token());
         }
         await get().loadTree(get().vaultId!);
         markGraphStale();
