@@ -108,7 +108,10 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
 ## Estado y releases
 
 - [[Estado del proyecto]] — situación actual, pendientes y deuda.
-- [[Version 1.6.2]] — release actual de desktop: las tablas y las propiedades se editan
+- [[Version 1.7.0]] — release actual: trece funcionalidades en una tanda. Las tablas se
+  vuelven de trabajar, aparecen las preferencias **del vault**, y el título renombra el
+  archivo. Web sale a la vez como `1.3.0`. **Sin publicar todavía.**
+- [[Version 1.6.2]] — desktop: las tablas y las propiedades se editan
   renderizadas, sin abrir el crudo. **Publicada el 2026-08-17**, y con ella llegaron también
   la 1.6.0 y la 1.6.1, que nunca habían salido.
 - [[Version 1.6.1]] — varios vaults a la vez, uno por ventana,

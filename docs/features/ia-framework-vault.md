@@ -47,12 +47,14 @@ Contenido **verificado contra el código real** de Mycelium: `[[Título|alias]]`
 `![[embed]]`, `![[X.excalidraw]]`, `#tag`, callouts (10 tipos, plegables `-/+`,
 anidados), `.mycelium/.trash`, **propiedades del frontmatter** con su subconjunto
 soportado (`FUN-M-04`, desde la v1.3.0 del framework), las **Esporas** y sus
-variables (`FUN-M-03`, desde la v1.4.0), renombrar NO reescribe
-enlaces (FUN-M-08) — la IA debe actualizarlos con grep.
+variables (`FUN-M-03`, desde la v1.4.0), los **tipos de archivo del vault** con la
+sintaxis de `.base` y `.canvas` (desde la v1.5.0), y que renombrar **sí** reescribe
+los enlaces —pero solo desde la app: un `mv` de la IA no dispara nada, y ahí los
+actualiza ella con grep (`FUN-M-08`).
 
 ## Versionado
 
-- `FRAMEWORK_IA_VERSION` en `frontend/lib/ia/framework.ts` (hoy `1.4.0`),
+- `FRAMEWORK_IA_VERSION` en `frontend/lib/ia/framework.ts` (hoy `1.5.0`),
   independiente de la versión de la app. **Al agregar funciones a Mycelium que la
   IA deba conocer, subir la versión y actualizar los templates.**
   - `1.0.0` — primera versión.
@@ -76,6 +78,22 @@ enlaces (FUN-M-08) — la IA debe actualizarlos con grep.
     agregan la regla dura 10 del `CLAUDE.md`, una sección en la skill
     `mycelium-vault` (qué es una Espora, dónde vive, sus variables) y ajustes en
     `/vault-nota` y `/vault-huerfanas`. Ver [[esporas-plantillas]].
+  - `1.5.0` — **el vault dejó de ser solo notas**, y los templates seguían
+    describiendo uno que sí lo era. Se documentan los tipos de archivo que la IA
+    puede crear y editar —`.base` ([[bases-tabla]]) y `.canvas` ([[canvas]]), con
+    su sintaxis en la skill— y los que el vault **guarda pero no indexa** (PDF,
+    imágenes, código: [[otros-tipos-de-archivo]]).
+
+    > [!important] Lo que más importa de esta versión no es lo que la IA puede escribir
+    > Es lo que **no puede citar**. Mycelium indexa `.md` y nada más, pero un `grep`
+    > encuentra igual un `.py` o un `.csv`. Sin esta instrucción, la IA puede
+    > presentar como evidencia de la memoria algo que la memoria no tiene, y
+    > enlazarlo con un `[[…]]` que no resuelve.
+
+    Corrige además la regla dura 2, que mentía desde `FUN-M-08`: renombrar **sí**
+    repara los enlaces entrantes. Pero solo cuando pasa por la app; un `mv` desde
+    la terminal —que es como renombra la IA— no dispara nada, y la regla pasa a
+    decir esa diferencia. Ver [[titulo-renombra]].
 - Cada archivo generado lleva el marcador `<!-- mycelium-ia vX -->`; la versión
   instalada vive en `.claude/mycelium-ia.json`.
 - Configuración → Vault muestra instalada vs disponible y ofrece
