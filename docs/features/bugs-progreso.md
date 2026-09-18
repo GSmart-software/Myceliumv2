@@ -75,10 +75,30 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-084 | Renombrar con un carácter inválido reescribe los `[[enlaces]]` entrantes con el nombre **pedido**, no con el que el archivo obtuvo | ambas (frontend) | ✅ ambas (2026-09-05) — `renombrarNota` devuelve ahora el título **efectivo**; **confirmado en la app** y reflejado a web. En web no se reproducía —el título no pasa por ningún saneo— pero el cambio se trajo igual |
 | DEF-085 | Un `.base` pierde su estado al cambiar de pestaña y volver —vista, búsqueda, panel, «ver sin filtrar», y un borrador sin guardar de la fuente— | ambas (frontend) | ⬜ pendiente — `EditorPane` solo monta la pestaña activa, así que `BaseView` se desmonta y su `useState` se pierde. Mismo caso que `DEF-039` con el scroll de las notas. **Ojo al corregir**: hay que conservar el estado de la interfaz, NO las filas, o esto empeora `DEF-086` |
 | DEF-086 | Un `.base` abierto no se entera de cambios en el frontmatter de sus notas (editor, IA o consola) | ambas (frontend) | ⬜ pendiente — `BaseView` pide `/tabla` una sola vez, al montarse. El mecanismo para enterarse **ya existe** en desktop: el watcher reindexa ante cambios externos y ya avisa al grafo (`DEF-054`); la tabla no escucha |
-| DEF-087 | Con frontmatter, en edición en vivo, los títulos y otros elementos no se renderizan | ambas (frontend) | ⬜ pendiente — mismo síntoma que `DEF-062`, otra causa. Aislado por el usuario: aparece con frontmatter y solo en vivo |
+| DEF-087 | Con frontmatter, en edición en vivo, los títulos y otros elementos no se renderizan | ambas (frontend) | ✅ ambas (2026-09-18) — la guarda que se salta los bloques ya dibujados podaba la **raíz** del árbol, que empieza en 0 como el frontmatter; **confirmado en la app** y reflejado a web. Arregla también la nota que empieza con una tabla |
 | DEF-078 | ~~Las opciones de un desplegable van pegadas al borde~~ | — | ⛔ **retirado** — no pasaba en todos los `<select>` sino solo en el del `DEF-070`, sin consolidar: era una regresión propia y no lleva número. Número quemado |
 
 ## Notas por bug
+
+- **DEF-087 — la guarda que protegía un bloque podaba el árbol entero.** `buildDecorations`
+  se salta los nodos que caen dentro de un bloque ya dibujado —la tarjeta del frontmatter,
+  una tabla— para no pintarlos dos veces. Miraba si el nodo **empezaba** dentro. Pero
+  `iterate` entra primero en la **raíz** (`Document`, que empieza en 0) y un frontmatter
+  también empieza en 0: la raíz contaba como parte del bloque, `return false` podaba todo, y
+  ninguna decoración que salga del árbol se dibujaba en la nota. Lo que se detecta por línea
+  —callouts, wikilinks, etiquetas— iba por otro recorrido y sí funcionaba, y por eso el
+  reporte decía «los títulos y otros elementos» y no «todo».
+
+  El parser estaba bien, y eso fue lo primero que se comprobó: con frontmatter los títulos
+  de abajo salen como `ATXHeading`. Se reprodujo en un Chromium real con el mismo juego de
+  extensiones que el editor, midiendo antes y después — y así apareció un segundo caso que
+  el reporte no traía: una nota que **empieza con una tabla** fallaba igual.
+
+  > [!info] Por qué no se vio antes
+  > Probablemente falla desde que existe la tarjeta de propiedades (`FUN-M-04`). Tenía el
+  > mismo síntoma que `DEF-062` —títulos con los `#` a la vista—, así que al corregir aquél
+  > quedó escondido que había otro. Lo desenmascaró el usuario al notar que solo pasaba en
+  > las notas con frontmatter.
 
 - **DEF-084 — el renombrado reescribía los enlaces con un nombre que nunca existió.**
   `renameNota` le pasaba al reescritor de `[[enlaces]]` el título que el usuario **pidió**,

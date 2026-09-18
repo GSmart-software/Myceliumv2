@@ -222,6 +222,37 @@ de provocar la transacción que faltaba.
 Un `StateField` que detecta su bloque **leyendo líneas** en vez del árbol no necesita
 nada de esto: `frontmatterField` busca el `---` de la primera línea y quedó intacto.
 
+## Podar el árbol: `iterate` entra primero en la RAÍZ
+
+`syntaxTree(state).iterate({ enter })` no empieza por los bloques del documento: empieza por
+el nodo **`Document`**, que va de `0` al final. Devolver `false` en `enter` poda ese nodo **y
+todo lo que cuelga de él**.
+
+Eso convierte en una trampa cualquier guarda del tipo «saltar lo que esté dentro de tal
+rango». Si la condición es «el nodo **empieza** dentro» y el rango arranca en `0`, la raíz la
+cumple, y la guarda poda **el árbol entero**. Es `DEF-087`: el rango era el del frontmatter,
+que siempre empieza en `0`, y ninguna decoración salida del árbol se dibujaba en la nota. Lo
+mismo con una tabla al principio.
+
+> [!important] La condición correcta es «ENTERO dentro», no «empieza dentro»
+> ```ts
+> // MAL: la raíz empieza en 0, igual que un bloque al inicio del documento
+> if (bloques.some(([f, t]) => node.from >= f && node.from < t)) return false;
+> // BIEN: la raíz empieza dentro pero sigue más allá, así que se recorre
+> if (bloques.some(([f, t]) => node.from >= f && node.to <= t)) return false;
+> ```
+> Un nodo que cruza el borde del bloque se recorre, y sus hijos de dentro caen igual en la
+> misma guarda, uno por uno. No hace falta tratar a la raíz como caso especial.
+
+> [!tip] Cómo se ve cuando pasa
+> Faltan **todas** las decoraciones que salen del árbol a la vez —títulos, énfasis, código,
+> enlaces— y ninguna de las que se buscan por línea con una regex. Un «falla casi todo, pero
+> no todo» apunta a esto: dos recorridos distintos, y uno de ellos podado desde la raíz.
+
+Y un método que sirvió acá: **medir el árbol antes de tocar el recorrido**. Lo primero fue
+volcar qué nodos arma lezer para una nota con frontmatter; ver los títulos de abajo como
+`ATXHeading` descartó al parser en un minuto y dejó la búsqueda en quien lo recorre.
+
 ## Otros detalles del editor
 
 - **Caret invisible en el editor CSS** (`DEF-026`): CodeMirror necesitaba
