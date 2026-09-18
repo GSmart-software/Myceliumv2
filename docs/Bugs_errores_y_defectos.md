@@ -237,6 +237,9 @@ En el bloque de propiedades, el campo de la **clave** ocupa el 100 % del ancho, 
 # DEF-062
 En el modo de edición, **muchas veces los títulos no se renderizan** y quedan como texto normal: se ven los `#`, `##`, `###` sin aplicar el estilo de título.
 
+> [!info] El mismo síntoma volvió por otra causa: ver `DEF-087`
+> Con frontmatter en la nota, en edición en vivo (2026-09-18).
+
 # DEF-063
 En una tabla, el texto de la celda vive en un `span` (`mic-tab-render`) que **no ocupa el ancho de la celda**, sino solo el de su contenido. Al hacer clic en la parte vacía de una celda **no se activa la edición**, y hay que apuntar justo al texto.
 
@@ -348,6 +351,43 @@ rechazo de caracteres inválidos.
 > El explorador y —desde `FUN-M-24`— el título del documento. Este último valida y rechaza
 > esos caracteres antes de llamar, así que por ahí ya no se llega; el explorador no valida,
 > y por ahí sí.
+
+# DEF-085
+Al **cambiar de pestaña y volver** a un archivo tabla (`.base`), la tabla **pierde todo lo
+que se había hecho en ella**: vuelve a la primera vista, se borra lo escrito en el buscador,
+se cierra el panel de filtros o de columnas, y si se había pedido «Ver todas las notas, sin
+filtrar» vuelve a esconderlas.
+
+Lo más grave: si se estaba editando la **fuente YAML** y no se guardó, el cambio **se pierde
+sin aviso**.
+
+> [!question] Qué es lo que más importa conservar
+> El reporte dice «que persista el estado de la visibilidad». Puede referirse a cualquiera
+> de los de arriba —la vista elegida, lo que se buscó, qué panel estaba abierto, o el «ver
+> sin filtrar», que es literalmente una elección de qué se ve—. Se registra el síntoma
+> completo; cuál pesa más se confirma al corregirlo.
+
+# DEF-086
+Un archivo tabla (`.base`) **no se entera** de que cambiaron las propiedades de las notas que
+muestra. Si mientras la tabla está abierta se modifica el frontmatter de una nota —desde el
+editor de Mycelium, desde una IA, o desde la consola—, la tabla sigue mostrando los valores
+viejos, y las notas que deberían entrar o salir por sus filtros no entran ni salen.
+
+Se nota sobre todo con la tabla en un panel y la nota en otro, o trabajando con una IA en la
+terminal: lo que se ve en la tabla deja de ser lo que hay en el vault.
+
+# DEF-087
+En el **modo de edición en vivo**, en una nota que tiene **frontmatter** (el bloque de
+propiedades entre `---` al inicio), **los títulos y otros elementos no se renderizan**: se ven
+los `#`, `##`, `###` y el resto del markdown como texto, sin su formato. En la vista de lectura
+y en raw no pasa.
+
+> [!info] El síntoma es el de `DEF-062`, pero el disparador es otro
+> `DEF-062` se corrigió y se confirmó el 2026-09-03: el árbol de sintaxis llegaba a medias y
+> nada recalculaba al completarse. El usuario siguió viendo títulos sin formato y aisló el
+> caso el 2026-09-18: pasa **cuando la nota tiene frontmatter**, y lo atribuye a los `---`
+> que lo cierran. Se registra aparte porque es otra causa con el mismo síntoma, no una
+> recaída de aquella.
 
 ---
 

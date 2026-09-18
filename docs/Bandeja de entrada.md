@@ -92,6 +92,9 @@ lo digo.
 | 2026-09-04 | Números de línea en los markdown, apagados por defecto y por vault | `FUN-M-28` `EDITOR-NUMEROS-DE-LINEA` — es M por el «por vault»: hoy las preferencias son por USUARIO |
 | 2026-09-04 | El desplegable de campos del filtro necesita buscador | `FUN-S-16` `BASES-FILTRO-BUSCADOR` · bloque **O**, con el resto del constructor |
 | 2026-09-05 | En el explorador faltan las líneas verticales de indentación que sí tiene VS Code | `FUN-S-17` `EXPLORER-GUIAS-INDENTACION` — surgió al probar el árbol de resultados de `FUN-M-20`, y **entra en esta misma versión**. La técnica ya quedó resuelta ahí: la sangría la da el anidamiento, no un `padding` por nivel |
+| 2026-09-18 | Las tablas `.base` no conservan su estado al cambiar de pestaña; que persista «el estado de la visibilidad» | `DEF-085` — pierde vista, búsqueda, panel abierto y «ver sin filtrar», y **también un borrador sin guardar de la fuente**. Queda preguntado cuál de esos es «la visibilidad» |
+| 2026-09-18 | Al cambiar el frontmatter de un archivo, el `.base` no se actualiza; un hook que lo detecte venga el cambio de donde venga | `DEF-086` — la idea del hook es la dirección correcta, y en desktop el mecanismo ya existe: el watcher avisa al grafo desde `DEF-054`. Falta que avise también a la tabla |
+| 2026-09-18 | Los títulos no se renderizan en edición en vivo: el culpable es el `---` que cierra el frontmatter | `DEF-087`, emparentado con `DEF-062` (mismo síntoma, otra causa). El aislamiento que hiciste es lo que lo vuelve atacable |
 
 > [!note] Esta tabla se puede vaciar cuando moleste
 > Es una comodidad para que veas en qué terminó cada cosa, no un registro canónico. La
