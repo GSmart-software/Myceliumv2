@@ -146,6 +146,10 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
 
 - [[README]] — presentación del repo (describe la estructura de la línea **web**).
 - [[CLAUDE]] — instrucciones vivas: framework de memoria + guía de trabajo del proyecto.
+- [[PRODUCT]] — registro de producto (usuarios, posicionamiento, principios) que usa la
+  skill de diseño `impeccable`.
+- [[DESIGN]] — el sistema visual tal como está implementado, extraído de `tokens.css`,
+  con reglas para los agentes que diseñen pantallas. Complementa a [[DESIGN_SYSTEM]].
 - [[Conflictos instrucciones IA]] y [[CLAUDE (mycelium-ia v1.2.0)]] /
   [[CLAUDE (mycelium-ia v1.1.0)]] — salidas del generador del framework cuando encontró
   archivos existentes (no los pisó); ver [[Generar el framework de IA en un vault]].
