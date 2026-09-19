@@ -102,6 +102,36 @@ Dio 14 avisos:
 `colorize` (temas claros y enlace roto) → `harden` (foco, chevrons, semántica) →
 `animate` (movimiento reducido) → `adapt` (640px) → `optimize` → `document` → `polish`.
 
+> [!success] Avance al 2026-09-19
+> Hechos y commiteados en `experimento/ui-impeccable`: `colorize`, `harden` (con
+> `DEF-088`), `animate`, `adapt` y `optimize` (xterm diferido). `document` actualizó
+> [[DESIGN]]: roles de Brote, degradé de marca con tres usos, ventana angosta y
+> movimiento. `polish` cerró el recorrido sin cambios de código: consola sin errores,
+> foco visible y en orden en todo el marco, diff limpio. Lo único funcional que encontró
+> es `DEF-090` (la búsqueda de la barra superior no busca), que pide una decisión de
+> producto antes que un arreglo.
+
+> [!info] Critique del cascarón (2026-09-19): 20/40, «Obsidian teñido»
+> La identidad vive en el color y el vocabulario, no en la estructura. Salieron
+> `DEF-091` (código en línea ilegible en claro) y `DEF-092` (la lectura no limita el
+> ancho), que son la próxima tanda por decisión del usuario. Quedan **anotados para más
+> adelante**, sin tocar por ahora:
+> - **Compartir en desktop es falso**: el backend es un `noop()` y el modal responde
+>   «Acceso concedido.»; ocupa el botón de mayor énfasis de la barra superior, y la
+>   sección «Compartido» del explorador está siempre vacía.
+> - **La red de enlaces está escondida**: backlinks y mini-grafo detrás de «Panel de
+>   metadatos», cerrado por defecto; es lo que diferencia al producto.
+> - **Marco sobrecargado**: 25 controles fijos en la barra del editor, íconos repetidos
+>   (Compartir y Grafo usan el mismo), título duplicado, cerrar pestaña de 16 px.
+> - **Teclado**: 80 paradas de Tab antes de la nota, explorador sin semántica de árbol,
+>   modal Compartir sin foco atrapado ni Escape.
+> Detalle completo en `.impeccable/critique/`.
+>
+> Quedaron fuera, a propósito: cargar KaTeX y highlight.js bajo demanda (pide volver
+> asíncrono el render de Markdown), las `transition: width` (sin costo medible), y
+> `DEF-089`. Aparecieron para el `critique`: la búsqueda de la barra superior no busca, y
+> el divisor de «Compartido» parece una barra de scroll.
+
 ## Relacionadas
 
 - [[Rediseñar la UI con impeccable]] — el proceso del que esta es la línea base.

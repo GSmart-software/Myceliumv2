@@ -19,6 +19,11 @@ colors:
   niebla-claro: "#E3EEF1"
   humus-claro: "#1F2D30"
   humus-tenue-claro: "#59696C"
+  brote-texto-claro: "#1B6C75"
+  brote-marco-claro: "#68CED9"
+  brote-marco-acento-claro: "#3FC3D1"
+  enlace-roto: "#3FC4D1"
+  enlace-roto-claro: "#30737E"
   ambar: "#C9821E"
   precaucion: "#D95040"
   error: "#E5484D"
@@ -71,6 +76,7 @@ spacing:
   toolbar: "40px"
   topbar: "52px"
   rail: "56px"
+  editor-min: "420px"
 components:
   button-primary:
     backgroundColor: "{colors.hifa}"
@@ -115,6 +121,18 @@ components:
     textColor: "{colors.brote}"
     rounded: "{rounded.sm}"
     padding: "0.05em 0.4em"
+  tag-pill-claro:
+    textColor: "{colors.brote-texto-claro}"
+    rounded: "{rounded.sm}"
+    padding: "0.05em 0.4em"
+  rail-button-claro:
+    textColor: "{colors.brote-marco-claro}"
+    rounded: "{rounded.md}"
+    size: "40px"
+  wikilink-missing:
+    textColor: "{colors.enlace-roto}"
+  wikilink-missing-claro:
+    textColor: "{colors.enlace-roto-claro}"
   dialog:
     backgroundColor: "{colors.niebla}"
     rounded: "{rounded.lg}"
@@ -130,7 +148,9 @@ components:
 > `frontend/styles/tokens.css`. La explicación larga, con el porqué de cada regla, vive en
 > [[DESIGN_SYSTEM]]. Ojo: **sus valores de color del modo oscuro están desactualizados**;
 > ante una diferencia, vale este archivo. Producto y usuarios: [[PRODUCT]].
-> Extraído del código el 2026-09-18.
+> Extraído del código el 2026-09-18; actualizado el 2026-09-19 con los cambios de
+> `colorize`, `harden`, `animate`, `adapt` y `optimize` (ver
+> [[Auditoria de UI 2026-09-19]]).
 
 ## Overview
 
@@ -148,8 +168,8 @@ un IDE: texto de interfaz de 13px, controles de 22 a 40px, pestañas de 34px, mu
 vista y nada que pida atención en reposo. **La nota es serena**: en lectura cambia a una
 serif, respira con interlineado de 1.7 y se limita a 72 caracteres de ancho. Lo orgánico
 del micelio se ve en los detalles, no en la cantidad: esquinas suaves, el degradé
-brote→hifa del logo, el halo del isotipo, títulos que alternan los dos colores de la
-marca.
+brote→hifa (en el logo, el título del documento y el énfasis triple), el halo del
+isotipo, títulos que alternan los dos colores de la marca.
 
 Hay tres cosas que Mycelium nunca debe parecer: **un clon gris de Obsidian** (violeta y
 grises neutros sin identidad), **un SaaS corporativo** (tarjetas blancas flotando con
@@ -162,6 +182,7 @@ partes, donde el glow deja de señalar y pasa a ser ruido).
 - Marco compacto (13px, controles chicos) frente a una lectura amplia (serif, 72ch).
 - Plano por defecto: las zonas se separan por tono; solo lo que flota tiene sombra.
 - Todo sale de tokens: dos temas × claro/oscuro = cuatro combinaciones, siempre las cuatro.
+- Brote nunca se usa en crudo como primer plano: cada uso pide su rol (texto, foco, marco).
 
 ## Colors
 
@@ -181,13 +202,40 @@ defecto, **Bioluminiscencia**, en oscuro (sin sufijo) y en claro (sufijo `-claro
 ### Neutral
 - **Esporo**: el marco, o sea rail, barra superior y barra lateral. Es lo más profundo de
   la pantalla, oscuro **también en modo claro**.
-- **Esporo profundo**: bloques de código, lienzo del grafo, y la base de la que se tiñen
-  todas las sombras y velos.
+- **Esporo profundo**: lienzo del grafo, fondo del código en oscuro, y la base de la que
+  se tiñen todas las sombras y velos.
+- **Fondo de código** (`--mic-bg-code`): en oscuro es Esporo profundo; en claro, un tinte
+  de la tinta al 7% sobre Lienzo. El código es un fragmento del mismo valor que su modo:
+  claro en claro, oscuro en oscuro, para que cada paleta de sintaxis (`--mic-syntax-*`,
+  con juego claro y oscuro) quede sobre el fondo para el que se diseñó. La misma paleta
+  colorea los bloques en vivo, en lectura (highlight.js solo pone clases) y en el visor.
 - **Lienzo**: el fondo del editor y del contenido principal. Es donde está la nota.
 - **Niebla**: paneles laterales, barra de pestañas, modales, campos.
 - **Humus**: la tinta del texto principal.
 - **Humus tenue**: texto secundario, placeholders, íconos inactivos sobre fondo claro.
 - **Borde**: en oscuro es un teal apagado propio; en claro sale de mezclar Humus al 16%.
+
+### Brote por rol
+Brote se diseñó para brillar sobre oscuro. En claro, puesto tal cual como texto, foco o
+ícono no llega al mínimo de contraste (un `#tag` daba 1.95:1). Por eso cada uso pide un
+**rol**, definido en `tokens.css`: en oscuro todos valen Brote, y en claro cada uno se
+calibra para el fondo donde se dibuja.
+
+| Rol | Token | Oscuro | Claro | Dónde |
+|---|---|---|---|---|
+| Texto | `--mic-glow-texto` | Brote | Brote 45% + tinta (**Brote texto**) | etiquetas, hover de enlaces, énfasis, íconos sobre el contenido |
+| Foco | `--mic-focus` | Brote | Hifa | anillo de foco con teclado |
+| Marco | `--mic-marco-glow` | Brote | Brote 60% + Niebla (**Brote marco**) | íconos, texto y foco sobre Esporo |
+| Marco, segundo color | `--mic-marco-acento` | Hifa | Brote 80% + Niebla | segundo color del logo |
+| Ícono del marco en reposo | `--mic-marco-inactivo` | 55% | 70% | opacidad de rail y botón de salir |
+| Título de callout | `--mic-callout-tinta` | 85% | 50% | color del tipo mezclado con la tinta |
+
+Los hex del frontmatter con sufijo `-claro` son esas mezclas resueltas en Bioluminiscencia;
+en Cantarela salen de la misma fórmula. Sobre el marco (rail y barra superior) el foco se
+redefine como `--mic-marco-glow`: Hifa en claro queda a 2:1 sobre Esporo.
+
+El **enlace roto** (`[[nota]]` que no existe) va en Hifa 55% + Humus tenue, con subrayado
+punteado: se distingue por la forma, no por oscurecerse.
 
 ### Secundario: el tema Cantarela
 Es el mismo sistema en ámbar y marrón: el dorado de los hongos comestibles. Tiene la misma
@@ -227,8 +275,14 @@ Bio oscuro, Cantarela claro, Cantarela oscuro. Un color de marca en crudo casi s
 falla en alguna. Por eso los títulos **se mezclan con la tinta** (`color-mix` con Humus)
 en vez de usar Hifa o Brote puros.
 
-**The Dark Frame Rule.** Sobre Esporo nunca va Humus tenue: está calibrado para fondo
-claro. Los íconos del marco usan Brote al 55% en reposo y al 100% activos o con hover.
+**The Dark Frame Rule.** Sobre Esporo nunca va Humus tenue ni ningún color calibrado para
+fondo claro: el marco usa `--mic-marco-glow`, a `--mic-marco-inactivo` en reposo y al
+100% activo o con hover.
+
+**The Role Rule.** Brote no se escribe en crudo como color de primer plano. Texto,
+anillo de foco e íconos usan su rol (`--mic-glow-texto`, `--mic-focus`,
+`--mic-marco-glow`); Brote en crudo queda para fondos tenues (hover al 14–15%, tintes) y
+para el grafo, que siempre se dibuja sobre oscuro.
 
 ## Typography
 
@@ -261,7 +315,8 @@ Pro); la interfaz siempre va en Geist.
 el marco para que "respire", ni se achica la nota para que entre más.
 
 **The Semibold Ceiling Rule.** En la interfaz, el énfasis máximo es 600. El 700 es para
-el logo y el H1 de una nota.
+el contenido y la marca: el H1 de una nota, el título del documento, el énfasis triple y
+el logo.
 
 ## Layout
 
@@ -273,9 +328,20 @@ barra de herramientas del editor de 40px. Al pie de toda pantalla de altura comp
 quedan 6px de aire (`--mic-gap-inferior`), para que nada parezca seguir por detrás del
 borde de la ventana.
 
-El ritmo de separación es corto y en rem: 0.25 / 0.35 / 0.5 / 0.75 / 1rem. Los paneles
-colapsan y se redimensionan con una transición de 160ms. Por debajo de 768px la barra
-superior se compacta: el logo pasa a isotipo y la búsqueda, a un botón de 30px.
+El ritmo de separación es corto y en rem: 0.25 / 0.35 / 0.5 / 0.75 / 1rem.
+
+**Ventana angosta.** Es una app de escritorio con ventana mínima de 640×480, así que lo
+angosto es media pantalla, no un teléfono. La regla es repartir, no esconder: la nota
+conserva siempre al menos 420px (`--mic-editor-min-width`, unos 50 caracteres a 16px) y
+el panel izquierdo cede ancho hasta su mínimo para dárselos, sin cambiar la preferencia
+guardada. Por debajo de 768px la barra superior se compacta: el logo queda en su isotipo
+y "Compartir" en su ícono, pero la búsqueda sigue siendo un campo que se achica.
+
+**Movimiento.** Corto y de estado: 120ms para hover y opacidad, 160ms para paneles y
+cambio de nota. El único movimiento de autor es el flujo por las aristas del grafo. Toda
+animación tiene alternativa con `prefers-reduced-motion`: se quita el desplazamiento y se
+conserva lo que informa (el cajón entra con fundido en vez de deslizarse, el punto de
+sincronización late sin crecer, el flujo del grafo pasa a flechas).
 
 ## Elevation & Depth
 
@@ -326,28 +392,34 @@ Precisos y silenciosos: chicos, sin cuerpo en reposo, se encienden al pasar el m
   la acción que cierra el flujo.
 - **Hover:** el primario se oscurece (Hifa mezclado al 85% con negro). El resto de los
   clickeables toma Brote al 15% de fondo y pasa a Humus si estaba en Humus tenue.
-- **Focus:** anillo de 2px en Brote, separado 2px. Es global y no se reemplaza.
+- **Focus:** anillo global de 2px en `--mic-focus`, separado 2px. No se reemplaza por
+  componente: si un contexto necesita otro color (el marco), redefine el token.
 - **Secondary:** transparente, con borde de 1px y texto Humus.
-- **Glow outline:** texto Brote con borde de Brote al 40%. Es para acciones de la barra
-  superior, sobre Esporo.
+- **Glow outline:** texto en Brote del marco con borde al 65%. Es para acciones de la
+  barra superior, sobre Esporo.
+- **Ícono del marco** (salir del vault): Brote del marco a opacidad de reposo; con hover,
+  opacidad plena y borde al 40%.
 - **Deshabilitado / inerte:** opacidad 0.35–0.45 **sobre el botón**, con cursor normal.
 
 ### Chips
-- **Etiqueta (`#tag`):** fondo Brote al 15%, texto Brote, esquina suave, al 0.9em del
-  texto que la rodea.
+- **Etiqueta (`#tag`):** fondo Brote al 15%, texto en `--mic-glow-texto`, esquina suave,
+  al 0.9em del texto que la rodea.
 - **Pastilla de propiedad:** píldora con fondo Humus tenue al 18%.
 
 ### Inputs / Fields
 - **Style:** sin borde, fondo Niebla, esquina redondeada (8px). El campo de búsqueda de
-  la barra superior mide 30px de alto y como mucho 480px de ancho.
-- **Focus:** el anillo global en Brote.
+  la barra superior mide 30px de alto y como mucho 480px de ancho, y se achica con la
+  ventana.
+- **Focus:** el anillo global. Si el campo anula su outline para no dibujarlo adentro, la
+  caja que lo contiene lo muestra con `:focus-within`; ningún campo queda sin foco visible.
 - **Interruptor:** píldora de 34×18px que se llena de Hifa al encenderse.
 - **Controles nativos:** `color-scheme` sigue al modo oscuro, y la lista de un `<select>`
   usa Niebla con la opción marcada en Hifa. Si no, el navegador la pinta en blanco.
 
 ### Navigation
-- **Rail:** botones de 40px sobre Esporo, íconos Lucide de 20px en Brote al 55%. El activo
-  va a opacidad plena, con una barra de 3px en Brote pegada al borde izquierdo.
+- **Rail:** botones de 40px sobre Esporo, íconos Lucide de 20px en Brote del marco a
+  opacidad de reposo (55% oscuro, 70% claro). El activo va a opacidad plena, con una barra
+  de 3px pegada al borde izquierdo.
 - **Pestañas:** 34px de alto, texto de 13px en Humus tenue, separadas por una línea de
   1px. La activa toma el fondo Lienzo, un borde inferior de 2px en Hifa y el texto en
   Humus. Una pestaña de vista previa lleva el título en cursiva, y las consolas suman una
@@ -358,12 +430,25 @@ Precisos y silenciosos: chicos, sin cuerpo en reposo, se encienden al pasar el m
 
 ### Callout (signature)
 Borde izquierdo de 3px en el color del tipo, fondo de ese color al 8%, esquinas
-redondeadas solo del lado derecho. Tiene diez tipos, que se pueden plegar y anidar. Es el
+redondeadas solo del lado derecho. El título lleva el color del tipo mezclado con la
+tinta según `--mic-callout-tinta`. Tiene diez tipos, que se pueden plegar y anidar. Es el
 componente que más identifica a las notas de Mycelium.
 
 ### Logo (signature)
 El isotipo (tres nodos unidos por hifas) con un halo de Brote, y la palabra con un degradé
-de Brote a Hifa. Es el **único** degradé del sistema.
+de Brote a Hifa, en los colores del marco. En una ventana angosta queda solo el isotipo.
+
+### Degradé de marca (signature)
+El degradé Brote → Hifa (`linear-gradient(90deg, glow, accent)`, recortado al texto) es
+la firma tipográfica de Mycelium y tiene **tres usos, y solo tres**: la palabra del logo,
+el título del documento (el nombre de la nota arriba del contenido) y el énfasis triple
+(`***texto***` / `___texto___`). Siempre en peso 700.
+
+### Grafo (signature)
+Nodos con halo sobre un lienzo que es oscuro en cualquier tema, aristas curvas y, si se
+elige, un flujo animado que recorre las aristas en la dirección del enlace. Con
+movimiento reducido el flujo pasa a flechas y el bucle se detiene; y un grafo que no se
+ve no anima ni dibuja.
 
 ## Do's and Don'ts
 
@@ -379,6 +464,12 @@ de Brote a Hifa. Es el **único** degradé del sistema.
   flotan.
 - **Do** mostrar atenuada, y con su motivo, la acción que no está disponible, en vez de
   ocultarla.
+- **Do** usar el rol de Brote que corresponda (`--mic-glow-texto`, `--mic-focus`,
+  `--mic-marco-glow`) cada vez que Brote vaya en primer plano.
+- **Do** dar a toda animación una alternativa con `prefers-reduced-motion` que conserve
+  lo que informa, y detener todo bucle que no esté a la vista.
+- **Do** repartir el espacio en una ventana angosta —la nota conserva 420px— en vez de
+  esconder funciones.
 
 ### Don't:
 - **Don't** parecer un clon gris de Obsidian: nada de violeta ni de grises neutros sin
@@ -386,7 +477,10 @@ de Brote a Hifa. Es el **único** degradé del sistema.
 - **Don't** parecer un SaaS corporativo: nada de tarjetas blancas elevadas con sombras
   suaves ni degradés violeta-azul.
 - **Don't** convertirlo en neón gamer: el glow saturado en todas partes deja de
-  señalar. El logo es el único degradé.
+  señalar. El degradé de marca tiene tres usos (logo, título del documento, énfasis
+  triple) y ninguno más.
+- **Don't** escribir Brote en crudo como color de texto, foco o ícono: en claro no llega
+  al contraste mínimo.
 - **Don't** escribir un hex a mano en un componente ni usar `rgba(0,0,0,…)` para una
   sombra.
 - **Don't** poner Humus tenue sobre Esporo.
