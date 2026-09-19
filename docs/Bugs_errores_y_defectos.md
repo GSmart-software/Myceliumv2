@@ -414,6 +414,32 @@ enlace sobre ese recuadro casi no se lee (medido: 2.5:1).
 Se ve en [[Mapa de documentacion]], en el callout «Cómo está organizado». Detectado el
 2026-09-19 durante `/impeccable audit`.
 
+# DEF-090
+El campo **«Buscar en Mycelium…» de la barra superior no busca**. Se puede hacer clic,
+escribir y apretar Enter, pero no pasa nada: no aparecen resultados, no se abre ningún
+panel y el texto queda ahí. La búsqueda que sí funciona es la del rail («Búsqueda
+global»), que no tiene relación con este campo.
+
+Es el campo más visible de la interfaz, arriba al centro, así que invita a usarlo y
+responde con silencio. Detectado el 2026-09-19 durante `/impeccable adapt` y confirmado
+en `/impeccable polish`.
+
+# DEF-091
+En los temas **claros**, el **código en línea** (lo que va entre comillas invertidas, como
+`FUN-L-14` o `docs/design/`) **no se lee**: en la vista de lectura se ve un recuadro oscuro
+casi liso, con el texto oscuro encima (medido: 1.04:1). Pasa en cualquier nota con código
+en línea, en Bioluminiscencia y en Cantarela claros; en los oscuros se ve bien.
+
+Detectado el 2026-09-19 durante `/impeccable critique`.
+
+# DEF-092
+En la **vista de lectura**, las líneas de la nota **ocupan todo el ancho del panel**: en
+una ventana ancha cada renglón llega a 170-180 caracteres, y leer un párrafo obliga a
+recorrer la pantalla de punta a punta. El texto debería limitarse a un ancho cómodo de
+lectura, como en cualquier lector.
+
+Detectado el 2026-09-19 durante `/impeccable critique`.
+
 ---
 
 > [!warning] Defectos sin reporte original
