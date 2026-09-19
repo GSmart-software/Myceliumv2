@@ -147,6 +147,24 @@ Dio 14 avisos:
 > `aria-expanded` y `aria-current`; «Saltar a la nota» es la primera parada; los menús
 > usan `lib/useMenuEmergente.ts` (Escape devuelve el foco, flechas, uno a la vez) y el
 > modal Compartir `lib/useDialogoModal.ts` (foco adentro, Escape, nombre del diálogo).
+
+> [!success] Cierre del refinamiento (critique 3, 2026-09-19): 20 → 21 → 21
+> El refinamiento resolvió los defectos y la accesibilidad (las dos evaluaciones lo
+> confirman: 0 controles sin nombre, 22 paradas de Tab hasta la nota en vez de 80, Escape
+> y foco en menús y modal, contraste en los cuatro combos). El puntaje no sube más porque
+> lo que frena es **estructural**: la identidad vive en el color, la composición es la de
+> Obsidian, y el marco esconde la red de enlaces. Eso no lo resuelve ningún refinamiento:
+> es el terreno del **rediseño**, que es el paso siguiente.
+>
+> Quedan abiertos, anotados para el rediseño o para una tanda chica:
+> - Funciones muertas o falsas en el marco: `DEF-090`, Compartir en desktop, Tags.
+> - Dos documentos según el modo (título solo en vivo, callout distinto, ancho sin límite
+>   en vivo).
+> - Barra del editor de 25 controles; Grafo y Compartir con el mismo ícono.
+> - Sin selector rápido, paleta de comandos ni lista de atajos.
+> - Menores y reales: el degradé del título en claro arranca a 2.2:1; `input` y
+>   `textarea` en Arial (no heredan la fuente); cabeceras del explorador en peso 700; la
+>   pestaña (`role="tab"`) no recibe foco.
 >
 > Quedaron fuera, a propósito: cargar KaTeX y highlight.js bajo demanda (pide volver
 > asíncrono el render de Markdown), las `transition: width` (sin costo medible), y
