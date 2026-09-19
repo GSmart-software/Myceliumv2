@@ -303,6 +303,19 @@ y **Pregunta**. Las seis marcas de color de las consolas (`--mic-consola-*`) son
 identidad, no de estado. Están calibradas para contrastar al menos 3.79:1 sobre los ocho
 fondos posibles.
 
+### Atmósferas: el tercer eje
+Además del **Tema** (qué colores) y el **Modo** (claro u oscuro), el usuario elige una
+**Atmósfera** para cada modo: cómo se reparten los colores del tema en fondos, marco,
+títulos y bordes. Son cuatro: **Abisal** (la de siempre, descrita en esta sección),
+**Niebla** (grises fríos; defecto en oscuro), **Bosque** (el tema en el marco; defecto en
+claro) y **Papel** (editorial, cálida). Viven en `styles/atmosferas.css` como fórmulas
+sobre los raw del tema, así que una sola definición sirve para Bioluminiscencia y
+Cantarela. Detalle y decisiones en [[atmosferas]] (`FUN-M-30`).
+
+Con las atmósferas, el marco **no siempre es oscuro**: en Niebla y Papel claros es claro.
+Por eso el texto neutro sobre el marco es un token propio, `--mic-marco-texto`, y cada
+atmósfera lo calibra.
+
 ### Named Rules
 **The Two Voices Rule.** Cada tema tiene exactamente dos colores de marca, Hifa (lo que se
 hace) y Brote (lo que brilla). Un tercer color de marca rompe el sistema. Si hace falta
@@ -313,15 +326,14 @@ tokens semánticos (`--mic-bg-*`, `--mic-text-*`, `--mic-accent`, `--mic-glow`).
 uno, se crea en `tokens.css` mapeado en los dos temas, y recién después se usa.
 
 **The Four Combos Rule.** Todo color se verifica en las cuatro combinaciones: Bio claro,
-Bio oscuro, Cantarela claro, Cantarela oscuro. Un color de marca en crudo casi siempre
+Bio oscuro, Cantarela claro, Cantarela oscuro — **por cada atmósfera**, o sea dieciséis. Un color de marca en crudo casi siempre
 falla en alguna. Por eso los títulos **se mezclan con la tinta** (`color-mix` con Humus)
 en vez de usar Hifa o Brote puros.
 
-**The Dark Frame Rule.** Sobre Esporo nunca va un color calibrado para fondo claro (el
-Humus tenue del modo claro, por ejemplo): el marco usa `--mic-marco-glow`, a
-`--mic-marco-inactivo` en reposo y al 100% activo o con hover. El texto neutro sobre el
-marco (la barra de estado) va en Humus tenue solo en oscuro, donde está calibrado para
-fondo oscuro; en claro se usa Niebla mezclada al 78% con el marco.
+**The Frame Rule.** Sobre el marco nunca va un color calibrado para el lienzo: el marco
+usa `--mic-marco-glow` (a `--mic-marco-inactivo` en reposo, al 100% activo o con hover)
+y `--mic-marco-texto` para el texto neutro. Cada atmósfera los define según el marco sea
+oscuro (Abisal, Bosque y todas en oscuro) o claro (Niebla y Papel en claro).
 
 **The Role Rule.** Brote no se escribe en crudo como color de primer plano. Texto,
 anillo de foco e íconos usan su rol (`--mic-glow-texto`, `--mic-focus`,

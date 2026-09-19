@@ -68,7 +68,9 @@ Tagline: *"Tu red de conocimiento, viva y conectada"*.
 - Tagline *"Tu red de conocimiento, viva y conectada"*.
 - Vocabulario propio en español (Esporas, papelera propia, "vault").
 - **Paleta y temas**: Bioluminiscencia y Cantarela, cada uno en claro y oscuro, oscuro por
-  defecto. Confirmado como obligatorio el 2026-09-19, al arrancar el rediseño.
+  defecto. Confirmado como obligatorio el 2026-09-19, al arrancar el rediseño. El mismo
+  día se sumó un tercer eje elegible, la **Atmósfera** (Abisal, Niebla, Bosque, Papel; una
+  por modo), que reparte esos colores sin cambiarlos: ver [[atmosferas]].
 - **Vocabulario fúngico del sistema de diseño**: Hifa, Brote, Esporo, Niebla, Lienzo,
   Humus. También obligatorio (2026-09-19).
 - **Estructura del espacio de trabajo: la convencional de la categoría**, hecha con todo

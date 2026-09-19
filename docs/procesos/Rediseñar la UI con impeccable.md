@@ -115,6 +115,12 @@ nuevo.
    > La franja lateral de 3px de los callouts (el revisor pide fondo teñido, sin franja) y
    > una celda sombreada fantasma a la izquierda del encabezado de las tablas en vivo.
    > Pendientes de decisión del usuario.
+
+   **Exploración de color (2026-09-19)**: el usuario notó que el prototipo había cambiado
+   mucho la UX y poco la UI, y abrió la paleta a la exploración. Se hicieron tres variantes
+   (Niebla, Bosque, Papel) contra la actual, comparadas en una página con los 16 combos.
+   Prefirió Niebla en oscuro y Bosque en claro, y pidió que las cuatro fueran elegibles: así
+   nacieron las [[atmosferas]] (`FUN-M-30`), con la actual rebautizada **Abisal**.
 8. **Cierre**: su revisor final y su documentador, que actualiza `DESIGN.md`.
 
 ## Lo que no aplica a Mycelium
