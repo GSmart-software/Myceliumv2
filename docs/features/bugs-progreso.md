@@ -74,11 +74,29 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-082 | Un `[[wikilink]]` de una propiedad no navega desde el bloque de propiedades | ambas (frontend) | ✅ ambas (2026-09-04) — era el mismo código que el `DEF-076`; **confirmado en la app** y reflejado a web |
 | DEF-084 | Renombrar con un carácter inválido reescribe los `[[enlaces]]` entrantes con el nombre **pedido**, no con el que el archivo obtuvo | ambas (frontend) | ✅ ambas (2026-09-05) — `renombrarNota` devuelve ahora el título **efectivo**; **confirmado en la app** y reflejado a web. En web no se reproducía —el título no pasa por ningún saneo— pero el cambio se trajo igual |
 | DEF-085 | Un `.base` pierde su estado al cambiar de pestaña y volver —vista, búsqueda, panel, «ver sin filtrar», y un borrador sin guardar de la fuente— | ambas (frontend) | ✅ ambas (2026-09-18) — caché por **pestaña**, como `instanceCache` en las notas (`DEF-039`): vista, scroll, búsqueda, «ver sin filtrar» y borrador; las filas se muestran al instante y se vuelven a pedir por detrás para no empeorar `DEF-086`. **Confirmado en la app** y reflejado a web. «La visibilidad» resultó ser la **vista activa**, más el scroll |
-| DEF-086 | Un `.base` abierto no se entera de cambios en el frontmatter de sus notas (editor, IA o consola) | ambas (frontend) | ⬜ pendiente — `BaseView` pide `/tabla` una sola vez, al montarse. El mecanismo para enterarse **ya existe** en desktop: el watcher reindexa ante cambios externos y ya avisa al grafo (`DEF-054`); la tabla no escucha |
+| DEF-086 | Un `.base` abierto no se entera de cambios en el frontmatter de sus notas (editor, IA o consola) | ambas (frontend) | ✅ ambas (2026-09-18) — escucha `EVENTO_RECARGA` (cambios de fuera, tras el reindex del watcher) y un evento nuevo, `EVENTO_NOTA_GUARDADA` (guardado desde la app; en web, el único). Refresca solo las filas; **confirmado en la app** y reflejado a web |
 | DEF-087 | Con frontmatter, en edición en vivo, los títulos y otros elementos no se renderizan | ambas (frontend) | ✅ ambas (2026-09-18) — la guarda que se salta los bloques ya dibujados podaba la **raíz** del árbol, que empieza en 0 como el frontmatter; **confirmado en la app** y reflejado a web. Arregla también la nota que empieza con una tabla |
 | DEF-078 | ~~Las opciones de un desplegable van pegadas al borde~~ | — | ⛔ **retirado** — no pasaba en todos los `<select>` sino solo en el del `DEF-070`, sin consolidar: era una regresión propia y no lleva número. Número quemado |
 
 ## Notas por bug
+
+- **DEF-086 — nadie le avisaba a la tabla.** `BaseView` pedía sus filas una sola vez. El
+  aviso para los cambios de **fuera** ya existía y estaba pensado para esto: `EVENTO_RECARGA`,
+  que el watcher emite tras reindexar. Y como el watcher dispara también con lo que escribe
+  la propia app, en desktop un solo oyente cubría las tres fuentes del reporte (editor, IA,
+  consola).
+
+  Se sumó igual `EVENTO_NOTA_GUARDADA`, que el editor emite tras cada guardado. En desktop
+  llega antes que el watcher, y en web es la única señal: allá no hay carpeta.
+
+  > [!warning] No se reusó `EVENTO_RECARGA` para los guardados, a propósito
+  > Aquél le dice a los editores abiertos «recarguen su nota». Emitirlo en cada guardado
+  > haría que **todos** se releyeran cada diez segundos. Son dos eventos porque dicen dos
+  > cosas: «el vault cambió por fuera» y «esta nota cambió».
+
+  Desde el editor, la tabla se actualiza cuando la nota se **guarda** —como mucho cada
+  10 s mientras hay cambios, el ritmo que ya existía—, no con cada tecla. Solo refresca las
+  tablas que se están viendo: las de fondo se ponen al día al volver, por `DEF-085`.
 
 - **DEF-085 — la tabla se desmontaba al cambiar de pestaña.** `EditorPane` solo monta la
   pestaña activa, así que `BaseView` perdía todo su `useState`. Se resolvió con el mismo
