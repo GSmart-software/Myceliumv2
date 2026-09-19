@@ -460,10 +460,16 @@ Esquinas suaves, nunca vivas: el micelio es orgánico. Hay tres radios y una pí
 **Suave** (4px) para botones, ítems de menú, controles chicos y etiquetas; es por lejos
 el más usado. **Redondeado** (8px) para campos de búsqueda, botones del rail, menús y
 avisos. **Amplio** (16px) solo para modales. **Píldora** (999px) para interruptores,
-chips de propiedades y contadores. La barra del rail activo (3px, redondeada del lado que
-mira al contenido) es la marca lateral del sistema: señala dónde estás, como en VS Code.
-No es un recurso para decorar tarjetas, callouts ni filas: el borde de 3px de los
-callouts es una deuda (ver Components), no una forma que se copie.
+chips de propiedades y contadores. La barra lateral recta de 2px es la marca de «dónde
+estás»: el rail activo (alto completo) y la nota abierta en el árbol, como en VS Code.
+Las pestañas y los modos, en cambio, se marcan con **relleno** (píldora). No es un
+recurso para decorar tarjetas ni filas.
+
+> [!note] Formas elegidas pieza por pieza (2026-09-19)
+> Se probaron en vivo cuatro lenguajes de forma —Actual, Suave (píldoras y rellenos),
+> Precisa (rectas y líneas finas) y Luminosa (halos)— y el usuario eligió por pieza:
+> pestañas y modos de **Suave**, árbol y rail de **Precisa**, y los callouts como
+> estaban. El contenido del markdown no cambia de forma.
 
 ## Components
 
@@ -503,17 +509,18 @@ Precisos y silenciosos: chicos, sin cuerpo en reposo, se encienden al pasar el m
   usa Niebla con la opción marcada en Hifa. Si no, el navegador la pinta en blanco.
 
 ### Navigation
-- **Rail:** botones de 40px sobre Esporo, íconos Lucide de 20px en Brote del marco a
-  opacidad de reposo (55% oscuro, 70% claro). El activo va a opacidad plena, con una barra
-  de 3px pegada al borde izquierdo.
+- **Rail:** botones de 40px sobre Esporo, casi rectos (2px), íconos Lucide de 20px en
+  Brote del marco a opacidad de reposo (55% oscuro, 70% claro). El activo va a opacidad
+  plena, con una barra recta de 2px y **alto completo** pegada al borde izquierdo.
 - **Grafo en el rail:** su ícono es el isotipo de Mycelium (tres nodos unidos por hifas)
   dibujado en trazo de línea, con la grilla de 24 y el grosor 2 de los íconos Lucide. No
   se usa `Share2`: es el ícono de «Compartir» y hacía ver la función insignia como una
   acción genérica.
-- **Pestañas:** 34px de alto, texto de 13px en Humus tenue, separadas por una línea de
-  1px. Ancho flexible entre 72 y 260px: con espacio libre el título se lee entero, con
-  muchas pestañas ceden todas por igual. La activa toma el fondo Lienzo, un borde
-  inferior de 2px en Hifa y el texto en Humus. Una pestaña de vista previa lleva el
+- **Pestañas:** **píldoras** de 26px de alto y 8px de radio dentro de la barra de 34,
+  separadas por 2px, texto de 13px en Humus tenue. Ancho flexible entre 72 y 260px: con
+  espacio libre el título se lee entero, con muchas pestañas ceden todas por igual. La
+  activa es la píldora **rellena** (Humus al 10% sobre Niebla) con el texto en Humus, sin
+  subrayado. Una pestaña de vista previa lleva el
   título en cursiva, y las consolas suman una barra de color de 3px a la izquierda.
 - **Pestañas con teclado:** patrón `tablist` con *roving tabindex*: una sola parada de
   Tab (la activa), flechas izquierda/derecha con vuelta, Inicio y Fin, Supr cierra y deja
@@ -524,11 +531,16 @@ Precisos y silenciosos: chicos, sin cuerpo en reposo, se encienden al pasar el m
   13px con esquina suave; los destructivos, en Precaución. Una entrada que no se puede
   usar **se muestra atenuada con el motivo, nunca se oculta**.
 
+- **Árbol:** filas **rectas**, de canto a canto. La nota abierta lleva fondo Brote al 12%
+  y una **barra de 2px** a la izquierda, como en VS Code; las carpetas del camino hasta
+  ella, el rastro (barra de 2px más tenue y nombre en seminegrita), sin fondo.
+
 ### Barra del editor
 De 40px: a la izquierda la tira de formato (`role="toolbar"`), cada acción con su
 ícono y su atajo en el `title`; a la derecha buscar en la nota, el panel de enlaces
-(`aria-pressed`), los modos (vivo, lectura, lado a lado, crudo) y «…» al extremo
-derecho, como en VS Code y Obsidian. Los íconos son de 16px. Colapsa en dos etapas y
+(`aria-pressed`), los modos (vivo, lectura, lado a lado, crudo) como **control
+segmentado** —una pista de Humus al 7% con el modo activo como píldora de Lienzo que se
+apoya con una sombra chica— y «…» al extremo derecho, como en VS Code y Obsidian. Los íconos son de 16px. Colapsa en dos etapas y
 **solo cuando no hay espacio** (medido con los anchos naturales): primero la tira pasa a
 «Formato ▾»; si aun así no entra, el grupo derecho pasa a «⋯». No hay punto de color de
 sincronización: el estado de guardado vive en la barra de estado, dicho con palabras.
@@ -582,12 +594,22 @@ queda vacía: no se inventan ceros).
   oscuro), 6.54 (Cantarela claro).
 - Separador «·» generado por CSS, que el lector de pantalla no lee. Cifras tabulares.
 
+### Consola
+La terminal integrada es **su propia hoja**, como un bloque de código: fondo
+`--mic-terminal-bg` —`#141719` en oscuro, `#EFEFE8` en claro— y 10px de aire alrededor
+del grid. El valor es fijo: no sigue al tema ni a la atmósfera, porque una consola se lee
+como lo que es. El mismo token va al CSS de la vista **y** al tema del xterm, así que el
+aire y las celdas son el mismo color; el relleno va en el contenedor y no en
+`.xterm-screen`, que es desde donde xterm mide el ratón.
+
 ### Callout (signature)
 Fondo del color del tipo al 8%, título con el color del tipo mezclado con la tinta según
 `--mic-callout-tinta`, esquinas redondeadas del lado derecho. Tiene diez tipos, que se
-pueden plegar y anidar. Es el componente que más identifica a las notas de Mycelium. Hoy
-lleva además un borde izquierdo de 3px en el color del tipo: es una **deuda**, no parte
-de la firma (ver abajo).
+pueden plegar y anidar. Es el componente que más identifica a las notas de Mycelium.
+Lleva un borde izquierdo de 3px en el color del tipo. El revisor final lo marcó como
+recurso gastado y se probaron tres alternativas (tarjeta sin franja, contorno fino,
+contorno con halo); el usuario **eligió conservarlo** el 2026-09-19, junto con el resto
+del contenido del markdown.
 
 ### Logo (signature)
 El isotipo (tres nodos unidos por hifas) con un halo de Brote, y la palabra con un degradé
@@ -606,12 +628,9 @@ movimiento reducido el flujo pasa a flechas y el bucle se detiene; y un grafo qu
 ve no anima ni dibuja.
 
 ### Deudas conocidas (no son reglas)
-Lo que el build lleva y el sistema **no** adopta. No se copia a superficies nuevas.
-- **Franja lateral de 3px en los callouts**, en vivo y en lectura (`styles/editor.css`,
-  `:where(.mic-live-callout)` hacia la línea 393 y `.mic-preview .mic-callout` hacia la
-  998). Un borde de color de más de 1px al costado de un bloque es un recurso gastado; la
-  identidad del callout está en el fondo tintado y el título en color.
-- **Celda sombreada fantasma** a la izquierda del encabezado de una tabla en modo vivo.
+Por ahora, ninguna. Las dos que marcó el revisor final se cerraron el 2026-09-19: la
+franja de los callouts quedó por decisión del usuario (ver *Callout*) y la celda sombreada
+del encabezado de las tablas en vivo era un defecto, `DEF-093`, corregido.
 
 ## Do's and Don'ts
 

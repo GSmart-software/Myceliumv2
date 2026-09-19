@@ -111,16 +111,25 @@ nuevo.
    después dio **fix-then-ship**: se aplicaron la hora de guardado desde que se abre la
    nota, el color neutro de la barra de estado, el «…» al extremo derecho, el foco a la
    nota al abrirla desde la paleta y el «Nuevo ▾».
-   > [!warning] Quedan dos deudas anteriores al rediseño
-   > La franja lateral de 3px de los callouts (el revisor pide fondo teñido, sin franja) y
-   > una celda sombreada fantasma a la izquierda del encabezado de las tablas en vivo.
-   > Pendientes de decisión del usuario.
+   > [!success] Las dos deudas anteriores al rediseño, cerradas
+   > La franja lateral de 3px de los callouts y la celda fantasma de las tablas en vivo:
+   > ver la exploración de formas, abajo.
 
    **Exploración de color (2026-09-19)**: el usuario notó que el prototipo había cambiado
    mucho la UX y poco la UI, y abrió la paleta a la exploración. Se hicieron tres variantes
    (Niebla, Bosque, Papel) contra la actual, comparadas en una página con los 16 combos.
    Prefirió Niebla en oscuro y Bosque en claro, y pidió que las cuatro fueran elegibles: así
    nacieron las [[atmosferas]] (`FUN-M-30`), con la actual rebautizada **Abisal**.
+
+   **Herramientas visibles**: el usuario rechazó el formato y la creación siempre dentro de
+   «Formato ▾» y «Nuevo ▾»; vuelven a la vista y solo se agrupan cuando no entran.
+
+   **Exploración de formas (2026-09-19)**: cuatro lenguajes probados en vivo (Actual,
+   Suave, Precisa, Luminosa) y elegidos **pieza por pieza**: pestañas y modos de Suave
+   (píldoras, control segmentado), árbol y rail de Precisa (filas rectas, barra de 2px),
+   callouts y todo el contenido del markdown sin cambios. Se cerraron así las dos deudas
+   del revisor: la franja de los callouts queda por decisión del usuario y la celda
+   fantasma de las tablas era `DEF-093`.
 8. **Cierre**: su revisor final y su documentador, que actualiza `DESIGN.md`.
 
 ## Lo que no aplica a Mycelium

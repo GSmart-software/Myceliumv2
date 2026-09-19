@@ -440,6 +440,13 @@ lectura, como en cualquier lector.
 
 Detectado el 2026-09-19 durante `/impeccable critique`.
 
+# DEF-093
+En una **tabla renderizada en vivo**, a la izquierda del encabezado aparece una **celda
+sombreada vacía**, más angosta que las demás, que no corresponde a ninguna columna de la
+tabla. Las filas de abajo no la tienen.
+
+Detectado el 2026-09-19 por el revisor final del prototipo del cascarón.
+
 ---
 
 > [!warning] Defectos sin reporte original
