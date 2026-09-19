@@ -130,6 +130,10 @@ nuevo.
    callouts y todo el contenido del markdown sin cambios. Se cerraron así las dos deudas
    del revisor: la franja de los callouts queda por decisión del usuario y la celda
    fantasma de las tablas era `DEF-093`.
+
+   **Marco e ícono (2026-09-19)**: cerrado el experimento de estilo, se atacaron las dos
+   marcas ajenas que quedaban a la vista —el ícono de Tauri y la barra de título del
+   sistema—. Ver [[marco-de-ventana]] (`FUN-M-31`).
 8. **Cierre**: su revisor final y su documentador, que actualiza `DESIGN.md`.
 
 ## Lo que no aplica a Mycelium

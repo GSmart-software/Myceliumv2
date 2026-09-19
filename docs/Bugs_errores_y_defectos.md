@@ -447,6 +447,14 @@ tabla. Las filas de abajo no la tienen.
 
 Detectado el 2026-09-19 por el revisor final del prototipo del cascarón.
 
+# DEF-094
+El **título de la ventana** muestra la **ruta completa** del vault en vez de su nombre:
+«Mycelium - C:TrabajoGSmartMycelium» en lugar de «Mycelium - Mycelium». Con varias
+ventanas abiertas, en la barra de tareas y en Alt+Tab los títulos se cortan por el ancho
+y quedan todos iguales, que es justo lo que el nombre venía a resolver.
+
+Detectado el 2026-09-19 al poner el nombre del vault en la barra superior.
+
 ---
 
 > [!warning] Defectos sin reporte original

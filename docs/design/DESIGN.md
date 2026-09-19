@@ -392,8 +392,10 @@ que nada parezca seguir por detrás del borde de la ventana.
 Qué va en cada zona, y nada más:
 
 - **Barra superior:** el logo a la izquierda y, al centro, el disparador de la paleta
-  («Ir a una nota o comando… Ctrl+P»); a la derecha, salir del vault. No hay
-  «Compartir»: en desktop no existe.
+  («Ir a una nota o comando… Ctrl+P»); a la derecha, salir del vault y los controles de
+  la ventana. No hay «Compartir»: en desktop no existe. **Es también la barra de
+  título**: la ventana va sin la del sistema, su fondo libre la arrastra y el doble clic
+  maximiza (ver [[marco-de-ventana]]).
 - **Rail:** arriba Explorador, Búsqueda, Esporas, Grafo (con el isotipo) y Consolas;
   abajo Papelera y Configuración. Una sección que todavía no existe no ocupa lugar.
 - **Panel izquierdo:** el árbol. **Pane:** pestañas, barra del editor y la nota.
@@ -593,6 +595,14 @@ queda vacía: no se inventan ceros).
   Contraste medido en reposo: 6.42 (Bio oscuro), 5.76 (Bio claro), 6.62 (Cantarela
   oscuro), 6.54 (Cantarela claro).
 - Separador «·» generado por CSS, que el lector de pantalla no lee. Cifras tabulares.
+
+### Controles de la ventana
+Minimizar, maximizar/restaurar y cerrar, al extremo derecho de la barra superior.
+**46×32px**: las medidas son las de Windows, porque saber dónde apuntar sin mirar es
+memoria del sistema, no nuestra; lo propio es el color —trazo de 1px en el texto del
+marco, hover con Brote al 16%— y que el botón llega hasta la esquina. El rojo de cerrar
+(`#c42b1c`) es la única excepción: es una convención del sistema operativo y no sigue
+al tema.
 
 ### Consola
 La terminal integrada es **su propia hoja**, como un bloque de código: fondo
