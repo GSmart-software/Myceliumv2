@@ -126,6 +126,27 @@ Dio 14 avisos:
 > - **Teclado**: 80 paradas de Tab antes de la nota, explorador sin semántica de árbol,
 >   modal Compartir sin foco atrapado ni Escape.
 > Detalle completo en `.impeccable/critique/`.
+
+> [!info] Critique 2 del cascarón (2026-09-19): 21/40 (antes 20)
+> Confirmado por las dos evaluaciones: `DEF-091` y `DEF-092` resueltos; la lectura pasó de
+> valle a «buen final». Sube solo un punto porque lo que frena es de marco, no de
+> defectos.
+>
+> **Decisión del usuario sobre el título del documento**: se queda. El nombre del
+> archivo con degradé sobre la nota es parte de la identidad (uno de los tres usos del
+> degradé de marca); no se oculta aunque repita el H1. Como mucho, más adelante:
+> alinearlo al eje del contenido y renombrar con doble clic en vez de uno.
+>
+> **Próxima tanda elegida**: teclado y menús (`/impeccable harden`). Escape y foco en
+> «Más opciones», el menú del pane y el modal Compartir (solo `ContextMenu` lo tiene);
+> el explorador como árbol navegable con `aria-current`; saltar al contenido; nombres
+> accesibles para los 10 botones que hoy solo tienen `title`.
+>
+> **Hecho el mismo día**, verificado con teclado en la app: el árbol pasa de 80 paradas
+> de Tab a una sola (la parada 20 desde el inicio), con flechas, `aria-level`,
+> `aria-expanded` y `aria-current`; «Saltar a la nota» es la primera parada; los menús
+> usan `lib/useMenuEmergente.ts` (Escape devuelve el foco, flechas, uno a la vez) y el
+> modal Compartir `lib/useDialogoModal.ts` (foco adentro, Escape, nombre del diálogo).
 >
 > Quedaron fuera, a propósito: cargar KaTeX y highlight.js bajo demanda (pide volver
 > asíncrono el render de Markdown), las `transition: width` (sin costo medible), y
