@@ -64,6 +64,10 @@ typography:
     fontFamily: "Geist, system-ui, sans-serif"
     fontSize: "0.75rem"
     fontWeight: 600
+  meta:
+    fontFamily: "Geist, system-ui, sans-serif"
+    fontSize: "0.75rem"
+    fontWeight: 400
 rounded:
   sm: "4px"
   md: "8px"
@@ -75,8 +79,10 @@ spacing:
   tab-bar: "34px"
   toolbar: "40px"
   topbar: "52px"
+  statusbar: "24px"
   rail: "56px"
   editor-min: "420px"
+  ancho-lectura: "42rem"
 components:
   button-primary:
     backgroundColor: "{colors.hifa}"
@@ -90,11 +96,13 @@ components:
     typography: "{typography.body}"
     rounded: "{rounded.sm}"
     padding: "0.45rem 0.75rem"
-  button-glow-outline:
+  menu-trigger:
     backgroundColor: "transparent"
-    textColor: "{colors.brote}"
-    rounded: "{rounded.md}"
-    padding: "0.3rem 0.65rem"
+    textColor: "{colors.humus-tenue}"
+    typography: "{typography.body}"
+    rounded: "{rounded.sm}"
+    height: "28px"
+    padding: "0 0.4rem 0 0.55rem"
   rail-button:
     textColor: "{colors.brote}"
     rounded: "{rounded.md}"
@@ -107,12 +115,32 @@ components:
   tab-active:
     backgroundColor: "{colors.lienzo}"
     textColor: "{colors.humus}"
-  search-field:
+  palette-trigger:
     backgroundColor: "{colors.niebla}"
-    textColor: "{colors.humus}"
+    textColor: "{colors.humus-tenue}"
+    typography: "{typography.body}"
     rounded: "{rounded.md}"
     height: "30px"
     padding: "0 0.75rem"
+  palette:
+    backgroundColor: "{colors.niebla}"
+    rounded: "{rounded.md}"
+    width: "min(600px, 100%)"
+  palette-option:
+    textColor: "{colors.humus}"
+    typography: "{typography.body}"
+    rounded: "{rounded.sm}"
+    padding: "0.25rem 0.6rem"
+  statusbar:
+    backgroundColor: "{colors.esporo}"
+    textColor: "{colors.humus-tenue}"
+    typography: "{typography.meta}"
+    height: "24px"
+    padding: "0 0.75rem"
+  statusbar-item:
+    rounded: "{rounded.sm}"
+    height: "20px"
+    padding: "0 0.4rem"
   menu-item:
     textColor: "{colors.humus}"
     rounded: "{rounded.sm}"
@@ -150,7 +178,11 @@ components:
 > ante una diferencia, vale este archivo. Producto y usuarios: [[PRODUCT]].
 > Extraído del código el 2026-09-18; actualizado el 2026-09-19 con los cambios de
 > `colorize`, `harden`, `animate`, `adapt` y `optimize` (ver
-> [[Auditoria de UI 2026-09-19]]).
+> [[Auditoria de UI 2026-09-19]]). Ampliado el 2026-09-19 con el **rediseño del
+> cascarón** (dirección «estándar de la categoría», vara VS Code y Obsidian; contrato en
+> `.impeccable/surfaces/frontend-app-workspace-workspace-page-tsx.md`, seed `f12c8d73`):
+> paleta de notas y comandos, barra de estado, barra del editor mínima, «Nuevo ▾» y la
+> medida única de la nota.
 
 ## Overview
 
@@ -166,10 +198,17 @@ viene por defecto, y el claro es su versión diurna, no al revés.
 Conviven dos densidades, y cada una tiene su lugar. **El marco es denso y técnico**, como
 un IDE: texto de interfaz de 13px, controles de 22 a 40px, pestañas de 34px, mucho a la
 vista y nada que pida atención en reposo. **La nota es serena**: en lectura cambia a una
-serif, respira con interlineado de 1.7 y se limita a 72 caracteres de ancho. Lo orgánico
+serif, respira con interlineado de 1.7 y se limita a una medida de 42rem (unos 80
+caracteres de serif), la misma en vivo que en lectura. Lo orgánico
 del micelio se ve en los detalles, no en la cantidad: esquinas suaves, el degradé
 brote→hifa (en el logo, el título del documento y el énfasis triple), el halo del
 isotipo, títulos que alternan los dos colores de la marca.
+
+**El cascarón es el estándar de la categoría**, hecho con el oficio de VS Code y
+Obsidian: rail de actividad, árbol, pestañas, editor y barra de estado, y una paleta que
+salta a cualquier nota o comando desde el centro de la barra superior. No se inventa un
+marco nuevo; se ejecuta bien el que ya se conoce. Lo que el rediseño sacó define lo que
+no vuelve: la tira de íconos sin nombre y los controles que no hacen nada.
 
 Hay tres cosas que Mycelium nunca debe parecer: **un clon gris de Obsidian** (violeta y
 grises neutros sin identidad), **un SaaS corporativo** (tarjetas blancas flotando con
@@ -179,7 +218,10 @@ partes, donde el glow deja de señalar y pasa a ser ruido).
 **Key Characteristics:**
 - Marco oscuro, contenido que brilla: la luz se reserva para lo que tiene significado.
 - Dos colores de marca por tema (Hifa y Brote) y el resto es tono del mismo matiz.
-- Marco compacto (13px, controles chicos) frente a una lectura amplia (serif, 72ch).
+- Marco compacto (13px, controles chicos) frente a una lectura amplia (serif, 42rem).
+- Cascarón estándar: rail, árbol, pestañas, editor, barra de estado y paleta (Ctrl+P).
+- Los grupos de acciones van detrás de un botón con rótulo («Formato ▾», «Nuevo ▾»),
+  no en una fila de íconos.
 - Plano por defecto: las zonas se separan por tono; solo lo que flota tiene sombra.
 - Todo sale de tokens: dos temas × claro/oscuro = cuatro combinaciones, siempre las cuatro.
 - Brote nunca se usa en crudo como primer plano: cada uso pide su rol (texto, foco, marco).
@@ -275,9 +317,11 @@ Bio oscuro, Cantarela claro, Cantarela oscuro. Un color de marca en crudo casi s
 falla en alguna. Por eso los títulos **se mezclan con la tinta** (`color-mix` con Humus)
 en vez de usar Hifa o Brote puros.
 
-**The Dark Frame Rule.** Sobre Esporo nunca va Humus tenue ni ningún color calibrado para
-fondo claro: el marco usa `--mic-marco-glow`, a `--mic-marco-inactivo` en reposo y al
-100% activo o con hover.
+**The Dark Frame Rule.** Sobre Esporo nunca va un color calibrado para fondo claro (el
+Humus tenue del modo claro, por ejemplo): el marco usa `--mic-marco-glow`, a
+`--mic-marco-inactivo` en reposo y al 100% activo o con hover. El texto neutro sobre el
+marco (la barra de estado) va en Humus tenue solo en oscuro, donde está calibrado para
+fondo oscuro; en claro se usa Niebla mezclada al 78% con el marco.
 
 **The Role Rule.** Brote no se escribe en crudo como color de primer plano. Texto,
 anillo de foco e íconos usan su rol (`--mic-glow-texto`, `--mic-focus`,
@@ -302,13 +346,16 @@ Pro); la interfaz siempre va en Geist.
 - **Title** (600, 1.375rem): el H2, en Brote mezclado. El H3 va en 1.125rem y del H4 al
   H6 van en 1rem. Se distinguen por **color** además de por tamaño: la rampa alterna
   Hifa y Brote y pierde intensidad en cada nivel, hasta que el H6 queda en Humus tenue.
-- **Reading** (400, 16px, interlineado 1.7): el cuerpo de la nota en lectura, a 72ch.
+- **Reading** (400, 16px, interlineado 1.7): el cuerpo de la nota en lectura, a la
+  medida de lectura (42rem).
 - **Editor** (400, 16px, interlineado 1.65): la mono del editor en vivo y en crudo.
 - **Body** (400, 0.8125rem): **el tamaño de la interfaz**. Pestañas, menús, botones,
   árbol de archivos, campos.
 - **Dialog title** (600, 0.95rem): el título de un modal.
 - **Label** (600, 0.75rem): encabezados de sección de un panel, metadatos, avisos. Por
-  debajo hay 0.6875rem, solo para contadores y detalles mínimos.
+  debajo hay 0.6875rem, solo para contadores, atajos (`kbd`) y detalles mínimos.
+- **Meta** (400, 0.75rem, cifras tabulares en la barra de estado): el texto de la barra
+  de estado y el detalle a la derecha de una opción de la paleta. Informa, no rotula.
 
 ### Named Rules
 **The Two Densities Rule.** La interfaz habla en 13px y la nota en 16px. No se agranda
@@ -320,13 +367,30 @@ el logo.
 
 ## Layout
 
-El workspace es una **grilla fija de marco**: rail vertical de 56px a la izquierda, barra
-superior de 52px, un panel izquierdo de 240px y uno derecho de 280px, los dos
-redimensionables entre 160 y 480px con un tirador de 4px. Entre ellos, el área de panes,
-que se puede partir en filas y columnas, cada una con su barra de pestañas de 34px y la
-barra de herramientas del editor de 40px. Al pie de toda pantalla de altura completa
-quedan 6px de aire (`--mic-gap-inferior`), para que nada parezca seguir por detrás del
-borde de la ventana.
+El workspace es una **grilla fija de marco** de tres filas: barra superior de 52px,
+el cuerpo, y la **barra de estado** de 24px (`--mic-statusbar-height`, área `estado`) que
+cruza todo el ancho al pie. En el cuerpo: rail vertical de 56px a la izquierda, un panel
+izquierdo de 240px y uno derecho de 280px, los dos redimensionables entre 160 y 480px
+con un tirador de 4px. Entre ellos, el área de panes, que se puede partir en filas y
+columnas, cada una con su barra de pestañas de 34px y la barra del editor de 40px. Al
+pie de toda pantalla de altura completa quedan 6px de aire (`--mic-gap-inferior`), para
+que nada parezca seguir por detrás del borde de la ventana.
+
+Qué va en cada zona, y nada más:
+
+- **Barra superior:** el logo a la izquierda y, al centro, el disparador de la paleta
+  («Ir a una nota o comando… Ctrl+P»); a la derecha, salir del vault. No hay
+  «Compartir»: en desktop no existe.
+- **Rail:** arriba Explorador, Búsqueda, Esporas, Grafo (con el isotipo) y Consolas;
+  abajo Papelera y Configuración. Una sección que todavía no existe no ocupa lugar.
+- **Panel izquierdo:** el árbol. **Pane:** pestañas, barra del editor y la nota.
+- **Barra de estado:** lo que se quiere saber de la nota activa sin abrir nada.
+
+**La medida de la nota** (`--mic-ancho-lectura: 42rem`) es la misma en vivo
+(`.cm-content`) y en lectura: una sola hoja, centrada, que no cambia de ancho al cambiar
+de modo. Va en **rem y no en ch** porque el `ch` de la mono del editor es más ancho que
+el de la serif de lectura: con 72ch la hoja saltaba al cambiar de modo. 42rem son unos 80
+caracteres de serif y unos 70 de mono.
 
 El ritmo de separación es corto y en rem: 0.25 / 0.35 / 0.5 / 0.75 / 1rem.
 
@@ -335,20 +399,24 @@ angosto es media pantalla, no un teléfono. La regla es repartir, no esconder: l
 conserva siempre al menos 420px (`--mic-editor-min-width`, unos 50 caracteres a 16px) y
 el panel izquierdo cede ancho hasta su mínimo para dárselos, sin cambiar la preferencia
 guardada. Por debajo de 768px la barra superior se compacta: el logo queda en su isotipo
-y "Compartir" en su ícono, pero la búsqueda sigue siendo un campo que se achica.
+y el disparador de la paleta pierde el atajo y recorta su texto, pero no se esconde.
 
 **Movimiento.** Corto y de estado: 120ms para hover y opacidad, 160ms para paneles y
-cambio de nota. El único movimiento de autor es el flujo por las aristas del grafo. Toda
-animación tiene alternativa con `prefers-reduced-motion`: se quita el desplazamiento y se
-conserva lo que informa (el cajón entra con fundido en vez de deslizarse, el punto de
-sincronización late sin crecer, el flujo del grafo pasa a flechas).
+cambio de nota; la paleta aparece en 120ms bajando 4px. El único movimiento de autor es
+el flujo por las aristas del grafo. Toda animación tiene alternativa con
+`prefers-reduced-motion`: se quita el desplazamiento y se conserva lo que informa (el
+cajón entra con fundido en vez de deslizarse, la paleta aparece sin animar, el flujo del
+grafo pasa a flechas).
 
 ## Elevation & Depth
 
 **Plano por defecto, sombra solo al flotar.** Las zonas se separan por **tono**: Esporo
 (marco) → Niebla (paneles, pestañas) → Lienzo (contenido). No hay bordes gruesos ni
 tarjetas elevadas. Solo tiene sombra lo que flota por encima del plano: menús
-contextuales, submenús, desplegables, avisos y modales. Esa sombra **nunca es negra
+contextuales, submenús, desplegables, avisos, modales y la paleta. En reposo, la
+pantalla principal no tiene nada flotando: **la paleta es la única superficie de trabajo
+que flota sobre el cascarón**, plana (Niebla, borde de 1px, 8px de radio) con sombra de
+modal, sobre un velo leve de Lienzo al 35%. Esa sombra **nunca es negra
 genérica**: se tiñe con Esporo profundo, así que en Cantarela es marrón y en
 Bioluminiscencia, azul petróleo.
 
@@ -379,9 +447,10 @@ Esquinas suaves, nunca vivas: el micelio es orgánico. Hay tres radios y una pí
 **Suave** (4px) para botones, ítems de menú, controles chicos y etiquetas; es por lejos
 el más usado. **Redondeado** (8px) para campos de búsqueda, botones del rail, menús y
 avisos. **Amplio** (16px) solo para modales. **Píldora** (999px) para interruptores,
-chips de propiedades y contadores. Las marcas laterales (la barra del rail, el borde de
-un callout, la barra de color de una consola) son de 3px, redondeadas solo del lado que
-mira hacia el contenido.
+chips de propiedades y contadores. La barra del rail activo (3px, redondeada del lado que
+mira al contenido) es la marca lateral del sistema: señala dónde estás, como en VS Code.
+No es un recurso para decorar tarjetas, callouts ni filas: el borde de 3px de los
+callouts es una deuda (ver Components), no una forma que se copie.
 
 ## Components
 
@@ -395,8 +464,10 @@ Precisos y silenciosos: chicos, sin cuerpo en reposo, se encienden al pasar el m
 - **Focus:** anillo global de 2px en `--mic-focus`, separado 2px. No se reemplaza por
   componente: si un contexto necesita otro color (el marco), redefine el token.
 - **Secondary:** transparente, con borde de 1px y texto Humus.
-- **Glow outline:** texto en Brote del marco con borde al 65%. Es para acciones de la
-  barra superior, sobre Esporo.
+- **Botón de menú con rótulo** («Formato ▾», «Nuevo ▾»): texto de 13px en Humus tenue
+  más un chevron de 14px, 28px de alto, esquina suave. Con hover o abierto
+  (`aria-expanded`) toma Brote al 15% de fondo y el texto pasa a Humus. Ver *Menú
+  emergente con rótulo*.
 - **Ícono del marco** (salir del vault): Brote del marco a opacidad de reposo; con hover,
   opacidad plena y borde al 40%.
 - **Deshabilitado / inerte:** opacidad 0.35–0.45 **sobre el botón**, con cursor normal.
@@ -407,9 +478,11 @@ Precisos y silenciosos: chicos, sin cuerpo en reposo, se encienden al pasar el m
 - **Pastilla de propiedad:** píldora con fondo Humus tenue al 18%.
 
 ### Inputs / Fields
-- **Style:** sin borde, fondo Niebla, esquina redondeada (8px). El campo de búsqueda de
-  la barra superior mide 30px de alto y como mucho 480px de ancho, y se achica con la
-  ventana.
+- **Style:** sin borde, fondo Niebla, esquina redondeada (8px).
+- **Disparador de la paleta:** en la barra superior, un **botón** con forma de campo
+  (no un campo que no busca): 30px de alto, como mucho 480px de ancho, lupa, el texto
+  «Ir a una nota o comando…» en Humus tenue y el atajo `Ctrl+P` en un `kbd` de 11px con
+  borde fino. Con hover, Niebla mezclada al 20% con el Brote del marco.
 - **Focus:** el anillo global. Si el campo anula su outline para no dibujarlo adentro, la
   caja que lo contiene lo muestra con `:focus-within`; ningún campo queda sin foco visible.
 - **Interruptor:** píldora de 34×18px que se llena de Hifa al encenderse.
@@ -420,19 +493,81 @@ Precisos y silenciosos: chicos, sin cuerpo en reposo, se encienden al pasar el m
 - **Rail:** botones de 40px sobre Esporo, íconos Lucide de 20px en Brote del marco a
   opacidad de reposo (55% oscuro, 70% claro). El activo va a opacidad plena, con una barra
   de 3px pegada al borde izquierdo.
+- **Grafo en el rail:** su ícono es el isotipo de Mycelium (tres nodos unidos por hifas)
+  dibujado en trazo de línea, con la grilla de 24 y el grosor 2 de los íconos Lucide. No
+  se usa `Share2`: es el ícono de «Compartir» y hacía ver la función insignia como una
+  acción genérica.
 - **Pestañas:** 34px de alto, texto de 13px en Humus tenue, separadas por una línea de
-  1px. La activa toma el fondo Lienzo, un borde inferior de 2px en Hifa y el texto en
-  Humus. Una pestaña de vista previa lleva el título en cursiva, y las consolas suman una
-  barra de color de 3px a la izquierda.
+  1px. Ancho flexible entre 72 y 260px: con espacio libre el título se lee entero, con
+  muchas pestañas ceden todas por igual. La activa toma el fondo Lienzo, un borde
+  inferior de 2px en Hifa y el texto en Humus. Una pestaña de vista previa lleva el
+  título en cursiva, y las consolas suman una barra de color de 3px a la izquierda.
+- **Pestañas con teclado:** patrón `tablist` con *roving tabindex*: una sola parada de
+  Tab (la activa), flechas izquierda/derecha con vuelta, Inicio y Fin, Supr cierra y deja
+  el foco en la que queda activa. La cruz de cerrar sale del orden de Tab. El anillo de
+  foco va **hacia adentro** (`outline-offset: -2px`), porque la barra recorta lo que
+  sobresale.
 - **Menú contextual:** fondo Lienzo, borde fino, radio de 8px, sombra de menú. Ítems de
   13px con esquina suave; los destructivos, en Precaución. Una entrada que no se puede
   usar **se muestra atenuada con el motivo, nunca se oculta**.
 
+### Barra del editor
+Mínima, de 40px: a la izquierda «Formato ▾», único punto de entrada al formato; a la
+derecha buscar en la nota, el panel de enlaces (`aria-pressed`), los modos (vivo,
+lectura, lado a lado, crudo) y «…» al extremo derecho, como en VS Code y Obsidian. Los
+íconos son de 16px. No hay tira de íconos de formato ni punto de color de
+sincronización: el estado de guardado vive en la barra de estado, dicho con palabras.
+
+### Explorador
+«Nueva nota», lo que más se usa, queda como ícono; el resto de lo que se puede crear
+(dibujo, base, lienzo, carpeta, importar) va detrás de «Nuevo ▾». El menú es `fixed`
+respecto de la ventana, calculado desde el botón, porque el panel lateral recorta lo que
+se sale.
+
+### Menú emergente con rótulo (sistema)
+Un grupo de acciones se ofrece como **un botón con texto y chevron** que abre un menú,
+nunca como una fila de íconos sin nombre. Ejemplos: «Formato ▾» en la barra del editor,
+«Nuevo ▾» en el explorador. El menú usa la forma del menú contextual (Lienzo, borde fino,
+radio de 8px, sombra de menú, ítems de 13px con ícono de 15px en Humus tenue) y el
+comportamiento de `useMenuEmergente`: clic afuera y Tab cierran, Escape cierra y
+devuelve el foco al botón, flechas, Inicio y Fin recorren los ítems con vuelta, al abrir
+el foco va al primero, y hay uno solo abierto a la vez. Si el menú puede quedar recortado
+por su contenedor, va `fixed` o en un portal; si es largo, se desplaza (como mucho 70vh).
+
+### Paleta de notas y comandos (signature)
+El camino corto a cualquier nota o acción, como el selector rápido de Obsidian y la
+paleta de VS Code. Se abre con Ctrl+O (notas) o Ctrl+P / Ctrl+Shift+P (comandos: el texto
+empieza con «>»), y desde el disparador de la barra superior. Un solo campo de 40px y
+14px, sin anillo: el foco lo marca la línea inferior, que pasa a `--mic-focus`. Debajo,
+la lista de opciones (30px, 13px, ícono de 15px) con el detalle a la derecha en Meta; la
+activa toma `--mic-focus` al 16% de fondo y su ícono ese color. Sin coincidencia exacta
+ofrece «Crear nota «…»». Al pie, una línea de ayuda con los atajos en `kbd`. Es un
+`combobox` con `aria-activedescendant`: el foco no deja el campo. Al abrir una nota, el
+foco va a la nota abierta. Mide como mucho 600×460px y cuelga debajo de la barra
+superior, centrada.
+
+### Barra de estado (signature)
+24px, fondo Esporo con una línea superior de Brote del marco al 14%, texto Meta
+alineado a la derecha: «12 enlaces · 5 te citan · 843 palabras · Guardado 14:02». Solo lo
+que no se ve en la nota misma, y solo para notas de texto (en el grafo o una consola
+queda vacía: no se inventan ceros).
+- **Enlaces · te citan** es un botón que abre el panel de enlaces, que arranca cerrado.
+  Abierto, lleva `aria-pressed` y se marca con **color y fondo**, no solo con color.
+- **Guardado** dice la hora si fue hoy y la fecha si fue otro día; «Guardando…» mientras
+  escribe y «Sin guardar» en `--mic-sync-warn` si falla. Sin `role="status"`, para no
+  anunciar cada tecla.
+- **Color:** en reposo, neutro (Humus tenue en oscuro; Niebla al 78% con el marco en
+  claro). El Brote del marco aparece solo con hover o presionado, al 12–14% de fondo.
+  Contraste medido en reposo: 6.42 (Bio oscuro), 5.76 (Bio claro), 6.62 (Cantarela
+  oscuro), 6.54 (Cantarela claro).
+- Separador «·» generado por CSS, que el lector de pantalla no lee. Cifras tabulares.
+
 ### Callout (signature)
-Borde izquierdo de 3px en el color del tipo, fondo de ese color al 8%, esquinas
-redondeadas solo del lado derecho. El título lleva el color del tipo mezclado con la
-tinta según `--mic-callout-tinta`. Tiene diez tipos, que se pueden plegar y anidar. Es el
-componente que más identifica a las notas de Mycelium.
+Fondo del color del tipo al 8%, título con el color del tipo mezclado con la tinta según
+`--mic-callout-tinta`, esquinas redondeadas del lado derecho. Tiene diez tipos, que se
+pueden plegar y anidar. Es el componente que más identifica a las notas de Mycelium. Hoy
+lleva además un borde izquierdo de 3px en el color del tipo: es una **deuda**, no parte
+de la firma (ver abajo).
 
 ### Logo (signature)
 El isotipo (tres nodos unidos por hifas) con un halo de Brote, y la palabra con un degradé
@@ -450,6 +585,14 @@ elige, un flujo animado que recorre las aristas en la dirección del enlace. Con
 movimiento reducido el flujo pasa a flechas y el bucle se detiene; y un grafo que no se
 ve no anima ni dibuja.
 
+### Deudas conocidas (no son reglas)
+Lo que el build lleva y el sistema **no** adopta. No se copia a superficies nuevas.
+- **Franja lateral de 3px en los callouts**, en vivo y en lectura (`styles/editor.css`,
+  `:where(.mic-live-callout)` hacia la línea 393 y `.mic-preview .mic-callout` hacia la
+  998). Un borde de color de más de 1px al costado de un bloque es un recurso gastado; la
+  identidad del callout está en el fondo tintado y el título en color.
+- **Celda sombreada fantasma** a la izquierda del encabezado de una tabla en modo vivo.
+
 ## Do's and Don'ts
 
 ### Do:
@@ -459,7 +602,8 @@ ve no anima ni dibuja.
   una sombra.
 - **Do** reservar el brillo de Brote para lo que tiene significado: foco, selección,
   conexión, lo activo.
-- **Do** mantener la interfaz en 13px y la lectura en 16px con serif a 72ch.
+- **Do** mantener la interfaz en 13px y la lectura en 16px con serif, a la misma medida
+  (42rem) en vivo y en lectura.
 - **Do** teñir las sombras con Esporo profundo y darles sombra solo a los elementos que
   flotan.
 - **Do** mostrar atenuada, y con su motivo, la acción que no está disponible, en vez de
@@ -470,6 +614,12 @@ ve no anima ni dibuja.
   lo que informa, y detener todo bucle que no esté a la vista.
 - **Do** repartir el espacio en una ventana angosta —la nota conserva 420px— en vez de
   esconder funciones.
+- **Do** agrupar acciones detrás de un botón con rótulo y chevron («Formato ▾», «Nuevo
+  ▾») con el comportamiento de `useMenuEmergente`.
+- **Do** llevar a la paleta (Ctrl+P) las acciones que no merecen un lugar fijo en el
+  marco, y a la barra de estado lo que se quiere saber de la nota sin abrir nada.
+- **Do** hacer navegable con teclado cada grupo del marco (pestañas con flechas, menús
+  con flechas y Escape), con el anillo hacia adentro donde el contenedor recorta.
 
 ### Don't:
 - **Don't** parecer un clon gris de Obsidian: nada de violeta ni de grises neutros sin
@@ -483,7 +633,15 @@ ve no anima ni dibuja.
   al contraste mínimo.
 - **Don't** escribir un hex a mano en un componente ni usar `rgba(0,0,0,…)` para una
   sombra.
-- **Don't** poner Humus tenue sobre Esporo.
+- **Don't** poner sobre Esporo un color calibrado para fondo claro (el Humus tenue del
+  modo claro incluido).
+- **Don't** volver a una tira de íconos sin nombre para el formato o para crear: es lo
+  que el rediseño del cascarón sacó.
+- **Don't** mostrar un control que no hace nada ni una sección que todavía no existe
+  (un buscador que no busca, «Compartir» en desktop, Tags en el rail). Lo que no se
+  puede usar *en este contexto* se atenúa con su motivo; lo que no existe, no se muestra.
+- **Don't** decir un estado solo con un color (el viejo punto de sincronización): se dice
+  con palabras.
 - **Don't** atenuar con `opacity` una fila, un panel o cualquier contenedor.
 - **Don't** tratar el modo oscuro como un tema aparte: es un modificador (`data-dark`)
   sobre el tema activo.

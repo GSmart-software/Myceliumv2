@@ -67,6 +67,14 @@ Tagline: *"Tu red de conocimiento, viva y conectada"*.
   hifa; el grafo es literalmente un micelio.
 - Tagline *"Tu red de conocimiento, viva y conectada"*.
 - Vocabulario propio en español (Esporas, papelera propia, "vault").
+- **Paleta y temas**: Bioluminiscencia y Cantarela, cada uno en claro y oscuro, oscuro por
+  defecto. Confirmado como obligatorio el 2026-09-19, al arrancar el rediseño.
+- **Vocabulario fúngico del sistema de diseño**: Hifa, Brote, Esporo, Niebla, Lienzo,
+  Humus. También obligatorio (2026-09-19).
+- **Estructura del espacio de trabajo: la convencional de la categoría**, hecha con todo
+  el oficio. Rail, árbol, pestañas y editor, con **VS Code y Obsidian como vara de
+  calidad**. El usuario lo eligió entre direcciones más radicales (2026-09-19): lo
+  familiar es el compromiso, sin rarezas metidas a escondidas.
 
 ## Evidence on Hand
 

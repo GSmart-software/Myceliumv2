@@ -77,7 +77,45 @@ nuevo.
 5. **Decidir el alcance** con los puntajes a la vista: refinar (`polish`, `typeset`,
    `layout`, `quieter` sobre lo peor puntuado) o rediseñar (su flujo de mundo visual
    nuevo, por el camino *code-led*: no hay generación de imágenes).
-6. **Cierre**: su revisor final y su documentador, que actualiza `DESIGN.md`.
+   **Hecho, en dos tiempos** (2026-09-19): primero se refinó —colorize, harden, animate,
+   adapt, optimize, document, polish; cascarón 20 → 21 → 21, ver
+   [[Auditoria de UI 2026-09-19]]— y, con lo estructural a la vista, se arrancó el
+   rediseño.
+6. **Rediseño — `shape`** (2026-09-19). El usuario vio tres direcciones sorteadas (un
+   «plano de hifas» al estilo del mapa de Beck, documentos paralelos al estilo Xanadu y un
+   pentagrama de enlaces) y **eligió el estándar de la categoría**: la estructura
+   convencional (rail, árbol, pestañas, editor) hecha con todo el oficio, con **VS Code y
+   Obsidian como vara**. Paleta y vocabulario fúngico fijos (anotado en [[PRODUCT]]).
+   Brief confirmado para la **primera entrega**, un prototipo de la pantalla principal
+   (solo desktop):
+   - El buscador de arriba pasa a selector rápido y paleta de comandos (Ctrl+O / Ctrl+P):
+     resuelve `DEF-090`.
+   - Compartir sale de desktop (botón y sección). Tags sale del rail hasta que exista. El
+     grafo, con ícono propio (el isotipo).
+   - Barra del editor reducida a modos y acciones; el formato, por atajos y un menú.
+   - Un solo documento en vivo y en lectura: mismo callout, mismo ancho, título en los dos.
+   - Barra de estado al pie con enlaces, citas, palabras y guardado **en texto**; el panel
+     de enlaces arranca **cerrado**.
+   - Pestañas enfocables y sin truncar con espacio libre.
+   - Se conserva: la función, el teclado y la accesibilidad de la tanda anterior, y el
+     título con degradé. Grafo, Bases y Configuración heredan tokens, no se rediseñan aún.
+   - Abierto: si la fuente de interfaz sigue siendo Geist, y el detalle de la barra de
+     estado.
+7. **Construir** la primera entrega con la dirección elegida; luego `polish` y un
+   `critique` para comparar contra el 21/40.
+   **Hecho 2026-09-19 (prototipo)**: paleta de notas y comandos (Ctrl+O / Ctrl+P), barra
+   de estado de 24px, «Formato ▾» en lugar de la tira de 17 íconos, «Nuevo ▾» en el
+   explorador, pestañas con teclado, la nota a 42rem en vivo y en lectura, Compartir y
+   Tags fuera de desktop, isotipo del grafo. El revisor final pidió volver a capturar (la
+   primera tanda de capturas tenía tamaños equivocados y el indicador de Next encima) y
+   después dio **fix-then-ship**: se aplicaron la hora de guardado desde que se abre la
+   nota, el color neutro de la barra de estado, el «…» al extremo derecho, el foco a la
+   nota al abrirla desde la paleta y el «Nuevo ▾».
+   > [!warning] Quedan dos deudas anteriores al rediseño
+   > La franja lateral de 3px de los callouts (el revisor pide fondo teñido, sin franja) y
+   > una celda sombreada fantasma a la izquierda del encabezado de las tablas en vivo.
+   > Pendientes de decisión del usuario.
+8. **Cierre**: su revisor final y su documentador, que actualiza `DESIGN.md`.
 
 ## Lo que no aplica a Mycelium
 
