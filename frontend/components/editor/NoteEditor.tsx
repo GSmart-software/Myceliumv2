@@ -36,6 +36,7 @@ import { registerView, unregisterView } from "@/lib/editor/viewRegistry";
 import { extensionesTab } from "@/lib/editor/tabWidth";
 import { exportDiagram, renderExcalidrawIn, saveDiagram } from "@/lib/excalidraw";
 import { getCachedNote, putCachedNote } from "@/lib/idb";
+import { EVENTO_NOTA_GUARDADA } from "@/lib/eventos";
 import { renderNota } from "@/lib/markdown";
 import { renderMermaidIn } from "@/lib/mermaid";
 import { ContextMenu, type MenuItem } from "@/components/explorer/ContextMenu";
@@ -339,6 +340,10 @@ export function NoteEditor({
       setSyncState("synced");
       // El contenido (y por ende los [[enlaces]]) cambió → refrescar el grafo.
       useGraphStore.getState().markStale();
+      // Y lo que muestre propiedades de muchas notas a la vez —un archivo tabla
+      // abierto en otro panel— tiene que enterarse (`DEF-086`). El `PUT` ya
+      // reindexó las propiedades, así que lo que se lea ahora es lo nuevo.
+      window.dispatchEvent(new CustomEvent(EVENTO_NOTA_GUARDADA, { detail: { notaId } }));
     } catch {
       setSyncState(navigator.onLine ? "error" : "offline");
     } finally {
