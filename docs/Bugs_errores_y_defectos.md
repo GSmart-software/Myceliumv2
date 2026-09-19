@@ -389,6 +389,31 @@ y en raw no pasa.
 > que lo cierran. Se registra aparte porque es otra causa con el mismo síntoma, no una
 > recaída de aquella.
 
+# DEF-088
+En el editor (en vivo y raw), cuando se **pliega un título**, la flecha de su margen
+**desaparece**: la sección queda plegada sin ninguna marca a la izquierda que lo indique, y
+solo se ve el `…` al final de la línea. Al pasar el mouse por el editor la flecha vuelve a
+aparecer, pero **apuntando hacia abajo**, igual que la de una sección desplegada: no hay
+forma de distinguir en el margen cuál está plegada.
+
+Además, el texto que aparece al dejar el mouse sobre la flecha está **en inglés** («Fold
+line» / «Unfold line») en una interfaz en español.
+
+Detectado el 2026-09-19 durante `/impeccable harden`, midiendo la app con Playwright.
+
+# DEF-089
+En el **modo de edición en vivo**, un `[[enlace]]` escrito **dentro de código en línea**
+(entre comillas invertidas, como `` `[[enlaces]]` ``) se muestra **como enlace**: con el
+color y el subrayado de un wikilink —y, si la nota no existe, como enlace roto— en lugar de
+verse como texto de código. El código en línea tendría que mostrarse literal, sin
+interpretar lo que tiene adentro.
+
+Además, en los temas **claros** el código en línea es un recuadro oscuro, y el color del
+enlace sobre ese recuadro casi no se lee (medido: 2.5:1).
+
+Se ve en [[Mapa de documentacion]], en el callout «Cómo está organizado». Detectado el
+2026-09-19 durante `/impeccable audit`.
+
 ---
 
 > [!warning] Defectos sin reporte original
