@@ -208,7 +208,8 @@ isotipo, títulos que alternan los dos colores de la marca.
 Obsidian: rail de actividad, árbol, pestañas, editor y barra de estado, y una paleta que
 salta a cualquier nota o comando desde el centro de la barra superior. No se inventa un
 marco nuevo; se ejecuta bien el que ya se conoce. Lo que el rediseño sacó define lo que
-no vuelve: la tira de íconos sin nombre y los controles que no hacen nada.
+no vuelve: los controles que no hacen nada. Las herramientas, en cambio, se ven: el
+usuario las prefiere a la vista y solo se agrupan cuando no entran.
 
 Hay tres cosas que Mycelium nunca debe parecer: **un clon gris de Obsidian** (violeta y
 grises neutros sin identidad), **un SaaS corporativo** (tarjetas blancas flotando con
@@ -220,8 +221,8 @@ partes, donde el glow deja de señalar y pasa a ser ruido).
 - Dos colores de marca por tema (Hifa y Brote) y el resto es tono del mismo matiz.
 - Marco compacto (13px, controles chicos) frente a una lectura amplia (serif, 42rem).
 - Cascarón estándar: rail, árbol, pestañas, editor, barra de estado y paleta (Ctrl+P).
-- Los grupos de acciones van detrás de un botón con rótulo («Formato ▾», «Nuevo ▾»),
-  no en una fila de íconos.
+- Las herramientas a la vista mientras entren; sin espacio, se agrupan detrás de un
+  botón con rótulo («Formato ▾», «Nuevo ▾»).
 - Plano por defecto: las zonas se separan por tono; solo lo que flota tiene sombra.
 - Todo sale de tokens: dos temas × claro/oscuro = cuatro combinaciones, siempre las cuatro.
 - Brote nunca se usa en crudo como primer plano: cada uso pide su rol (texto, foco, marco).
@@ -524,21 +525,28 @@ Precisos y silenciosos: chicos, sin cuerpo en reposo, se encienden al pasar el m
   usar **se muestra atenuada con el motivo, nunca se oculta**.
 
 ### Barra del editor
-Mínima, de 40px: a la izquierda «Formato ▾», único punto de entrada al formato; a la
-derecha buscar en la nota, el panel de enlaces (`aria-pressed`), los modos (vivo,
-lectura, lado a lado, crudo) y «…» al extremo derecho, como en VS Code y Obsidian. Los
-íconos son de 16px. No hay tira de íconos de formato ni punto de color de
+De 40px: a la izquierda la tira de formato (`role="toolbar"`), cada acción con su
+ícono y su atajo en el `title`; a la derecha buscar en la nota, el panel de enlaces
+(`aria-pressed`), los modos (vivo, lectura, lado a lado, crudo) y «…» al extremo
+derecho, como en VS Code y Obsidian. Los íconos son de 16px. Colapsa en dos etapas y
+**solo cuando no hay espacio** (medido con los anchos naturales): primero la tira pasa a
+«Formato ▾»; si aun así no entra, el grupo derecho pasa a «⋯». No hay punto de color de
 sincronización: el estado de guardado vive en la barra de estado, dicho con palabras.
 
+> [!note] Se probó el formato siempre en un menú (2026-09-19)
+> El rediseño lo metió siempre dentro de «Formato ▾». El usuario lo rechazó: prefiere las
+> herramientas visibles. El menú quedó solo para cuando no entran.
+
 ### Explorador
-«Nueva nota», lo que más se usa, queda como ícono; el resto de lo que se puede crear
-(dibujo, base, lienzo, carpeta, importar) va detrás de «Nuevo ▾». El menú es `fixed`
-respecto de la ventana, calculado desde el botón, porque el panel lateral recorta lo que
-se sale.
+Las seis acciones de creación (nota, dibujo, base, lienzo, carpeta, importar) van a la
+vista como íconos de 28px. Cuando el **panel** es angosto —container query sobre la
+fila, así decide el ancho del panel y no el de la ventana— queda «Nueva nota» y el resto
+pasa a «Nuevo ▾». El menú es `fixed` respecto de la ventana, calculado desde el botón,
+porque el panel lateral recorta lo que se sale.
 
 ### Menú emergente con rótulo (sistema)
-Un grupo de acciones se ofrece como **un botón con texto y chevron** que abre un menú,
-nunca como una fila de íconos sin nombre. Ejemplos: «Formato ▾» en la barra del editor,
+Cuando un grupo de acciones **no entra**, se ofrece como **un botón con texto y chevron**
+que abre un menú, no como un ícono genérico de «más». Ejemplos: «Formato ▾» en la barra del editor,
 «Nuevo ▾» en el explorador. El menú usa la forma del menú contextual (Lienzo, borde fino,
 radio de 8px, sombra de menú, ítems de 13px con ícono de 15px en Humus tenue) y el
 comportamiento de `useMenuEmergente`: clic afuera y Tab cierran, Escape cierra y
@@ -626,8 +634,9 @@ Lo que el build lleva y el sistema **no** adopta. No se copia a superficies nuev
   lo que informa, y detener todo bucle que no esté a la vista.
 - **Do** repartir el espacio en una ventana angosta —la nota conserva 420px— en vez de
   esconder funciones.
-- **Do** agrupar acciones detrás de un botón con rótulo y chevron («Formato ▾», «Nuevo
-  ▾») con el comportamiento de `useMenuEmergente`.
+- **Do** dejar las herramientas a la vista y agruparlas detrás de un botón con rótulo y
+  chevron («Formato ▾», «Nuevo ▾») solo cuando no entran, con el comportamiento de
+  `useMenuEmergente`.
 - **Do** llevar a la paleta (Ctrl+P) las acciones que no merecen un lugar fijo en el
   marco, y a la barra de estado lo que se quiere saber de la nota sin abrir nada.
 - **Do** hacer navegable con teclado cada grupo del marco (pestañas con flechas, menús
@@ -647,8 +656,7 @@ Lo que el build lleva y el sistema **no** adopta. No se copia a superficies nuev
   sombra.
 - **Don't** poner sobre Esporo un color calibrado para fondo claro (el Humus tenue del
   modo claro incluido).
-- **Don't** volver a una tira de íconos sin nombre para el formato o para crear: es lo
-  que el rediseño del cascarón sacó.
+- **Don't** esconder en un menú herramientas que entran a la vista.
 - **Don't** mostrar un control que no hace nada ni una sección que todavía no existe
   (un buscador que no busca, «Compartir» en desktop, Tags en el rail). Lo que no se
   puede usar *en este contexto* se atenúa con su motivo; lo que no existe, no se muestra.
