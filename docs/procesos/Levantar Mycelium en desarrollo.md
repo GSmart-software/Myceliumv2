@@ -69,4 +69,6 @@ Un worktree recién creado **no tiene** `node_modules`: correr `npm ci`.
 - [[Reflejar cambios de desktop a web]] — el flujo que usa worktrees.
 - [[Capa de datos del desktop]] / [[Capa de datos de la web]] — qué hay detrás.
 - [[Generar instaladores desktop]] — build de producción.
+- [[Ver la UI con Playwright]] — levantar desktop con el puerto de depuración para que
+  una sesión de IA vea la ventana.
 - [[Mapa de documentacion]] — índice general.
