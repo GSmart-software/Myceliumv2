@@ -73,12 +73,30 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-083 | La terminal dibuja el texto corrupto: símbolos y texto repetido donde no corresponde | desktop | 🛠️ desktop (2026-09-04) — **implementado, SIN CONFIRMAR**: hay que probarlo con una TUI adentro. **Sin reflejo**: la terminal es solo-desktop |
 | DEF-082 | Un `[[wikilink]]` de una propiedad no navega desde el bloque de propiedades | ambas (frontend) | ✅ ambas (2026-09-04) — era el mismo código que el `DEF-076`; **confirmado en la app** y reflejado a web |
 | DEF-084 | Renombrar con un carácter inválido reescribe los `[[enlaces]]` entrantes con el nombre **pedido**, no con el que el archivo obtuvo | ambas (frontend) | ✅ ambas (2026-09-05) — `renombrarNota` devuelve ahora el título **efectivo**; **confirmado en la app** y reflejado a web. En web no se reproducía —el título no pasa por ningún saneo— pero el cambio se trajo igual |
-| DEF-085 | Un `.base` pierde su estado al cambiar de pestaña y volver —vista, búsqueda, panel, «ver sin filtrar», y un borrador sin guardar de la fuente— | ambas (frontend) | ⬜ pendiente — `EditorPane` solo monta la pestaña activa, así que `BaseView` se desmonta y su `useState` se pierde. Mismo caso que `DEF-039` con el scroll de las notas. **Ojo al corregir**: hay que conservar el estado de la interfaz, NO las filas, o esto empeora `DEF-086` |
+| DEF-085 | Un `.base` pierde su estado al cambiar de pestaña y volver —vista, búsqueda, panel, «ver sin filtrar», y un borrador sin guardar de la fuente— | ambas (frontend) | ✅ ambas (2026-09-18) — caché por **pestaña**, como `instanceCache` en las notas (`DEF-039`): vista, scroll, búsqueda, «ver sin filtrar» y borrador; las filas se muestran al instante y se vuelven a pedir por detrás para no empeorar `DEF-086`. **Confirmado en la app** y reflejado a web. «La visibilidad» resultó ser la **vista activa**, más el scroll |
 | DEF-086 | Un `.base` abierto no se entera de cambios en el frontmatter de sus notas (editor, IA o consola) | ambas (frontend) | ⬜ pendiente — `BaseView` pide `/tabla` una sola vez, al montarse. El mecanismo para enterarse **ya existe** en desktop: el watcher reindexa ante cambios externos y ya avisa al grafo (`DEF-054`); la tabla no escucha |
 | DEF-087 | Con frontmatter, en edición en vivo, los títulos y otros elementos no se renderizan | ambas (frontend) | ✅ ambas (2026-09-18) — la guarda que se salta los bloques ya dibujados podaba la **raíz** del árbol, que empieza en 0 como el frontmatter; **confirmado en la app** y reflejado a web. Arregla también la nota que empieza con una tabla |
 | DEF-078 | ~~Las opciones de un desplegable van pegadas al borde~~ | — | ⛔ **retirado** — no pasaba en todos los `<select>` sino solo en el del `DEF-070`, sin consolidar: era una regresión propia y no lleva número. Número quemado |
 
 ## Notas por bug
+
+- **DEF-085 — la tabla se desmontaba al cambiar de pestaña.** `EditorPane` solo monta la
+  pestaña activa, así que `BaseView` perdía todo su `useState`. Se resolvió con el mismo
+  patrón que `instanceCache` en el editor de notas: un caché **por pestaña** (no por archivo:
+  dos pestañas del mismo `.base` pueden mirar vistas distintas) que sobrevive a cambiar de
+  pestaña y muere al cerrarla.
+
+  Tres cosas que se decidieron y no son obvias:
+
+  - **El scroll se captura mientras se desplaza**, no al desmontar: es la trampa de `DEF-039`,
+    donde la limpieza del efecto corría con el nodo fuera del DOM y leía 0. Acá restaurarlo
+    alcanza con un `scrollTop` a secas, porque la tabla no virtualiza: las filas del caché
+    están en el DOM al primer render.
+  - **Las filas se guardan para mostrarlas, no para servirlas.** Se ven al instante —sin el
+    parpadeo de carga— y se vuelven a pedir por detrás. Servirlas sin preguntar congelaría la
+    tabla, y cambiar de pestaña es hoy lo único que la refresca (`DEF-086`).
+  - **Tope de 8 pestañas.** El caché de notas no tiene porque guarda un documento; éste
+    guarda las filas de todo el vault.
 
 - **DEF-087 — la guarda que protegía un bloque podaba el árbol entero.** `buildDecorations`
   se salta los nodos que caen dentro de un bloque ya dibujado —la tarjeta del frontmatter,
