@@ -53,22 +53,37 @@ dibuja la app**: lo dibuja Windows, y solo lo ofrece cuando la ventana contesta
 `HTMAXBUTTON` al mensaje con el que pregunta qué hay bajo el puntero (`WM_NCHITTEST`).
 Esa respuesta la daba el marco del sistema, así que se fue con él.
 
-Se repone en `src-tauri/src/marco.rs`: se engancha un *subclass* al procedimiento de la
-ventana y se contesta `HTMAXBUTTON` cuando el puntero cae sobre el rectángulo del botón,
-que el frontend informa con `marco_zona_maximizar` (en píxeles CSS; Rust los pasa a
-físicos con el factor de escala de la ventana) al montarse y cada vez que cambia de sitio
-o de tamaño.
+> [!danger] Contestar desde la ventana principal NO alcanza
+> Fue el primer intento y **no funciona**: la página vive dentro de una **ventana hija del
+> WebView2** que tapa toda el área de cliente, así que Windows le pregunta a ESA. Medido
+> acá el 2026-09-20: con el procedimiento de la ventana principal enganchado y el puntero
+> sobre el botón, **no entró un solo mensaje**; solo llegaban los de los bordes.
 
-> [!warning] Contestar eso tiene dos consecuencias, y hay que atender las dos
-> Para Windows, ese rectángulo deja de ser área de cliente:
-> 1. **El clic no llega al webview**. Lo atiende Rust (`WM_NCLBUTTONUP`) alternando
+Se repone en `src-tauri/src/marco.rs` con una **ventana nativa propia encima del botón**:
+hija, del tamaño del botón, sin pintar nada —el diseño se sigue viendo debajo— y con un
+procedimiento que contesta `HTMAXBUTTON` siempre. Es la misma salida a la que llegaron por
+separado los plugins de la comunidad. El frontend informa el rectángulo con
+`marco_zona_maximizar` (en píxeles CSS; Rust los pasa a físicos con el factor de escala)
+al montarse y cada vez que cambia de sitio o de tamaño.
+
+> [!warning] Esa ventanita se queda con el ratón, y hay que devolver lo que saca
+> 1. **El clic no llega al webview**. Lo atiende ella (`WM_NCLBUTTONUP`) alternando
 >    maximizar y restaurar; el `onClick` del botón sigue existiendo para el teclado.
-> 2. **No hay `:hover` de CSS**. Rust avisa con el evento `marco://hover-maximizar` y el
->    componente pinta la clase `.hover`. Se emite solo al cambiar: `WM_NCHITTEST` llega
->    con cada movimiento del puntero.
+> 2. **No hay `:hover` de CSS**. Avisa con el evento `marco://hover-maximizar` y el
+>    componente pinta la clase `.hover`. Se emite solo al cambiar, y el seguimiento de
+>    salida se pide con `TrackMouseEvent`, o el resaltado queda encendido al salir rápido.
+
+Cómo comprobarlo sin la app delante: las ventanas hijas de Mycelium se listan con
+`EnumChildWindows`; tiene que aparecer `MyceliumCapaMaximizar`, visible, con el rectángulo
+del botón y **primera** en la lista (o sea, por encima del webview).
 
 Todo esto es **solo Windows** (`#[cfg(target_os = "windows")]`). En el resto los comandos
 existen y no hacen nada, para que el frontend no tenga que preguntar dónde corre.
+
+> [!info] De paso, los bordes ya los repone Tauri
+> Al listar las ventanas hijas apareció `TAURI_DRAG_RESIZE_BORDERS`: Tauri ya crea su
+> propia capa para el arrastre de los bordes. Las ocho franjas de `BordesRedimensionado`
+> se le superponen; funcionan, pero quizá sobren. Sin decidir.
 
 ## Lo que falta
 
