@@ -139,7 +139,11 @@ nuevo.
 
    **Configuración (2026-09-20)**: la pantalla que peor había envejecido con el goteo de
    ajustes. Pasa a ventana centrada con categorías y buscador; ver [[configuracion]]
-   (`FUN-M-32`).
+   (`FUN-M-32`). Su propio `critique` la puntuó **19/40**: sus cuatro hallazgos graves eran
+   todos trabajo del usuario que se perdía sin avisar (el borrador del `.mycignore`, la
+   validación tardía de Esporas, el snippet que se borraba de un clic, el resultado a 900px
+   de scroll). El usuario eligió arreglar «el P0 y los avisos» y, del cascarón, «los tres
+   chicos»: todo eso es `FUN-M-34`, documentado en la misma [[configuracion]].
 
    **Marco e ícono (2026-09-19)**: cerrado el experimento de estilo, se atacaron las dos
    marcas ajenas que quedaban a la vista —el ícono de Tauri y la barra de título del
