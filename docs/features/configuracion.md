@@ -115,6 +115,59 @@ Borrador que sobrevive al cambio de categoría; la pregunta al cerrar y el desca
 de Esporas apareciendo al teclear `../fuera` y yendose al corregir; el botón de enlaces a
 12px del borde izquierdo con su isotipo; el modo «Crudo» y el título alineado a la izquierda.
 
+## Tercera tanda: que se pueda leer y encontrar (`FUN-M-35`, 2026-09-20)
+
+Lo que quedaba de la misma crítica, una vez tapados los agujeros por donde se perdía
+trabajo.
+
+### Un solo interruptor
+
+Doce ajustes de sí o no y **dos formas** de preguntarlo: nueve eran un botón con la palabra
+«Activado» y tres la píldora del sistema, con tres tratamientos de foco entre ambas. Con dos
+formas para la misma decisión la columna de la derecha deja de poder leerse de un vistazo,
+que es justo lo único que una lista de ajustes tiene que permitir. Ahora todos pasan por
+`components/settings/Interruptor.tsx`: rótulo a la izquierda, píldora a la derecha,
+explicación debajo en medida de lectura, y un estado apagado visible para el que todavía no
+se puede tocar. Con él se fueron la clase `.toggle` y el parche `style={{ color: … }}` que
+se repetía en diecisiete párrafos.
+
+### El buscador dejaba de servir justo cuando hacía falta
+
+El índice era una lista de rótulos exactos: quien no supiera que el ajuste se llama
+«Archivos ignorados (.mycignore)» no lo encontraba, porque «ignorar», «indexar» o
+«excluir» no devolvían nada. Cada entrada pasa a ser `{ rotulo, alias?, soloAvanzado? }`:
+
+- los **alias** son cómo lo llamaría quien no sabe cómo se llama — se busca por ellos, pero
+  lo que se muestra y a lo que se salta es siempre el rótulo;
+- **`soloAvanzado`** saca del índice lo que vive tras los siete clics mientras no esté
+  encendido: ofrecerlo era mandar a un salto que no llegaba a ningún lado;
+- faltaba **«Shell por defecto»**, que no estaba indexado.
+
+### Lo demás
+
+- **Los snippets no están en ninguna cuenta.** El texto prometía respaldo «en cualquier
+  dispositivo», herencia de la línea web, en la versión cuyo principio es que nada sale de
+  la máquina. Se guardan en el índice local del vault abierto, y eso es lo que dice ahora.
+- **El modo avanzado se alcanza con el teclado**: los siete clics vivían en el `<footer>`, así
+  que sin ratón era inalcanzable. Ahora el número de versión es un `<button>`.
+- **La marca del salto tiene color propio** (`--mic-marca`, el acento) y un fondo teñido.
+  Usaba `--mic-focus` sin que el foco estuviera ahí: dos anillos iguales se leen como dos
+  focos.
+- **Los cuatro grupos sobreviven a la ventana angosta**: bajo 720px las categorías pasan a
+  fichas en fila y el nombre del grupo se ocultaba, dejando ocho fichas sueltas. Ahora ocupa
+  su propio renglón.
+- **Las listas de snippets y de versiones** respetan el mismo tope de 560px que un ajuste.
+- **`Ctrl+,` abre Configuración**, el atajo de VS Code y Obsidian; el engranaje del rail y el
+  comando de la paleta lo anuncian.
+
+### Verificado en la app
+
+Cero botones «Activado/Desactivado» y cinco interruptores en Editor; «ignorar» → Archivos
+ignorados, «plantillas» → Carpeta de Esporas, «powershell» → Shell por defecto, «sangria» →
+Ancho de tabulación; el salto marca la fila (`--mic-marca` = `#19e6ff` contra `--mic-focus`
+= `#3dffc4`); el pie es un `<button>`; el engranaje dice «Configuración (Ctrl+,)». La
+ventana angosta queda sin comprobar en vivo: exige achicar la ventana real del usuario.
+
 ## Relacionadas
 
 [[Rediseñar la UI con impeccable]] · [[avisos-y-confirmaciones]] · [[atmosferas]] · [[DESIGN]] · [[BACKLOG]]
