@@ -171,6 +171,62 @@ Dio 14 avisos:
 > `DEF-089`. Aparecieron para el `critique`: la búsqueda de la barra superior no busca, y
 > el divisor de «Compartido» parece una barra de scroll.
 
+## Segunda auditoría — 2026-09-20 (cerrado el experimento): 17/20
+
+Misma rúbrica que la de arriba, después del prototipo del cascarón, las atmósferas, las
+formas, el marco de ventana propio y la ventana de Configuración. **14/20 → 17/20**.
+
+| # | Dimensión | Antes | Ahora | Hallazgo principal |
+|---|---|---|---|---|
+| 1 | Accesibilidad | — | 3 | Un enlace dentro de un callout queda en 4.35:1 en Bioluminiscencia claro |
+| 2 | Rendimiento | — | 3 | Nada de `will-change`; quedan tres `transition: width` en barras de progreso |
+| 3 | Adaptación | — | 3 | Sin scroll horizontal a 640px; los objetivos de 16-22px son de ratón |
+| 4 | Tematización | — | 4 | Tokens de dos capas + atmósferas, medidos en 16 combinaciones |
+| 5 | Integridad | — | 4 | 14 avisos del detector, todos explicados por decisiones escritas |
+| **Total** | | **14/20** | **17/20** | Bueno, banda alta |
+
+### Veredicto de integridad: **pasa**
+
+El detector da 14 avisos y **ninguno es deriva**: 7 `side-tab` (la franja de los callouts,
+que el usuario decidió conservar; la barra de color de las consolas; el borde de una
+tabla), 4 `gradient-text` (los usos sancionados en [[DESIGN]]) y 3 `layout-transition`
+(barras de progreso). Cada uno tiene su decisión escrita, con fecha y motivo.
+
+### Hallazgos
+
+- **[P2] Enlace dentro de un callout, en claro: 4.35:1.** `styles/editor.css`
+  (`.mic-wikilink-cm`, color `--mic-accent`). Sobre el lienzo pasa; sobre el fondo teñido
+  del callout se queda a 0.15 del mínimo. Medido en Bioluminiscencia claro con Bosque.
+  Le corresponde el tratamiento por rol que ya tienen los títulos: mezclar con la tinta en
+  claro.
+- **[P3] El degradé del logo en claro** mide bajo (viene de la línea base como el degradé
+  del título). Es decoración sobre un botón que además dice «Mycelium» en su `aria-label`.
+- **[P3] Objetivos de 16-22px**: la «×» de una pestaña, las flechas de historial, el menú
+  del pane y los botones de fila/columna de una tabla. Para ratón son la medida de VS
+  Code; en una pantalla táctil quedarían chicos.
+- **[P3] Color a mano** en `BaseView.module.css`: el enlace roto se mezcla con `#000` en
+  vez de con la tinta del tema. El rojo de «cerrar» (`#c42b1c`) es a propósito y está
+  documentado: es convención del sistema operativo.
+- **[P3] Tres `transition: width`** (importar, abrir vault, actualizador). Sin costo
+  medible, como ya se anotó en la primera auditoría.
+
+### Lo que mejoró respecto de la línea base
+
+- **Teclado**: paleta, pestañas, menús, diálogos, árbol y la ventana de Configuración se
+  operan enteros con teclado, con foco atrapado y devuelto.
+- **Sin controles muertos**: la búsqueda que no buscaba es hoy la paleta (`DEF-090`) y
+  Compartir salió de desktop.
+- **Contraste medido, no supuesto**: 16 combinaciones (tema × modo × atmósfera) para el
+  texto del marco y la barra de estado.
+- **Movimiento reducido**: los cinco archivos con animación tienen su alternativa.
+- **Sin `will-change`** en todo el frontend.
+
+### Qué falta para llegar a 20
+
+Subir accesibilidad, rendimiento y adaptación a 4 pide: el enlace del callout por rol,
+llevar las barras de progreso a `transform`, y decidir si los objetivos de ratón se
+agrandan (hoy son deliberados). Nada de eso es bloqueante.
+
 ## Relacionadas
 
 - [[Rediseñar la UI con impeccable]] — el proceso del que esta es la línea base.
