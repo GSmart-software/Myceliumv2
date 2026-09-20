@@ -463,6 +463,20 @@ teñido. Fuera del callout, sobre el lienzo, el mismo enlace se lee bien.
 Detectado el 2026-09-20 en la segunda auditoría técnica: 4.35:1 medido en Bioluminiscencia
 claro, con el mínimo en 4.5:1.
 
+# DEF-096
+El selector de modo del editor tiene tres opciones en español —«En vivo», «Dividido»,
+«Lectura»— y una en inglés: **«Raw»**. La interfaz está solo en español y la propia
+documentación de diseño llama «crudo» a ese modo.
+
+Detectado el 2026-09-20 en la crítica del cascarón.
+
+# DEF-097
+El **título del documento** se dibuja **centrado** mientras el cuerpo de la nota va
+alineado a la izquierda, así que el mismo texto tiene dos ejes a pocos píxeles de
+distancia. Se ve en vivo y en lectura.
+
+Detectado el 2026-09-19 en la segunda crítica del cascarón y repetido en la tercera.
+
 ---
 
 > [!warning] Defectos sin reporte original
