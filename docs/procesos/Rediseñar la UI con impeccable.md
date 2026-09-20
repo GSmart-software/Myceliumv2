@@ -131,6 +131,12 @@ nuevo.
    del revisor: la franja de los callouts queda por decisión del usuario y la celda
    fantasma de las tablas era `DEF-093`.
 
+   **Evaluación (2026-09-20)**: segunda auditoría técnica **14/20 → 17/20** (ver
+   [[Auditoria de UI 2026-09-19]]) y `critique` del cascarón con dos subagentes aislados,
+   **21/40 → 25/40**, archivado en `.impeccable/critique/`. De ahí salió `DEF-095` (enlace
+   sobre callout) y la tanda de [[avisos-y-confirmaciones]] (`FUN-M-33`): borrado con
+   deshacer, confirmación propia, recientes en la paleta y `Ctrl+Tab`.
+
    **Configuración (2026-09-20)**: la pantalla que peor había envejecido con el goteo de
    ajustes. Pasa a ventana centrada con categorías y buscador; ver [[configuracion]]
    (`FUN-M-32`).
