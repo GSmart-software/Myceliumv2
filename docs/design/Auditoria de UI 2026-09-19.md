@@ -194,7 +194,9 @@ tabla), 4 `gradient-text` (los usos sancionados en [[DESIGN]]) y 3 `layout-trans
 
 ### Hallazgos
 
-- **[P2] Enlace dentro de un callout, en claro: 4.35:1.** `styles/editor.css`
+- **[P2] Enlace dentro de un callout, en claro: 4.35:1.** ✅ **Corregido** el 2026-09-20
+  (`DEF-095`): los enlaces pasan al rol `--mic-enlace`, que en claro se mezcla con la
+  tinta. Medido después: 6.11:1 en ese caso y 5.06:1 el peor de seis combinaciones. `styles/editor.css`
   (`.mic-wikilink-cm`, color `--mic-accent`). Sobre el lienzo pasa; sobre el fondo teñido
   del callout se queda a 0.15 del mínimo. Medido en Bioluminiscencia claro con Bosque.
   Le corresponde el tratamiento por rol que ya tienen los títulos: mezclar con la tinta en

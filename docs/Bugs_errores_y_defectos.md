@@ -455,6 +455,14 @@ y quedan todos iguales, que es justo lo que el nombre venía a resolver.
 
 Detectado el 2026-09-19 al poner el nombre del vault en la barra superior.
 
+# DEF-095
+En los **temas claros**, un `[[enlace]]` dentro de un **callout** no llega al contraste
+mínimo: se lee más flojo que el resto del texto del callout, que va sobre el mismo fondo
+teñido. Fuera del callout, sobre el lienzo, el mismo enlace se lee bien.
+
+Detectado el 2026-09-20 en la segunda auditoría técnica: 4.35:1 medido en Bioluminiscencia
+claro, con el mínimo en 4.5:1.
+
 ---
 
 > [!warning] Defectos sin reporte original
