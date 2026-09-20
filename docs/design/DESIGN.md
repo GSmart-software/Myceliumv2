@@ -168,6 +168,13 @@ components:
     width: "min(420px, 92vw)"
 ---
 
+> [!note] En vivo, la hoja se centra con el relleno, no con un ancho máximo
+> El canalón de plegado y el de números son hermanos del texto y se pegan al borde del
+> área desplazable: centrando el contenido quedaban contra el margen izquierdo de la
+> ventana, lejos de la línea que pliegan. El centrado vive en el relleno del área
+> desplazable, que además descuenta los canalones a la izquierda para que la columna de
+> texto caiga donde en lectura.
+
 # Design System: Mycelium
 
 > [!info] Qué es este archivo
