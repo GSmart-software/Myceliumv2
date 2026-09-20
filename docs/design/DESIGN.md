@@ -611,6 +611,13 @@ marco, hover con Brote al 16%— y que el botón llega hasta la esquina. El rojo
 (`#c42b1c`) es la única excepción: es una convención del sistema operativo y no sigue
 al tema.
 
+### Ventana de configuración
+Cuadro centrado de 980×700 sobre un velo, con la cabecera (título, buscador, cerrar), las
+categorías a la izquierda en 216px agrupadas por tema, y el panel a la derecha. La
+categoría elegida se marca con **relleno**, como las pestañas. Es, junto con la paleta, lo
+único que flota sobre el cascarón. Dentro, un ajuste mide como mucho 420px y un
+interruptor 560px: más ancho no se lee mejor. Ver [[configuracion]].
+
 ### Consola
 La terminal integrada es **su propia hoja**, como un bloque de código: fondo
 `--mic-terminal-bg` —`#141719` en oscuro, `#EFEFE8` en claro— y 10px de aire alrededor

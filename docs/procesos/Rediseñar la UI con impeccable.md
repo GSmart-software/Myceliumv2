@@ -131,6 +131,10 @@ nuevo.
    del revisor: la franja de los callouts queda por decisión del usuario y la celda
    fantasma de las tablas era `DEF-093`.
 
+   **Configuración (2026-09-20)**: la pantalla que peor había envejecido con el goteo de
+   ajustes. Pasa a ventana centrada con categorías y buscador; ver [[configuracion]]
+   (`FUN-M-32`).
+
    **Marco e ícono (2026-09-19)**: cerrado el experimento de estilo, se atacaron las dos
    marcas ajenas que quedaban a la vista —el ícono de Tauri y la barra de título del
    sistema—. Ver [[marco-de-ventana]] (`FUN-M-31`).
