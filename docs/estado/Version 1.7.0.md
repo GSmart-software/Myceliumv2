@@ -1,6 +1,11 @@
 # Versión 1.7.0
 
 **Desktop** (`desktop-tauri`) · 2026-09-05 · sobre [[Version 1.6.2]]
+
+> [!warning] Nunca se publicó: la entrega la [[Version 2.0.0]]
+> Se numeró y se documentó, pero no llegó a subirse al bucket. Quien actualice salta de la
+> 1.6.2 a la 2.0.0, que lleva este changelog dentro del suyo.
+
 **Web** (`web-cloud`) sale a la vez como **1.3.0**, con la parte que le aplica.
 
 Trece funcionalidades elegidas por el usuario y trabajadas en una sola tanda, más
