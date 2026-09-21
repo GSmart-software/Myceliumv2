@@ -77,6 +77,41 @@ arregló el grafo anclado.
 también en rutas típicas de instalación, porque no suele estar en el PATH. En Unix, la
 shell de login (`$SHELL`) va primera como sugerida.
 
+## El ancho de los caracteres: xterm viene con una tabla de 2010
+
+Sin addon de Unicode, xterm decide cuántas celdas ocupa cada carácter con la tabla de
+**Unicode 6**. Ahí casi todos los emojis ocupan **una**. Los programas que corren en la
+consola —Node con `string-width`, el CLI de una IA, Windows Terminal— les dan **dos**. Cuando
+el terminal y el programa no coinciden, cada emoji corre una celda el resto de la línea, y un
+programa que redibuja la pantalla termina escribiendo encima de lo que no era (`DEF-098`).
+
+> [!important] Medirlo, no suponerlo: `unicode11` no alcanza
+> La respuesta habitual es cargar `@xterm/addon-unicode11`. Medido con cada símbolo del
+> reporte, cuántas celdas avanza el cursor:
+>
+> | Símbolo | Unicode 6 (por defecto) | `unicode11` | `unicode-graphemes` |
+> |---|---|---|---|
+> | ✅ ❌ 🟡 🟨 🟦 🚀 | 1 | 2 | 2 |
+> | ☑️ ⚠️ (con U+FE0F) | 1 | **1** | 2 |
+> | ✔ ☑ ⚠ (sin U+FE0F) | 1 | 1 | 1 |
+>
+> ☑️ y ⚠️ son un carácter de **texto** seguido de un selector invisible, U+FE0F, que lo pide
+> en versión emoji. Mirando carácter por carácter, el primero ocupa una celda y el selector
+> cero. Solo leyendo el **grupo** entero se sabe que ocupa dos, y eso lo hace
+> `@xterm/addon-unicode-graphemes` (`activeVersion = "15-graphemes"`).
+
+Se mide sin la app, con Playwright: un `Terminal` en un HTML que carga los `.js` de
+`node_modules`, escribir el símbolo y leer `term.buffer.active.cursorX`. Es la API pública, y
+mide exactamente lo que importa: cuánto avanzó el cursor.
+
+`term.unicode` es API «propuesta» y exige `allowProposedApi: true` en el `Terminal`; sin eso,
+fijar la versión tira una excepción.
+
+> [!warning] El otro lado, ConPTY, no se puede medir así
+> En Windows la salida pasa por ConPTY, que tiene su propia tabla de anchos. Si alguna vez un
+> emoji aparece con una celda **de más** —el desfase al revés—, el desacuerdo es de ConPTY y
+> no de xterm.
+
 ## Relacionadas
 
 - [[terminal-integrada]] — especificación funcional y criterios de aceptación.

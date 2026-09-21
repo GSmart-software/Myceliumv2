@@ -70,7 +70,7 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-079 | En la terminal, `Ctrl+C`/`Ctrl+V` no copian ni pegan; el botón derecho pega dos veces | desktop | 🛠️ desktop (2026-09-04) — **implementado, SIN CONFIRMAR**: hay que probarlo con una TUI adentro. **Sin reflejo**: la terminal es solo-desktop |
 | DEF-080 | Una condición de filtro sin valor se borra sola en vez de quedarse inactiva | ambas (frontend) | ✅ ambas (2026-09-04) — se perdía en el viaje al archivo; **confirmado en la app** y reflejado a web |
 | DEF-081 | El explorador no muestra el nombre completo al dejar el puntero encima | ambas (frontend) | ✅ ambas (2026-09-04) — un `title` en cada fila; **confirmado en la app** y reflejado a web. En web van dos de las tres filas: la de archivos no indexados es solo-desktop |
-| DEF-083 | La terminal dibuja el texto corrupto: símbolos y texto repetido donde no corresponde | desktop | 🛠️ desktop (2026-09-04) — **implementado, SIN CONFIRMAR**: hay que probarlo con una TUI adentro. **Sin reflejo**: la terminal es solo-desktop |
+| DEF-083 | La terminal dibuja el texto corrupto: símbolos y texto repetido donde no corresponde | desktop | 🛠️ desktop (2026-09-04) — **implementado, SIN CONFIRMAR**: hay que probarlo con una TUI adentro. **Sin reflejo**: la terminal es solo-desktop | Lo que seguía fallando tenía **otra causa**, `DEF-098` (el ancho de los emojis), corregida el 2026-09-21
 | DEF-082 | Un `[[wikilink]]` de una propiedad no navega desde el bloque de propiedades | ambas (frontend) | ✅ ambas (2026-09-04) — era el mismo código que el `DEF-076`; **confirmado en la app** y reflejado a web |
 | DEF-084 | Renombrar con un carácter inválido reescribe los `[[enlaces]]` entrantes con el nombre **pedido**, no con el que el archivo obtuvo | ambas (frontend) | ✅ ambas (2026-09-05) — `renombrarNota` devuelve ahora el título **efectivo**; **confirmado en la app** y reflejado a web. En web no se reproducía —el título no pasa por ningún saneo— pero el cambio se trajo igual |
 | DEF-085 | Un `.base` pierde su estado al cambiar de pestaña y volver —vista, búsqueda, panel, «ver sin filtrar», y un borrador sin guardar de la fuente— | ambas (frontend) | ✅ ambas (2026-09-18) — caché por **pestaña**, como `instanceCache` en las notas (`DEF-039`): vista, scroll, búsqueda, «ver sin filtrar» y borrador; las filas se muestran al instante y se vuelven a pedir por detrás para no empeorar `DEF-086`. **Confirmado en la app** y reflejado a web. «La visibilidad» resultó ser la **vista activa**, más el scroll |
@@ -86,6 +86,7 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-095 | En claro, un enlace dentro de un callout no llega al contraste mínimo (4.35:1) | ambas (frontend) | ✅ corregido en `experimento/ui-impeccable` (2026-09-20). ✅ **confirmado en la app** (2026-09-20): entre 5.70:1 y 6.26:1 sobre el fondo teñido del callout, en cuatro combinaciones de tema y atmósfera — los enlaces usaban Hifa en crudo, que pasa sobre el lienzo pero no sobre el fondo teñido del callout. Pasan a un rol propio, `--mic-enlace`, que en claro se mezcla con la tinta, como ya hacían los títulos. Medido: mínimo 5.06:1 en seis combinaciones de tema, modo y atmósfera |
 | DEF-096 | El modo «Raw» del editor está en inglés entre tres modos en español | ambas (frontend) | ✅ corregido en `experimento/ui-impeccable` (2026-09-20), **confirmado en la app** — el rótulo del modo estaba escrito a mano en `MODES` de `EditorToolbar.tsx` con el nombre técnico del formato; pasa a «Crudo», como ya lo llamaba DESIGN.md |
 | DEF-097 | El título del documento va centrado y el cuerpo de la nota alineado a la izquierda | ambas (frontend) | ✅ corregido en `experimento/ui-impeccable` (2026-09-20), **confirmado en la app** — el `text-align: center` de `.mic-doc-title` venía de cuando el título flotaba sobre un editor a todo el ancho; con la nota a 42rem el título comparte columna con el cuerpo y el centrado lo rompía. Va a la izquierda |
+| DEF-098 | En la terminal, los emojis (✅ ❌ ☑️ 🟡 🟨 ⚠️ 🟦…) desfasan el resto de la línea | desktop | ✅ desktop (2026-09-21) — xterm medía los emojis con la tabla de Unicode 6 (una celda); ahora `@xterm/addon-unicode-graphemes` (dos). `unicode11` no alcanzaba para ☑️ y ⚠️. **Confirmado en la app**. **Sin reflejo**: la terminal es solo-desktop |
 | DEF-078 | ~~Las opciones de un desplegable van pegadas al borde~~ | — | ⛔ **retirado** — no pasaba en todos los `<select>` sino solo en el del `DEF-070`, sin consolidar: era una regresión propia y no lleva número. Número quemado |
 
 ## Notas por bug
@@ -125,6 +126,24 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
     tabla, y cambiar de pestaña es hoy lo único que la refresca (`DEF-086`).
   - **Tope de 8 pestañas.** El caché de notas no tiene porque guarda un documento; éste
     guarda las filas de todo el vault.
+
+- **DEF-098 — xterm contaba los emojis con una tabla de 2010.** Sin addon de Unicode, xterm
+  calcula el ancho de cada carácter con la tabla de **Unicode 6**, donde ✅ o 🚀 ocupan una
+  celda. Los programas de hoy —Node con `string-width`, el CLI de una IA, Windows Terminal—
+  les dan dos. Cada emoji corría una celda el resto de la línea.
+
+  Se **midió** antes de elegir, en un Chromium real, cuántas celdas avanza xterm con cada
+  símbolo del reporte en cada modo. Eso descartó la solución habitual: `unicode11` arregla
+  ✅ ❌ 🟡 🟨 🟦 pero deja **☑️ y ⚠️** en una celda, porque son un carácter de texto más un
+  selector invisible (U+FE0F) que lo pide en versión emoji, y solo mirando el grupo entero se
+  sabe que ocupa dos. `@xterm/addon-unicode-graphemes` lo hace, y deja bien los ✔ ☑ ⚠ sin
+  selector.
+
+  > [!info] Por qué `DEF-083` no lo había arreglado
+  > `DEF-083` corrigió una causa real y distinta —un carácter UTF-8 partido entre dos
+  > lecturas del PTY— y tiene sus propios tests. El síntoma siguió porque tenía **dos**
+  > causas. `DEF-083` sigue sin confirmar: lo que queda por comprobar es si, con las dos
+  > corregidas, ya no se ve texto corrupto.
 
 - **DEF-087 — la guarda que protegía un bloque podaba el árbol entero.** `buildDecorations`
   se salta los nodos que caen dentro de un bloque ya dibujado —la tarjeta del frontmatter,
