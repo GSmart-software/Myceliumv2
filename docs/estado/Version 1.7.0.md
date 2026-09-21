@@ -2,9 +2,10 @@
 
 **Desktop** (`desktop-tauri`) · 2026-09-05 · sobre [[Version 1.6.2]]
 
-> [!warning] Nunca se publicó: la entrega la [[Version 2.0.0]]
-> Se numeró y se documentó, pero no llegó a subirse al bucket. Quien actualice salta de la
-> 1.6.2 a la 2.0.0, que lleva este changelog dentro del suyo.
+> [!success] Publicada el 2026-09-06
+> Está en el bucket desde el 2026-09-06 a las 03:28 (UTC), con su changelog. La publicación
+> no quedó registrada en esta nota, y eso hizo creer al preparar la [[Version 2.0.0]] que
+> nunca había salido. La siguiente es la [[Version 2.0.0]].
 
 **Web** (`web-cloud`) sale a la vez como **1.3.0**, con la parte que le aplica.
 
