@@ -10,6 +10,21 @@ solo divergen en la capa de datos.
 | **`desktop-tauri`** | **Desktop** (app Tauri) | `frontend/lib/db/*` → SQLite nativo (`tauri-plugin-sql`); `lib/api.ts` = dispatcher local | Rama principal de trabajo del escritorio. Antes se llamaba `reestructuracion`. |
 | **`web-cloud`** | **Web** (Next.js + .NET) | backend `.NET` → D1/blobs; `lib/api.ts` = cliente HTTP | Antes se llamaba `desktop-cloud`. **Publicada en `origin` el 2026-09-04** con su nombre nuevo; la vieja `desktop-cloud` se conserva a propósito. |
 
+**Ramas experimentales** (locales, se conservan como registro):
+
+| Rama | Qué fue | Estado |
+|---|---|---|
+| `experimento/ui-plana` | Rediseño con el tema Sofka | **No integrada.** Se conserva |
+| `experimento/ui-impeccable` | Rediseño de UI/UX con la skill impeccable ([[Rediseñar la UI con impeccable]]) | **Integrada a `desktop-tauri` el 2026-09-21** (`e2d1866`, `--no-ff`). **No va a web.** La rama se conserva |
+
+> [!warning] El rediseño de impeccable es solo-desktop, por decisión
+> No por imposibilidad técnica: el usuario decidió que no se refleje a web. Eso agranda la
+> distancia entre las dos ramas en archivos que hasta ahora eran compartidos —el cascarón
+> (`components/workspace/*`), la configuración (`components/settings/*`), el explorador,
+> `tokens.css`, `editor.css`—. **A partir de acá, un reflejo que toque esos archivos ya no
+> puede traerlos enteros**: hay que clasificarlos de nuevo, porque desktop tiene encima el
+> rediseño que web no.
+
 **Topología lineal:** `desktop-tauri` = `web-cloud` + la capa Tauri encima (contiene
 toda la historia de la web). Comparten el 100% del frontend salvo unos ~17 commits
 (capa de datos y ajustes desktop).

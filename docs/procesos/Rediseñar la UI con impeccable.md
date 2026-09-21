@@ -9,6 +9,19 @@ con el tema Sofka (rama `experimento/ui-plana`).
 > experimento Sofka, para que la comparación sea limpia). Nada de esto se integra a
 > `desktop-tauri` sin que el usuario lo decida.
 
+> [!success] Integrado a `desktop-tauri` el 2026-09-21
+> El usuario dio el experimento por **exitoso** y pidió unificarlo con `desktop-tauri`,
+> **solo desktop — no a web**. Se fusionó con `--no-ff` (commit `e2d1866`) para que quede
+> en la historia como una unidad: 36 commits, de `cc20a57` a `aa84dd5`.
+>
+> Fue una fusión sin conflictos posibles: la rama partía exactamente del último commit de
+> `desktop-tauri` (`6d2543b`) y este no tenía nada propio, así que el árbol resultante es
+> idéntico a la punta de la rama. Se verificó igual antes de fusionar —`tsc`, `next build`,
+> `cargo check` y 155 tests— y se comprobó que ningún commit traía líneas de atribución.
+>
+> **La rama no se borra**, por decisión del usuario: es parte del historial. La del
+> experimento Sofka (`experimento/ui-plana`) tampoco se tocó.
+
 ## Por qué impeccable y no ui-ux-pro-max
 
 Se evaluaron las dos el 2026-09-18.
