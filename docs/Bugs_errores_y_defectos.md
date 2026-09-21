@@ -477,6 +477,18 @@ distancia. Se ve en vivo y en lectura.
 
 Detectado el 2026-09-19 en la segunda crítica del cascarón y repetido en la tercera.
 
+# DEF-098
+En la **terminal integrada**, cuando la salida contiene **emojis o símbolos especiales**
+—✅, ❌, ☑️, 🟡, 🟨, ⚠️, 🟦 y otros—, el texto que viene después en la misma línea **queda
+desfasado**: aparece corrido, se superpone con lo que ya estaba, o deja restos donde no
+corresponde. Se nota sobre todo con programas que redibujan la pantalla, como el CLI de una
+IA.
+
+> [!info] Es lo que seguía pasando después de `DEF-083`
+> `DEF-083` corrigió una causa real —los caracteres partidos entre dos lecturas del PTY— pero
+> nunca se confirmó, y el síntoma siguió. El usuario aisló el disparador el 2026-09-21: pasa
+> **con emojis**. Se registra aparte porque es otra causa, no una recaída de aquélla.
+
 ---
 
 > [!warning] Defectos sin reporte original
