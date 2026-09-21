@@ -2,6 +2,12 @@
 
 **Solo desktop** (`desktop-tauri`) · 2026-09-21 · sobre [[Version 1.7.0]]
 
+> [!success] Publicada el 2026-09-21 a las 13:57 (UTC)
+> Con `npm run publicar`, reutilizando los instaladores del ensayo. Verificado: los tres
+> manifiestos responden y parsean, la firma de los dos `latest.json` es idéntica al `.sig`,
+> y el `.exe` descargado del bucket tiene el mismo SHA-256 que el firmado
+> (`4214906a05307090…`). `versions.json` quedó con 2.0.0, 1.7.0, 1.6.2, 1.5.0 y 1.4.0.
+
 El **rediseño de la interfaz** hecho en el experimento de impeccable, integrado a
 `desktop-tauri` el 2026-09-21 ([[Rediseñar la UI con impeccable]]), más las correcciones
 que llegaron después de la 1.7.0.

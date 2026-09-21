@@ -234,6 +234,17 @@ nota, así que no ensucian nada.
 > propósito: un changelog vacío deja al usuario decidiendo a ciegas, y volcar el documento
 > entero es peor todavía.
 
+> [!warning] Después de publicar, anotalo en la nota de la versión
+> El script no escribe nada en `docs/`. Si la publicación no queda en la nota, la
+> documentación sigue diciendo que la versión está pendiente, y la siguiente se prepara
+> sobre una premisa falsa. Pasó con la **1.7.0**: se publicó el 2026-09-06 sin anotarlo, y
+> al preparar la 2.0.0 se escribió un changelog que la repetía entera y afirmaba que nunca
+> había salido. Lo frenó el ensayo, que descargó el `versions.json` del bucket y la listaba.
+>
+> Así que, al terminar: un callout `[!success] Publicada el …` en la nota, y la línea de la
+> versión en [[Mapa de documentacion]]. Y **ante la duda, el bucket manda**: el
+> `latest.json` público dice qué versión recibe todo el mundo, sin credenciales.
+
 ### Paso 2 — `npm run publicar`
 
 ```sh

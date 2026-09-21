@@ -122,6 +122,7 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
 - [[Estado del proyecto]] — situación actual, pendientes y deuda.
 - [[Version 2.0.0]] — release actual de desktop: el **rediseño de la interfaz** (marco
   propio, atmósferas, paleta, configuración en ventana). Major por decisión del usuario.
+  **Publicada el 2026-09-21**.
 - [[Version 1.7.0]] — trece funcionalidades en una tanda: las tablas se vuelven de
   trabajar, aparecen las preferencias **del vault**, y el título renombra el archivo. Web
   salió como `1.3.0`. **Publicada el 2026-09-06**.
