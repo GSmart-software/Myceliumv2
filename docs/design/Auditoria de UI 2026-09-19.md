@@ -1,0 +1,236 @@
+# Auditoría de UI 2026-09-19
+
+Línea base técnica de la interfaz **antes** de cualquier cambio de diseño: el paso 4 de
+[[Rediseñar la UI con impeccable]]. Sirve para comparar con números después de cada
+arreglo (volver a correr `/impeccable audit frontend`).
+
+- **Rama**: `experimento/ui-impeccable`, idéntica a `desktop-tauri` en la UI.
+- **Cómo se midió**: `/impeccable audit` con la app real enganchada por CDP
+  ([[Ver la UI con Playwright]]), la nota [[Mapa de documentacion]] abierta en vivo, las
+  cuatro combinaciones tema × modo, la ventana en su mínimo (640×480), el árbol
+  accesible, más lectura del código y el detector mecánico de impeccable.
+- El contraste se calculó sobre **colores computados**, componiendo las transparencias
+  hasta el fondo opaco. Nada se estimó leyendo CSS.
+
+## Puntaje: 14/20 (Bueno)
+
+| Dimensión | Puntaje | Hallazgo principal |
+|---|---|---|
+| Accesibilidad | 2 | En claro, Brote no alcanza el mínimo: `#tag` a 1.95:1, anillo de foco a 2.2:1 |
+| Rendimiento | 3 | Excalidraw y Mermaid diferidos; xterm entra en el paquete inicial |
+| Responsive | 3 | Funciona a 640px; recortes menores en la búsqueda y el título |
+| Theming | 3 | Tokens casi perfectos; los temas claros están mal calibrados en el glow |
+| Integridad | 3 | Sistema coherente y propio; tres degradés no documentados |
+
+> [!important] El patrón de fondo
+> Casi todos los problemas graves tienen **una sola causa**: Brote (`--mic-glow`) se
+> diseñó para brillar sobre oscuro, y en los temas **claros** se sigue usando igual
+> como texto, anillo de foco y gráfico. Los temas oscuros pasan todas las mediciones de
+> texto salvo el enlace roto.
+
+## Mediciones clave
+
+Contraste medido (mínimos WCAG: 4.5:1 texto, 3:1 gráficos y foco).
+
+| Elemento | Bio oscuro | Bio claro | Cant. oscuro | Cant. claro |
+|---|---|---|---|---|
+| `#tag` (texto Brote sobre Brote 15%) | 10.27 | **1.95** | 8.24 | **2.03** |
+| Anillo de foco sobre lienzo | 14.69 | **2.21** | 11.44 | **2.29** |
+| Título de callout | ok | **2.03** | ok | **2.12** |
+| Enlace roto `[[…]]` | **2.24** | **1.01**¹ | **1.38** | **1.03**¹ |
+| Logo, fin del degradé (Hifa) sobre el marco | 13.14 | **2.01** | 5.99 | **2.14** |
+| Ícono inactivo del rail (Brote 55%) | 5.07 | **2.30** | 4.28 | **2.41** |
+| Texto de "Compartir" | ok | **4.10** | ok | **4.45** |
+| Borde de "Compartir" (Brote 40%) | 3.14 | **1.85** | **2.80** | **1.92** |
+| Enlace (Hifa) sobre lienzo | 12.44 | 4.50 | 5.70 | 4.76 |
+
+¹ Dentro de un fragmento de código, cuyo fondo es Esporo profundo también en claro.
+
+## Hallazgos
+
+**P1**
+- `#tag` ilegible en claro (`styles/editor.css:590`).
+- Enlace roto casi invisible en todos los temas: `color-mix(accent 40%, #000)` en
+  `styles/editor.css:579`, el único color del editor que no sale de un token.
+- Anillo de foco invisible en claro (`app/globals.css`, `:focus-visible`), incumple
+  WCAG 1.4.11.
+- Título de callout ilegible en claro.
+
+**P2**
+- En claro, el marco (logo, íconos del rail, "Compartir") usa los tonos calibrados para
+  fondo claro sobre Esporo, justo lo que prohíbe *The Dark Frame Rule* de [[DESIGN]].
+- La búsqueda de la barra superior anula el foco sin reemplazo
+  (`AppTopbar.module.css:71`).
+- ~~Los chevrons de plegado no son botones: no se alcanzan con teclado.~~ **Falso
+  positivo**, verificado en `harden`: el margen es `aria-hidden` y plegar funciona con
+  Ctrl+Shift+[ / ]. El árbol de Playwright los listaba igual. Lo que sí había era
+  `DEF-088`: la flecha de una sección plegada no se veía.
+- `prefers-reduced-motion` solo en `AperturaVault`; el grafo y los paneles animan
+  sin alternativa.
+- No hay landmark `main`, y el contenido del editor no tiene nombre accesible.
+- A 640px el explorador sigue en 240px.
+
+**P3**
+- La búsqueda compacta muestra una "B" recortada.
+- El título del documento corta la palabra al medio (falta `hyphens: auto`).
+- xterm en el paquete inicial vía `lib/terminal.ts`.
+- `transition: width` en tres barras de progreso y `transition: all` en
+  `panes.module.css:363`.
+- `#eafff8` fijo en `MiniGraph.tsx:159`.
+
+## Detector mecánico
+
+Dio 14 avisos:
+- **8 son falsos positivos.** Callouts, citas y grupos de filtro con borde lateral son
+  convenciones de Markdown o de estructura; el chevron está dibujado con bordes.
+- **4 son texto con degradé.** El logo es intencional; el título del documento y el
+  énfasis triple (`***texto***`) no están registrados en [[DESIGN]].
+- **3 son `transition: width`.**
+
+## Lo que funciona bien
+
+- La arquitectura de tokens: cero hex en componentes y el porqué documentado en
+  `tokens.css`.
+- Los temas oscuros.
+- Los controles nativos (`color-scheme`, la lista del `<select>`).
+- Los 81 botones del workspace tienen nombre accesible.
+- La carga diferida de Excalidraw y Mermaid.
+- El grafo solo anima cuando hace falta.
+
+## Plan que salió de acá
+
+`colorize` (temas claros y enlace roto) → `harden` (foco, chevrons, semántica) →
+`animate` (movimiento reducido) → `adapt` (640px) → `optimize` → `document` → `polish`.
+
+> [!success] Avance al 2026-09-19
+> Hechos y commiteados en `experimento/ui-impeccable`: `colorize`, `harden` (con
+> `DEF-088`), `animate`, `adapt` y `optimize` (xterm diferido). `document` actualizó
+> [[DESIGN]]: roles de Brote, degradé de marca con tres usos, ventana angosta y
+> movimiento. `polish` cerró el recorrido sin cambios de código: consola sin errores,
+> foco visible y en orden en todo el marco, diff limpio. Lo único funcional que encontró
+> es `DEF-090` (la búsqueda de la barra superior no busca), que pide una decisión de
+> producto antes que un arreglo.
+
+> [!info] Critique del cascarón (2026-09-19): 20/40, «Obsidian teñido»
+> La identidad vive en el color y el vocabulario, no en la estructura. Salieron
+> `DEF-091` (código en línea ilegible en claro) y `DEF-092` (la lectura no limita el
+> ancho), que son la próxima tanda por decisión del usuario. Quedan **anotados para más
+> adelante**, sin tocar por ahora:
+> - **Compartir en desktop es falso**: el backend es un `noop()` y el modal responde
+>   «Acceso concedido.»; ocupa el botón de mayor énfasis de la barra superior, y la
+>   sección «Compartido» del explorador está siempre vacía.
+> - **La red de enlaces está escondida**: backlinks y mini-grafo detrás de «Panel de
+>   metadatos», cerrado por defecto; es lo que diferencia al producto.
+> - **Marco sobrecargado**: 25 controles fijos en la barra del editor, íconos repetidos
+>   (Compartir y Grafo usan el mismo), título duplicado, cerrar pestaña de 16 px.
+> - **Teclado**: 80 paradas de Tab antes de la nota, explorador sin semántica de árbol,
+>   modal Compartir sin foco atrapado ni Escape.
+> Detalle completo en `.impeccable/critique/`.
+
+> [!info] Critique 2 del cascarón (2026-09-19): 21/40 (antes 20)
+> Confirmado por las dos evaluaciones: `DEF-091` y `DEF-092` resueltos; la lectura pasó de
+> valle a «buen final». Sube solo un punto porque lo que frena es de marco, no de
+> defectos.
+>
+> **Decisión del usuario sobre el título del documento**: se queda. El nombre del
+> archivo con degradé sobre la nota es parte de la identidad (uno de los tres usos del
+> degradé de marca); no se oculta aunque repita el H1. Como mucho, más adelante:
+> alinearlo al eje del contenido y renombrar con doble clic en vez de uno.
+>
+> **Próxima tanda elegida**: teclado y menús (`/impeccable harden`). Escape y foco en
+> «Más opciones», el menú del pane y el modal Compartir (solo `ContextMenu` lo tiene);
+> el explorador como árbol navegable con `aria-current`; saltar al contenido; nombres
+> accesibles para los 10 botones que hoy solo tienen `title`.
+>
+> **Hecho el mismo día**, verificado con teclado en la app: el árbol pasa de 80 paradas
+> de Tab a una sola (la parada 20 desde el inicio), con flechas, `aria-level`,
+> `aria-expanded` y `aria-current`; «Saltar a la nota» es la primera parada; los menús
+> usan `lib/useMenuEmergente.ts` (Escape devuelve el foco, flechas, uno a la vez) y el
+> modal Compartir `lib/useDialogoModal.ts` (foco adentro, Escape, nombre del diálogo).
+
+> [!success] Cierre del refinamiento (critique 3, 2026-09-19): 20 → 21 → 21
+> El refinamiento resolvió los defectos y la accesibilidad (las dos evaluaciones lo
+> confirman: 0 controles sin nombre, 22 paradas de Tab hasta la nota en vez de 80, Escape
+> y foco en menús y modal, contraste en los cuatro combos). El puntaje no sube más porque
+> lo que frena es **estructural**: la identidad vive en el color, la composición es la de
+> Obsidian, y el marco esconde la red de enlaces. Eso no lo resuelve ningún refinamiento:
+> es el terreno del **rediseño**, que es el paso siguiente.
+>
+> Quedan abiertos, anotados para el rediseño o para una tanda chica:
+> - Funciones muertas o falsas en el marco: `DEF-090`, Compartir en desktop, Tags.
+> - Dos documentos según el modo (título solo en vivo, callout distinto, ancho sin límite
+>   en vivo).
+> - Barra del editor de 25 controles; Grafo y Compartir con el mismo ícono.
+> - Sin selector rápido, paleta de comandos ni lista de atajos.
+> - Menores y reales: el degradé del título en claro arranca a 2.2:1; `input` y
+>   `textarea` en Arial (no heredan la fuente); cabeceras del explorador en peso 700; la
+>   pestaña (`role="tab"`) no recibe foco.
+>
+> Quedaron fuera, a propósito: cargar KaTeX y highlight.js bajo demanda (pide volver
+> asíncrono el render de Markdown), las `transition: width` (sin costo medible), y
+> `DEF-089`. Aparecieron para el `critique`: la búsqueda de la barra superior no busca, y
+> el divisor de «Compartido» parece una barra de scroll.
+
+## Segunda auditoría — 2026-09-20 (cerrado el experimento): 17/20
+
+Misma rúbrica que la de arriba, después del prototipo del cascarón, las atmósferas, las
+formas, el marco de ventana propio y la ventana de Configuración. **14/20 → 17/20**.
+
+| # | Dimensión | Antes | Ahora | Hallazgo principal |
+|---|---|---|---|---|
+| 1 | Accesibilidad | — | 3 | Un enlace dentro de un callout queda en 4.35:1 en Bioluminiscencia claro |
+| 2 | Rendimiento | — | 3 | Nada de `will-change`; quedan tres `transition: width` en barras de progreso |
+| 3 | Adaptación | — | 3 | Sin scroll horizontal a 640px; los objetivos de 16-22px son de ratón |
+| 4 | Tematización | — | 4 | Tokens de dos capas + atmósferas, medidos en 16 combinaciones |
+| 5 | Integridad | — | 4 | 14 avisos del detector, todos explicados por decisiones escritas |
+| **Total** | | **14/20** | **17/20** | Bueno, banda alta |
+
+### Veredicto de integridad: **pasa**
+
+El detector da 14 avisos y **ninguno es deriva**: 7 `side-tab` (la franja de los callouts,
+que el usuario decidió conservar; la barra de color de las consolas; el borde de una
+tabla), 4 `gradient-text` (los usos sancionados en [[DESIGN]]) y 3 `layout-transition`
+(barras de progreso). Cada uno tiene su decisión escrita, con fecha y motivo.
+
+### Hallazgos
+
+- **[P2] Enlace dentro de un callout, en claro: 4.35:1.** ✅ **Corregido** el 2026-09-20
+  (`DEF-095`): los enlaces pasan al rol `--mic-enlace`, que en claro se mezcla con la
+  tinta. Medido después: 6.11:1 en ese caso y 5.06:1 el peor de seis combinaciones. `styles/editor.css`
+  (`.mic-wikilink-cm`, color `--mic-accent`). Sobre el lienzo pasa; sobre el fondo teñido
+  del callout se queda a 0.15 del mínimo. Medido en Bioluminiscencia claro con Bosque.
+  Le corresponde el tratamiento por rol que ya tienen los títulos: mezclar con la tinta en
+  claro.
+- **[P3] El degradé del logo en claro** mide bajo (viene de la línea base como el degradé
+  del título). Es decoración sobre un botón que además dice «Mycelium» en su `aria-label`.
+- **[P3] Objetivos de 16-22px**: la «×» de una pestaña, las flechas de historial, el menú
+  del pane y los botones de fila/columna de una tabla. Para ratón son la medida de VS
+  Code; en una pantalla táctil quedarían chicos.
+- **[P3] Color a mano** en `BaseView.module.css`: el enlace roto se mezcla con `#000` en
+  vez de con la tinta del tema. El rojo de «cerrar» (`#c42b1c`) es a propósito y está
+  documentado: es convención del sistema operativo.
+- **[P3] Tres `transition: width`** (importar, abrir vault, actualizador). Sin costo
+  medible, como ya se anotó en la primera auditoría.
+
+### Lo que mejoró respecto de la línea base
+
+- **Teclado**: paleta, pestañas, menús, diálogos, árbol y la ventana de Configuración se
+  operan enteros con teclado, con foco atrapado y devuelto.
+- **Sin controles muertos**: la búsqueda que no buscaba es hoy la paleta (`DEF-090`) y
+  Compartir salió de desktop.
+- **Contraste medido, no supuesto**: 16 combinaciones (tema × modo × atmósfera) para el
+  texto del marco y la barra de estado.
+- **Movimiento reducido**: los cinco archivos con animación tienen su alternativa.
+- **Sin `will-change`** en todo el frontend.
+
+### Qué falta para llegar a 20
+
+Subir accesibilidad, rendimiento y adaptación a 4 pide: el enlace del callout por rol,
+llevar las barras de progreso a `transform`, y decidir si los objetivos de ratón se
+agrandan (hoy son deliberados). Nada de eso es bloqueante.
+
+## Relacionadas
+
+- [[Rediseñar la UI con impeccable]] — el proceso del que esta es la línea base.
+- [[DESIGN]] · [[PRODUCT]] — lo que impeccable lee.
+- [[DESIGN_SYSTEM]] — el sistema de diseño, con las reglas de modo oscuro.

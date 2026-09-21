@@ -389,6 +389,94 @@ y en raw no pasa.
 > que lo cierran. Se registra aparte porque es otra causa con el mismo síntoma, no una
 > recaída de aquella.
 
+# DEF-088
+En el editor (en vivo y raw), cuando se **pliega un título**, la flecha de su margen
+**desaparece**: la sección queda plegada sin ninguna marca a la izquierda que lo indique, y
+solo se ve el `…` al final de la línea. Al pasar el mouse por el editor la flecha vuelve a
+aparecer, pero **apuntando hacia abajo**, igual que la de una sección desplegada: no hay
+forma de distinguir en el margen cuál está plegada.
+
+Además, el texto que aparece al dejar el mouse sobre la flecha está **en inglés** («Fold
+line» / «Unfold line») en una interfaz en español.
+
+Detectado el 2026-09-19 durante `/impeccable harden`, midiendo la app con Playwright.
+
+# DEF-089
+En el **modo de edición en vivo**, un `[[enlace]]` escrito **dentro de código en línea**
+(entre comillas invertidas, como `` `[[enlaces]]` ``) se muestra **como enlace**: con el
+color y el subrayado de un wikilink —y, si la nota no existe, como enlace roto— en lugar de
+verse como texto de código. El código en línea tendría que mostrarse literal, sin
+interpretar lo que tiene adentro.
+
+Además, en los temas **claros** el código en línea es un recuadro oscuro, y el color del
+enlace sobre ese recuadro casi no se lee (medido: 2.5:1).
+
+Se ve en [[Mapa de documentacion]], en el callout «Cómo está organizado». Detectado el
+2026-09-19 durante `/impeccable audit`.
+
+# DEF-090
+El campo **«Buscar en Mycelium…» de la barra superior no busca**. Se puede hacer clic,
+escribir y apretar Enter, pero no pasa nada: no aparecen resultados, no se abre ningún
+panel y el texto queda ahí. La búsqueda que sí funciona es la del rail («Búsqueda
+global»), que no tiene relación con este campo.
+
+Es el campo más visible de la interfaz, arriba al centro, así que invita a usarlo y
+responde con silencio. Detectado el 2026-09-19 durante `/impeccable adapt` y confirmado
+en `/impeccable polish`.
+
+# DEF-091
+En los temas **claros**, el **código en línea** (lo que va entre comillas invertidas, como
+`FUN-L-14` o `docs/design/`) **no se lee**: en la vista de lectura se ve un recuadro oscuro
+casi liso, con el texto oscuro encima (medido: 1.04:1). Pasa en cualquier nota con código
+en línea, en Bioluminiscencia y en Cantarela claros; en los oscuros se ve bien.
+
+Detectado el 2026-09-19 durante `/impeccable critique`.
+
+# DEF-092
+En la **vista de lectura**, las líneas de la nota **ocupan todo el ancho del panel**: en
+una ventana ancha cada renglón llega a 170-180 caracteres, y leer un párrafo obliga a
+recorrer la pantalla de punta a punta. El texto debería limitarse a un ancho cómodo de
+lectura, como en cualquier lector.
+
+Detectado el 2026-09-19 durante `/impeccable critique`.
+
+# DEF-093
+En una **tabla renderizada en vivo**, a la izquierda del encabezado aparece una **celda
+sombreada vacía**, más angosta que las demás, que no corresponde a ninguna columna de la
+tabla. Las filas de abajo no la tienen.
+
+Detectado el 2026-09-19 por el revisor final del prototipo del cascarón.
+
+# DEF-094
+El **título de la ventana** muestra la **ruta completa** del vault en vez de su nombre:
+«Mycelium - C:TrabajoGSmartMycelium» en lugar de «Mycelium - Mycelium». Con varias
+ventanas abiertas, en la barra de tareas y en Alt+Tab los títulos se cortan por el ancho
+y quedan todos iguales, que es justo lo que el nombre venía a resolver.
+
+Detectado el 2026-09-19 al poner el nombre del vault en la barra superior.
+
+# DEF-095
+En los **temas claros**, un `[[enlace]]` dentro de un **callout** no llega al contraste
+mínimo: se lee más flojo que el resto del texto del callout, que va sobre el mismo fondo
+teñido. Fuera del callout, sobre el lienzo, el mismo enlace se lee bien.
+
+Detectado el 2026-09-20 en la segunda auditoría técnica: 4.35:1 medido en Bioluminiscencia
+claro, con el mínimo en 4.5:1.
+
+# DEF-096
+El selector de modo del editor tiene tres opciones en español —«En vivo», «Dividido»,
+«Lectura»— y una en inglés: **«Raw»**. La interfaz está solo en español y la propia
+documentación de diseño llama «crudo» a ese modo.
+
+Detectado el 2026-09-20 en la crítica del cascarón.
+
+# DEF-097
+El **título del documento** se dibuja **centrado** mientras el cuerpo de la nota va
+alineado a la izquierda, así que el mismo texto tiene dos ejes a pocos píxeles de
+distancia. Se ve en vivo y en lectura.
+
+Detectado el 2026-09-19 en la segunda crítica del cascarón y repetido en la tercera.
+
 ---
 
 > [!warning] Defectos sin reporte original

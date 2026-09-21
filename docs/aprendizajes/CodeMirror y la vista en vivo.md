@@ -266,6 +266,25 @@ volcar qué nodos arma lezer para una nota con frontmatter; ver los títulos de 
   el estado. El mismo patrón se reutilizó para la terminal (ver
   [[Terminal integrada - PTY y xterm]]).
 
+## No estilar por los textos de CodeMirror (`DEF-088`)
+
+La flecha de plegado se giraba con `.cm-gutterElement[title^="unfold"]`. Nunca funcionó,
+por **dos** razones, y cada una bastaba:
+
+- CodeMirror pone el `title` en el `<span>` **de adentro** del `.cm-gutterElement`, no en
+  él.
+- El texto es «Unfold line», con **mayúscula**, y `^=` distingue mayúsculas para `title`.
+
+Resultado: una sección plegada quedaba sin flecha (opacidad 0), y al verla con el mouse
+apuntaba como desplegada. Y había una tercera trampa esperando: esos textos son
+**frases traducibles** (`EditorState.phrases`), así que el selector se habría roto igual
+el día que se tradujeran.
+
+**La regla**: el estado de un marcador se expone como **dato propio** —`markerDOM` en
+`foldGutter` con un `data-plegado`— y el CSS lee ese dato (`:has(> [data-plegado])`).
+Los textos de CodeMirror son para personas, no para selectores. Detectado el 2026-09-19
+en el `harden` de [[Rediseñar la UI con impeccable]].
+
 ## Relacionadas
 
 - [[Aprendizajes tecnicos]] — mapa del área.

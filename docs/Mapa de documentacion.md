@@ -46,6 +46,18 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
 - [[Publicar una version]] — bucket, claves de firma y los cinco pasos de una
   publicación, para que la actualización llegue sola (`FUN-L-14`).
 - [[Generar el framework de IA en un vault]] — instalar las instrucciones de IA.
+- [[Rediseñar la UI con impeccable]] — la skill de diseño: dónde está, cómo se
+  configura y en qué orden se usa.
+- [[Ver la UI con Playwright]] — capturas y estilos de la app real vía WebView2.
+
+## Diseño (`docs/design/`)
+
+- [[PRODUCT]] — registro de producto (usuarios, posicionamiento, principios) que usa la
+  skill de diseño `impeccable`.
+- [[DESIGN]] — el sistema visual tal como está implementado, extraído de `tokens.css`,
+  con reglas para los agentes que diseñen pantallas. Complementa a [[DESIGN_SYSTEM]].
+- [[Auditoria de UI 2026-09-19]] — línea base técnica (14/20) antes de cambiar nada: los
+  temas claros no calibran el color de brillo.
 
 ## Funcionalidades (especificaciones)
 
