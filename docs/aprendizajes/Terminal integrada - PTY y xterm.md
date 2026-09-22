@@ -112,9 +112,42 @@ fijar la versión tira una excepción.
 > emoji aparece con una celda **de más** —el desfase al revés—, el desacuerdo es de ConPTY y
 > no de xterm.
 
+## El `localStorage` no es de la ventana ni del vault: es del origen
+
+Las consolas se guardaban en una clave única (`mic-terminales`), y eso las volvía de la
+**instalación**. De ahí salieron dos defectos que parecían distintos y eran el mismo
+(`DEF-099` y `DEF-100`): al cambiar de vault seguían las consolas del anterior —con el cwd
+en la carpeta que se acababa de dejar— y dos ventanas, cada una con su vault, veían la
+misma lista.
+
+> [!important] Todo lo persistido tiene un ámbito, y hay que elegirlo a propósito
+> El almacenamiento del navegador es por **origen**: todas las ventanas de Mycelium son el
+> mismo. Así que la clave no separa nada por sí sola; **la separación se escribe en el
+> nombre de la clave**. `DEF-044` ya lo había resuelto para las pestañas (`micelio-tabs` →
+> `micelio-tabs:<ruta>`) y el remedio es el mismo: `mic-consolas:<ruta>`.
+>
+> Con eso, lo de las dos ventanas se cae solo: no pueden chocar porque un vault se abre en
+> **una** ventana (`FUN-L-16`), así que nunca comparten clave.
+
+Dos detalles que no son evidentes:
+
+- **Las preferencias no van con las sesiones.** La shell por defecto y el «restaurar al
+  abrir» se configuran junto al resto de los ajustes del usuario: si viajaran dentro de la
+  clave del vault, entrar a uno nuevo las reiniciaría en silencio. Salieron a su propia
+  clave, fuera del `partialize`.
+- **El orden al cambiar de almacén no es intercambiable**, igual que en `tabsStore`: leer lo
+  guardado, reapuntar el `persist`, y recién entonces rehidratar o vaciar. Vaciar antes de
+  reapuntar escribe la lista vacía **en la clave del vault que se está dejando**.
+
+Y una consecuencia de fondo: la lista sobrevive, el **proceso** no. Al cambiar de vault se
+matan los PTY, porque su cwd es de la carpeta anterior — que es exactamente lo que el
+usuario veía. Volver al vault es como volver a abrir la app (CA6): están sus consolas, con
+su título y su cwd, listas para arrancar de nuevo.
+
 ## Relacionadas
 
 - [[terminal-integrada]] — especificación funcional y criterios de aceptación.
 - [[Tauri y el WebView]] — ConPTY, `portable-pty`, el proceso que sobrevive al F5.
 - [[Estado con Zustand]] — ids sentinela `terminal:<uuid>` y qué persistir.
+- [[bugs-progreso]] — `DEF-099` y `DEF-100`, el ámbito de las consolas.
 - [[Aprendizajes tecnicos]] — mapa del área.

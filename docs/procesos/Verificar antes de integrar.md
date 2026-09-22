@@ -13,6 +13,7 @@ orquestador como los subagentes.
 | Módulo Rust con tests | `cargo test --lib <modulo>` | `frontend/src-tauri/` |
 | Backend .NET (solo web) | `dotnet build` | `backend/` |
 | Reflejo a web | `npm ci` + `tsc` + `npx next build` | worktree de `web-cloud` |
+| Módulo con tests headless | `node --test scripts/test-<modulo>.mjs` | `frontend/` |
 | Smoke tests (si aplica) | `node scripts/smoke-*.mjs` | `frontend/` |
 
 > [!tip] `next build` solo en el reflejo a web
