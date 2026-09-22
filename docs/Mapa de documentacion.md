@@ -81,6 +81,8 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
   referencian sus documentos y convertirlo en enlaces (`FUN-M-17` · `FUN-L-17`).
 - [[canvas]] — el archivo `.canvas`: notas y textos en el espacio, unidos por flechas
   (`FUN-L-18`).
+- [[drawio]] — draw.io como tipo de archivo del vault, y la decisión que lo bloquea
+  (`FUN-L-20`). Idea registrada, sin implementar.
 - [[bases-tabla]] — el archivo `.base`: agregar notas por sus propiedades en una tabla
   (`FUN-L-03`). Continuación directa de [[metadata-yaml]].
 - [[edicion-en-el-render]] — las propiedades y las tablas dejan de abrirse en crudo con el

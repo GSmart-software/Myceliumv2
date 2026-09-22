@@ -489,6 +489,29 @@ IA.
 > nunca se confirmó, y el síntoma siguió. El usuario aisló el disparador el 2026-09-21: pasa
 > **con emojis**. Se registra aparte porque es otra causa, no una recaída de aquélla.
 
+# DEF-099
+Las **consolas no pertenecen al vault**. Al abrir otro vault, la lista de consolas que
+aparece es la del vault anterior: están los mismos «Terminal N», con lo que ya se había
+escrito en ellos, y su **directorio de trabajo sigue apuntando a la carpeta del vault que
+se dejó**. Escribir `pwd` (o `cd` sin argumentos) en esa consola muestra la ruta vieja.
+
+Reportado por el usuario el 2026-09-22.
+
+> [!info] Lo que NO es defecto: cerrar la pestaña no termina la consola
+> El usuario preguntó si también era un defecto que, al cerrar la pestaña de una consola y
+> volver a abrirla, persista todo lo que se hizo. **No lo es**: es el CA7 de
+> [[terminal-integrada]]. Cerrar la pestaña solo la oculta —la sesión sigue viva y se
+> reabre desde el panel de Consolas— y lo que la termina es **Finalizar**. Lo que sí falla
+> es que esa sesión sobreviva al **cambio de vault**, que es otra cosa.
+
+# DEF-100
+Con **varias ventanas de Mycelium abiertas** —un vault en cada una, que es lo que permite
+`FUN-L-16`— **las consolas se comparten**: la lista del panel de Consolas es la misma en
+todas las ventanas, así que en la ventana de un vault aparecen las consolas abiertas en el
+otro. Cada vault debería tener las suyas.
+
+Reportado por el usuario el 2026-09-22, en la misma tanda que `DEF-099`.
+
 ---
 
 > [!warning] Defectos sin reporte original

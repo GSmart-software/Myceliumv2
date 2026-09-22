@@ -42,6 +42,20 @@ diferencia funcional entre versiones es aceptada). Idea y decisiones: `docs/BACK
    si muere por sí mismo (`exit`), en cuyo caso la pestaña se cierra sola y la consola
    desaparece de la lista.
 
+> [!warning] Lo que la spec nunca dijo: **de quién** son las consolas
+> Los CA6 y CA7 definen qué sobrevive **en el tiempo** —al cerrar la pestaña, al reabrir la
+> app— pero no de qué **ámbito** es una consola. Se implementó como si fuera de la
+> instalación: `terminalStore` persiste en una sola clave de `localStorage`
+> (`mic-terminales`), y `tabsStore`, que desde `DEF-044` tiene un almacén por vault, excluye
+> a propósito las terminales de su descarte porque «no son notas del vault».
+>
+> El usuario reportó las dos consecuencias el 2026-09-22: al cambiar de vault siguen las
+> consolas del anterior, con el cwd de su carpeta (`DEF-099`), y varias ventanas —un vault
+> en cada una, `FUN-L-16`— comparten la lista (`DEF-100`). Su criterio es explícito: **cada
+> vault debe tener sus propias consolas**. Al corregirlo hay que fijar acá ese ámbito, y
+> tener en cuenta que en Rust las sesiones **ya** pertenecen a una ventana y mueren con
+> ella, así que lo que está de más es la lista del frontend, no el proceso.
+
 ## Notas de implementación
 
 - **Rust** (`src-tauri/src/terminal.rs`): crate `portable-pty` (PTY multiplataforma,
@@ -70,4 +84,5 @@ diferencia funcional entre versiones es aceptada). Idea y decisiones: `docs/BACK
 - [[Mycelium como memoria de la IA]] — para qué existe esta terminal.
 - [[ia-framework-vault]] — lo que corre dentro de ella.
 - [[Diferencias funcionales aceptadas entre versiones]] — por qué es solo-desktop.
+- [[bugs-progreso]] — `DEF-099` y `DEF-100`, el ámbito de las consolas.
 - [[RAMAS]] — archivos que hizo divergir.

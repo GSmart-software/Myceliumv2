@@ -95,6 +95,9 @@ lo digo.
 | 2026-09-18 | Las tablas `.base` no conservan su estado al cambiar de pestaña; que persista «el estado de la visibilidad» | `DEF-085` — pierde vista, búsqueda, panel abierto y «ver sin filtrar», y **también un borrador sin guardar de la fuente**. Queda preguntado cuál de esos es «la visibilidad» |
 | 2026-09-18 | Al cambiar el frontmatter de un archivo, el `.base` no se actualiza; un hook que lo detecte venga el cambio de donde venga | `DEF-086` — la idea del hook es la dirección correcta, y en desktop el mecanismo ya existe: el watcher avisa al grafo desde `DEF-054`. Falta que avise también a la tabla |
 | 2026-09-18 | Los títulos no se renderizan en edición en vivo: el culpable es el `---` que cierra el frontmatter | `DEF-087`, emparentado con `DEF-062` (mismo síntoma, otra causa). El aislamiento que hiciste es lo que lo vuelve atacable |
+| 2026-09-22 | Al cambiar de vault siguen las consolas del anterior, apuntando a su carpeta; ¿es por la persistencia o es un bug? | `DEF-099`. **Las dos cosas**: que cerrar la pestaña no termine la consola es el CA7 de [[terminal-integrada]], a propósito; que sobreviva al **cambio de vault** es el defecto |
+| 2026-09-22 | Varias ventanas de Mycelium comparten las consolas; cada vault debería tener las suyas | `DEF-100`, la otra cara del `DEF-099`: la lista vive en una sola clave de `localStorage`. Los procesos **sí** están separados por ventana desde `FUN-L-16` |
+| 2026-09-22 | Integrar draw.io en Mycelium, como se integró Excalidraw | `FUN-L-20` `FILES-DRAWIO` · va sola · spec en [[drawio]]. Lo caro no es el editor sino **cómo se embebe**: draw.io no tiene componente React, y apuntar a su sitio público rompería el funcionar sin conexión |
 
 > [!note] Esta tabla se puede vaciar cuando moleste
 > Es una comodidad para que veas en qué terminó cada cosa, no un registro canónico. La
