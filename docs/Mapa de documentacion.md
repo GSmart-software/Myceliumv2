@@ -34,6 +34,8 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
 - [[Implementacion independiente por rama]] — la regla de oro: nada de merge entre versiones.
 - [[Diferencias funcionales aceptadas entre versiones]] — qué existe solo en una y por qué.
 - [[Mycelium como memoria de la IA]] — el objetivo de fondo de la terminal y el framework.
+- [[Los temas los define Mycelium, no el usuario]] — por qué no hay creador de temas, y
+  qué queda aprendido para los estilos que sí se agreguen.
 
 ## Procesos
 
@@ -83,8 +85,6 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
   (`FUN-L-18`).
 - [[drawio]] — draw.io como tipo de archivo del vault, y la decisión que lo bloquea
   (`FUN-L-20`). Idea registrada, sin implementar.
-- [[temas-personalizados]] — que el usuario cree sus propios temas eligiendo los colores de
-  identidad, y el resto derivado (`FUN-M-36`). Idea registrada, sin implementar.
 - [[bases-tabla]] — el archivo `.base`: agregar notas por sus propiedades en una tabla
   (`FUN-L-03`). Continuación directa de [[metadata-yaml]].
 - [[edicion-en-el-render]] — las propiedades y las tablas dejan de abrirse en crudo con el
