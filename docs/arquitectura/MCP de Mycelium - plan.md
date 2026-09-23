@@ -122,7 +122,7 @@ bloques cercados. Es barato hacerlo bien desde el principio y carísimo después
 entonces los enlaces ya están materializados en una tabla y nadie sabe cuáles son de verdad.
 Emparentado con `DEF-089`, que es la misma ceguera en la edición en vivo.
 
-## 6. Lo que cambió el estado del arte (2026-09-23)
+## 4. Lo que cambió el estado del arte (2026-09-23)
 
 Se contrastó el plan contra lo que existe hoy: [[Memoria documental para IA - estado del arte]].
 **El veredicto de fondo es que el plan es correcto**, y no por cortesía: las técnicas más
@@ -136,7 +136,7 @@ herramienta del vecindario llegó al mismo «el markdown es la verdad, SQLite es
 Pero la investigación encontró tres cosas que el plan no tenía, y **ninguna agrega un
 componente**: las tres hacen que el plan **mida** algo que hoy no mide.
 
-### 6.1 El texto de los enlaces entrantes entra al ranking
+### 4.1 El texto de los enlaces entrantes entra al ranking
 
 Es el mejor hallazgo. Medido desde 2001 y reproducido en 2010 y 2022: rankear por el **texto
 del enlace** es hasta el doble de efectivo que por el contenido para encontrar *la* página de
@@ -153,7 +153,7 @@ consulta. Aparte y no en la fila destino, porque materializarlo ahí rompería l
 reindexado incremental, que es lo que hace barato el diseño. Entra como **quinta señal en
 peso cero** y se calibra *offline* sobre corridas ya ejecutadas: no cuesta una tanda nueva.
 
-### 6.2 La regla de decisión estaba mal medida, y se corrige
+### 4.2 La regla de decisión estaba mal medida, y se corrige
 
 El arnés define la eficiencia como **contexto ocupado** (`tokens_recuperacion`) y
 pre-registra que si el MCP ocupa más que el `grep` actual, se rehace. La investigación probó
@@ -178,7 +178,7 @@ de tamaño y no un ganador; y el arnés lo penaliza artificialmente si cada preg
 sesión nueva, porque le hace pagar siempre la escritura del caché. Hay que medirlo por sesión
 y no por pregunta.
 
-### 6.3 La decisión sobre embeddings estaba pre-registrada contra un número imposible
+### 4.3 La decisión sobre embeddings estaba pre-registrada contra un número imposible
 
 [[MCP de Mycelium - memoria]] dice que los embeddings entran si el arnés mide **recall@10 <
 0,80** en la clase de preguntas con desajuste de vocabulario. [[MCP de Mycelium - evaluacion]]
@@ -198,7 +198,7 @@ instalador**, y eso apunta al artefacto equivocado. La opción real es un modelo
 correcta no es «¿entra en el instalador?» sino **«¿acepta el usuario una descarga opcional de
 ~140 MB?»**, y eso no se decide midiendo: se pregunta.
 
-### 6.4 Una ambigüedad del plan, cerrada
+### 4.4 Una ambigüedad del plan, cerrada
 
 La investigación no pudo saber si la columna `encabezados` del índice guarda **el encabezado
 propio** o **la cadena completa de ancestros**. **Decisión: la cadena completa** (`Nota > H2 >
@@ -206,7 +206,7 @@ H3`), que el esquema ya calcula para las migas. Es la versión gratis de lo que 
 Retrieval paga con un modelo: cada sección queda indexada con el lugar que ocupa, sin una
 llamada a nada.
 
-## 7. Lo que hay que construir en la app, y no es «solo MCP»
+## 5. Lo que hay que construir en la app, y no es «solo MCP»
 
 Dos cosas que el plan asume y que son cambios de Mycelium, no del servidor. Van al BACKLOG
 por separado para que no viajen escondidas:
@@ -220,7 +220,7 @@ por separado para que no viajen escondidas:
    `TERM`. Sumar `MYCELIUM_VAULT` y el *token* de la ventana deja autenticado, sin
    configurar nada, al Claude Code que corre en la terminal integrada.
 
-## 8. El orden, y por qué empieza por medir
+## 6. El orden, y por qué empieza por medir
 
 > [!tip] La fase 0 es la única que no se puede saltear
 > El arnés mide **la línea base**: cuánto le cuesta hoy a la IA encontrar algo con `grep`.
@@ -240,7 +240,7 @@ por separado para que no viajen escondidas:
 Las fases 1 y 2 se miden con el mismo arnés. Si la fase 1 no le gana a `grep`, **no se sigue
 a la 2**: se revisa el diseño.
 
-## 9. Lo que sigue esperando una decisión del usuario
+## 7. Lo que sigue esperando una decisión del usuario
 
 1. ~~**Con qué modelo se corre la evaluación.**~~ **Decidido** (usuario, 2026-09-23): el
    **modelo más chico** para la tanda principal, y las preguntas de reserva repetidas con el
@@ -259,7 +259,7 @@ a la 2**: se revisa el diseño.
 5. **Puntaje parcial** en las preguntas de enumeración, o todo o nada.
 6. **¿Aceptarías una descarga opcional de ~140 MB** para tener búsqueda semántica, si el
    arnés llegara a mostrar que hace falta? No es una decisión de ahora —primero hay que
-   medir si hace falta— pero sí marca si esa puerta está abierta o cerrada (§ 6.3).
+   medir si hace falta— pero sí marca si esa puerta está abierta o cerrada (§ 4.3).
 
 ## Relacionadas
 
