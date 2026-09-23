@@ -192,6 +192,60 @@ sitios es la misma que documenta [[canvas]] § 7:
   `[[…]]` dentro de los estilos y las etiquetas de las figuras. Es destino válido, no
   fuente. Mismo criterio que las bases y los canvas.
 
+### Tres defectos que solo aparecieron con la app en la mano (2026-09-23)
+
+Los tres pasaron la verificación automática y **los encontró el usuario probando**. Vale la
+pena el detalle, porque los tres son la misma clase de error: *una respuesta escrita en
+varios sitios, y solo uno actualizado*.
+
+**1. `![[diagrama.drawio]]` no dibujaba nada.** Dos causas encadenadas:
+
+- `resolveWikilink` recortaba solo `excalidraw|md` de una lista escrita a mano. El título
+  de una nota **no lleva extensión**, así que `Arquitectura.drawio` no encontraba a
+  `Arquitectura` y el bloque salía como «no existe» con el archivo ahí al lado.
+- La **vista en vivo no comparte código con la de lectura**. `lib/markdown.ts` cubre solo
+  la lectura; los embeds mientras se edita son widgets de CodeMirror en
+  `lib/editor/livePreview.ts`, donde no había nada para draw.io. Aunque la resolución
+  hubiera funcionado, el diagrama habría aparecido al leer y desaparecido al editar.
+
+**2. Un `.drawio` se listaba sin extensión** (`FUN-S-03`): el explorador tenía su propia
+copia del mapa tipo→extensión.
+
+**3. Volver a la pestaña recargaba el editor entero**, perdiendo zoom, selección y deshacer.
+
+### La raíz común, y cómo queda cerrada
+
+«Qué extensión tiene este tipo» estaba contestada en **tres** archivos. Ahora vive solo en
+`lib/extensionesDeTipo.ts`, como los íconos en `lib/iconosDeTipo.ts` (`FUN-S-11`), y es un
+`Record<NotaTipo, string>`: **un tipo nuevo no compila** hasta contestar ahí. Igual la
+expresión del embed, que ahora leen las dos vistas desde `lib/drawio.ts`.
+
+> [!warning] Los tests estaban verdes con el embed roto
+> Probaban la expresión por su cuenta; el defecto estaba en la resolución, que nadie
+> tocaba. `scripts/test-embeds.mjs` carga ahora el pipeline de verdad —`renderNota` y
+> `resolveWikilink`— y **se comprobó que falla con el código viejo** (tres tests en rojo).
+> Un test que aprueba una función rota es peor que no tenerlo.
+
+### Cambiar de pestaña sin recargar
+
+El `iframe` vive en `lib/drawioInstancias.ts`, fuera de React, como el `Map` de
+`lib/terminal.ts` y el `instanceCache` de `NoteEditor` (`DEF-039`).
+
+> [!important] La solución de la terminal no se podía copiar
+> La terminal re-adjunta su nodo con `appendChild`, pero **mover un `iframe` en el DOM lo
+> recarga**. Está comprobado en el smoke, contra la webapp de verdad y en los dos sentidos:
+> `ocultarNoRecarga` (ocultar y reposicionar conserva el documento) y `mudarloSiRecarga`
+> (cambiarlo de padre lo pierde).
+>
+> Por eso el `iframe` se crea una vez colgado de `<body>` y se **posiciona** con
+> `position: fixed` sobre el rectángulo del pane; cambiar de pestaña solo lo oculta.
+> `z-index: 10`, bajo a propósito: `.paneBody` no crea contexto de apilado, así que las
+> zonas de soltar (20), la pista de arrastre (30) y los menús (60) siguen por encima.
+>
+> Cerrar la pestaña **sí** destruye el `iframe` —lo decide el árbol de panes, porque la
+> vista no distingue un cierre de un cambio de pestaña— y hay un tope de **3** editores
+> vivos, que nunca poda uno visible.
+
 ### Lo que quedó fuera de esta unidad
 
 - **`.drawio.svg`**: descartado en § 4, no se implementó ninguna variante.
@@ -205,8 +259,8 @@ sitios es la misma que documenta [[canvas]] § 7:
 | `npx tsc --noEmit` | verde |
 | `cargo check` · `cargo test --lib archivos` | verde · 9 tests, incluido el del tipo `.drawio` |
 | `npx next build` | verde — **es la prueba de que el export estático se banca la webapp**: 102 MB de estáticos en `public/`, y Next los copia sin atragantarse (~70 s) |
-| `node --test scripts/test-drawio.mjs` | 9/9 |
-| `node scripts/smoke-drawio.mjs` | 12/12, sin peticiones externas (CA7), sin 404 y sin errores de consola |
+| `node --test` (drawio · extensiones · embeds) | 43/43 |
+| `node scripts/smoke-drawio.mjs` | 15/15, sin peticiones externas (CA7), sin 404 y sin errores de consola |
 
 > [!warning] Lo que la verificación automática **no** prueba
 > `tsc` en verde no prueba comportamiento. Lo que falta confirmar en la app es lo visible:
