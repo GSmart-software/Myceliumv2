@@ -35,6 +35,21 @@ export function VaultSection() {
     setEsporasError(null);
   }
 
+  /**
+   * Valida mientras se escribe. Antes el error se fijaba en el `blur`, y salir
+   * del campo puede ser el mismo clic que cambia de categoría: la sección se
+   * desmontaba con el error recién puesto y el usuario nunca lo veía
+   * (crítica de Configuración, 2026-09-20).
+   */
+  const escribirCarpetaEsporas = (valor: string) => {
+    setEsporasBorrador(valor);
+    setEsporasError(
+      normalizarCarpetaEsporas(valor) === null
+        ? "Tiene que ser una carpeta DENTRO del vault: sin rutas absolutas ni «..»."
+        : null,
+    );
+  };
+
   /** Confirma la carpeta de Esporas: si la ruta no es válida, no se guarda. */
   const confirmarCarpetaEsporas = () => {
     if (esporasBorrador === carpetaEsporasPref) return;
@@ -74,17 +89,20 @@ export function VaultSection() {
           value={esporasBorrador}
           spellCheck={false}
           placeholder={CARPETA_ESPORAS_DEFECTO}
-          onChange={(e) => setEsporasBorrador(e.target.value)}
+          onChange={(e) => escribirCarpetaEsporas(e.target.value)}
           onBlur={confirmarCarpetaEsporas}
           onKeyDown={(e) => {
             if (e.key === "Enter") e.currentTarget.blur();
             if (e.key === "Escape") {
+              // Escape acá deshace lo tecleado y NO cierra la ventana: sin
+              // esto, el mismo Escape llegaba al diálogo y se llevaba todo.
+              e.stopPropagation();
               setEsporasBorrador(carpetaEsporasPref);
               setEsporasError(null);
             }
           }}
         />
-        <p className={styles.cssPreviewNote} style={{ color: "var(--mic-text-muted)" }}>
+        <p className={styles.hint}>
           Las notas de esta carpeta son <strong>Esporas</strong>: plantillas para crear notas
           ya con su estructura, o para insertar una estructura en una nota que ya existe.
           Admiten variables (<code>{"{{titulo}}"}</code>, <code>{"{{fecha}}"}</code>,{" "}
@@ -104,7 +122,7 @@ export function VaultSection() {
 
       <div className={styles.field}>
         <span className={styles.label}>Exportar</span>
-        <p className={styles.cssPreviewNote} style={{ color: "var(--mic-text-muted)" }}>
+        <p className={styles.hint}>
           Descarga todas las notas en un ZIP preservando la estructura de carpetas.
         </p>
         <div className={styles.btnRow}>
@@ -123,7 +141,7 @@ export function VaultSection() {
 
       <div className={styles.field}>
         <span className={styles.label}>Importar vault de Obsidian</span>
-        <p className={styles.cssPreviewNote} style={{ color: "var(--mic-text-muted)" }}>
+        <p className={styles.hint}>
           Importá una carpeta o un .zip. Se preserva la estructura, se ignora
           <code> .obsidian/</code> y los conflictos se resuelven uno a uno.
         </p>

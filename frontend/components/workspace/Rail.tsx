@@ -5,8 +5,6 @@ import {
   Files,
   Search,
   Settings,
-  Share2,
-  Tag,
   Trash2,
   type LucideIcon,
 } from "lucide-react";
@@ -14,12 +12,14 @@ import { useRouter } from "next/navigation";
 import { usePanelLayoutStore, type RailSection } from "@/stores/panelLayoutStore";
 import { GRAPH_TAB_ID, useTabsStore } from "@/stores/tabsStore";
 import { useUiStore } from "@/stores/uiStore";
+import { IconoGrafo } from "./IconoGrafo";
 import styles from "./Rail.module.css";
 
 const TOP_ITEMS: { section: RailSection; icon: LucideIcon; label: string }[] = [
   { section: "explorer", icon: Files, label: "Explorador" },
   { section: "search", icon: Search, label: "Búsqueda global" },
-  { section: "tags", icon: Tag, label: "Tags" },
+  // Tags sale del rail hasta que la vista exista: era un aviso de «planificada
+  // para una versión futura» en el tercer lugar del rail (critique 2026-09-19).
   // Plantillas de notas (FUN-M-03): un clic en una Espora crea la nota.
   { section: "esporas", icon: CircleDot, label: "Esporas" },
 ];
@@ -69,7 +69,7 @@ export function Rail() {
           title="Grafo de conexiones"
           onClick={openGraph}
         >
-          <Share2 size={20} aria-hidden />
+          <IconoGrafo size={20} />
         </button>
       </div>
       <div className={styles.spacer} />
@@ -79,7 +79,7 @@ export function Rail() {
           type="button"
           className={styles.button}
           aria-label="Configuración"
-          title="Configuración"
+          title="Configuración (Ctrl+,)"
           onClick={() => setSettingsOpen(true)}
         >
           <Settings size={20} aria-hidden />

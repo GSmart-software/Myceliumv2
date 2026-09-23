@@ -6,6 +6,10 @@
   height: var(--mic-topbar-height);
   padding: 0 0.75rem;
   background: var(--mic-bg-sidebar);
+  /* Sobre el marco el foco es el Brote del marco: el de contenido (Hifa, en
+     claro) queda a 2:1 sobre Esporo. Se redefine el token y no cada regla, así
+     el anillo global de globals.css lo toma solo. */
+  --mic-focus: var(--mic-marco-glow);
 }
 
 .logo {
@@ -14,10 +18,10 @@
   gap: 0.5rem;
   font-weight: 700;
   font-size: 1rem;
-  color: var(--mic-glow);
+  color: var(--mic-marco-glow);
   padding: 0.25rem 0.5rem;
   border-radius: var(--mic-radius-sm);
-  background: linear-gradient(90deg, var(--mic-glow), var(--mic-accent));
+  background: linear-gradient(90deg, var(--mic-marco-glow), var(--mic-marco-acento));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -25,15 +29,22 @@
 
 .logoMark {
   flex-shrink: 0;
-  filter: drop-shadow(0 0 5px color-mix(in srgb, var(--mic-glow) 55%, transparent));
+  filter: drop-shadow(0 0 5px color-mix(in srgb, var(--mic-marco-glow) 55%, transparent));
 }
 
 .logo:hover {
-  background-color: color-mix(in srgb, var(--mic-glow) 15%, transparent);
+  background-color: color-mix(in srgb, var(--mic-marco-glow) 15%, transparent);
 }
 
-.logoCompact {
-  display: none;
+/* Nombre del vault abierto, al lado del logo. */
+.vault {
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.8125rem;
+  color: var(--mic-marco-texto);
 }
 
 .searchBar {
@@ -50,57 +61,69 @@
   text-align: left;
 }
 
+.searchBar:hover {
+  color: var(--mic-text-primary);
+  background: color-mix(in srgb, var(--mic-bg-surface) 80%, var(--mic-marco-glow));
+}
+
 .searchIcon {
   color: var(--mic-text-muted);
   flex-shrink: 0;
 }
 
 .searchPlaceholder {
-  font-size: 0.8125rem;
-  color: var(--mic-text-muted);
+  flex: 1;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.searchInput {
-  flex: 1;
-  min-width: 0;
-  background: transparent;
-  border: none;
-  outline: none;
   font-size: 0.8125rem;
-  color: var(--mic-text-primary);
+  color: var(--mic-text-muted);
 }
 
-.searchInput::placeholder {
+.searchKey {
+  flex-shrink: 0;
+  font: inherit;
+  font-size: 0.6875rem;
+  padding: 0 0.3rem;
+  border-radius: 3px;
+  border: 1px solid var(--mic-border);
   color: var(--mic-text-muted);
 }
 
 .actions {
   display: flex;
   align-items: center;
+  align-self: stretch;
   gap: 0.5rem;
 }
 
+/* Compartir es de esta versión: en desktop no hay cuenta ni servidor y el botón
+   no existe (`lib/capacidades.ts`). Sigue el marco de la barra nueva —mismo
+   alto que el disparador y que el avatar, color del marco— en vez del acento,
+   que ahora está reservado a la selección y al estado. */
 .shareButton {
   display: flex;
   align-items: center;
   gap: 0.35rem;
-  padding: 0.3rem 0.65rem;
+  height: 30px;
+  padding: 0 0.65rem;
   border-radius: var(--mic-radius-md);
   font-size: 0.8125rem;
-  color: var(--mic-glow);
-  border: 1px solid color-mix(in srgb, var(--mic-glow) 40%, transparent);
+  color: var(--mic-marco-glow);
+  opacity: var(--mic-marco-inactivo);
+  border: 1px solid transparent;
+  transition: opacity 120ms ease, border-color 120ms ease;
 }
 
 .shareButton:disabled {
-  opacity: 0.45;
+  opacity: 0.3;
   cursor: default;
 }
 
 .shareButton:not(:disabled):hover {
-  background-color: color-mix(in srgb, var(--mic-glow) 15%, transparent);
+  opacity: 1;
+  border-color: color-mix(in srgb, var(--mic-marco-glow) 40%, transparent);
 }
 
 .avatar {
@@ -119,24 +142,17 @@
   filter: brightness(1.15);
 }
 
+/* Ventana angosta: el logo queda en su isotipo (el nombre sigue como aria-label
+   y title del botón) y el disparador pierde el atajo; el texto se recorta. */
 @media (max-width: 767px) {
-  .logoFull {
-    display: none;
+  .topbar {
+    gap: 0.5rem;
   }
 
-  .logoCompact {
-    display: inline;
-  }
-
-  .searchBar {
-    flex: 0 0 auto;
-    width: 30px;
-    padding: 0;
-    justify-content: center;
-  }
-
-  .searchPlaceholder,
-  .shareLabel {
+  .logoFull,
+  .vault,
+  .shareLabel,
+  .searchKey {
     display: none;
   }
 }

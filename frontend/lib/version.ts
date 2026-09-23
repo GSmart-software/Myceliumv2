@@ -23,5 +23,23 @@
  *         **Se quedan fuera por naturaleza**: el color por consola y el
  *         resaltado de sintaxis del visor, que dependen de la terminal y del
  *         visor de archivos, los dos solo-desktop.
+ * 2.0.0 = **el rediseño de la interfaz**, reflejado del escritorio (el
+ *         experimento de impeccable, integrado allá el 2026-09-21 y reflejado
+ *         acá el 2026-09-22): la barra superior pasa a ser la paleta de notas y
+ *         comandos, Configuración se muda a una ventana con categorías y
+ *         buscador, aparecen las **atmósferas** (un tercer eje del estilo, al
+ *         lado de tema y modo), la barra de estado al pie, los avisos con
+ *         deshacer, el diálogo de confirmación propio y la interfaz entera
+ *         usable con el teclado.
+ *
+ *         **MAJOR por decisión del usuario, no por la regla** — igual que en
+ *         desktop: por dentro no hay rearquitectura, pero quien entra no
+ *         encuentra las cosas donde estaban, y el aspecto por defecto cambia
+ *         porque la atmósfera nueva se aplica sola. Que las dos líneas coincidan
+ *         en `2.0.0` es casualidad: siguen sin compartir numeración.
+ *
+ *         **Se queda fuera por naturaleza**: el marco de ventana propio
+ *         (`FUN-M-31`) —acá la ventana es la del navegador—, y con él los
+ *         controles de minimizar/maximizar/cerrar y el menú de anclaje.
  */
-export const APP_VERSION = "1.3.0";
+export const APP_VERSION = "2.0.0";

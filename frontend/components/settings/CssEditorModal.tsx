@@ -101,7 +101,7 @@ export function CssEditorModal({ snippet, onClose }: { snippet: CssSnippet; onCl
     // abierto lo cierra; si no, NO hace nada (Esc NO cierra el editor del
     // snippet, para no perder los cambios; se cierra con la X o "Guardar").
     // En captura + stopImmediatePropagation para que el Esc no llegue ni a
-    // CodeMirror ni al SettingsDrawer (que también cierra con Esc).
+    // CodeMirror ni a la ventana de Configuración (que también cierra con Esc).
     function onKey(e: KeyboardEvent) {
       if (e.key !== "Escape") return;
       const view = viewRef.current;
