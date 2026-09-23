@@ -677,12 +677,28 @@ Reglas de higiene del formato, que son las que evitan el desastre a los tres mes
 
 ### Preguntas abiertas
 
-- **¿Qué modelo se usa para las corridas?** Con `opus` la exactitud sube y tapa las
-  diferencias de recuperación (un modelo fuerte compensa una herramienta mediocre); con
-  `sonnet` o `haiku` la herramienta se nota más y la tanda es mucho más barata. Inclinación:
-  correr la tanda principal con el modelo **más chico que todavía resuelva el brazo base
-  razonablemente**, y repetir solo las preguntas de reserva con el modelo grande para
-  confirmar que la conclusión no depende del tamaño. Falta decidirlo y justificarlo.
+> [!success] Decidido por el usuario (2026-09-23): **el modelo más chico** para la tanda
+> principal
+> Con `opus` la exactitud sube y **tapa** las diferencias de recuperación: un modelo fuerte
+> compensa una herramienta mediocre, que es justo lo que no queremos que pase inadvertido.
+> Con el chico la herramienta se nota y la tanda cuesta mucho menos, así que se pueden
+> correr más preguntas —y la nota ya dice que, si la mejora es chica, lo que hace falta son
+> **más preguntas**, no más repeticiones—.
+>
+> **Pero «el más chico» tiene un piso, y hay que medirlo en la fase 0**: el brazo base
+> (`grep` → leer → seguir enlaces → citar) tiene que resolverse **razonablemente** con ese
+> modelo. Si no lo resuelve, la comparación deja de medir lo que dice medir y pasa a medir
+> «la herramienta compensa a un modelo que no llega», que es otra afirmación y mucho más
+> débil. Criterio concreto: si el brazo base no alcanza al menos **el 50 % de acierto
+> citado** en las preguntas de desarrollo, el piso sube al modelo siguiente y queda anotado
+> en el informe.
+>
+> Las **preguntas de reserva** se repiten con el modelo grande, para confirmar que la
+> conclusión no depende del tamaño. Ese es el control de que el resultado es sobre la
+> herramienta y no sobre el modelo.
+>
+> El modelo exacto de cada corrida ya viaja como columna (`modelo`) en `resultados.jsonl`,
+> así que dos tandas con modelos distintos nunca se confunden.
 - **¿El brazo C debería tener una variante sin `grep`?** Un cuarto brazo «MCP puro» diría
   si las herramientas se bastan solas. Cuesta un 33 % más de corridas. Tal vez solo sobre
   las clases C4, C6 y C7.

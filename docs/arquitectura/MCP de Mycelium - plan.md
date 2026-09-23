@@ -158,10 +158,11 @@ a la 2**: se revisa el diseño.
 
 ## 6. Lo que sigue esperando una decisión del usuario
 
-1. **Con qué modelo se corre la evaluación.** Con el grande, la exactitud tapa las
-   diferencias de recuperación; con uno chico, la herramienta se nota y la tanda es barata.
-   *Recomendación*: tanda principal con el modelo más chico que resuelva bien el brazo base,
-   y repetir las preguntas selladas con el grande.
+1. ~~**Con qué modelo se corre la evaluación.**~~ **Decidido** (usuario, 2026-09-23): el
+   **modelo más chico** para la tanda principal, y las preguntas de reserva repetidas con el
+   grande. Con un piso que la fase 0 tiene que comprobar: si el brazo base no llega al 50 %
+   de acierto citado con ese modelo, sube al siguiente — si no, dejaríamos de medir la
+   herramienta y pasaríamos a medir cuánto compensa a un modelo que no llega.
 2. **¿Hay un segundo vault real?** Sin él, la conclusión queda limitada a «…en el vault de
    Mycelium», y eso va en el informe, no en una nota al pie.
 3. **Los nombres de las herramientas, en español o en inglés.** Se decidió español por
