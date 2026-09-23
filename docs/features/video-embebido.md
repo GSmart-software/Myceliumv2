@@ -57,14 +57,36 @@ costó `FUN-L-20`.
 
 ## 5. Seguridad del iframe
 
-> [!danger] Nunca `allow-same-origin`
-> El `sandbox` es `allow-scripts allow-popups allow-presentation`. **Sin
-> `allow-same-origin`**, el documento de YouTube queda en un **origen opaco**: se ve y se
-> reproduce, y no puede alcanzar el `localStorage`, las cookies ni el DOM de Mycelium.
-> Añadirlo junto con `allow-scripts` anularía el sandbox por completo.
+El `sandbox` es `allow-scripts allow-popups allow-presentation allow-same-origin`.
+
+> [!warning] `allow-same-origin` hace falta, y cuesta creerlo hasta que se mide
+> La primera versión lo negaba, con este argumento: «con él, YouTube alcanzaría el
+> `localStorage` y el DOM de la app». **El argumento es falso y el resultado fue un
+> reproductor negro**, que es como lo encontró el usuario el 2026-09-23.
 >
-> Hay **dos** tests que lo fijan: uno sobre la constante y otro sobre el HTML que sale de
-> `renderNota`, para que relajarlo no pueda pasar desapercibido.
+> Medido con el reproductor real, misma página servida por http, mismo vídeo:
+>
+> | `sandbox` | Lo que se ve | Peticiones del reproductor |
+> |---|---|---|
+> | Sin `allow-same-origin` | Un cuadro liso (captura de 1,3 KB) | **0** |
+> | Con `allow-same-origin` | El póster dibujado (153 KB) | 1 |
+>
+> Lo que concede **no** es acceso a Mycelium: significa «no le pongas un origen opaco a
+> este documento», así que el iframe conserva **el suyo**, `youtube-nocookie.com`. Sigue
+> siendo un origen distinto del de la app, y la política de mismo origen le impide igual
+> tocar su `localStorage`, sus cookies o su DOM. Lo que se rompía era **YouTube consigo
+> mismo**: sin origen propio no llega a su almacenamiento y no arranca.
+>
+> La línea que de verdad no se cruza es **`allow-top-navigation`**: con eso el iframe podría
+> llevarse la ventana entera, que es el `DEF-101` por otra puerta. Eso está fijado por dos
+> tests —la constante y el HTML que sale de `renderNota`—, junto con que `allow-scripts` y
+> `allow-same-origin` **estén**, para que nadie los saque «por seguridad» y devuelva el
+> recuadro negro.
+
+> [!tip] La lección, más allá de este iframe
+> Un ajuste de seguridad que **no se probó contra lo que protege** puede terminar
+> protegiendo de nada y rompiendo la función. Los dos tests originales pasaban en verde
+> sobre un reproductor que no reproducía: medían la decisión, no el efecto.
 
 El `allow` se queda en lo que el reproductor necesita (`accelerometer`, `encrypted-media`,
 `picture-in-picture`, `fullscreen`): **ni cámara, ni micrófono, ni ubicación**.
