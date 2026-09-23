@@ -6,8 +6,10 @@ Foto de dónde está Mycelium hoy. Para el detalle de cada tema, seguir los enla
 
 ## Resumen
 
-- **Versión: desktop `2.0.0`** ([[Version 2.0.0]], **publicada el 2026-09-21**) · **web
-  `2.0.0`** ([[Version 2.0.0 de web]], 2026-09-22, sin publicar). Las dos líneas **no
+- **Versión: desktop `2.1.0`** ([[Version 2.1.0]], 2026-09-23: draw.io como tipo de
+  archivo, los enlaces web al navegador y el vídeo en la nota) · **web `2.1.0`** (le llega
+  el vídeo y los enlaces; draw.io y las consolas son solo-desktop). La anterior de
+  escritorio, [[Version 2.0.0]], se publicó el 2026-09-21. Las dos líneas **no
   comparten numeración**: que hoy digan el mismo número es casualidad —web venía de `1.3.0`
   y desktop de `1.7.0`, y el salto a major lo decidió el usuario en las dos por el mismo
   motivo (cambia toda la interfaz de una vez).
