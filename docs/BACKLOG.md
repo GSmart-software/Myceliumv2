@@ -72,6 +72,7 @@ y **priorizar** qué implementar antes.
 | `FUN-S-13` | `TABS-HISTORIAL-RUEDA` | Clic con la **rueda** en las flechas de atrás/adelante: abre en una **pestaña nueva** el documento anterior o siguiente del historial, en vez de navegar en la actual. Misma convención que la rueda sobre un archivo del explorador | ambas | — |
 | `FUN-S-12` 🟢 | `TERMINAL-COLOR-POR-CONSOLA` | Asignar un **color a cada consola**, reflejado en su pestaña, que se **atenúa cuando no tiene el foco**. Permite distinguirlas de un vistazo sin perder cuál se está viendo. **Implementado y confirmado en la app** el 2026-09-05, junto con `FUN-S-11`. La marca es una **barra** en el borde de la pestaña y no solo el ícono, porque el ícono se puede apagar y el color no puede depender de otra preferencia para existir. La lista de seis colores es cerrada y **no sigue al tema** —si lo hiciera, la consola «verde» sería otra en Cantarela—, y sus valores están medidos: peor caso 3.79:1 sobre los ocho fondos posibles. Spec en [[marcas-en-las-pestanas]] | desktop | — |
 
+| `FUN-S-18` | `EMBED-SIN-EXTENSION` | Que un embed **resuelva por título**, como ya hacen los `[[enlaces]]`: hoy `![[Mi diagrama]]` queda escrito tal cual y hay que poner `![[Mi diagrama.excalidraw]]` o `![[Mi diagrama.drawio]]`. El reconocedor exige la extensión porque **decide por ella** qué dibuja; resolver primero el destino y mirar después su tipo es lo que falta. Salió de probar `FUN-L-20` el 2026-09-23: el usuario escribió la forma de Obsidian y no pasó nada | ambas | — |
 ### 1.2 Intermedias — tamaño M
 
 | ID | Nombre | Descripción | Aplica | Orig. |
@@ -107,6 +108,7 @@ y **priorizar** qué implementar antes.
 | `FUN-M-19` 🟢🌐 | `EDITOR-PROPIEDADES-EN-SITIO` | El bloque de propiedades **deja de abrirse en crudo** al entrar el cursor: sigue renderizado y se edita ahí — cambiar un valor, renombrar una clave, **agregar y quitar** propiedades — sin ir a la vista raw, más «editar como texto» por bloque. Invierte el «widget de solo lectura» de `FUN-M-04`, cuyo motor (`ponerPropiedad`, `quitarPropiedad`, `renombrarPropiedad`) ya está hecho y probado. **Confirmado en desktop** por el usuario el 2026-08-16 y **reflejado en web** el 2026-08-17, junto con `FUN-L-19` porque tocan los mismos archivos compartidos. Primera mitad de [[edicion-en-el-render]]; la segunda es `FUN-L-19` | ambas | — |
 | `FUN-M-17` 🟡 | `VAULT-RELINKEADO` | Adoptar un vault que viene de otro proyecto: **la IA descubre** cómo se referencian sus documentos (`` `HU-009` ``, el nombre suelto, `[texto](otra.md)`) y lo registra en un léxico persistente; **el script aplica** esas formas y las convierte en `[[wikilinks]]`. La auditoría **no modifica documentos**; el enlazado sí, con respaldo y deshacer. Es el **caso de entrada** de Mycelium sobre un proyecto existente. **Su núcleo ya está hecho** (`lib/enlaces.ts`, 41 tests), porque lo necesitaba `FUN-L-17`; lo que falta son los dos comandos de la IA. Spec en [[auditoria-y-relinkeado]] | ambas | — |
 
+| `FUN-M-37` | `EMBED-NOTA` | **Embeber una nota dentro de otra** (transclusión), como en Obsidian: `![[nota]]` muestra su contenido en el lugar. Hoy esa sintaxis **cuenta como enlace en el grafo pero no dibuja nada**, así que el usuario que la escribe no ve ni un error. Es `M` porque renderizar markdown dentro de markdown trae lo suyo: ciclos (A embebe B que embebe A), profundidad, qué pasa con el frontmatter de la nota embebida y si se puede editar ahí o solo leer. Misma tanda que `FUN-S-18`, de probar `FUN-L-20` | ambas | — |
 ### 1.3 Grandes — tamaño L
 
 | ID | Nombre | Descripción | Aplica | Orig. |
@@ -292,6 +294,19 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   web no hay nada que colorear. El alcance de una funcionalidad no puede ser más amplio que
   el de aquella de la que depende.
 
+#### `FUN-S-18` · `EMBED-SIN-EXTENSION` (—)
+- **Qué es**: que `![[Mi diagrama]]` embeba el archivo aunque no se escriba su extensión.
+- **De dónde sale**: de probar `FUN-L-20` el 2026-09-23. El usuario escribió la forma que usa
+  Obsidian, no pasó nada, y lo reportó como defecto de draw.io. **No lo es**: pasa igual con
+  Excalidraw desde siempre. Pero que tres tipos de archivo se comporten así y el usuario lo
+  lea como una falla es la señal de que la sintaxis está del lado equivocado.
+- **Por qué hoy exige la extensión**: el reconocedor (`lib/markdown.ts`, `lib/editor/livePreview.ts`)
+  **decide por la extensión** qué dibujar — un `.excalidraw` lo pinta el renderer de escenas,
+  un `.drawio` la webapp—. Resolver primero el destino por título, como hacen los `[[enlaces]]`,
+  y mirar después el tipo del archivo encontrado, es justamente el cambio.
+- **Cuidado**: dos archivos del mismo nombre y distinta extensión dejan de ser distinguibles;
+  hay que decidir qué gana (o avisar).
+
 ### Pendientes — tamaño M
 
 #### `FUN-M-01` · `TRASH-PREVIEW` (C-M-13)
@@ -473,6 +488,17 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   mensaje de error y se vuelve al nombre original** — el error se dice, no se traga en
   silencio. Y los títulos `#` del cuerpo **no intervienen**: el que manda es siempre el nombre
   del archivo que se muestra al inicio del documento.
+
+#### `FUN-M-37` · `EMBED-NOTA` (—)
+- **Qué es**: `![[nota]]` muestra el **contenido** de esa nota dentro de la actual.
+- **De dónde sale**: la misma prueba de `FUN-L-20` (2026-09-23) que dejó `FUN-S-18`.
+- **Lo que más importa del estado actual**: la sintaxis **ya cuenta como enlace** para el
+  grafo —el escáner de enlaces no distingue `[[x]]` de `![[x]]`—, así que un vault puede
+  tener embeds de notas escritos hace meses que aparecen en el grafo y no se ven en ninguna
+  parte. Al implementarlo, esas notas **empiezan a mostrar contenido** de golpe.
+- **Lo que hay que decidir**: ciclos (A embebe B que embebe A), profundidad máxima, si se
+  muestra el frontmatter de la embebida, si se puede embeber un trozo (`![[nota#título]]`) y
+  si desde el embed se edita o solo se lee.
 
 ### Pendientes — tamaño L
 
@@ -1249,6 +1275,7 @@ No tienen parentesco suficiente con nada: cada una es su propio release.
 | `FUN-L-20` `FILES-DRAWIO` | Un tipo de archivo nuevo, con su editor embebido: no comparte código con nada pendiente. Sí comparte **molde** con `FUN-L-18`, pero aquella ya está hecha | minor |
 | `FUN-M-02` `GRAPH-BUSCADOR-FILTRO` | Solo toca el grafo (ver la alternativa del bloque B) | minor |
 | `FUN-M-07` `DAILY-NOTE` | Ya tiene todo lo que necesitaba: `FUN-M-03` le dio plantillas y sustitución de variables | minor |
+| `FUN-S-18` + `FUN-M-37` `EMBED-*` | Las dos tocan el mismo reconocedor de `![[…]]`; se hacen juntas o la segunda rehace la primera | minor |
 | `FUN-M-09` `EXPORT-ZIP-SERVIDOR` (web) | Exportación en servidor; independiente de identidad y de colaboración | minor |
 | `FUN-XL-01` `STORAGE-LOCAL-FIRST-NUBE` | Rearquitectura de almacenamiento del desktop. Necesita que exista infraestructura de nube, pero es trabajo aparte del bloque I | major |
 
