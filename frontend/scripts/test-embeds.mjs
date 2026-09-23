@@ -1,0 +1,178 @@
+// Test headless del pipeline REAL de la vista de lectura (`lib/markdown.ts`),
+// no de una expresión suelta (`FUN-S-21`).
+//
+// Existe por una lección del escritorio: allá un embed dejó de dibujarse y los
+// tests siguieron en verde, porque probaban la expresión por su cuenta y nadie
+// comprobaba que `renderNota` llegara a emitir el HTML.
+//
+// `lib/markdown.ts` importa paquetes de npm (remark/rehype), así que no se
+// puede cargar desde una `data:` URL —ahí los especificadores desnudos no
+// resuelven—. Se transpila a una carpeta temporal DENTRO de `frontend/`, con
+// los imports `@/lib/...` reescritos a rutas relativas, para que node resuelva
+// `node_modules` como siempre.
+//
+//   node --test scripts/test-embeds.mjs
+import assert from "node:assert/strict";
+import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { dirname, join } from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
+import { after, test } from "node:test";
+import ts from "typescript";
+
+const AQUI = dirname(fileURLToPath(import.meta.url));
+const FRONTEND = join(AQUI, "..");
+const TMP = join(FRONTEND, ".tmp-test-embeds");
+
+/** Los módulos que hacen falta, con sus dependencias locales. */
+const MODULOS = [
+  "lib/markdown.ts",
+  "lib/frontmatter.ts",
+  "lib/wikilinks.ts",
+  "lib/extensionesDeTipo.ts",
+  "lib/editor/wikilink.ts",
+  "lib/video.ts",
+];
+
+await rm(TMP, { recursive: true, force: true });
+await mkdir(TMP, { recursive: true });
+
+// El único import de store que sobrevive a la transpilación es `useVaultStore`,
+// y `resolveWikilink` no lo usa: recibe las notas por parámetro. Con un doble
+// basta para poder probarlo sin arrancar la app.
+await writeFile(
+  join(TMP, "vaultStore.mjs"),
+  "export const useVaultStore = { getState: () => ({ notas: [], carpetas: [] }) };\n",
+);
+
+for (const rel of MODULOS) {
+  const fuente = await readFile(join(FRONTEND, rel), "utf8");
+  const { outputText } = ts.transpileModule(fuente, {
+    compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 },
+  });
+  const js = outputText
+    // `@/lib/x` y `@/lib/editor/x` → `./x.mjs`: quedan todos planos en la misma
+    // carpeta, así que solo importa el último segmento.
+    .replace(/(["'])@\/lib\/(?:[A-Za-z0-9_-]+\/)*([A-Za-z0-9_-]+)\1/g, '"./$2.mjs"')
+    .replace(/(["'])@\/stores\/([A-Za-z0-9_-]+)\1/g, '"./$2.mjs"');
+  await writeFile(join(TMP, `${rel.split("/").pop().replace(/\.ts$/, "")}.mjs`), js);
+}
+
+const { renderNota } = await import(pathToFileURL(join(TMP, "markdown.mjs")).href);
+const { resolveWikilink } = await import(pathToFileURL(join(TMP, "wikilink.mjs")).href);
+
+after(async () => {
+  await rm(TMP, { recursive: true, force: true });
+});
+
+test("los embeds de excalidraw siguen funcionando igual", () => {
+  // La línea base del pipeline: si esto se cae, el reproductor de vídeo se
+  // llevó por delante algo que ya andaba.
+  const html = renderNota("![[Dibujo.excalidraw]]");
+  assert.match(html, /class="mic-excalidraw"/);
+  assert.match(html, /data-diag="Dibujo"/);
+});
+
+test("un wikilink normal sigue siendo un wikilink", () => {
+  const html = renderNota("Ver [[Otra nota]].");
+  assert.match(html, /class="mic-wikilink"/);
+});
+
+// ── El reproductor de vídeo en el pipeline de verdad (`FUN-S-21`) ───────────
+//
+// Probar solo `leerVideo` no diría si `renderNota` llega a emitir el iframe:
+// es la misma distancia que dejó un embed roto con los tests en verde.
+
+test("![](youtube) emite el iframe del reproductor", () => {
+  const html = renderNota("![](https://www.youtube.com/watch?v=dQw4w9WgXcQ)");
+  assert.match(html, /<iframe/);
+  assert.match(html, /youtube-nocookie\.com\/embed\/dQw4w9WgXcQ/);
+  assert.match(html, /class="mic-video"/);
+});
+
+test("el iframe del vídeo sale con el sandbox que lo deja funcionar", () => {
+  // Se fija en el HTML de verdad, no solo en la constante. `allow-same-origin`
+  // es lo que le deja a YouTube su propio almacenamiento: sin eso el usuario ve
+  // un recuadro negro (medido el 2026-09-23). No alcanza a la app, que es otro
+  // origen. Lo que nunca puede aparecer acá es `allow-top-navigation`: con eso
+  // el iframe se llevaría la ventana, o sea el `DEF-101` por otra puerta.
+  const html = renderNota("![](https://youtu.be/dQw4w9WgXcQ)");
+  assert.match(html, /sandbox="[^"]*allow-scripts[^"]*"/);
+  assert.match(html, /sandbox="[^"]*allow-same-origin[^"]*"/);
+  assert.ok(!/allow-top-navigation/.test(html), `el iframe podría llevarse la ventana: ${html}`);
+});
+
+test("youtu.be y /shorts/ salen igual que la forma larga", () => {
+  for (const url of [
+    "https://youtu.be/dQw4w9WgXcQ",
+    "https://www.youtube.com/shorts/dQw4w9WgXcQ",
+  ]) {
+    assert.match(renderNota(`![](${url})`), /youtube-nocookie\.com\/embed\/dQw4w9WgXcQ/);
+  }
+});
+
+test("una imagen normal sigue siendo una imagen", () => {
+  // Que el reproductor no se lleve por delante los embeds de imagen de siempre.
+  const html = renderNota("![gato](https://ejemplo.com/gato.png)");
+  assert.match(html, /<img/);
+  assert.ok(!/mic-video/.test(html));
+});
+
+test("un enlace a YouTube que NO es embed sigue siendo un enlace", () => {
+  // Sin el `!` delante es un enlace normal: lo abre el navegador, no se dibuja.
+  const html = renderNota("[mirá esto](https://youtu.be/dQw4w9WgXcQ)");
+  assert.match(html, /<a /);
+  assert.ok(!/<iframe/.test(html));
+});
+
+// ── La resolución del destino: donde estaba el defecto ───────────────────────
+//
+// El título de una nota NO lleva extensión, pero la referencia sí. Si
+// `resolveWikilink` no sabe quitarla, `![[Lienzo.canvas]]` no encuentra NADA y
+// el destino se estiliza como «no existe» con el archivo ahí al lado. Es un
+// defecto latente que venía de antes: la lista de extensiones decía
+// `excalidraw|md`, y ni `.base` ni `.canvas` estaban en ella.
+
+/** El vault de prueba: un dibujo, una base, un lienzo y una nota. */
+const NOTAS = [
+  { id: "Bocetos/Idea.excalidraw", titulo: "Idea", tipo: "excalidraw", carpetaId: "Bocetos" },
+  { id: "Tareas.base", titulo: "Tareas", tipo: "base", carpetaId: null },
+  { id: "Lienzo.canvas", titulo: "Lienzo", tipo: "canvas", carpetaId: null },
+  { id: "Otra nota.md", titulo: "Otra nota", tipo: "markdown", carpetaId: null },
+];
+const CARPETAS = [{ id: "Bocetos", nombre: "Bocetos", padreId: null }];
+
+test("una referencia con extensión .canvas resuelve a su nota", () => {
+  const destino = resolveWikilink("Lienzo.canvas", NOTAS, CARPETAS);
+  assert.ok(destino, "no resolvió: es el defecto que lo dibujaba como inexistente");
+  assert.equal(destino.id, "Lienzo.canvas");
+  assert.equal(destino.tipo, "canvas");
+});
+
+test("resuelve igual sin la extensión y sin importar mayúsculas", () => {
+  assert.equal(resolveWikilink("Lienzo", NOTAS, CARPETAS)?.id, "Lienzo.canvas");
+  assert.equal(resolveWikilink("lienzo.CANVAS", NOTAS, CARPETAS)?.id, "Lienzo.canvas");
+});
+
+test("TODAS las extensiones de nota resuelven, no solo las dos de antes", () => {
+  // La lista escrita a mano decía `excalidraw|md`. Esta comprobación es la que
+  // impide que el próximo tipo se agregue a medias.
+  assert.equal(resolveWikilink("Tareas.base", NOTAS, CARPETAS)?.id, "Tareas.base");
+  assert.equal(resolveWikilink("Lienzo.canvas", NOTAS, CARPETAS)?.id, "Lienzo.canvas");
+  assert.equal(
+    resolveWikilink("Idea.excalidraw", NOTAS, CARPETAS)?.id,
+    "Bocetos/Idea.excalidraw",
+  );
+  assert.equal(resolveWikilink("Otra nota.md", NOTAS, CARPETAS)?.id, "Otra nota.md");
+});
+
+test("la carpeta sigue desambiguando con extensión de por medio", () => {
+  assert.equal(
+    resolveWikilink("Bocetos/Idea.excalidraw", NOTAS, CARPETAS)?.id,
+    "Bocetos/Idea.excalidraw",
+  );
+});
+
+test("un destino que no existe sigue sin resolver", () => {
+  assert.equal(resolveWikilink("No existe.canvas", NOTAS, CARPETAS), undefined);
+  assert.equal(resolveWikilink("", NOTAS, CARPETAS), undefined);
+});
