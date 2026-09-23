@@ -195,8 +195,8 @@ sitios es la misma que documenta [[canvas]] § 7:
 ### Lo que quedó fuera de esta unidad
 
 - **`.drawio.svg`**: descartado en § 4, no se implementó ninguna variante.
-- **Medir el instalador**: el recorte se midió sobre la webapp comprimida (33,7 MB), no
-  sobre un `tauri build` completo. Ver § 10.
+- **Llegar a los 30-35 MB de instalador** que fijaba § 3: quedó en 40,3 MB. El porqué y qué
+  haría falta para bajar más, en § 10.
 
 ## 10. Verificación
 
@@ -212,11 +212,30 @@ sitios es la misma que documenta [[canvas]] § 7:
 > `tsc` en verde no prueba comportamiento. Lo que falta confirmar en la app es lo visible:
 > que el editor se vea bien dentro de la pestaña, que el tema oscuro no desentone (CA6), y
 > que crear/editar/guardar se sienta como una nota (CA1–CA3).
->
-> **El tamaño del instalador no se midió**: hace falta un `tauri build` completo. Sobre el
-> instalador de hoy (10,2 MB) y 33,7 MB de webapp comprimida, la estimación es **~35-42 MB**
-> según cuánto mejore LZMA sobre deflate. El objetivo de § 3 era 30-35 MB: puede quedar
-> justo por encima.
+
+### El instalador: **no se llegó al objetivo**
+
+Se midió con un `tauri build` completo:
+
+| | Antes | Ahora | Δ |
+|---|---|---|---|
+| NSIS (`-setup.exe`) | 10,2 MB | **40,3 MB** | +30,1 |
+| MSI | — | **41,8 MB** | — |
+
+El objetivo de § 3 era **30-35 MB** y quedó en **40,3**, unos **5-7 MB por encima**. Se
+deja dicho en vez de seguir recortando: **lo que queda es lo que no se puede tocar**. De los
+102 MB de la webapp, 42 son `stencils/` y 11 son `img/lib` —las bibliotecas de formas y sus
+miniaturas—, que son exactamente la razón de traer draw.io en vez de quedarse con Excalidraw.
+Bajar de acá es empezar a borrar bibliotecas de figuras, o sea entregar un draw.io mutilado.
+
+Las quitas baratas ya se hicieron (§ 3): sacaron 45 MB sin romper nada. Las que faltarían
+rompen el CA2.
+
+> [!question] Queda para el usuario
+> Si 40 MB es aceptable, no hay nada más que hacer. Si no lo es, la decisión ya no es de
+> recorte sino de **alcance**: elegir un subconjunto de bibliotecas de formas y asumir que
+> un `.drawio` con figuras de una biblioteca ausente se verá incompleto —incluido uno que
+> venga de afuera—.
 
 > [!info] Solo desktop, por decisión del usuario (2026-09-23)
 > En teoría aplica a las dos versiones —el editor es frontend—, pero en `web-cloud` habría
