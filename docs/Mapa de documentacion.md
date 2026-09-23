@@ -28,6 +28,11 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
 - [[DESIGN_SYSTEM]] — tokens, temas, layout y estados visuales.
 - [[MIGRACION-TAURI]] — desglose por fases de la migración a Tauri (historia).
 
+## Arquitectura en diseño
+
+- [[MCP de Mycelium - encuadre]] — el servidor MCP (`FUN-L-09`): hechos, restricciones y
+  reparto del diseño en memoria, control y evaluación. **Solo planificación.**
+
 ## Decisiones
 
 - [[Dos ramas en vez de monorepo]] — por qué se canceló el monorepo y cuándo reconsiderarlo.
