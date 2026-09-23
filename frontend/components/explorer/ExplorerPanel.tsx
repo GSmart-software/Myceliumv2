@@ -30,6 +30,11 @@ import { ICONO_POR_TIPO } from "@/lib/iconosDeTipo";
 import { api } from "@/lib/api";
 import { baseInicial } from "@/lib/bases";
 import { canvasInicial } from "@/lib/canvas";
+// La extensión que se lee en cada fila (`FUN-S-03`) sale del mismo mapa que usa
+// `resolveWikilink` para quitarla de una referencia: eran dos copias, y la
+// segunda solo conocía `.excalidraw` y `.md`, así que `[[Lienzo.canvas]]` se
+// estilizaba como inexistente.
+import { EXTENSION_POR_TIPO } from "@/lib/extensionesDeTipo";
 import { carpetaEsporas, crearNotaDesdeEspora, listarEsporas } from "@/lib/esporasVault";
 import { exportNoteMd, exportNotePdfActive } from "@/lib/export";
 import { collectFromDataTransfer, collectFromFileList } from "@/lib/import";
@@ -1154,21 +1159,6 @@ function NoteRow({
     </div>
   );
 }
-
-/**
- * Extensión que se muestra junto al nombre, por tipo de nota (`FUN-S-03`).
- *
- * **También el markdown**: omitirlo haría que la única fila sin extensión sea la
- * más común, y se leería como si le faltara algo en vez de como el caso normal.
- * Con todas puestas, la columna es uniforme y la extensión pasa a ser
- * información y no una excepción.
- */
-const EXTENSION_POR_TIPO: Record<string, string | undefined> = {
-  markdown: "md",
-  excalidraw: "excalidraw",
-  base: "base",
-  canvas: "canvas",
-};
 
 /**
  * Teclado del árbol (patrón de árbol de WAI-ARIA). Trabaja sobre el DOM porque
