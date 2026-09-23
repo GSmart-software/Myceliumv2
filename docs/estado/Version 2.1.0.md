@@ -2,6 +2,13 @@
 
 **Solo desktop** (`desktop-tauri`) · 2026-09-23 · sobre [[Version 2.0.0]]
 
+> [!success] Publicada el 2026-09-23 a las 21:27 (UTC)
+> Con `npm run publicar`. Verificado: los tres manifiestos responden y parsean, la firma de
+> los dos `latest.json` es idéntica al `.sig`, y el `.exe` del bucket tiene el mismo SHA-256
+> que el firmado (`b9fc2d15eedd36cf…`). `versions.json` quedó con 2.1.0, 2.0.0, 1.7.0,
+> 1.6.2, 1.5.0 y 1.4.0. Comprobado además fuera del script: el `latest.json` público sirve
+> la 2.1.0 y el instalador responde 200.
+
 **draw.io como tipo de archivo del vault** (`FUN-L-20`), más dos cosas chicas que salieron
 de probarlo: los **enlaces web** abren el navegador (`FUN-S-20`, que corrige `DEF-101`) y los
 **vídeos de YouTube** se ven dentro de la nota (`FUN-S-21`). Entran también `DEF-099` y

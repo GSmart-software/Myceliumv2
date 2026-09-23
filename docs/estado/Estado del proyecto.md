@@ -6,7 +6,7 @@ Foto de dónde está Mycelium hoy. Para el detalle de cada tema, seguir los enla
 
 ## Resumen
 
-- **Versión: desktop `2.1.0`** ([[Version 2.1.0]], 2026-09-23: draw.io como tipo de
+- **Versión: desktop `2.1.0`** ([[Version 2.1.0]], **publicada el 2026-09-23**: draw.io como tipo de
   archivo, los enlaces web al navegador y el vídeo en la nota) · **web `2.1.0`** (le llega
   el vídeo y los enlaces; draw.io y las consolas son solo-desktop). La anterior de
   escritorio, [[Version 2.0.0]], se publicó el 2026-09-21. Las dos líneas **no
