@@ -30,8 +30,16 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
 
 ## Arquitectura en diseño
 
-- [[MCP de Mycelium - encuadre]] — el servidor MCP (`FUN-L-09`): hechos, restricciones y
-  reparto del diseño en memoria, control y evaluación. **Solo planificación.**
+- [[MCP de Mycelium - plan]] — **la puerta**: el plan integrado del servidor MCP
+  (`FUN-L-09`), con las fronteras resueltas entre las tres partes, el orden de construcción
+  y lo que falta decidir. **Solo planificación.**
+- [[MCP de Mycelium - encuadre]] — los hechos verificados y las restricciones de partida.
+- [[MCP de Mycelium - memoria]] — el modelo de datos, las herramientas de recuperación y por
+  qué no hay embeddings.
+- [[MCP de Mycelium - control]] — qué puede operar la IA de la app, por qué canal y con qué
+  permisos.
+- [[MCP de Mycelium - evaluacion]] — cómo se mide con MCP y sin MCP, y qué resultado nos
+  haría abandonar el diseño.
 
 ## Decisiones
 

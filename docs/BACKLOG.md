@@ -709,8 +709,18 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   depender de `grep` sobre archivos y consulta el mismo índice que usa la app.
 - **Objetivo**: respuestas más precisas y baratas (menos lectura bruta), y el paso
   previo natural a que la IA pueda **operar** Mycelium de forma controlada.
-- **A definir**: transporte (stdio local), qué herramientas expone la v1, y cómo se
-  registra en `.claude/` (el generador de `FUN-L-08` añadiría la config MCP).
+- **Planificado el 2026-09-23**, sin construir: [[MCP de Mycelium - plan]] y las tres notas
+  que integra. Decidido ahí: índice propio en Rust con granularidad de **sección**, enlaces
+  materializados, **sin embeddings**, cinco herramientas `vault_*` de lectura y nueve
+  `mycelium_*` de control por *named pipe*, y un arnés de evaluación de tres brazos que
+  puede concluir que el MCP **no sirvió**.
+- **Va junto con `FUN-L-10`**, y ese es el hallazgo de la planificación: el MCP construye su
+  propio indexador en Rust, así que dejar el de TypeScript en la app serían **dos
+  implementaciones** de «qué es un enlace» derivando. `FUN-L-09` es la excusa para que el
+  índice viva donde debía.
+- **Arrastra dos cambios en la app** que no son del MCP: la confirmación tiene que ser una
+  **cola** (hoy una pregunta cancela la anterior) y la terminal tiene que pasar el vault en
+  el entorno.
 
 #### `FUN-L-10` · `VAULT-INDEX-EN-RUST` (—)
 - **Qué es**: mover el indexado del vault del frontend a **Rust**: que el walker lea los
