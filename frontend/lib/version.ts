@@ -42,4 +42,4 @@
  *         (`FUN-M-31`) —acá la ventana es la del navegador—, y con él los
  *         controles de minimizar/maximizar/cerrar y el menú de anclaje.
  */
-export const APP_VERSION = "2.0.0";
+export const APP_VERSION = "2.1.0";
