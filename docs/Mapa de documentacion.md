@@ -128,6 +128,8 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
 ## Estado y releases
 
 - [[Estado del proyecto]] — situación actual, pendientes y deuda.
+- [[Version 2.1.0 de web]] — el reflejo de la tanda del 2026-09-23: vídeo en la nota y
+  enlaces en pestaña nueva. Sin publicar.
 - [[Version 2.0.0 de web]] — el rediseño de la interfaz, **reflejado a web** el
   2026-09-22. **Numeración propia**: coincidir con la 2.0.0 de escritorio es casualidad.
 - [[Version 2.1.0]] — release actual de desktop: **draw.io** como tipo de archivo del
