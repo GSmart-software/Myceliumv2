@@ -229,6 +229,75 @@ entre ramas):
   `components/ventana/*`, `lib/ventana.ts`, `src-tauri/src/marco.rs`), la carga diferida de
   la terminal y todo lo del actualizador. Ver [[configuracion]], [[atmosferas]],
   [[avisos-y-confirmaciones]] y [[Version 2.0.0 de web]].
+- **draw.io (`FUN-L-20`, solo-desktop por decisión del usuario, 2026-09-23)**: nada de
+  `lib/drawio.ts`, `lib/drawioInstancias.ts`, `lib/drawioRender.ts`, `components/drawio/*`,
+  `scripts/preparar-drawio.mjs`, `scripts/{test,smoke}-drawio.mjs` ni `public/drawio/`
+  existe en web, y el `NotaTipo` de allá **no incluye `drawio`**. Ver
+  [[Diferencias funcionales aceptadas entre versiones]].
+
+  > [!warning] Dejó tres archivos compartidos con lo suyo MEZCLADO
+  > `lib/markdown.ts`, `lib/editor/livePreview.ts` y `styles/editor.css` llevan, en el
+  > mismo archivo, el embed de draw.io (que **no** va a web) y el reproductor de vídeo
+  > (que sí). Traerlos enteros deja `web-cloud` importando módulos que no existen y
+  > estilando un tipo de archivo que allá no existe. Se traen enteros **y se les quitan
+  > los trozos de draw.io**: el `import embedDrawioRe` y su bloque en `remarkMicelio`; el
+  > `DrawioWidget`, sus dos imports y su bucle en `buildDecorations`; los dos bloques CSS
+  > de `.mic-drawio-block` y `.mic-live-drawio`. Los cortes son limpios porque draw.io y
+  > el vídeo nunca comparten una línea.
+
+- **Vídeo embebido (`FUN-S-21`, las dos ramas, ✅ reflejado 2026-09-23)**: **todo
+  compartido**. `frontend/lib/video.ts` (detección pura, sin imports) y
+  `frontend/scripts/test-video.mjs` se traen **enteros y quedan idénticos**;
+  `lib/markdown.ts` (`remarkVideo`), `lib/editor/livePreview.ts` (`VideoWidget`) y
+  `styles/editor.css` (`.mic-video` + `.mic-live-video`) se traen enteros y se les quita
+  draw.io, según la advertencia de arriba. `scripts/test-embeds.mjs` es **nuevo en las
+  dos** pero **diverge**: en desktop prueba el pipeline con `![[diagrama.drawio]]`, en
+  web con `![[Lienzo.canvas]]`. La mitad del vídeo es la misma. Ver [[video-embebido]].
+
+- **Enlaces a páginas web (`FUN-S-20` / `DEF-101`, las dos ramas, ✅ reflejado
+  2026-09-23, ADAPTADO)**: `frontend/lib/enlacesExternos.ts` **diverge en una sola
+  función**. La parte que decide —`ESQUEMAS_PERMITIDOS` (`http:`, `https:`, `mailto:` y
+  nada más), `destinoExterno`, `esEnlaceExterno`, `manejarClicDeEnlace`— es idéntica; lo
+  que cambia es `abrirEnNavegador`:
+
+  | Rama | Qué hace | Firma |
+  |---|---|---|
+  | `desktop-tauri` | `openUrl` del plugin `opener` → el navegador del sistema | `async`, `Promise<boolean>` |
+  | `web-cloud` | `window.open(destino, "_blank", "noopener,noreferrer")` | síncrona, `boolean` |
+
+  Los **cinco** consumidores son compartidos y se traen enteros
+  (`components/editor/NoteEditor.tsx` se aplica a mano por divergir de antes):
+  `lib/editor/tablaWidget.ts`, `lib/editor/propiedadesWidget.ts`,
+  `components/canvas/CanvasView.tsx` y el caso `Link` de `lib/editor/livePreview.ts`.
+  `scripts/test-enlaces-externos.mjs` es el mismo archivo salvo dos comentarios y el caso
+  `#drawio`. **No se refleja** la red de seguridad de Rust (`src-tauri/src/navegacion.rs`
+  + `opener:allow-*` en `capabilities/default.json`): no hay Rust en web.
+
+  > [!info] En web el defecto no es grave, y la solución es la misma igual
+  > Allá navegar la webview se llevaba la aplicación entera —marco propio, sin barra de
+  > dirección—; en una pestaña del navegador navegar es lo normal y el botón de atrás
+  > vuelve. Se abre en pestaña nueva de todos modos: Mycelium es una sola página y perder
+  > su estado por seguir un enlace de una nota es un incordio evitable. Anotado así en
+  > [[bugs-progreso]]. Ver [[enlaces-externos]].
+
+- **Extensión por tipo (`lib/extensionesDeTipo.ts`, las dos ramas, 2026-09-23, ADAPTADO)**:
+  el `Record<NotaTipo, string>` tiene **cinco** entradas en desktop y **cuatro** en web,
+  porque el `NotaTipo` de web no incluye `drawio`. Es la única diferencia; `sinExtensionDeNota`
+  y `EXTENSIONES_DE_NOTA` son iguales, y `lib/editor/wikilink.ts` se trae **entero e
+  idéntico**. Reflejarlo **cerró un defecto latente en web**: allá la lista escrita a mano
+  decía `excalidraw|md`, así que `[[Lienzo.canvas]]` y `[[Tareas.base]]` no resolvían a
+  ninguna nota y se estilizaban como inexistentes. `scripts/test-extensiones.mjs` diverge
+  por lo mismo (la lista de tipos). En desktop el mapa tiene un tercer consumidor,
+  `extDeTipo` en `lib/db/vaultFs.ts`, que en web no existe.
+
+  > [!tip] Tres archivos compartidos nombran draw.io en sus comentarios, a propósito
+  > `lib/editor/wikilink.ts`, `lib/video.ts` y `scripts/test-video.mjs` quedaron **byte a
+  > byte iguales** en las dos ramas aunque sus comentarios citen `![[diagrama.drawio]]` o
+  > `lib/drawio.ts` como ejemplo. Es la misma decisión que con los seis `--mic-consola-*`
+  > de `tokens.css`: que el archivo siga siendo **uno solo** vale más que ajustar un
+  > ejemplo, porque un archivo que diverge por un comentario hay que mantenerlo dos veces
+  > para siempre.
+
 - **Preferencias por vault (`FUN-M-28` + `FUN-M-21` + `FUN-M-25`; portadas a web el
   2026-09-05 como `FUN-M-29`)**: el único archivo que **diverge de verdad** es
   `stores/prefsVaultStore.ts`. Todo lo que lo consume es compartido y se trae entero.

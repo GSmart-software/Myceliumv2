@@ -3,6 +3,11 @@
 `![](https://youtu.be/ID)` muestra el reproductor dentro de la nota, como en Obsidian.
 Pedido por el usuario el 2026-09-23; implementado ese mismo día.
 
+**Reflejado a `web-cloud` el 2026-09-23** (`7ac7616`) sin adaptar nada: `lib/video.ts` y
+`scripts/test-video.mjs` quedaron **idénticos** en las dos ramas. Lo único que hubo que
+hacer fue quitarle draw.io a los tres archivos compartidos que lo llevan mezclado — ver
+[[RAMAS]].
+
 ## 1. Qué reconoce
 
 | Forma | Ejemplo |

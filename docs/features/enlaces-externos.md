@@ -3,6 +3,14 @@
 Que `[texto](https://…)` **abra el navegador predeterminado** y Mycelium no se mueva.
 Corrige [[Bugs_errores_y_defectos|DEF-101]], implementado el 2026-09-23.
 
+**Reflejado a `web-cloud` el 2026-09-23** (`a83267d`), **adaptado**: allá no hay plugin
+`opener` ni Rust, así que `abrirEnNavegador` abre una **pestaña nueva**
+(`window.open(destino, "_blank", "noopener,noreferrer")`) y la red de seguridad del § 5 no
+va. Se conserva igual la lista de esquemas del § 4 y que el manejador sea **uno solo** para
+las cinco vistas. En web el defecto no es grave —el botón de atrás vuelve—, pero perder el
+estado de una aplicación de una sola página por seguir un enlace es un incordio evitable.
+Ver [[RAMAS]].
+
 ## 1. De dónde sale
 
 Del usuario: «si tengo un link de una página web, al hacerle clic me abriera el navegador
