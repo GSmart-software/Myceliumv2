@@ -74,6 +74,8 @@ y **priorizar** qué implementar antes.
 
 | `FUN-S-18` | `EMBED-SIN-EXTENSION` | Que un embed **resuelva por título**, como ya hacen los `[[enlaces]]`: hoy `![[Mi diagrama]]` queda escrito tal cual y hay que poner `![[Mi diagrama.excalidraw]]` o `![[Mi diagrama.drawio]]`. El reconocedor exige la extensión porque **decide por ella** qué dibuja; resolver primero el destino y mirar después su tipo es lo que falta. Salió de probar `FUN-L-20` el 2026-09-23: el usuario escribió la forma de Obsidian y no pasó nada | ambas | — |
 | `FUN-S-19` | `EMBED-CANVAS` | Que `![[lienzo.canvas]]` **muestre el lienzo** dentro de la nota, como ya hace `![[dibujo.excalidraw]]`. Hoy no dibuja nada: los embeds de canvas **nunca se implementaron** —la spec de `FUN-L-18` no los prometía— y el texto queda escrito tal cual. Se descubrió el 2026-09-23, probando `FUN-L-20`, al comparar los tres tipos: el de Excalidraw anda y los otros dos no | ambas | — |
+| `FUN-S-20` | `LINK-EXTERNO-NAVEGADOR` | Que un enlace a una página web **abra el navegador predeterminado** en vez de navegar la ventana de la app. Corrige `DEF-101`, que hoy se lleva Mycelium entero con un clic. La trampa está en **dónde**: los clics en enlaces se atienden en cinco sitios —vista de lectura, edición en vivo, widget de tablas, widget de propiedades y canvas—, así que va en un helper único; más `on_navigation` en Rust como red de seguridad, para que ningún camino olvidado pueda secuestrar la ventana. Necesita `tauri-plugin-opener` y su permiso. En web basta `target="_blank"` | ambas (difiere) | — |
+| `FUN-S-21` | `EMBED-VIDEO` | Pegar el enlace de un video de YouTube como embed —`![](https://youtu.be/…)`— y que se **renderice el reproductor** dentro de la nota, como en Obsidian. Va por `youtube-nocookie.com` (mismo reproductor, sin cookies de seguimiento antes del play) y **en los dos caminos**: `lib/markdown.ts` para lectura y un widget en `lib/editor/livePreview.ts` para la edición en vivo, o se ve al leer y desaparece al editar (la lección de `FUN-L-20`). Sin conexión tiene que degradar con dignidad: un recuadro con el enlace, no un hueco. Vimeo sale casi gratis si se hace genérico | ambas | — |
 ### 1.2 Intermedias — tamaño M
 
 | ID | Nombre | Descripción | Aplica | Orig. |
@@ -316,6 +318,30 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 - **Lo que hay que decidir**: si el embed es una **vista previa** que al hacer clic abre la
   pestaña —lo que se eligió para draw.io, y lo barato— o un lienzo navegable dentro de la
   nota.
+
+#### `FUN-S-20` · `LINK-EXTERNO-NAVEGADOR` (—)
+- **Qué es**: que `[texto](https://…)` abra el navegador del sistema.
+- **De dónde sale**: del usuario, el 2026-09-23: «si tengo un link de una página web, al
+  hacerle clic me abriera el navegador predeterminado». Al probarlo apareció `DEF-101`.
+- **Las dos mitades**: en lectura el enlace **navega la webview** y se lleva la app; en
+  edición en vivo **no hace nada**. O sea que no es «falta abrir el navegador»: es que el
+  comportamiento actual es peor que no tener enlaces.
+- **Dónde toca**: hay **cinco** manejadores de clic que hacen `closest("a")` —`NoteEditor`,
+  `livePreview`, `tablaWidget`, `propiedadesWidget`, `CanvasView`—. Arreglar uno solo deja
+  enlaces que abren el navegador en una vista y rompen la app en otra.
+- **La red de seguridad**: `on_navigation` en Rust, para que un camino no cubierto no pueda
+  sacar a la app de su propia página.
+
+#### `FUN-S-21` · `EMBED-VIDEO` (—)
+- **Qué es**: `![](https://www.youtube.com/watch?v=…)` muestra el reproductor en la nota.
+- **De dónde sale**: del usuario, el 2026-09-23, comparando con Obsidian.
+- **Por qué es S**: es el mecanismo que ya se construyó dos veces —detectar en el embed y
+  sustituir por un widget—, con la lección de `FUN-L-20` incorporada: **los dos caminos**,
+  lectura y edición en vivo, o se ve en uno y no en el otro.
+- **Que quede escrito, o parece una incoherencia**: esto **no** contradice la decisión de
+  empaquetar draw.io para no depender de la red. Ahí se trataba de que *la app* funcione sin
+  conexión; acá la conexión la pide **el usuario**, explícitamente, al pegar un video.
+- **Sin conexión**: un recuadro con el enlace y el motivo, nunca un hueco en blanco.
 
 ### Pendientes — tamaño M
 
@@ -1286,6 +1312,7 @@ No tienen parentesco suficiente con nada: cada una es su propio release.
 | `FUN-M-02` `GRAPH-BUSCADOR-FILTRO` | Solo toca el grafo (ver la alternativa del bloque B) | minor |
 | `FUN-M-07` `DAILY-NOTE` | Ya tiene todo lo que necesitaba: `FUN-M-03` le dio plantillas y sustitución de variables | minor |
 | `FUN-S-18` + `FUN-S-19` + `FUN-M-37` `EMBED-*` | Las tres tocan el mismo reconocedor de `![[…]]`; se hacen juntas o cada una rehace a la anterior | minor |
+| `FUN-S-20` `LINK-EXTERNO-NAVEGADOR` | Corrige `DEF-101`, que es grave y barato: no espera a nada ni comparte código con lo demás | patch |
 | `FUN-M-09` `EXPORT-ZIP-SERVIDOR` (web) | Exportación en servidor; independiente de identidad y de colaboración | minor |
 | `FUN-XL-01` `STORAGE-LOCAL-FIRST-NUBE` | Rearquitectura de almacenamiento del desktop. Necesita que exista infraestructura de nube, pero es trabajo aparte del bloque I | major |
 

@@ -512,6 +512,22 @@ otro. Cada vault debería tener las suyas.
 
 Reportado por el usuario el 2026-09-22, en la misma tanda que `DEF-099`.
 
+# DEF-101
+En la **vista de lectura**, hacer clic en un enlace a una página web —`[texto](https://…)`—
+**se lleva la ventana de Mycelium a esa página**. La app desaparece: la ventana queda
+ocupada por el sitio, sin barra de dirección ni botón de volver, porque el marco es propio
+(`FUN-M-31`). No hay forma evidente de recuperar el vault.
+
+En la **vista de edición en vivo**, el mismo enlace **no hace nada**.
+
+Reportado por el usuario el 2026-09-23, probándolo a pedido mientras se evaluaba si abrir
+los enlaces en el navegador del sistema era viable.
+
+> [!danger] Es el defecto que más lejos deja al usuario
+> Cualquier otro se ve y se sigue trabajando. Este **se lleva la aplicación entera** con un
+> clic en algo que en cualquier documento es inofensivo, y basta con que una nota importada
+> traiga un enlace.
+
 ---
 
 > [!warning] Defectos sin reporte original
