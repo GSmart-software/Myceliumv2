@@ -105,6 +105,23 @@ Mientras convivan las dos implementaciones —que van a convivir un tiempo— ha
 conjunto de enlaces, secciones y propiedades. Si esa prueba no existe, la deriva es cuestión
 de semanas.
 
+### 3.1 Un detalle que el extractor nuevo no puede repetir
+
+Al revisar estas cinco notas con un comprobador ingenuo aparecieron doce «enlaces rotos»
+—`[[destino]]`, `[[Mi base]]`, `[[Título|alias]]`—. **No lo están**: son ejemplos de
+sintaxis dentro de backticks, la convención del vault para mostrar cómo se escribe algo.
+
+Lo interesante es que **el escáner de enlaces de hoy tiene la misma ingenuidad**: busca
+`[[…]]` con una expresión regular sobre el texto crudo, sin distinguir el código en línea ni
+los bloques cercados. O sea que cada nota que **documenta** la sintaxis ensucia el grafo con
+aristas fantasma hacia notas que nunca existieron — y las notas que más documentan sintaxis
+son justamente las del área de arquitectura.
+
+El extractor del índice nuevo **no puede heredar eso**: tiene que saltear código en línea y
+bloques cercados. Es barato hacerlo bien desde el principio y carísimo después, porque para
+entonces los enlaces ya están materializados en una tabla y nadie sabe cuáles son de verdad.
+Emparentado con `DEF-089`, que es la misma ceguera en la edición en vivo.
+
 ## 4. Lo que hay que construir en la app, y no es «solo MCP»
 
 Dos cosas que el plan asume y que son cambios de Mycelium, no del servidor. Van al BACKLOG
