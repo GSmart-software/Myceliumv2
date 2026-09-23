@@ -59,6 +59,37 @@ De ahí salen dos caminos:
 > cada quita las bibliotecas de formas, las plantillas y la exportación. Lo que quede fuera
 > se anota acá.
 
+### Lo que quedó fuera, y lo que se probó y se devolvió (2026-09-23)
+
+La webapp pasó de **147 MB a 102 MB** sin comprimir, y de **51,3 a 33,7 MB** comprimida
+—que es lo que paga el instalador—. El orden fue el que pedía la spec: entera y funcionando
+primero, y después una quita por vez con el smoke corriendo entre medio.
+
+| Qué salió | Cuánto | Por qué se puede |
+|---|---|---|
+| `js/integrate.min.js` | 22 MB | Es el bundle del modo «integrate», el de `embed.diagrams.net`. **Ningún** archivo del paquete lo referencia: `index.html` carga `js/app.min.js` vía `bootstrap.js`. |
+| `js/diagramly/` + `js/grapheditor/` | 14 MB | Las fuentes **sin minificar**. `bootstrap.js` solo las pide en la rama `dev=1`; en producción manda `app.min.js`, que ya las trae adentro. |
+| `resources/dia_*.txt` salvo `es` | 6 MB | Las traducciones que no se usan. La UI va en español y el fallback de draw.io es el inglés. |
+| `META-INF/` + `WEB-INF/` | 5 MB | El andamiaje de la app Java del `.war`. Mycelium sirve estáticos, no hay servlet container. |
+
+> [!warning] MathJax se probó, se rompió y **se devolvió**
+> Era el primer candidato de esta nota, pero sacarlo no sale gratis: draw.io lo pide **al
+> arrancar** (`js/PreConfig.js` define `DRAW_MATH_URL`), así que sin él quedaba un **404 en
+> cada apertura** del editor y las fórmulas dentro de las figuras dejaban de dibujarse en
+> silencio. A cambio ahorraba **~1 MB comprimido sobre 33**. El peso real está en
+> `stencils/` (42 MB), que es justo lo que no se puede tocar.
+>
+> Los dos *viewers* tampoco salieron: están referenciados —`viewer.min.js` desde
+> `js/PreConfig.js`, y `viewer-static.min.js` desde `app.min.js`, que es lo que sostiene la
+> exportación a HTML—.
+>
+> Esto es la regla «si algo se rompe, revertí esa quita» aplicada: la lista de candidatos no
+> manda sobre lo que se ve al probar.
+
+Lo que encontró el problema fue un check nuevo del smoke: **los 404**. Los demás
+—bibliotecas de formas, plantillas, exportación— seguían verdes con MathJax afuera, que es
+exactamente la forma en que una quita rompe algo sin avisar.
+
 ## 4. El archivo
 
 - **`.drawio`** es la extensión nativa: XML de mxGraph, texto plano, versionable en git.
@@ -119,10 +150,73 @@ sitios es la misma que documenta [[canvas]] § 7:
 - El iframe se abre con `embed=1&proto=json&offline=1&stealth=1`: modo embebido, sin salidas
   a la red. Que **no** haya ninguna petición externa es parte de la verificación.
 
-## 8. Abierto
+## 8. Lo que estaba abierto, y cómo se resolvió
 
-- Si el embed en una nota es interactivo o una imagen que al hacer clic abre la pestaña.
-- Qué queda afuera del recorte, que se decide probando (§ 3).
+- **El embed en una nota es una imagen que al hacer clic abre la pestaña**, no un editor.
+  Es la misma decisión que ya tomó Excalidraw con sus embeds, y evita cargar la webapp
+  entera una vez por cada diagrama de la nota. El SVG lo dibuja la propia webapp —el XML de
+  mxGraph no lo entiende nadie más—: hay **un** iframe oculto que actúa de servicio de
+  dibujo y atiende los pedidos encolados.
+- **Qué quedó afuera del recorte**: § 3, con lo que se probó y se devolvió.
+
+## 9. Lo que se implementó (2026-09-23)
+
+| Pieza | Dónde |
+|---|---|
+| Protocolo y formato (puro, 9 tests) | `frontend/lib/drawio.ts` · `frontend/scripts/test-drawio.mjs` |
+| El editor | `frontend/components/drawio/DrawioView.tsx` |
+| Vistas previas de los embeds | `frontend/lib/drawioRender.ts` |
+| Tipo de archivo | `NotaTipo`, `extDeTipo`, `archivos.rs`, `iconosDeTipo.ts`, `EditorPane`, `SidebarNoteView`, menú «Nuevo» |
+| La webapp empaquetada | `frontend/scripts/preparar-drawio.mjs` (`npm run preparar-drawio`) |
+| Que el puente funciona | `frontend/scripts/smoke-drawio.mjs` |
+
+### Tres cosas que solo se supieron probando
+
+1. **No existe `action: 'save'`.** El guardado es una *acción del editor* (el botón, o
+   Ctrl+S), no una acción del protocolo: se dispara con
+   `{action:'invokeAction', actionName:'save'}`. Está en `js/diagramly/Menus.js`, donde el
+   modo embebido reemplaza `actions.get('save')` por el que hace `postMessage`.
+2. **`offline=1` *enciende* el service worker**, al revés de lo que sugiere el nombre
+   (`js/diagramly/Editor.js`). Acá no aporta nada —la webapp se sirve del disco— y
+   arriesgaba servir una versión vieja tras actualizar el paquete, así que va con `pwa=0`.
+3. **`merge` entra con `ignoreChange`**, así que un cambio venido del host no rebota como
+   `autosave`. El autosave solo lo disparan los cambios reales del modelo.
+
+### Decisiones de implementación
+
+- **El XML vive en un ref del componente, no en el iframe.** Por eso cambiar de claro a
+  oscuro puede rehacer el iframe —draw.io lee el tema al arrancar— sin perder nada.
+- **Solo se atienden los mensajes cuyo `source` es nuestro iframe.** Por la ventana pasan
+  `postMessage` de otras cosas, y confundir uno ajeno con un guardado escribiría el archivo.
+- **Un `.drawio` no aporta aristas al grafo.** Es XML: escanearlo como prosa encontraría
+  `[[…]]` dentro de los estilos y las etiquetas de las figuras. Es destino válido, no
+  fuente. Mismo criterio que las bases y los canvas.
+
+### Lo que quedó fuera de esta unidad
+
+- **`.drawio.svg`**: descartado en § 4, no se implementó ninguna variante.
+- **Medir el instalador**: el recorte se midió sobre la webapp comprimida (33,7 MB), no
+  sobre un `tauri build` completo. Ver § 10.
+
+## 10. Verificación
+
+| Qué | Resultado |
+|---|---|
+| `npx tsc --noEmit` | verde |
+| `cargo check` · `cargo test --lib archivos` | verde · 9 tests, incluido el del tipo `.drawio` |
+| `npx next build` | verde — **es la prueba de que el export estático se banca la webapp**: 102 MB de estáticos en `public/`, y Next los copia sin atragantarse (~70 s) |
+| `node --test scripts/test-drawio.mjs` | 9/9 |
+| `node scripts/smoke-drawio.mjs` | 12/12, sin peticiones externas (CA7), sin 404 y sin errores de consola |
+
+> [!warning] Lo que la verificación automática **no** prueba
+> `tsc` en verde no prueba comportamiento. Lo que falta confirmar en la app es lo visible:
+> que el editor se vea bien dentro de la pestaña, que el tema oscuro no desentone (CA6), y
+> que crear/editar/guardar se sienta como una nota (CA1–CA3).
+>
+> **El tamaño del instalador no se midió**: hace falta un `tauri build` completo. Sobre el
+> instalador de hoy (10,2 MB) y 33,7 MB de webapp comprimida, la estimación es **~35-42 MB**
+> según cuánto mejore LZMA sobre deflate. El objetivo de § 3 era 30-35 MB: puede quedar
+> justo por encima.
 
 > [!info] Solo desktop, por decisión del usuario (2026-09-23)
 > En teoría aplica a las dos versiones —el editor es frontend—, pero en `web-cloud` habría
