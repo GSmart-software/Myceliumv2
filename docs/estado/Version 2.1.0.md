@@ -14,10 +14,14 @@ de probarlo: los **enlaces web** abren el navegador (`FUN-S-20`, que corrige `DE
 **vídeos de YouTube** se ven dentro de la nota (`FUN-S-21`). Entran también `DEF-099` y
 `DEF-100`, el ámbito de las consolas.
 
-> [!info] La web sale a la vez como `1.4.0`
-> Le llega el vídeo embebido y los enlaces externos —allá, en pestaña nueva—. draw.io y lo
-> de las consolas **no**: son solo-desktop. Ver
+> [!info] La web sale a la vez como `2.1.0` ([[Version 2.1.0 de web]])
+> Le llega el vídeo embebido y los enlaces externos —allá, en pestaña nueva—, más un defecto
+> latente que se cerró de paso: los enlaces a un `.canvas` o a un `.base` volvieron a
+> resolver. draw.io y lo de las consolas **no**: son solo-desktop. Ver
 > [[Diferencias funcionales aceptadas entre versiones]].
+>
+> Su numeración es **propia**: que coincida con la de escritorio viene de la 2.0.0, donde
+> las dos subieron a major por el mismo motivo el mismo día. No están sincronizadas.
 
 ## Por qué sube este dígito
 
