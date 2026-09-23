@@ -8,6 +8,7 @@ import remarkRehype from "remark-rehype";
 import { unified } from "unified";
 import { visit } from "unist-util-visit";
 import type { Parent } from "unist";
+import { embedDrawioRe } from "@/lib/drawio";
 import { cuerpoDe, separarFrontmatter, type Propiedad, type TipoPropiedad } from "@/lib/frontmatter";
 import { partirWikilink } from "@/lib/wikilinks";
 
@@ -50,6 +51,27 @@ function remarkMicelio() {
             data: {
               hProperties: {
                 className: "mic-excalidraw",
+                dataDiag: match[1],
+              },
+            },
+            children: [{ type: "text", value: `Diagrama ${match[1]}` }],
+          },
+        });
+      }
+
+      // Diagramas de draw.io embebidos (`FUN-L-20` CA5): mismo mecanismo que
+      // Excalidraw —un placeholder que el cliente reemplaza por el dibujo—
+      // porque el XML de mxGraph solo lo sabe dibujar la webapp de draw.io.
+      for (const match of value.matchAll(embedDrawioRe())) {
+        matches.push({
+          start: match.index,
+          end: match.index + match[0].length,
+          node: {
+            type: "link",
+            url: "#drawio",
+            data: {
+              hProperties: {
+                className: "mic-drawio",
                 dataDiag: match[1],
               },
             },

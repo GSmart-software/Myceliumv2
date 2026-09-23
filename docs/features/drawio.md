@@ -59,6 +59,37 @@ De ahí salen dos caminos:
 > cada quita las bibliotecas de formas, las plantillas y la exportación. Lo que quede fuera
 > se anota acá.
 
+### Lo que quedó fuera, y lo que se probó y se devolvió (2026-09-23)
+
+La webapp pasó de **147 MB a 102 MB** sin comprimir, y de **51,3 a 33,7 MB** comprimida
+—que es lo que paga el instalador—. El orden fue el que pedía la spec: entera y funcionando
+primero, y después una quita por vez con el smoke corriendo entre medio.
+
+| Qué salió | Cuánto | Por qué se puede |
+|---|---|---|
+| `js/integrate.min.js` | 22 MB | Es el bundle del modo «integrate», el de `embed.diagrams.net`. **Ningún** archivo del paquete lo referencia: `index.html` carga `js/app.min.js` vía `bootstrap.js`. |
+| `js/diagramly/` + `js/grapheditor/` | 14 MB | Las fuentes **sin minificar**. `bootstrap.js` solo las pide en la rama `dev=1`; en producción manda `app.min.js`, que ya las trae adentro. |
+| `resources/dia_*.txt` salvo `es` | 6 MB | Las traducciones que no se usan. La UI va en español y el fallback de draw.io es el inglés. |
+| `META-INF/` + `WEB-INF/` | 5 MB | El andamiaje de la app Java del `.war`. Mycelium sirve estáticos, no hay servlet container. |
+
+> [!warning] MathJax se probó, se rompió y **se devolvió**
+> Era el primer candidato de esta nota, pero sacarlo no sale gratis: draw.io lo pide **al
+> arrancar** (`js/PreConfig.js` define `DRAW_MATH_URL`), así que sin él quedaba un **404 en
+> cada apertura** del editor y las fórmulas dentro de las figuras dejaban de dibujarse en
+> silencio. A cambio ahorraba **~1 MB comprimido sobre 33**. El peso real está en
+> `stencils/` (42 MB), que es justo lo que no se puede tocar.
+>
+> Los dos *viewers* tampoco salieron: están referenciados —`viewer.min.js` desde
+> `js/PreConfig.js`, y `viewer-static.min.js` desde `app.min.js`, que es lo que sostiene la
+> exportación a HTML—.
+>
+> Esto es la regla «si algo se rompe, revertí esa quita» aplicada: la lista de candidatos no
+> manda sobre lo que se ve al probar.
+
+Lo que encontró el problema fue un check nuevo del smoke: **los 404**. Los demás
+—bibliotecas de formas, plantillas, exportación— seguían verdes con MathJax afuera, que es
+exactamente la forma en que una quita rompe algo sin avisar.
+
 ## 4. El archivo
 
 - **`.drawio`** es la extensión nativa: XML de mxGraph, texto plano, versionable en git.
@@ -119,10 +150,146 @@ sitios es la misma que documenta [[canvas]] § 7:
 - El iframe se abre con `embed=1&proto=json&offline=1&stealth=1`: modo embebido, sin salidas
   a la red. Que **no** haya ninguna petición externa es parte de la verificación.
 
-## 8. Abierto
+## 8. Lo que estaba abierto, y cómo se resolvió
 
-- Si el embed en una nota es interactivo o una imagen que al hacer clic abre la pestaña.
-- Qué queda afuera del recorte, que se decide probando (§ 3).
+- **El embed en una nota es una imagen que al hacer clic abre la pestaña**, no un editor.
+  Es la misma decisión que ya tomó Excalidraw con sus embeds, y evita cargar la webapp
+  entera una vez por cada diagrama de la nota. El SVG lo dibuja la propia webapp —el XML de
+  mxGraph no lo entiende nadie más—: hay **un** iframe oculto que actúa de servicio de
+  dibujo y atiende los pedidos encolados.
+- **Qué quedó afuera del recorte**: § 3, con lo que se probó y se devolvió.
+
+## 9. Lo que se implementó (2026-09-23)
+
+| Pieza | Dónde |
+|---|---|
+| Protocolo y formato (puro, 9 tests) | `frontend/lib/drawio.ts` · `frontend/scripts/test-drawio.mjs` |
+| El editor | `frontend/components/drawio/DrawioView.tsx` |
+| Vistas previas de los embeds | `frontend/lib/drawioRender.ts` |
+| Tipo de archivo | `NotaTipo`, `extDeTipo`, `archivos.rs`, `iconosDeTipo.ts`, `EditorPane`, `SidebarNoteView`, menú «Nuevo» |
+| La webapp empaquetada | `frontend/scripts/preparar-drawio.mjs` (`npm run preparar-drawio`) |
+| Que el puente funciona | `frontend/scripts/smoke-drawio.mjs` |
+
+### Tres cosas que solo se supieron probando
+
+1. **No existe `action: 'save'`.** El guardado es una *acción del editor* (el botón, o
+   Ctrl+S), no una acción del protocolo: se dispara con
+   `{action:'invokeAction', actionName:'save'}`. Está en `js/diagramly/Menus.js`, donde el
+   modo embebido reemplaza `actions.get('save')` por el que hace `postMessage`.
+2. **`offline=1` *enciende* el service worker**, al revés de lo que sugiere el nombre
+   (`js/diagramly/Editor.js`). Acá no aporta nada —la webapp se sirve del disco— y
+   arriesgaba servir una versión vieja tras actualizar el paquete, así que va con `pwa=0`.
+3. **`merge` entra con `ignoreChange`**, así que un cambio venido del host no rebota como
+   `autosave`. El autosave solo lo disparan los cambios reales del modelo.
+
+### Decisiones de implementación
+
+- **El XML vive en un ref del componente, no en el iframe.** Por eso cambiar de claro a
+  oscuro puede rehacer el iframe —draw.io lee el tema al arrancar— sin perder nada.
+- **Solo se atienden los mensajes cuyo `source` es nuestro iframe.** Por la ventana pasan
+  `postMessage` de otras cosas, y confundir uno ajeno con un guardado escribiría el archivo.
+- **Un `.drawio` no aporta aristas al grafo.** Es XML: escanearlo como prosa encontraría
+  `[[…]]` dentro de los estilos y las etiquetas de las figuras. Es destino válido, no
+  fuente. Mismo criterio que las bases y los canvas.
+
+### Tres defectos que solo aparecieron con la app en la mano (2026-09-23)
+
+Los tres pasaron la verificación automática y **los encontró el usuario probando**. Vale la
+pena el detalle, porque los tres son la misma clase de error: *una respuesta escrita en
+varios sitios, y solo uno actualizado*.
+
+**1. `![[diagrama.drawio]]` no dibujaba nada.** Dos causas encadenadas:
+
+- `resolveWikilink` recortaba solo `excalidraw|md` de una lista escrita a mano. El título
+  de una nota **no lleva extensión**, así que `Arquitectura.drawio` no encontraba a
+  `Arquitectura` y el bloque salía como «no existe» con el archivo ahí al lado.
+- La **vista en vivo no comparte código con la de lectura**. `lib/markdown.ts` cubre solo
+  la lectura; los embeds mientras se edita son widgets de CodeMirror en
+  `lib/editor/livePreview.ts`, donde no había nada para draw.io. Aunque la resolución
+  hubiera funcionado, el diagrama habría aparecido al leer y desaparecido al editar.
+
+**2. Un `.drawio` se listaba sin extensión** (`FUN-S-03`): el explorador tenía su propia
+copia del mapa tipo→extensión.
+
+**3. Volver a la pestaña recargaba el editor entero**, perdiendo zoom, selección y deshacer.
+
+### La raíz común, y cómo queda cerrada
+
+«Qué extensión tiene este tipo» estaba contestada en **tres** archivos. Ahora vive solo en
+`lib/extensionesDeTipo.ts`, como los íconos en `lib/iconosDeTipo.ts` (`FUN-S-11`), y es un
+`Record<NotaTipo, string>`: **un tipo nuevo no compila** hasta contestar ahí. Igual la
+expresión del embed, que ahora leen las dos vistas desde `lib/drawio.ts`.
+
+> [!warning] Los tests estaban verdes con el embed roto
+> Probaban la expresión por su cuenta; el defecto estaba en la resolución, que nadie
+> tocaba. `scripts/test-embeds.mjs` carga ahora el pipeline de verdad —`renderNota` y
+> `resolveWikilink`— y **se comprobó que falla con el código viejo** (tres tests en rojo).
+> Un test que aprueba una función rota es peor que no tenerlo.
+
+### Cambiar de pestaña sin recargar
+
+El `iframe` vive en `lib/drawioInstancias.ts`, fuera de React, como el `Map` de
+`lib/terminal.ts` y el `instanceCache` de `NoteEditor` (`DEF-039`).
+
+> [!important] La solución de la terminal no se podía copiar
+> La terminal re-adjunta su nodo con `appendChild`, pero **mover un `iframe` en el DOM lo
+> recarga**. Está comprobado en el smoke, contra la webapp de verdad y en los dos sentidos:
+> `ocultarNoRecarga` (ocultar y reposicionar conserva el documento) y `mudarloSiRecarga`
+> (cambiarlo de padre lo pierde).
+>
+> Por eso el `iframe` se crea una vez colgado de `<body>` y se **posiciona** con
+> `position: fixed` sobre el rectángulo del pane; cambiar de pestaña solo lo oculta.
+> `z-index: 10`, bajo a propósito: `.paneBody` no crea contexto de apilado, así que las
+> zonas de soltar (20), la pista de arrastre (30) y los menús (60) siguen por encima.
+>
+> Cerrar la pestaña **sí** destruye el `iframe` —lo decide el árbol de panes, porque la
+> vista no distingue un cierre de un cambio de pestaña— y hay un tope de **3** editores
+> vivos, que nunca poda uno visible.
+
+### Lo que quedó fuera de esta unidad
+
+- **`.drawio.svg`**: descartado en § 4, no se implementó ninguna variante.
+- **Llegar a los 30-35 MB de instalador** que fijaba § 3: quedó en 40,3 MB. El porqué y qué
+  haría falta para bajar más, en § 10.
+
+## 10. Verificación
+
+| Qué | Resultado |
+|---|---|
+| `npx tsc --noEmit` | verde |
+| `cargo check` · `cargo test --lib archivos` | verde · 9 tests, incluido el del tipo `.drawio` |
+| `npx next build` | verde — **es la prueba de que el export estático se banca la webapp**: 102 MB de estáticos en `public/`, y Next los copia sin atragantarse (~70 s) |
+| `node --test` (drawio · extensiones · embeds) | 43/43 |
+| `node scripts/smoke-drawio.mjs` | 15/15, sin peticiones externas (CA7), sin 404 y sin errores de consola |
+
+> [!warning] Lo que la verificación automática **no** prueba
+> `tsc` en verde no prueba comportamiento. Lo que falta confirmar en la app es lo visible:
+> que el editor se vea bien dentro de la pestaña, que el tema oscuro no desentone (CA6), y
+> que crear/editar/guardar se sienta como una nota (CA1–CA3).
+
+### El instalador: **no se llegó al objetivo**
+
+Se midió con un `tauri build` completo:
+
+| | Antes | Ahora | Δ |
+|---|---|---|---|
+| NSIS (`-setup.exe`) | 10,2 MB | **40,3 MB** | +30,1 |
+| MSI | — | **41,8 MB** | — |
+
+El objetivo de § 3 era **30-35 MB** y quedó en **40,3**, unos **5-7 MB por encima**. Se
+deja dicho en vez de seguir recortando: **lo que queda es lo que no se puede tocar**. De los
+102 MB de la webapp, 42 son `stencils/` y 11 son `img/lib` —las bibliotecas de formas y sus
+miniaturas—, que son exactamente la razón de traer draw.io en vez de quedarse con Excalidraw.
+Bajar de acá es empezar a borrar bibliotecas de figuras, o sea entregar un draw.io mutilado.
+
+Las quitas baratas ya se hicieron (§ 3): sacaron 45 MB sin romper nada. Las que faltarían
+rompen el CA2.
+
+> [!question] Queda para el usuario
+> Si 40 MB es aceptable, no hay nada más que hacer. Si no lo es, la decisión ya no es de
+> recorte sino de **alcance**: elegir un subconjunto de bibliotecas de formas y asumir que
+> un `.drawio` con figuras de una biblioteca ausente se verá incompleto —incluido uno que
+> venga de afuera—.
 
 > [!info] Solo desktop, por decisión del usuario (2026-09-23)
 > En teoría aplica a las dos versiones —el editor es frontend—, pero en `web-cloud` habría

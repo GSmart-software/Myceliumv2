@@ -5,6 +5,7 @@ import { Eye, Pencil } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { BaseView } from "@/components/bases/BaseView";
 import { CanvasView } from "@/components/canvas/CanvasView";
+import { DrawioView } from "@/components/drawio/DrawioView";
 import { ExcalidrawFileEditor } from "@/components/editor/ExcalidrawFileEditor";
 import { NoteEditor } from "@/components/editor/NoteEditor";
 import { GraphView } from "@/components/graph/GraphView";
@@ -13,6 +14,7 @@ import { esTabArchivo, nombreDeRuta, rutaDeTabArchivo } from "@/lib/otrosArchivo
 import { esTabTerminal, termIdDe } from "@/lib/terminalBase";
 import { useTerminalStore } from "@/stores/terminalStore";
 import { subscribeDoc } from "@/lib/editor/docBroker";
+import { renderDrawioIn } from "@/lib/drawioRender";
 import { renderExcalidrawIn } from "@/lib/excalidraw";
 import { fetchNoteContent } from "@/lib/export";
 import { renderNota } from "@/lib/markdown";
@@ -47,6 +49,7 @@ export function SidebarNoteView({ notaId }: { notaId: string }) {
   // corresponden. Su propio botón «Fuente» ya deja editarla (`FUN-L-03`).
   const esBase = nota?.tipo === "base";
   const esCanvas = nota?.tipo === "canvas";
+  const esDrawio = nota?.tipo === "drawio";
 
   // Una consola también se puede anclar en el visor (FUN-L-07): se muestra la
   // TerminalView real (misma sesión), no un render de nota.
@@ -99,7 +102,7 @@ export function SidebarNoteView({ notaId }: { notaId: string }) {
         <span className={styles.viewerTitle} title={nota?.titulo}>
           {nota?.titulo ?? "…"}
         </span>
-        {!esExcalidraw && !esBase && !esCanvas && (
+        {!esExcalidraw && !esBase && !esCanvas && !esDrawio && (
           <button
             type="button"
             className={styles.viewerToggle}
@@ -118,6 +121,10 @@ export function SidebarNoteView({ notaId }: { notaId: string }) {
           <BaseView key={notaId} notaId={notaId} />
         ) : esCanvas ? (
           <CanvasView key={notaId} notaId={notaId} />
+        ) : esDrawio ? (
+          // El panel lateral no es una pestaña: lleva su propia clave para que
+          // el barrido de pestañas cerradas no se lo lleve por delante.
+          <DrawioView key={notaId} notaId={notaId} instanceId={`sidebar:${notaId}`} />
         ) : editing ? (
           <NoteEditor
             key={`edit-${notaId}`}
@@ -166,6 +173,7 @@ function ReadOnlyNote({ notaId }: { notaId: string }) {
     if (containerRef.current) {
       void renderMermaidIn(containerRef.current);
       void renderExcalidrawIn(containerRef.current, notaId);
+      void renderDrawioIn(containerRef.current);
     }
   }, [html, notaId]);
 
