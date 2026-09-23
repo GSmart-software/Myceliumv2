@@ -98,6 +98,7 @@ lo digo.
 | 2026-09-22 | Al cambiar de vault siguen las consolas del anterior, apuntando a su carpeta; ¿es por la persistencia o es un bug? | `DEF-099`. **Las dos cosas**: que cerrar la pestaña no termine la consola es el CA7 de [[terminal-integrada]], a propósito; que sobreviva al **cambio de vault** es el defecto |
 | 2026-09-22 | Varias ventanas de Mycelium comparten las consolas; cada vault debería tener las suyas | `DEF-100`, la otra cara del `DEF-099`: la lista vive en una sola clave de `localStorage`. Los procesos **sí** están separados por ventana desde `FUN-L-16` |
 | 2026-09-22 | Integrar draw.io en Mycelium, como se integró Excalidraw | `FUN-L-20` `FILES-DRAWIO` · va sola · spec en [[drawio]]. Lo caro no es el editor sino **cómo se embebe**: draw.io no tiene componente React, y apuntar a su sitio público rompería el funcionar sin conexión |
+| 2026-09-23 | Un botón para crear temas propios: nombre y colores generales (no los fondos), listados bajo «Temas personalizados» como tarjetas | `FUN-M-36` `THEME-PERSONALIZADO` · va sola · spec en [[temas-personalizados]]. Lo caro no es la tarjeta: es que el tema **deje de ser una lista cerrada** de dos literales, repetida en siete sitios. Queda por confirmar si son dos colores o tres |
 
 > [!note] Esta tabla se puede vaciar cuando moleste
 > Es una comodidad para que veas en qué terminó cada cosa, no un registro canónico. La

@@ -106,6 +106,7 @@ y **priorizar** qué implementar antes.
 | `FUN-M-22` | `EXPORT-FEEDBACK-DESCARGA` | Avisar de la exportación: una tarjeta abajo a la derecha que indica que se está descargando, permanece 10-15 s al terminar —con cierre manual— y ofrece **abrir la carpeta** donde quedó el archivo. Hoy exportar no da ninguna señal | ambas (difiere) | — |
 | `FUN-M-19` 🟢🌐 | `EDITOR-PROPIEDADES-EN-SITIO` | El bloque de propiedades **deja de abrirse en crudo** al entrar el cursor: sigue renderizado y se edita ahí — cambiar un valor, renombrar una clave, **agregar y quitar** propiedades — sin ir a la vista raw, más «editar como texto» por bloque. Invierte el «widget de solo lectura» de `FUN-M-04`, cuyo motor (`ponerPropiedad`, `quitarPropiedad`, `renombrarPropiedad`) ya está hecho y probado. **Confirmado en desktop** por el usuario el 2026-08-16 y **reflejado en web** el 2026-08-17, junto con `FUN-L-19` porque tocan los mismos archivos compartidos. Primera mitad de [[edicion-en-el-render]]; la segunda es `FUN-L-19` | ambas | — |
 | `FUN-M-17` 🟡 | `VAULT-RELINKEADO` | Adoptar un vault que viene de otro proyecto: **la IA descubre** cómo se referencian sus documentos (`` `HU-009` ``, el nombre suelto, `[texto](otra.md)`) y lo registra en un léxico persistente; **el script aplica** esas formas y las convierte en `[[wikilinks]]`. La auditoría **no modifica documentos**; el enlazado sí, con respaldo y deshacer. Es el **caso de entrada** de Mycelium sobre un proyecto existente. **Su núcleo ya está hecho** (`lib/enlaces.ts`, 41 tests), porque lo necesitaba `FUN-L-17`; lo que falta son los dos comandos de la IA. Spec en [[auditoria-y-relinkeado]] | ambas | — |
+| `FUN-M-36` | `THEME-PERSONALIZADO` | Que el usuario **cree sus propios temas**: un nombre y los colores de identidad —principal y secundario—, y el resto de la paleta **derivada por fórmula**, como ya hacen las [[atmosferas]] con los semánticos. Aparecen en Apariencia bajo «Temas personalizados», con las mismas tarjetas que los de Mycelium. Es `M` y no `S` por lo que no se ve: hoy el tema es una **unión cerrada de dos literales** repetida en siete sitios —incluido el CSS del PDF, que lleva los colores escritos a mano—, y pasa a ser un dato. El riesgo es el **contraste**: los temas actuales están medidos ≥4,5:1 en los 16 combos. Spec en [[temas-personalizados]] | ambas | — |
 
 ### 1.3 Grandes — tamaño L
 
@@ -473,6 +474,28 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   mensaje de error y se vuelve al nombre original** — el error se dice, no se traga en
   silencio. Y los títulos `#` del cuerpo **no intervienen**: el que manda es siempre el nombre
   del archivo que se muestra al inicio del documento.
+
+#### `FUN-M-36` · `THEME-PERSONALIZADO` (—)
+- **Qué es**: un botón para crear temas propios. El usuario pone el **nombre** y los colores
+  **generales** —principal, secundario—, y no los fondos: esos se derivan.
+- **De dónde sale**: del usuario, en la [[Bandeja de entrada]] el 2026-09-23.
+- **Por qué derivar y no pedir los 16 colores**: los colores de identidad son una elección;
+  los fondos y los textos son **consecuencia**, y su único trabajo es tener el contraste
+  justo contra aquéllos. Pedirlos a mano es pedirle a quien crea el tema que resuelva un
+  problema de accesibilidad. Además, derivando, el tema nuevo **hereda las cuatro
+  atmósferas sin trabajo**, porque éstas ya están escritas como fórmulas sobre los raw.
+- **Por qué es M**: la tarjeta y el selector de color son lo barato. Lo que cuesta es que el
+  tema **deje de ser una lista cerrada**: `Tema` es hoy `"bioluminiscencia" | "cantarela"` y
+  eso está repetido en el store, en el esquema y la siembra del índice, al guardar, en el
+  buscador de ajustes, en la lista de swatches y —el que más se olvida— en
+  `lib/printStyles.ts`, el CSS autocontenido del PDF, que lleva los tokens de los dos temas
+  escritos dentro.
+- **El riesgo es el contraste**: los temas actuales están medidos ≥4,5:1 en los 16 combos de
+  tema × modo × atmósfera. Se defiende por dos lados: derivar con luminancias **fijas** (así
+  el contraste no depende del color elegido) y medirlo al elegir, para avisar sin prohibir.
+- **A confirmar antes de implementar**: si son dos colores o tres (un tercero para el tinte
+  del marco).
+- Spec completa en [[temas-personalizados]].
 
 ### Pendientes — tamaño L
 
@@ -1249,6 +1272,7 @@ No tienen parentesco suficiente con nada: cada una es su propio release.
 | `FUN-L-20` `FILES-DRAWIO` | Un tipo de archivo nuevo, con su editor embebido: no comparte código con nada pendiente. Sí comparte **molde** con `FUN-L-18`, pero aquella ya está hecha | minor |
 | `FUN-M-02` `GRAPH-BUSCADOR-FILTRO` | Solo toca el grafo (ver la alternativa del bloque B) | minor |
 | `FUN-M-07` `DAILY-NOTE` | Ya tiene todo lo que necesitaba: `FUN-M-03` le dio plantillas y sustitución de variables | minor |
+| `FUN-M-36` `THEME-PERSONALIZADO` | Toca el sistema de temas y nada más. Se apoya en [[atmosferas]], que ya está entregada | minor |
 | `FUN-M-09` `EXPORT-ZIP-SERVIDOR` (web) | Exportación en servidor; independiente de identidad y de colaboración | minor |
 | `FUN-XL-01` `STORAGE-LOCAL-FIRST-NUBE` | Rearquitectura de almacenamiento del desktop. Necesita que exista infraestructura de nube, pero es trabajo aparte del bloque I | major |
 

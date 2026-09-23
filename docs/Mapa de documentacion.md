@@ -83,6 +83,8 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
   (`FUN-L-18`).
 - [[drawio]] — draw.io como tipo de archivo del vault, y la decisión que lo bloquea
   (`FUN-L-20`). Idea registrada, sin implementar.
+- [[temas-personalizados]] — que el usuario cree sus propios temas eligiendo los colores de
+  identidad, y el resto derivado (`FUN-M-36`). Idea registrada, sin implementar.
 - [[bases-tabla]] — el archivo `.base`: agregar notas por sus propiedades en una tabla
   (`FUN-L-03`). Continuación directa de [[metadata-yaml]].
 - [[edicion-en-el-render]] — las propiedades y las tablas dejan de abrirse en crudo con el
