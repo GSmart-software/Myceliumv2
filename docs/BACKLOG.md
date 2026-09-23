@@ -128,7 +128,7 @@ y **priorizar** qué implementar antes.
 | `FUN-L-18` 🛠️🌐 | `FILES-CANVAS` | Tipo de archivo **canvas** (`.canvas`, formato JSON Canvas de Obsidian): lienzo infinito con texto suelto, tarjetas de markdown y tarjetas que **son** notas del vault, unidas por flechas. Los `[[enlaces]]` de las tarjetas funcionan y cuentan en el grafo; las flechas son solo disposición visual. Spec en [[canvas]]. **Implementado en las dos ramas** el 2026-08-08 (sin confirmar); sale en la [[Version 1.6.0]]; construido sin librería de nodos, ver [[canvas]] § 9. | ambas | — |
 | `FUN-L-17` 🛠️ | `VAULT-RELINKEADO-UI` | La auditoría y conversión de `FUN-M-17` como **pantalla de la app**, consumiendo el mismo núcleo. Sirve a quien nunca usa la IA y hoy no tiene ninguna salida. **Implementada en desktop** el 2026-08-08 (sin confirmar), y con ella el **núcleo de `FUN-M-17`**, que no existía: `lib/enlaces.ts`. Sale en la [[Version 1.6.0]]. Ver [[auditoria-y-relinkeado]] § 17 | ambas | — |
 | `FUN-L-15` 🟢 | `RELEASE-SCRIPT-PUBLICACION` | Un `npm run publicar` que compruebe, compile, firme, suba a R2 con `wrangler`, escriba los tres manifiestos y **verifique lo publicado**, en vez de hacer esos cuatro pasos a mano. Tiene modo `--simulacro`. **Script local, no CI**: usar el workflow obligaría a alinear `origin` y a poner la clave de firma como secreto de GitHub. **Confirmado**: publicó la 1.5.0 de verdad el 2026-08-03. El proceso, en [[Publicar una version]] § 2 | desktop | — |
-| `FUN-L-20` | `FILES-DRAWIO` | Integrar **draw.io** como un tipo de archivo más del vault, igual que Excalidraw: crear, abrir y editar un diagrama dentro de Mycelium, guardado en la carpeta del vault. No compite con Excalidraw —aquel es trazo a mano, este es figura y conector que se engancha— ni con el canvas. El trabajo real no es el editor sino **cómo se embebe**: draw.io no publica un componente React, se integra como su aplicación web en modo embebido (`iframe` + `postMessage`), así que hay que decidir entre apuntar al sitio público (no funciona sin conexión) o **empaquetar la webapp** en el instalador. Spec en [[drawio]] | ambas | — |
+| `FUN-L-20` | `FILES-DRAWIO` | Integrar **draw.io** como un tipo de archivo más del vault, igual que Excalidraw: crear, abrir y editar un diagrama dentro de Mycelium, guardado en la carpeta del vault. No compite con Excalidraw —aquel es trazo a mano, este es figura y conector que se engancha— ni con el canvas. El trabajo real no es el editor sino **cómo se embebe**: draw.io no publica un componente React, se integra como su aplicación web en modo embebido (`iframe` + `postMessage`), así que hay que decidir entre apuntar al sitio público (no funciona sin conexión) o **empaquetar la webapp** en el instalador. **Decidido por el usuario el 2026-09-23**: webapp **empaquetada y recortada** (sin conexión funciona; el instalador pasa de 10,2 MB a ~30-35 MB) y **solo desktop**. En implementación desde esa fecha. Spec en [[drawio]] | desktop | — |
 
 ### 1.4 Muy grandes — tamaño XL
 
@@ -852,10 +852,11 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   `postMessage`), así que hay que montar ese puente, decidir el formato de guardado
   (`.drawio` XML o `.drawio.svg` con el XML incrustado) y recorrer los nueve sitios que
   pide cualquier tipo de archivo nuevo ([[canvas]] § 7).
-- **Lo que bloquea todo lo demás**: `iframe` al sitio público contra **empaquetar la webapp**.
-  Lo primero rompe la promesa de que Mycelium funciona sin conexión —justo donde se pierde
-  trabajo si falla—; lo segundo engorda el instalador y obliga a confirmar la licencia del
-  empaquetado. Sin esa decisión no se empieza.
+- **Lo que bloqueaba todo lo demás, ya decidido** (usuario, 2026-09-23): **empaquetada y
+  recortada**, y **solo desktop**. El sitio público rompía que Mycelium funcione sin
+  conexión, justo donde se pierde trabajo si falla. Se paga en tamaño: el `draw.war` de la
+  release fijada `v31.4.6` son 51,3 MB (Apache-2.0) y el instalador pasa de 10,2 MB a unos
+  30-35 MB. La webapp no entra a git: la baja un script en el build.
 - Spec completa en [[drawio]].
 
 ### Pendientes — tamaño XL
