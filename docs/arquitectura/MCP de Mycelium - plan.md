@@ -122,7 +122,91 @@ bloques cercados. Es barato hacerlo bien desde el principio y carísimo después
 entonces los enlaces ya están materializados en una tabla y nadie sabe cuáles son de verdad.
 Emparentado con `DEF-089`, que es la misma ceguera en la edición en vivo.
 
-## 4. Lo que hay que construir en la app, y no es «solo MCP»
+## 6. Lo que cambió el estado del arte (2026-09-23)
+
+Se contrastó el plan contra lo que existe hoy: [[Memoria documental para IA - estado del arte]].
+**El veredicto de fondo es que el plan es correcto**, y no por cortesía: las técnicas más
+citadas resuelven **otro** problema. GraphRAG, LightRAG y compañía existen para **inferir**
+un grafo desde texto plano; nuestro vault ya lo tiene escrito a mano, más limpio que
+cualquiera que infiera un modelo, y además ninguna pasa la restricción de trabajar sin
+conexión. Dos convergencias independientes respaldan lo decidido: el buscador más usado de
+Obsidian llegó por su cuenta al mismo BM25 con pesos por título, encabezados y cuerpo, y otra
+herramienta del vecindario llegó al mismo «el markdown es la verdad, SQLite es un caché».
+
+Pero la investigación encontró tres cosas que el plan no tenía, y **ninguna agrega un
+componente**: las tres hacen que el plan **mida** algo que hoy no mide.
+
+### 6.1 El texto de los enlaces entrantes entra al ranking
+
+Es el mejor hallazgo. Medido desde 2001 y reproducido en 2010 y 2022: rankear por el **texto
+del enlace** es hasta el doble de efectivo que por el contenido para encontrar *la* página de
+algo — y su fuerza está en las consultas **navegacionales**, que en un vault son casi todas
+(«¿cuál era la nota de los dos escritores?»).
+
+El plan ya guarda el `alias` de cada enlace, pero solo lo **devuelve**: el vocabulario con
+que los demás nombran una nota **no participa del ranking**. Dicho de otra forma: Contextual
+Retrieval paga ~1 dólar por millón de tokens para que un modelo escriba el contexto de cada
+fragmento; acá **ese contexto ya lo escribió el autor**, una vez por cada enlace que tipeó.
+
+**Decidido**: tabla `ENLACES_FTS` **aparte**, indexada por `destino_norm`, que se funde en la
+consulta. Aparte y no en la fila destino, porque materializarlo ahí rompería la localidad del
+reindexado incremental, que es lo que hace barato el diseño. Entra como **quinta señal en
+peso cero** y se calibra *offline* sobre corridas ya ejecutadas: no cuesta una tanda nueva.
+
+### 6.2 La regla de decisión estaba mal medida, y se corrige
+
+El arnés define la eficiencia como **contexto ocupado** (`tokens_recuperacion`) y
+pre-registra que si el MCP ocupa más que el `grep` actual, se rehace. La investigación probó
+ese umbral contra un caso nuevo —meter el vault entero en contexto aprovechando el caché de
+prompts— y lo rompió: ese camino **ocupa 1,68 veces más contexto y cuesta unas 6 veces
+menos en dinero** a partir de la tercera pregunta de una sesión.
+
+> [!danger] Dos métricas que se contradicen no pueden decidir nada
+> `tokens_recuperacion` y `total_cost_usd` apuntan en direcciones opuestas en cuanto entra el
+> caché. Si no se resuelve **antes** de la primera tanda, la primera decisión importante se
+> toma con la métrica que más convenga, que es la peor forma de decidir.
+
+**Decidido**: cuando digamos «barato», el número que manda es el **costo en dólares**. El
+contexto ocupado pasa a ser **diagnóstico**, no regla — porque el daño que hace ocupar la
+ventana (la degradación por contexto largo) **ya se paga en la métrica principal**, que es el
+acierto citado. Un brazo que ocupa más ventana, acierta igual y cuesta menos, es mejor; si la
+ventana llena le costara aciertos, el acierto lo va a mostrar.
+
+**Y entra el cuarto brazo**: «corpus entero en contexto». Con dos advertencias escritas: el
+vault personal (5,6 MB) **no entra** en la ventana, así que el resultado va a ser un umbral
+de tamaño y no un ganador; y el arnés lo penaliza artificialmente si cada pregunta abre una
+sesión nueva, porque le hace pagar siempre la escritura del caché. Hay que medirlo por sesión
+y no por pregunta.
+
+### 6.3 La decisión sobre embeddings estaba pre-registrada contra un número imposible
+
+[[MCP de Mycelium - memoria]] dice que los embeddings entran si el arnés mide **recall@10 <
+0,80** en la clase de preguntas con desajuste de vocabulario. [[MCP de Mycelium - evaluacion]]
+**no puede producir ese número**: esa clase no existe entre las siete, y el arnés puntúa la
+**respuesta final**, no la lista ordenada de candidatos. La decisión más cara del diseño
+estaba atada a una medición que nunca iba a existir, y lo habríamos descubierto el día de
+decidir.
+
+**Decidido**, tres piezas chicas: una clase **C8 · desajuste de vocabulario** (21 → 24
+preguntas); que `vault_buscar` **registre su lista ordenada** con las señales que ya calcula
+—una línea de registro local, que además habilita toda la calibración *offline*—; y
+`secciones_clave` en las claves de esa clase.
+
+Se corrige además el umbral: hablaba de un modelo de menos de 40 MB **dentro del
+instalador**, y eso apunta al artefacto equivocado. La opción real es un modelo estático
+—hay uno en Rust puro, sin GPU— de unos 140 MB en su versión multilingüe. La pregunta
+correcta no es «¿entra en el instalador?» sino **«¿acepta el usuario una descarga opcional de
+~140 MB?»**, y eso no se decide midiendo: se pregunta.
+
+### 6.4 Una ambigüedad del plan, cerrada
+
+La investigación no pudo saber si la columna `encabezados` del índice guarda **el encabezado
+propio** o **la cadena completa de ancestros**. **Decisión: la cadena completa** (`Nota > H2 >
+H3`), que el esquema ya calcula para las migas. Es la versión gratis de lo que Contextual
+Retrieval paga con un modelo: cada sección queda indexada con el lugar que ocupa, sin una
+llamada a nada.
+
+## 7. Lo que hay que construir en la app, y no es «solo MCP»
 
 Dos cosas que el plan asume y que son cambios de Mycelium, no del servidor. Van al BACKLOG
 por separado para que no viajen escondidas:
@@ -136,7 +220,7 @@ por separado para que no viajen escondidas:
    `TERM`. Sumar `MYCELIUM_VAULT` y el *token* de la ventana deja autenticado, sin
    configurar nada, al Claude Code que corre en la terminal integrada.
 
-## 5. El orden, y por qué empieza por medir
+## 8. El orden, y por qué empieza por medir
 
 > [!tip] La fase 0 es la única que no se puede saltear
 > El arnés mide **la línea base**: cuánto le cuesta hoy a la IA encontrar algo con `grep`.
@@ -156,7 +240,7 @@ por separado para que no viajen escondidas:
 Las fases 1 y 2 se miden con el mismo arnés. Si la fase 1 no le gana a `grep`, **no se sigue
 a la 2**: se revisa el diseño.
 
-## 6. Lo que sigue esperando una decisión del usuario
+## 9. Lo que sigue esperando una decisión del usuario
 
 1. ~~**Con qué modelo se corre la evaluación.**~~ **Decidido** (usuario, 2026-09-23): el
    **modelo más chico** para la tanda principal, y las preguntas de reserva repetidas con el
@@ -173,10 +257,14 @@ a la 2**: se revisa el diseño.
    secciones**, para que `[[Mi base]]` resuelva. Indexar además su **texto** cerraría una de
    las clases de pregunta que la evaluación dejó diseñada para que el MCP pierda.
 5. **Puntaje parcial** en las preguntas de enumeración, o todo o nada.
+6. **¿Aceptarías una descarga opcional de ~140 MB** para tener búsqueda semántica, si el
+   arnés llegara a mostrar que hace falta? No es una decisión de ahora —primero hay que
+   medir si hace falta— pero sí marca si esa puerta está abierta o cerrada (§ 6.3).
 
 ## Relacionadas
 
 - [[MCP de Mycelium - encuadre]] — los hechos y las restricciones de partida.
+- [[Memoria documental para IA - estado del arte]] — contra qué se contrastó este plan.
 - [[MCP de Mycelium - memoria]] · [[MCP de Mycelium - control]] · [[MCP de Mycelium - evaluacion]] — las tres partes.
 - [[Mycelium como memoria de la IA]] — la decisión de producto de la que sale todo.
 - [[BACKLOG]] — `FUN-L-09` y `FUN-L-10`, que este plan une.

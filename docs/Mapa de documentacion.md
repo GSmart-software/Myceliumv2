@@ -40,6 +40,8 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
   permisos.
 - [[MCP de Mycelium - evaluacion]] — cómo se mide con MCP y sin MCP, y qué resultado nos
   haría abandonar el diseño.
+- [[Memoria documental para IA - estado del arte]] — qué existe hoy para darle memoria a una
+  IA sobre documentación, y por qué casi todo resuelve otro problema.
 
 ## Decisiones
 
