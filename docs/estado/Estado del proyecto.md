@@ -1,15 +1,19 @@
 # Estado del proyecto
 
-**Actualizado**: 2026-08-03 · rama activa `desktop-tauri`
+**Actualizado**: 2026-09-22 · rama activa `desktop-tauri`
 
 Foto de dónde está Mycelium hoy. Para el detalle de cada tema, seguir los enlaces.
 
 ## Resumen
 
-- **Versión: desktop `1.6.2`** ([[Version 1.6.2]], **publicada el 2026-08-17**) · **web `1.1.0`**
-  ([[Version 1.1.0 de web]], 2026-08-08). Las dos líneas **no comparten numeración**.
-  Web se puso al día con todo lo que le aplicaba; lo que sigue solo en desktop es lo que
-  por naturaleza no le aplica (terminal, framework de IA, autoactualización).
+- **Versión: desktop `2.0.0`** ([[Version 2.0.0]], **publicada el 2026-09-21**) · **web
+  `2.0.0`** ([[Version 2.0.0 de web]], 2026-09-22, sin publicar). Las dos líneas **no
+  comparten numeración**: que hoy digan el mismo número es casualidad —web venía de `1.3.0`
+  y desktop de `1.7.0`, y el salto a major lo decidió el usuario en las dos por el mismo
+  motivo (cambia toda la interfaz de una vez).
+  Web está al día con todo lo que le aplica, **incluido el rediseño de la interfaz**; lo que
+  sigue solo en desktop es lo que por naturaleza no le aplica (terminal, framework de IA,
+  autoactualización, marco de ventana propio, visor de archivos sueltos).
 - [[Version 1.0.0]] fue el primer release final en **ambas** versiones, con instaladores
   de escritorio generados.
 - **Todos los bugs `DEF-*`** del reporte original cerrados y reflejados

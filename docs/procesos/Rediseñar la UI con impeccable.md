@@ -162,6 +162,23 @@ nuevo.
    marcas ajenas que quedaban a la vista —el ícono de Tauri y la barra de título del
    sistema—. Ver [[marco-de-ventana]] (`FUN-M-31`).
 8. **Cierre**: su revisor final y su documentador, que actualiza `DESIGN.md`.
+9. **Integración y reflejo** (2026-09-21 y 22). El experimento se integró a `desktop-tauri`
+   con `--no-ff` (`e2d1866`) y salió como [[Version 2.0.0]], **major por decisión del
+   usuario**: por dentro no hay rearquitectura, pero cambia toda la interfaz de una vez.
+
+   Al integrarlo, el usuario decidió que **no** fuera a web. Un día después, tras usarla
+   («estuve probando la nueva UI y me gusta»), pidió reflejarla: `e412a8c` en `web-cloud`,
+   [[Version 2.0.0 de web]]. Fue el reflejo más grande hecho hasta ahora —63 archivos— y
+   de los más limpios: 44 se trajeron enteros y 8 se aplicaron a mano. El detalle de la
+   clasificación está en [[RAMAS]]; el procedimiento, en
+   [[Reflejar cambios de desktop a web]].
+
+   > [!tip] Un rediseño hecho con tokens y componentes propios cruza barato
+   > Lo que hizo que 44 de 63 archivos viajaran con un `git checkout` es que el experimento
+   > no tocó la capa de datos en ningún momento: atmósferas en CSS, avisos y
+   > confirmaciones en stores de zustand, y los tres ganchos de teclado
+   > (`useMenuEmergente`, `useDialogoModal`) sin dependencias. Lo único que pidió cirugía
+   > fueron los archivos que ya divergían por la terminal y el visor de archivos.
 
 ## Lo que no aplica a Mycelium
 

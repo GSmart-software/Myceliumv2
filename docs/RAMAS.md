@@ -15,15 +15,18 @@ solo divergen en la capa de datos.
 | Rama | Qué fue | Estado |
 |---|---|---|
 | `experimento/ui-plana` | Rediseño con el tema Sofka | **No integrada.** Se conserva |
-| `experimento/ui-impeccable` | Rediseño de UI/UX con la skill impeccable ([[Rediseñar la UI con impeccable]]) | **Integrada a `desktop-tauri` el 2026-09-21** (`e2d1866`, `--no-ff`). **No va a web.** La rama se conserva |
+| `experimento/ui-impeccable` | Rediseño de UI/UX con la skill impeccable ([[Rediseñar la UI con impeccable]]) | **Integrada a `desktop-tauri` el 2026-09-21** (`e2d1866`, `--no-ff`) y **reflejada a `web-cloud` el 2026-09-22** (`e412a8c`). La rama se conserva |
 
-> [!warning] El rediseño de impeccable es solo-desktop, por decisión
-> No por imposibilidad técnica: el usuario decidió que no se refleje a web. Eso agranda la
-> distancia entre las dos ramas en archivos que hasta ahora eran compartidos —el cascarón
-> (`components/workspace/*`), la configuración (`components/settings/*`), el explorador,
-> `tokens.css`, `editor.css`—. **A partir de acá, un reflejo que toque esos archivos ya no
-> puede traerlos enteros**: hay que clasificarlos de nuevo, porque desktop tiene encima el
-> rediseño que web no.
+> [!important] El rediseño SÍ fue a web, tras revertirse la decisión
+> Al integrarlo, el usuario había decidido que **no** se reflejara —y esta nota decía
+> «solo-desktop, por decisión»—. El **2026-09-22**, después de usar la interfaz nueva
+> («estuve probando la nueva UI y me gusta»), pidió reflejarla. Queda anotado el cambio de
+> criterio, no borrado: era una decisión de producto, no un impedimento técnico.
+>
+> Efecto en las ramas: los archivos del cascarón (`components/workspace/*`), de la
+> configuración (`components/settings/*`), el explorador, `tokens.css` y `editor.css`
+> **vuelven a estar al día en las dos**, así que siguen trayéndose enteros. Lo que sí
+> quedó divergiendo está en la lista de abajo.
 
 **Topología lineal:** `desktop-tauri` = `web-cloud` + la capa Tauri encima (contiene
 toda la historia de la web). Comparten el 100% del frontend salvo unos ~17 commits
@@ -189,6 +192,43 @@ entre ramas):
   > `lib/canvas.ts` y `lib/enlaces.ts` son **puros y sin imports** —así los transpilan sus
   > tests sin build— y no pueden importar `lib/wikilinks.ts`. Cada uno cubre el caso en su
   > propia suite: es lo único que impide que diverjan.
+- **Rediseño de la interfaz (`FUN-M-30` a `FUN-M-35`, desktop 2.0.0, ✅ reflejado
+  2026-09-22 como web 2.0.0)**: el reflejo más grande hecho hasta ahora —63 archivos— y,
+  sorprendentemente, el que menos cirugía pidió: **23 archivos compartidos se trajeron
+  enteros** (`styles/tokens.css`, `styles/editor.css`, `app/globals.css`,
+  `components/settings/{Appearance,Editor,Graph,CustomCss}Section.tsx`,
+  `components/editor/EditorToolbar.tsx`, `components/explorer/{ContextMenu,EsporasPanel}.tsx`,
+  `components/graph/MiniGraph.tsx`, los `.module.css` del explorador, las pestañas y el
+  grafo, `stores/{preferences,sync,ui}Store.ts`) y **21 nuevos** también
+  (`lib/atmosferas.ts`, `styles/atmosferas.css`, `lib/use{DialogoModal,MenuEmergente}.ts`,
+  `stores/{avisos,confirmar,recientes}Store.ts`, `components/workspace/{Avisos,BarraEstado,
+  DialogoConfirmar,PaletaComandos,IconoGrafo}.tsx`, `components/settings/{Interruptor,
+  VentanaAjustes}.tsx`, `components/explorer/MenuNuevo.tsx`).
+
+  **Dos archivos dejaron de divergir**: `lib/confirmar.ts` y `TrashPanel.tsx`. La pregunta
+  antes la dibujaba el sistema (el plugin de Tauri en desktop, `window.confirm` en web) y
+  ahora la dibuja Mycelium en las dos, con el mismo módulo.
+
+  **Lo que se aplicó a mano**, todo en archivos que ya divergían: `AppTopbar.tsx` + su CSS
+  (web conserva Compartir y el avatar, y no tiene controles de ventana ni nombre de vault),
+  `workspace/page.tsx` (monta las piezas nuevas pero no `UpdateDialog`, y mantiene el
+  cálculo de `shareFolder`), `Rail.tsx` (sin el botón de consolas), `ExplorerPanel.tsx`
+  (sin los archivos sueltos de `FUN-L-11` ni «Abrir terminal aquí»),
+  `VentanaAjustes.tsx` (sin Consolas ni Actualizaciones, con **Cuenta** en su lugar) y
+  `VaultSection.tsx` (solo la validación en vivo de Esporas; el `.mycignore` es de desktop).
+
+  > [!warning] Dos textos que dicen lo contrario en cada rama, a propósito
+  > `lib/capacidades.ts` existe en las dos con **una sola línea distinta**
+  > (`HAY_COMPARTIR`: `false` en desktop, `true` en web); es lo que mantiene compartidos al
+  > explorador y al menú contextual. Y el texto de los snippets de CSS es **opuesto** en
+  > cada una —en web quedan en la cuenta y viajan entre dispositivos; en desktop, en el
+  > índice local del vault—, igual que la lista de tipos de pestaña de `EditorSection.tsx`
+  > (desktop nombra la consola y los archivos no indexados; web no los tiene).
+
+  Se quedó **sin reflejar por naturaleza** el marco de ventana propio (`FUN-M-31`:
+  `components/ventana/*`, `lib/ventana.ts`, `src-tauri/src/marco.rs`), la carga diferida de
+  la terminal y todo lo del actualizador. Ver [[configuracion]], [[atmosferas]],
+  [[avisos-y-confirmaciones]] y [[Version 2.0.0 de web]].
 - **Preferencias por vault (`FUN-M-28` + `FUN-M-21` + `FUN-M-25`; portadas a web el
   2026-09-05 como `FUN-M-29`)**: el único archivo que **diverge de verdad** es
   `stores/prefsVaultStore.ts`. Todo lo que lo consume es compartido y se trae entero.

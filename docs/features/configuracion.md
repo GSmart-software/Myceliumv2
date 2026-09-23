@@ -1,6 +1,6 @@
 # Configuración
 
-`FUN-M-32` · desktop · rama `experimento/ui-impeccable` · 2026-09-20
+`FUN-M-32` (+ `FUN-M-34`, `FUN-M-35`) · **ambas versiones** · desktop 2.0.0 (2026-09-20) · reflejada a web el 2026-09-22
 
 > [!info] Qué es
 > Configuración deja de ser un panel que entra desde la derecha y pasa a ser una **ventana
@@ -167,6 +167,19 @@ ignorados, «plantillas» → Carpeta de Esporas, «powershell» → Shell por d
 Ancho de tabulación; el salto marca la fila (`--mic-marca` = `#19e6ff` contra `--mic-focus`
 = `#3dffc4`); el pie es un `<button>`; el engranaje dice «Configuración (Ctrl+,)». La
 ventana angosta queda sin comprobar en vivo: exige achicar la ventana real del usuario.
+
+## En web
+
+Reflejada el 2026-09-22 ([[Version 2.0.0 de web]]). Tres diferencias, todas por lo que
+existe en cada versión:
+
+- **«Cuenta» es una categoría más** (perfil y «Cerrar sesión»). En el panel viejo colgaban
+  del pie, a la vista desde cualquier pestaña —también desde Apariencia—.
+- **No hay Consolas ni Actualizaciones**: la terminal y el actualizador son de desktop. El
+  pie, por lo mismo, solo dice la versión y no esconde el modo avanzado.
+- **La guardia del cierre no tiene qué custodiar**: el borrador que se perdía era el del
+  `.mycignore`, que no existe en web. `cerrar()` queda como el sitio donde ponerla el día
+  que web gane un ajuste que se escriba a mano.
 
 ## Relacionadas
 

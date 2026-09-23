@@ -1,6 +1,6 @@
 # Avisos, confirmaciones y recientes
 
-`FUN-M-33` · desktop · rama `experimento/ui-impeccable` · 2026-09-20
+`FUN-M-33` · **ambas versiones** · desktop 2.0.0 (2026-09-20) · reflejada a web el 2026-09-22
 
 Lo que salió de la crítica del cascarón (25/40): sus dos problemas de comportamiento más
 graves y el que más molesta a diario.
@@ -58,6 +58,15 @@ Nota descartable creada, borrada (aviso + «Deshacer» → vuelve), borrada otra
 eliminada desde la papelera con el diálogo propio (texto, verbo y foco inicial
 comprobados). `Ctrl+Tab` y `Ctrl+Shift+Tab` alternan entre las dos pestañas abiertas. La
 paleta abre con las dos últimas notas vistas.
+
+## En web
+
+Reflejada entera el 2026-09-22 ([[Version 2.0.0 de web]]), sin adaptaciones: los avisos, el
+diálogo propio, las recientes y `Ctrl+Tab` no dependen de la capa de datos.
+
+Con ella, **`lib/confirmar.ts` deja de divergir**. Tenía dos cuerpos distintos —el diálogo
+del plugin de Tauri en desktop, `window.confirm` en web— con la misma firma asíncrona. Ahora
+la pregunta la dibuja Mycelium en las dos y el archivo es uno solo. Ver [[RAMAS]].
 
 ## Relacionadas
 

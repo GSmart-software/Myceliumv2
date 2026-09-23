@@ -1,6 +1,6 @@
 # Marco de ventana propio
 
-`FUN-M-31` · desktop · rama `experimento/ui-impeccable` · 2026-09-19
+`FUN-M-31` · **solo desktop** (en web la ventana es la del navegador) · 2.0.0 · 2026-09-19
 
 > [!info] Qué es
 > Mycelium deja de usar la barra de título de Windows: la ventana va sin decoración
@@ -89,6 +89,17 @@ existen y no hacen nada, para que el frontend no tenga que preguntar dónde corr
 
 - **El estado maximizada** se sigue por `onResized`, que es el evento que hay; no existe
   uno propio de «cambió el estado de la ventana».
+
+## Por qué no va a web
+
+Cuando el resto del rediseño se reflejó (2026-09-22), esto se quedó. No es una decisión de
+producto: en web **la ventana es la del navegador**, y una página no puede —ni debería—
+dibujar sus botones de minimizar, maximizar y cerrar, ni reponer el redimensionado, ni
+ofrecer el menú de anclaje de Windows 11. Con el marco se quedan en desktop
+`components/ventana/*`, `lib/ventana.ts` y `src-tauri/src/marco.rs`. El ícono de la
+aplicación tampoco cruza: en web lo que hay es un favicon.
+
+Ver [[Diferencias funcionales aceptadas entre versiones]].
 
 ## Relacionadas
 

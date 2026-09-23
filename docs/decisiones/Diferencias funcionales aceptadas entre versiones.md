@@ -23,6 +23,10 @@ donde aplica**, y eso **no** se considera un defecto.
 | Login, OAuth, colaboración en tiempo real, export ZIP en servidor | Solo web | Requieren backend, usuarios y nube |
 | Exportar PDF | **Ambas, distinto** | Desktop imprime en cliente (iframe + `window.print()`); web delega en el backend (PuppeteerSharp) |
 | Exportar vault | **Ambas, distinto** | Desktop: a carpeta nativa **o** ZIP; web: solo ZIP |
+| [[marco-de-ventana]] (`FUN-M-31`) | Solo desktop | En web la ventana es la del navegador: una página no dibuja sus botones de ventana ni el menú de anclaje |
+| [[otros-tipos-de-archivo]] (`FUN-L-11` + `FUN-M-26`) | Solo desktop | Lee y escribe archivos sueltos de la carpeta del vault, que en web no existen |
+| Compartir carpetas (HU-35) | Solo web | Necesita cuenta y servidor. En desktop el botón pedía el email de otra persona y no hacía nada: se apagó con `lib/capacidades.ts` (`HAY_COMPARTIR`) |
+| Snippets de CSS | **Ambas, distinto** | Web: asociados a la cuenta, viajan entre dispositivos. Desktop: en el índice local del vault abierto. El texto de la pantalla lo dice distinto en cada una, a propósito |
 
 ## Cómo se decide
 

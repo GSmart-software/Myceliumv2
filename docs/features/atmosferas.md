@@ -1,6 +1,6 @@
 # Atmósferas
 
-`FUN-M-30` · desktop · rama `experimento/ui-impeccable` · 2026-09-19
+`FUN-M-30` · **ambas versiones** · desktop 2.0.0 (2026-09-19) · reflejada a web el 2026-09-22
 
 > [!info] Qué es
 > Un **tercer eje del estilo**, al lado del **Tema** (qué colores: Bioluminiscencia o
