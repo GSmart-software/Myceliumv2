@@ -73,6 +73,7 @@ y **priorizar** qué implementar antes.
 | `FUN-S-12` 🟢 | `TERMINAL-COLOR-POR-CONSOLA` | Asignar un **color a cada consola**, reflejado en su pestaña, que se **atenúa cuando no tiene el foco**. Permite distinguirlas de un vistazo sin perder cuál se está viendo. **Implementado y confirmado en la app** el 2026-09-05, junto con `FUN-S-11`. La marca es una **barra** en el borde de la pestaña y no solo el ícono, porque el ícono se puede apagar y el color no puede depender de otra preferencia para existir. La lista de seis colores es cerrada y **no sigue al tema** —si lo hiciera, la consola «verde» sería otra en Cantarela—, y sus valores están medidos: peor caso 3.79:1 sobre los ocho fondos posibles. Spec en [[marcas-en-las-pestanas]] | desktop | — |
 
 | `FUN-S-18` | `EMBED-SIN-EXTENSION` | Que un embed **resuelva por título**, como ya hacen los `[[enlaces]]`: hoy `![[Mi diagrama]]` queda escrito tal cual y hay que poner `![[Mi diagrama.excalidraw]]` o `![[Mi diagrama.drawio]]`. El reconocedor exige la extensión porque **decide por ella** qué dibuja; resolver primero el destino y mirar después su tipo es lo que falta. Salió de probar `FUN-L-20` el 2026-09-23: el usuario escribió la forma de Obsidian y no pasó nada | ambas | — |
+| `FUN-S-19` | `EMBED-CANVAS` | Que `![[lienzo.canvas]]` **muestre el lienzo** dentro de la nota, como ya hace `![[dibujo.excalidraw]]`. Hoy no dibuja nada: los embeds de canvas **nunca se implementaron** —la spec de `FUN-L-18` no los prometía— y el texto queda escrito tal cual. Se descubrió el 2026-09-23, probando `FUN-L-20`, al comparar los tres tipos: el de Excalidraw anda y los otros dos no | ambas | — |
 ### 1.2 Intermedias — tamaño M
 
 | ID | Nombre | Descripción | Aplica | Orig. |
@@ -306,6 +307,15 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   y mirar después el tipo del archivo encontrado, es justamente el cambio.
 - **Cuidado**: dos archivos del mismo nombre y distinta extensión dejan de ser distinguibles;
   hay que decidir qué gana (o avisar).
+
+#### `FUN-S-19` · `EMBED-CANVAS` (—)
+- **Qué es**: que un `![[lienzo.canvas]]` se vea dentro de la nota.
+- **De dónde sale**: de la misma prueba de `FUN-L-20` (2026-09-23). Comparando los tres
+  tipos quedó a la vista que **solo Excalidraw** tiene embed: el usuario lo reportó como si
+  los otros estuvieran rotos, y en el caso del canvas nunca estuvieron hechos.
+- **Lo que hay que decidir**: si el embed es una **vista previa** que al hacer clic abre la
+  pestaña —lo que se eligió para draw.io, y lo barato— o un lienzo navegable dentro de la
+  nota.
 
 ### Pendientes — tamaño M
 
@@ -1275,7 +1285,7 @@ No tienen parentesco suficiente con nada: cada una es su propio release.
 | `FUN-L-20` `FILES-DRAWIO` | Un tipo de archivo nuevo, con su editor embebido: no comparte código con nada pendiente. Sí comparte **molde** con `FUN-L-18`, pero aquella ya está hecha | minor |
 | `FUN-M-02` `GRAPH-BUSCADOR-FILTRO` | Solo toca el grafo (ver la alternativa del bloque B) | minor |
 | `FUN-M-07` `DAILY-NOTE` | Ya tiene todo lo que necesitaba: `FUN-M-03` le dio plantillas y sustitución de variables | minor |
-| `FUN-S-18` + `FUN-M-37` `EMBED-*` | Las dos tocan el mismo reconocedor de `![[…]]`; se hacen juntas o la segunda rehace la primera | minor |
+| `FUN-S-18` + `FUN-S-19` + `FUN-M-37` `EMBED-*` | Las tres tocan el mismo reconocedor de `![[…]]`; se hacen juntas o cada una rehace a la anterior | minor |
 | `FUN-M-09` `EXPORT-ZIP-SERVIDOR` (web) | Exportación en servidor; independiente de identidad y de colaboración | minor |
 | `FUN-XL-01` `STORAGE-LOCAL-FIRST-NUBE` | Rearquitectura de almacenamiento del desktop. Necesita que exista infraestructura de nube, pero es trabajo aparte del bloque I | major |
 
