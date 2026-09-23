@@ -44,6 +44,7 @@ import {
   controlTablaDe,
   esControlDeTabla,
 } from "@/lib/editor/tablaWidget";
+import { esEnlaceExterno, manejarClicDeEnlace } from "@/lib/enlacesExternos";
 import { renderExcalidrawInto } from "@/lib/excalidraw";
 import { getAllViews } from "@/lib/editor/viewRegistry";
 import { useUiStore } from "@/stores/uiStore";
@@ -623,6 +624,7 @@ export function liveExtensions(
 const WIKILINK_RE = /\[\[([^[\]]+)\]\]/g;
 /** Embed de un diagrama/archivo excalidraw: `![[ref.excalidraw]]`. */
 const EXCALIDRAW_RE = /!\[\[([^[\]]+)\.excalidraw\]\]/g;
+
 const TAG_RE = /(^|[\s(])#([\p{L}\p{N}_/-]+)/gu;
 /** Cabecera de callout: `> [!tipo]` (con `>` anidados para callouts dentro de
  *  callouts, DEF-022) y símbolo de plegado opcional (-/+). Grupo 1 = marcadores
@@ -777,6 +779,14 @@ export function livePreview(
           if (link) {
             event.preventDefault();
             onWikilinkClick(link.getAttribute("data-title") ?? "");
+            return true;
+          }
+          // Enlace a una página web (`FUN-S-20`). Acá NO hay un `<a>`: el live
+          // preview oculta el `(url)` y deja el texto marcado, así que el destino
+          // viaja en `data-href` (ver el caso `Link` de `buildDecorations`).
+          // Antes de esto, en esta vista un enlace no hacía nada (`DEF-101`).
+          const externo = (event.target as HTMLElement).closest("[data-href]");
+          if (externo && manejarClicDeEnlace(event, externo.getAttribute("data-href"))) {
             return true;
           }
           return false;
@@ -1000,6 +1010,30 @@ function buildDecorations(
             const line = doc.lineAt(node.from);
             if (!activeLines.has(line.number)) {
               decos.push({ from: node.from, to: node.to, deco: hide });
+            }
+            break;
+          }
+          case "Link": {
+            // El destino de un `[texto](https://…)` para poder abrirlo en el
+            // navegador (`FUN-S-20`). El `(url)` se oculta más arriba, así que
+            // sin esto el enlace queda como texto suelto y el clic no hace nada
+            // —que es la mitad de `DEF-101` que se veía en esta vista—.
+            //
+            // Se marca el nodo entero y no solo el texto: el `data-href` tiene
+            // que seguir estando cuando el cursor NO está en la línea, que es
+            // justo cuando se ve como enlace y da ganas de hacerle clic.
+            let destino: string | null = null;
+            const hijo = node.node.getChild("URL");
+            if (hijo) destino = doc.sliceString(hijo.from, hijo.to).trim();
+            if (destino !== null && esEnlaceExterno(destino)) {
+              decos.push({
+                from: node.from,
+                to: node.to,
+                deco: Decoration.mark({
+                  class: "mic-enlace-externo",
+                  attributes: { "data-href": destino, title: destino },
+                }),
+              });
             }
             break;
           }

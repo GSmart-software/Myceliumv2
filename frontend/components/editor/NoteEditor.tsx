@@ -34,6 +34,7 @@ import {
 } from "@/lib/editor/wikilink";
 import { registerView, unregisterView } from "@/lib/editor/viewRegistry";
 import { extensionesTab } from "@/lib/editor/tabWidth";
+import { manejarClicDeEnlace } from "@/lib/enlacesExternos";
 import { exportDiagram, renderExcalidrawIn, saveDiagram } from "@/lib/excalidraw";
 import { getCachedNote, putCachedNote } from "@/lib/idb";
 import { EVENTO_NOTA_GUARDADA } from "@/lib/eventos";
@@ -1067,6 +1068,10 @@ export function NoteEditor({
       const anchor = (event.target as HTMLElement).closest("a");
       if (!anchor) return;
       const href = anchor.getAttribute("href") ?? "";
+      // Un enlace a una página web se abre en una pestaña nueva y NO navega la
+      // actual: Mycelium es una sola página y perder su estado por seguir un
+      // enlace de una nota es un incordio evitable (`FUN-S-20`).
+      if (manejarClicDeEnlace(event, href)) return;
       if (href.startsWith("#wikilink:")) {
         event.preventDefault();
         openByTitle(decodeURIComponent(href.slice("#wikilink:".length)));
