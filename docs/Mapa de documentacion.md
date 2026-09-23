@@ -83,8 +83,12 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
   referencian sus documentos y convertirlo en enlaces (`FUN-M-17` · `FUN-L-17`).
 - [[canvas]] — el archivo `.canvas`: notas y textos en el espacio, unidos por flechas
   (`FUN-L-18`).
-- [[drawio]] — draw.io como tipo de archivo del vault, y la decisión que lo bloquea
-  (`FUN-L-20`). Idea registrada, sin implementar.
+- [[drawio]] — draw.io como tipo de archivo del vault, con su webapp empaquetada
+  (`FUN-L-20`).
+- [[enlaces-externos]] — que un enlace a una página web abra el navegador y no se lleve la
+  ventana de la app (`FUN-S-20`, corrige `DEF-101`).
+- [[video-embebido]] — pegar un enlace de YouTube como embed y ver el reproductor dentro de
+  la nota (`FUN-S-21`).
 - [[bases-tabla]] — el archivo `.base`: agregar notas por sus propiedades en una tabla
   (`FUN-L-03`). Continuación directa de [[metadata-yaml]].
 - [[edicion-en-el-render]] — las propiedades y las tablas dejan de abrirse en crudo con el
