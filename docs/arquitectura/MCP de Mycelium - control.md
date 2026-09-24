@@ -143,7 +143,7 @@ flowchart LR
 
 ### 2.2 Decisión — *named pipe* en Windows, socket UNIX en el resto
 
-**Un canal por vault abierto**, cuyo nombre se deriva de la ruta canónica del vault:
+**Un canal por vault abierto**, cuyo nombre se deriva de la ruta canónica del vault —definida en [[MCP de Mycelium - plan]] § 7.3: la cadena de la entrada del registro, resuelta con una normalización única—:
 `\\.\pipe\mycelium-<hash>` en Windows, `$XDG_RUNTIME_DIR/mycelium-<hash>.sock` en Linux y
 `$TMPDIR` en macOS. Encima corre un protocolo de líneas JSON con correlación por `id`:
 prácticamente el mismo JSON-RPC que el servidor ya habla por `stdio`.

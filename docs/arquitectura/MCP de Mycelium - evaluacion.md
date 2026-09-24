@@ -291,8 +291,8 @@ después ahorrar.
 | **Precisión de citas** | ∩ admisibles / citas | Detecta el que cita de más |
 | **Exhaustividad de citas** | ∩ clave / clave | Detecta el que acierta sin fundar |
 | **Citas inventadas** | Nº de títulos que no existen | Alucinación pura; cualquier valor > 0 es señal roja |
-| **Tokens de recuperación** | Contexto del último mensaje − contexto del primero (sección 6) | Lo que la recuperación **metió** en el contexto |
-| **Costo USD** | `total_cost_usd` de la corrida | El número verdadero de facturación, ya pesa el caché |
+| **Tokens de recuperación** | Contexto del último mensaje − contexto del primero (sección 6) | Lo que la recuperación **metió** en el contexto. **Diagnóstico**: no decide (§ 9.1) |
+| **Costo** | Recalculado de los tokens por categoría con pesos congelados (§ 9.1); `total_cost_usd` como control | **La métrica de eficiencia que decide** (`K`). Ya pesa el caché |
 | **Llamadas a herramientas** | Conteo por nombre, de la transcripción | Cuántos viajes hizo hasta contestar |
 | **Tasa de adopción** | % de corridas del brazo C con ≥ 1 llamada al MCP | Si el agente ignora el MCP, el problema es el diseño de las herramientas |
 | **Tiempo de reloj** | `duration_ms` | **Diagnóstico, no decisorio** (ver el aviso) |
@@ -561,30 +561,97 @@ Los sesgos ordenados por cuánto daño hacen. Cada uno con su contramedida concr
 
 ## 9. La regla de decisión, escrita antes de correr
 
-> [!important] Pre-registro
-> Esta sección se completa y se **congela** antes de la primera tanda real. Cambiarla
-> después de ver los números es inventar la conclusión. Si hay que cambiarla, se cambia,
-> se fecha y se dice qué se sabía al cambiarla.
+> [!important] Pre-registro — reescrito el 2026-09-24, antes de cualquier corrida
+> Esta sección se **congela** antes de la primera tanda real. Cambiarla después de ver los
+> números es inventar la conclusión. Si hay que cambiarla, se cambia, se fecha y se dice qué
+> se sabía al cambiarla.
+>
+> **Qué cambió respecto de la primera versión, y por qué.** Decidía la eficiencia por
+> **tokens de contexto** (`T`). La investigación del estado del arte mostró que esa medida y
+> el costo real **apuntan en direcciones opuestas** en cuanto entra el caché de prompts —el
+> vault entero cacheado ocupaba 1,68 veces más contexto y costaba unas 6 veces menos—, y la
+> revisión crítica señaló que el plan ya había decidido «manda el costo en dólares» sin que
+> esta regla lo reflejara. Además la versión anterior tenía un hueco (un Δ de +6 puntos con
+> el intervalo lejos del cero no caía en ninguna fila) y no decía qué hacer con un brazo
+> inválido. Ninguna corrida se había hecho todavía: el cambio no mira datos.
 
-Con `Δ` = diferencia pareada media en **acierto citado** (C − B), `IC` su intervalo del
-95 % por bootstrap, y `T` la razón de `tokens_recuperacion` (C / B):
+### 9.1 Las dos magnitudes
 
-| Resultado | Lectura | Qué se hace |
+- **`Δ`** — diferencia pareada media en **acierto citado** (C − B), con su `IC` del 95 % por
+  *bootstrap* remuestreando preguntas. Es la métrica principal (§ 5).
+- **`K`** — razón de **costo** C / B, pareada por pregunta: para cada pregunta se toma la
+  **mediana** del costo de sus cinco repeticiones en cada brazo, y `K` es la mediana de esas
+  razones, con su `IC` por el mismo *bootstrap*.
+
+> [!note] El costo se **recalcula**, no se copia de la factura
+> `total_cost_usd` depende del precio vigente el día de la corrida: dos tandas separadas por
+> un cambio de tarifa no serían comparables. El costo de una corrida se recalcula a partir de
+> los tokens por categoría (entrada, escritura de caché, lectura de caché, salida) con una
+> **tabla de pesos congelada** junto con esta regla.
+>
+> Y hay un detalle que la vuelve robusta: **cuando los dos brazos usan el mismo modelo, `K`
+> solo depende de los pesos relativos entre categorías** —la lectura de caché a 0,1× la
+> entrada, la escritura a 1,25×—, no del precio absoluto. Por eso lo que se congela son esos
+> cocientes, que cambian mucho menos que las tarifas. `total_cost_usd` se sigue registrando,
+> como control de que el recálculo no se desvía.
+
+`tokens_recuperacion` **deja de decidir**: pasa a ser diagnóstico. El daño real de llenar la
+ventana —que el modelo rinda peor con un contexto largo— **ya lo cobra `Δ`**: si ocupar más
+contexto le cuesta aciertos a un brazo, el acierto lo va a mostrar.
+
+### 9.2 Primero, ¿la comparación es válida?
+
+Antes de leer `Δ` o `K`, cada brazo pasa tres filtros. Si alguno falla, **no hay
+conclusión**: hay una tarea.
+
+| Filtro | Si falla | Qué se hace |
 |---|---|---|
-| `Δ ≥ +10 pts` con `IC` sin el 0 | El MCP encuentra cosas que `grep` no | **Entra.** El costo es secundario |
-| `Δ` compatible con 0 **y** `T ≤ 0,6` | Igual de exacto, bastante más barato | **Entra**, con el ahorro como justificación explícita |
-| `Δ` compatible con 0 **y** `0,6 < T < 1` | Ni más exacto ni claramente más barato | **No entra como está.** Se rehace el diseño de las herramientas o se recorta el alcance |
-| `Δ ≤ −5 pts` | El MCP **empeora** la recuperación | **Se abandona o se rehace de cero.** Y se investiga por qué: casi seguro recorte de contexto (el caso de P-01) |
-| `T > 1` | El MCP cuesta más contexto que `grep` | Falla el objetivo declarado —«rápido y barato»— del encuadre. Se rehace |
-| Adopción < 50 % en el brazo C | El agente ignora las herramientas | **No es un resultado sobre la recuperación, es un defecto de las herramientas**: nombres, descripciones o instrucciones. Se corrige y se vuelve a correr; no se reporta como comparación |
-| Pierde en C7 por más de 30 pts sin caer a `grep` | El índice solo-`.md` le sacó capacidades al agente | Bloqueante: hay que garantizar el repliegue a `grep` antes de seguir |
+| El brazo base llega al **50 % de acierto citado** con el modelo chico | El modelo no alcanza para la tarea: se mediría cuánto compensa la herramienta a un modelo que no llega | Sube el piso al modelo siguiente y se anota en el informe |
+| La **adopción** del MCP en el brazo C es ≥ 50 % | El agente ignora las herramientas: no es un resultado sobre la recuperación | Se corrigen nombres, descripciones o instrucciones y se vuelve a correr |
+| Un brazo **compactó** el contexto en menos del 20 % de sus corridas | Sus métricas de costo y de contexto dejan de ser comparables | Se reporta **solo su acierto**; su costo queda fuera de la decisión |
+
+### 9.3 La decisión
+
+Se lee **en orden**; la primera fila que se cumple decide.
+
+| # | Resultado | Lectura | Qué se hace |
+|---|---|---|---|
+| 1 | `Δ ≤ −5 pts` | El MCP **empeora** la recuperación | **Se abandona o se rehace de cero.** Y se investiga por qué: casi seguro recorte de contexto (el caso de P-01) |
+| 2 | `Δ ≥ +10 pts` con `IC` sin el 0 | Encuentra cosas que `grep` no | **Entra**, salvo que `K > 2`: entonces entra solo con decisión explícita del usuario, porque la exactitud se está pagando cara |
+| 3 | `Δ > 0` con `IC` sin el 0, pero `< +10 pts` | Algo más exacto, sin ser contundente | **Entra si `K ≤ 1`**: mejora sin costar más. Si `K > 1`, se trata como la fila 5 |
+| 4 | `K ≤ 0,6` y el `IC` de `K` sin el 1 | Igual de exacto y claramente más barato | **Entra**, con el ahorro como justificación explícita |
+| 5 | `0,6 < K ≤ 1` | Ni más exacto ni lo bastante más barato | **No entra como está.** Se rehace el diseño de las herramientas o se recorta el alcance |
+| 6 | `K > 1` | Cuesta más que `grep` sin acertar más | Falla el objetivo declarado —«rápido y barato»—. **Se rehace** |
+
+> [!info] Por qué el umbral de ahorro es 0,6 y no 0,9
+> Un MCP no es gratis después de construido: suma un binario, un índice y un segundo
+> *parser* que mantener para siempre. **Un ahorro chico no paga ese costo permanente.**
+> Pedir al menos un 40 % es poner ese costo de mantenimiento en la balanza. No sale de una
+> fórmula: es un juicio, y queda escrito como juicio.
+
+Además, y fuera del orden de la tabla:
+
+- **Bloqueante de clase**: si el MCP pierde en C7 por más de 30 puntos **sin caer a `grep`**,
+  el índice solo-`.md` le sacó capacidades al agente. Hay que garantizar el repliegue antes de
+  seguir, gane lo que gane en el resto.
+- **El brazo del corpus entero** (D) se lee aparte, porque corre con Sonnet y solo sobre las
+  preguntas de reserva: se compara contra B y C **corridos con Sonnet** sobre esas mismas
+  preguntas, con la misma tabla. Su resultado no decide si el MCP entra; decide **a partir de
+  qué tamaño de vault** hace falta un MCP de memoria. Si D iguala a C en `Δ` con `K ≤ 1`, la
+  conclusión de producto es un umbral: por debajo de cierto tamaño, alcanza con meter el
+  vault en contexto.
 
 > [!tip] El resultado más útil es el que duele
-> Si la conclusión es «no sirve», la evaluación **ya pagó su costo**: nos ahorró construir
-> un servidor MCP que no aportaba. La forma de saber que este diseño está bien es que las
-> filas «se abandona» y «se rehace» son alcanzables con datos plausibles, no hipótesis de
-> laboratorio. La de `T > 1` en particular es muy alcanzable: un MCP que devuelve notas
-> enteras «por las dudas» consume más que un `grep` bien apuntado.
+> Si la conclusión es «no sirve», la evaluación **ya pagó su costo**: nos ahorró construir un
+> servidor que no aportaba. La forma de saber que esta regla está bien es que las filas 1, 5 y
+> 6 son alcanzables con datos plausibles. La 6 en particular: un MCP que devuelve notas
+> enteras «por las dudas» cuesta más que un `grep` bien apuntado.
+
+### 9.4 Lo que se completa al congelar
+
+Dos cosas que son datos del día y no decisiones: la **tabla de pesos** de costo por categoría
+de token, con su fecha y su fuente, y el **commit** del vault que se usa como corpus. Con esas
+dos anotadas, esta sección queda cerrada.
 
 ---
 
@@ -624,9 +691,11 @@ Una fila de `resultados.jsonl` (los campos de ambiente son los que hacen la comp
  "citas_inventadas": 0, "acierto_citado": 1,
  "puntuador": "mecanico", "juez_motivo": null,
 
- "tokens_recuperacion": 14820, "tokens_salida": 612, "tokens_pensamiento": 210,
- "costo_usd": 0.0412, "num_turns": 6,
- "llamadas": {"mcp__mycelium__buscar": 1, "Read": 0},
+ "tokens": {"entrada": 38, "cache_escritura": 9120, "cache_lectura": 61400, "salida": 612},
+ "tokens_recuperacion": 14820, "tokens_pensamiento": 210, "compactado": false,
+ "costo": 0.0398, "costo_usd": 0.0412, "pesos_costo": "2026-09-24",
+ "num_turns": 6,
+ "llamadas": {"mcp__mycelium__vault_buscar": 1, "Read": 0},
  "ms_total": 18422, "ms_api": 9110,
 
  "descartada": false, "motivo_descarte": null}

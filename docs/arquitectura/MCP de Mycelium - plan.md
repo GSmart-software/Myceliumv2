@@ -277,21 +277,57 @@ control.
 
 ### 7.2 Lo que falta, en orden, y nada de esto cuesta código
 
-1. **La regla de decisión pre-registrada no existe todavía.** El § 4.2 decidió que manda el
-   costo en dólares, pero [[MCP de Mycelium - evaluacion]] § 9 sigue decidiendo por tokens y
-   no tiene ningún umbral de costo escrito. Hay que reescribir esa sección con una razón de
-   costo y sus umbrales, y **congelarla antes de la fase 0**: un pre-registro que se escribe
-   después de ver los datos no es un pre-registro.
+1. ~~**La regla de decisión pre-registrada no existe todavía.**~~ **Hecho el 2026-09-24**:
+   [[MCP de Mycelium - evaluacion]] § 9 decide ahora por **costo** (`K`), recalculado de los
+   tokens con pesos congelados para que dos tandas separadas por un cambio de tarifa sigan
+   siendo comparables. Además tiene filtros de validez previos —piso del modelo, adopción,
+   compactación—, un orden de lectura sin huecos y el brazo del corpus entero leído aparte.
+   Falta solo lo que es dato del día: la tabla de pesos y el commit del corpus.
 2. **El modelo chico no puede correr el cuarto brazo**, y es una consecuencia de una decisión
-   del usuario que nadie vio: ver el § 7.3.
-3. **La ruta del vault no tiene forma canónica.** La app hashea la cadena tal como llega
-   —verificado en `hashRuta` y `registrar_vault`—, así que un servidor que resuelva el vault
-   desde el `cwd` con otras mayúsculas u otras barras calcula **otro** *hash*: otro índice y
-   otro nombre de *pipe*, y contesta `APP_CERRADA` **con la app abierta**. Es, según la
-   revisión, lo primero que va a fallar el día que alguien lance Claude Code desde fuera de
-   la terminal integrada. Propuesta: la forma canónica es la cadena que guarda `vaults.json`.
+   del usuario que nadie vio: ver el § 7.4.
+3. ~~**La ruta del vault no tiene forma canónica.**~~ **Decidido el 2026-09-24**, en el § 7.3.
 
-### 7.3 Una consecuencia de «el modelo más chico» que nadie vio
+### 7.3 Qué es «el mismo vault»: la forma canónica de la ruta
+
+La revisión lo planteó como un problema del MCP, y al verificarlo resultó ser **de la app,
+hoy, sin MCP de por medio**. La pregunta «¿es el mismo vault?» se contesta de **tres** formas:
+
+| Dónde | Cómo compara | Qué decide |
+|---|---|---|
+| `misma_ruta` (`ventanas.rs`) | **Normaliza**: barras, barra final, mayúsculas | Si el vault ya está abierto en otra ventana |
+| `aplicar_vincular` (`vault_config.rs`) | **Cadena exacta** | Si hay que agregar una entrada al registro |
+| `hashRuta` (`lib/db/client.ts`) | **Cadena exacta** | Qué archivo de índice le toca |
+
+O sea que la misma carpeta escrita de dos formas es **un solo vault** para el control de
+ventanas y **dos** para el registro y para el índice: dos entradas en la lista y dos índices
+en el app-data. Es la tercera vez en dos días que aparece el mismo patrón —una pregunta con
+varias respuestas—, después de las extensiones de archivo y de los dos indexadores.
+
+**Decisión:**
+
+1. **La identidad de un vault es su entrada en `vaults.json`.** Todo lo demás se resuelve
+   contra esa entrada.
+2. **Una sola normalización, para comparar**: la de `misma_ruta` —barras unificadas, sin
+   barra final—, con una corrección: las mayúsculas se ignoran **solo donde el sistema de
+   archivos no las distingue**. Hoy `misma_ruta` baja a minúsculas siempre, lo que es correcto
+   en Windows y un error en Linux. Vive en **un solo lugar**: el *crate* compartido del § 3.
+3. **`vincular_vault` deduplica con esa normalización**: si la carpeta ya está registrada con
+   otra escritura, devuelve la entrada existente en vez de crear otra.
+4. **Para derivar nombres —el archivo del índice, el *pipe*— se usa la cadena registrada,
+   tal cual**, no la normalizada. Cambiar lo que se hashea dejaría **huérfanos todos los
+   índices existentes** —en esta máquina hay uno de 67 MB— y obligaría a reindexar cada vault
+   la primera vez y a limpiar los archivos viejos. La cadena registrada ya es estable: no
+   hace falta tocarla.
+5. **El servidor MCP resuelve su vault** —`MYCELIUM_VAULT`, después `--vault`, después
+   subiendo desde el `cwd`— **a una entrada del registro**, comparando con la normalización,
+   y desde ahí usa la cadena registrada. Si no encuentra entrada, `VAULT_DESCONOCIDO`: el MCP
+   sirve vaults de Mycelium, no carpetas sueltas.
+
+Con eso el caso que la revisión anticipaba —Claude Code lanzado desde otra terminal, con la
+ruta escrita distinto, recibiendo `APP_CERRADA` con la app abierta— no puede ocurrir: las dos
+escrituras resuelven a la misma entrada y derivan el mismo nombre.
+
+### 7.4 Una consecuencia de «el modelo más chico» que nadie vio
 
 El modelo chico tiene una ventana de **200.000 tokens**. De ahí salen dos problemas:
 

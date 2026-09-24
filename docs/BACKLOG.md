@@ -723,6 +723,10 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   en el entorno, un **panel de actividad en el rail** con lo que hizo el agente (usuario,
   2026-09-23 — es lo que permite que lo reversible no pregunte) y un **interruptor** en
   Configuración → Vault para apagar el canal de control, por vault y apagado por defecto.
+  Más uno que **ya es de la app hoy**: «¿es el mismo vault?» se contesta de tres formas
+  —normalizando en el control de ventanas, por cadena exacta en el registro y en el índice—,
+  así que la misma carpeta escrita distinto da dos entradas y dos índices. Se unifica en una
+  normalización y `vincular_vault` deduplica. Ver [[MCP de Mycelium - plan]] § 7.3.
 
 #### `FUN-L-10` · `VAULT-INDEX-EN-RUST` (—)
 - **Qué es**: mover el indexado del vault del frontend a **Rust**: que el walker lea los
