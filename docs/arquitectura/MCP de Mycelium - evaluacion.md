@@ -792,6 +792,21 @@ por encima del 50 %: **el modelo chico alcanza**. Ninguna pregunta quedó contam
 cuatro preguntas —un cuarto del conjunto— están puntuadas mecánicamente, así que el 70 %
 puede moverse cuando el juez exista. **Implementarlo es condición para la tanda del MCP.**
 
+> [!success] El juez ya puntuó esas filas (2026-09-24) y el 70 % no se movió
+> `eval/juzgar.mjs`, con **Opus** como juez (más fuerte que Haiku y que Sonnet, los dos
+> modelos que evalúa; con Sonnet, la réplica de reserva se juzgaría a sí misma), ciego al
+> brazo y sin herramientas ni `CLAUDE.md`. Las **40 filas** C2/C3 costaron **US$ 0,53**:
+> 18 correctas, 22 incorrectas, ninguna duda, y **coincidió con la regla mecánica en las
+> 40** — el acierto citado del brazo base sigue en **70,0 %**. Sus veredictos no siguen al
+> largo de la respuesta (r ≈ 0,1 dentro de cada pregunta y brazo).
+>
+> **Pero todavía no tiene derecho a decidir nada**: falta el patrón humano. Son **60
+> respuestas** en [[patron-juez]] (se abre en Mycelium y se marca una casilla por
+> respuesta; la guía está arriba de la planilla), y después `node eval/patron.mjs validar
+> --juzgar --confirmo-costo`. Hasta entonces el informe dice «no puede decidir». Los
+> veredictos del juez quedan en `eval/juicios.jsonl`; las filas nuevas de
+> `resultados.jsonl` conservan el formato de la § 10.
+
 ### Lo que dice, antes de que exista el MCP
 
 > [!info] Cuatro lecturas, con la muestra chica que tienen
