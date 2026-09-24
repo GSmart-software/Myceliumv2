@@ -903,7 +903,67 @@ reformulaba, y abandona `grep` justo donde era imprescindible.
 
 ---
 
-## 13. Decisiones y preguntas abiertas
+## 13. Resultado de la fase 1b: mejora mucho, y todavía no alcanza (2026-09-24)
+
+La fase 1 rehecha según [[MCP de Mycelium - diagnostico fase 1]] —búsqueda que premia cubrir
+términos, lectura de la nota entera hasta 20 KB, instrucciones en las herramientas—, servidor
+`9d58453`. Tanda `2026-09-24-mcp-fase1b`: 81 corridas, US$ 3,36, más US$ 0,28 del juez.
+
+| | Acierto citado | Dato correcto | Costo mediano | Contexto |
+|---|---|---|---|---|
+| Base (`grep`) | 70,0 % | 63 / 80 | US$ 0,062 | 14.809 |
+| MCP fase 1 | 47,5 % | — | US$ 0,035 | 5.533 |
+| **MCP fase 1b** | **60,0 %** | **60 / 80** | **US$ 0,033** | **5.940** |
+
+**La regla**: filtros de validez, todos pasan (adopción 95 %). `Δ = −10,0` pts, IC
+[−25,0, +3,8]; `K = 0,52`, IC [0,40, 0,64]. **Decide otra vez la fila 1**: con `Δ ≤ −5`,
+el MCP se rehace.
+
+> [!info] La fila 1 no pide que el intervalo excluya el cero, y es a propósito
+> Para **entrar**, la regla exige demostrar la mejora (filas 2 a 4 piden intervalos lejos del
+> cero). Para **rechazar**, alcanza con la estimación: `Δ = −10` con un intervalo que todavía
+> toca el cero no demuestra que el MCP sea peor, pero tampoco que no lo sea, y el criterio es
+> **primero no empeorar**. No se relee la regla para que este resultado pase.
+
+### Lo que mejoró
+
+La búsqueda rehecha hizo lo que la prueba gratis anticipaba: **de 47,5 % a 60,0 %**, sin
+perder la ventaja de costo (sigue costando la mitad). Por clase contra la base: C4 **+10**
+(era −40), C5 +10, C3 +10, **C7 0** (era −30: el agente cae a `grep` en el 40 % de esas
+corridas y el bloqueante deja de aplicar), C2 −20 (era −60).
+
+### Lo que queda, y la mayor parte es de cita, no de búsqueda
+
+**En el dato solo, el MCP está a 3 corridas de la base: 60 contra 63 de 80.** Lo que abre la
+diferencia es **cómo cita**: 12 corridas del MCP tienen el dato bien y la cita mal, contra 7
+de la base.
+
+Las «citas inventadas» subieron de 5 a **13**, y no son notas inexistentes: son notas reales
+citadas por su **título visible** —«Atmósferas», «Vídeo embebido en una nota», «Canvas:
+notas en el espacio»— en vez de por su **nombre de archivo**, que es lo que resuelve un
+`[[enlace]]` (`atmosferas`, `video-embebido`, `canvas`). La causa es un efecto colateral del
+propio arreglo: al devolver la **nota entera**, el agente ve primero el `# Encabezado` y cita
+eso. Con secciones sueltas veía la referencia `ruta#sN` y citaba bien — era justamente lo que
+el diagnóstico había identificado como la ventaja del MCP en C1, que ahora pasó de +20 a −20.
+
+**No es un problema de puntuación**: una cita que no resuelve como `[[enlace]]` no le sirve a
+nadie que quiera ir a la nota. Es un defecto real de la respuesta, y barato de corregir en la
+salida de las herramientas: decir **cómo se cita** cada nota.
+
+### Lo que sigue
+
+1. **Que las herramientas digan cómo citar**: el nombre que resuelve como `[[enlace]]`,
+   visible junto a cada resultado y al principio de cada lectura. Explica hasta 5 de las 8
+   corridas de diferencia.
+2. **Mirar C6 (−40) y C8 (−30)**, que no se movieron o casi: las enumeraciones siguen siendo
+   el punto débil —juntar **todo** lo pertinente— y el vocabulario distinto sigue perdiendo
+   contra el modelo reformulando `grep`.
+3. Otra tanda contra la misma base. **La regla sigue congelada**; las selladas siguen sin
+   abrirse hasta la tanda que decida.
+
+---
+
+## 14. Decisiones y preguntas abiertas
 
 ### Decisiones
 
