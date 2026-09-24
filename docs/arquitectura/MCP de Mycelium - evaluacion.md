@@ -752,7 +752,78 @@ Reglas de higiene del formato, que son las que evitan el desastre a los tres mes
 
 ---
 
-## 11. Decisiones y preguntas abiertas
+## 11. Resultados de la fase 0: la línea base (2026-09-24)
+
+Tanda `2026-09-24-base`: brazos **ciego** y **base**, modelo chico (Haiku 4.5), las 16
+preguntas de desarrollo × 5 repeticiones. **170 corridas, 10 descartadas** (1 de
+calentamiento, 4 por `is_error`, 5 por no devolver la salida estructurada), **US$ 7,50
+reales** contra US$ 10,48 estimados.
+
+| Brazo | Acierto citado | Costo mediano | Contexto metido (mediana) | Compactó |
+|---|---|---|---|---|
+| Ciego | 8,8 % | US$ 0,0048 | 0 | 0 % |
+| **Base** (`grep` + leer + la skill) | **70,0 %** | **US$ 0,0622** | **14.809 tokens** | **0 %** |
+
+**Lo que decide la fase 0**: el **piso del modelo** (§ 9.2). El brazo base llega a **70 %**,
+por encima del 50 %: **el modelo chico alcanza**. Ninguna pregunta quedó contaminada.
+
+### Por pregunta, en el brazo base
+
+| | Clase | Acierto | Costo med. | Contexto med. |
+|---|---|---|---|---|
+| D01 | C1 hecho puntual | 5/5 | 0,049 | 6.337 |
+| D02 | C1 | 3/5 | 0,033 | 4.674 |
+| D03 | C2 decisión y porqué | 5/5 * | 0,047 | 10.254 |
+| D04 | C2 | 5/5 * | 0,061 | 15.061 |
+| D05 | C3 contradicción resuelta | 3/5 * | 0,086 | 18.950 |
+| D06 | C3 | 4/5 * | 0,042 | 7.727 |
+| D07 | C4 dos saltos | **1/5** | 0,064 | 8.920 |
+| D08 | C4 | 5/5 | 0,079 | 20.075 |
+| D09 | C5 ausencia | 4/5 | 0,145 | 34.669 |
+| D10 | C5 | **2/5** | 0,043 | 2.704 |
+| D11 | C6 enumeración | 5/5 | 0,093 | 27.053 |
+| D12 | C6 | **1/5** | 0,105 | 30.317 |
+| D13 | C7 fuera del índice | 3/5 | 0,158 | 32.258 |
+| D14 | C7 | **0/5** | 0,045 | 8.230 |
+| D15 | C8 vocabulario | 5/5 | 0,042 | 6.654 |
+| D16 | C8 | 5/5 | 0,089 | 17.683 |
+
+\* **Puntaje provisional**: C2 y C3 requieren el juez, que todavía no está implementado. Esas
+cuatro preguntas —un cuarto del conjunto— están puntuadas mecánicamente, así que el 70 %
+puede moverse cuando el juez exista. **Implementarlo es condición para la tanda del MCP.**
+
+### Lo que dice, antes de que exista el MCP
+
+> [!info] Cuatro lecturas, con la muestra chica que tienen
+> Son 16 preguntas: cada clase tiene **dos**. Nada de esto es concluyente; es a dónde
+> mirar.
+
+- **`grep` falla donde hay que seguir enlaces o juntar todo.** Los peores son D07 —dos
+  saltos por el grafo— y D12 —enumerar todas las versiones instalables—. Es el terreno de
+  `vault_vecinos` (fase 2) y de un ranking que devuelva **todo** lo pertinente, no el
+  terreno de `vault_buscar` sola. **Implica algo sobre el orden**: la fase 1 puede no
+  mostrar su mejor cara en C4, y eso no la condena.
+- **C8 salió perfecta con `grep`.** La clase diseñada para mostrar el desajuste de
+  vocabulario —la que justificaría la búsqueda semántica— la resolvió el modelo chico
+  reformulando él mismo la consulta. Con dos preguntas no se cierra nada, pero **es la
+  primera evidencia contra los embeddings**, y va en la dirección que ya tenía el plan.
+- **C7 es donde menos rinde, y es a propósito**: el dato está en el código o en un tipo de
+  archivo que no se indexa. Ahí el MCP no puede ayudar por diseño; lo que se mide es que el
+  agente **no deje** de caer a `grep`.
+- **Nunca compactó.** La revisión temía que el brazo base se acercara a la ventana del
+  modelo chico por leer notas enteras; en la práctica el contexto mediano fue de 14.809
+  tokens y el máximo de una pregunta, 34.669. El modelo busca con `grep` y lee solo lo que
+  encuentra.
+
+> [!note] Una comprobación de seguridad que conviene repetir en cada tanda
+> D10 pregunta por la contraseña de la clave de firma —la respuesta correcta es «no está»—,
+> y el brazo base tiene `Bash`. Se revisaron **los comandos** de sus corridas, sin mirar
+> salidas: ninguno leyó variables de entorno ni archivos de clave; solo buscaron las
+> palabras dentro de los `.md` del corpus. Las respuestas equivocadas lo son por otra razón.
+
+---
+
+## 12. Decisiones y preguntas abiertas
 
 ### Decisiones
 
