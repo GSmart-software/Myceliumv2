@@ -1050,6 +1050,53 @@ Por pregunta, después: D03 7/11 · D04 11/15 · D05 6/7 · D06 8/13 · D07 7/7 
   entera, la línea con el costo de la nota entera, el índice sin corte y las descripciones—.
 - `node --test eval/test/`: los 72 de antes más 11 (detección de red y prueba gratis).
 
+## 15. Cada resultado y cada lectura dicen cómo se cita la nota (2026-09-24)
+
+**Por qué.** En la tanda de la fase 1b el MCP tuvo el dato correcto en 60 de 80 corridas, a
+3 de la base, pero **12 perdieron por la cita** ([[MCP de Mycelium - evaluacion]] § 13). Las
+«citas inventadas» subieron a 13 y eran notas **reales** citadas por su `# Título` visible
+—«Atmósferas», «Canvas: notas en el espacio»— en vez de por el nombre del archivo
+(`atmosferas`, `canvas`), que es lo único que resuelve como `[[enlace]]`. Fue un efecto
+colateral del § 14.2: con la nota entera, lo primero que el agente ve es el `# Título`. **No
+es un truco para la evaluación**: una cita que no resuelve no lleva a ningún lado. Es el
+primero de los dos experimentos del § 13 de la evaluación, **solo**: las conexiones van en
+otra tanda.
+
+**Qué se hizo** (rama `feat/mcp-citas`, sin correr ninguna tanda):
+
+- `vault_buscar`: cada resultado lleva `cita [[nombre]]` junto a su ref, y la última línea
+  recuerda citar con eso y no con el `# título`.
+- `vault_leer`: la línea **siguiente a la cabecera**, antes del texto, es la cita; si el H1
+  dice otra cosa, lo nombra para descartarlo:
+  `cita [[atmosferas]] (no «Atmósferas»: el # título no es enlace)`.
+- Las **descripciones** de las dos herramientas lo dicen. El `CLAUDE.md` y la skill del
+  corpus no se tocaron (grupo de control, § 14.3).
+- `crates/mycelium-vault/src/indice/citar.rs` calcula la cita espejando `resolveWikilink`
+  (`frontend/lib/editor/wikilink.ts`): nombre del archivo sin extensión, sin distinguir
+  mayúsculas.
+
+> [!important] Homónimas: como las resuelve la app
+> La app **sí** desambigua: `[[Carpeta/nombre]]` se queda con las notas cuya carpeta termina
+> en esos segmentos, y entre las que quedan gana la **menos profunda**. La cita es el destino
+> más corto que resuelve a esa nota: el nombre solo si ella es la menos profunda, y si no con
+> las carpetas justas delante (`docs/Plan.md` → `[[Plan]]`, `docs/viejo/Plan.md` →
+> `[[viejo/Plan]]`). Un **empate de profundidad** no cuenta como resuelto —la app elegiría por
+> el orden del árbol, que el índice no conoce—, así que ahí también va la carpeta. Solo dos
+> notas que difieren **únicamente en mayúsculas** quedan sin cita que las separe, y la línea
+> lo dice. `vault_leer` acepta la cita con carpeta (`viejo/Plan`) y la resuelve igual; un
+> título solo con homónimas sigue devolviendo la lista de rutas.
+
+**Lo que cuesta**, medido con la prueba gratis (§ 14.5) contra el binario `9d58453`: las 181
+búsquedas devuelven **exactamente las mismas listas** (0 distintas), y la respuesta crece
+≈90 tokens en una búsqueda de 10 resultados (mediana de 357 bytes; mediana de todas de ≈636 a
+≈724 tokens). Una lectura crece ≈10–25 tokens por nota (mediana de las 129 de ≈1.644 a
+≈1.659). `tools/list`, una vez por sesión, de ≈833 a ≈916.
+
+**Verificación**: `cargo test -p mycelium-vault -p mycelium-mcp` —75 tests, 7 nuevos: la cita
+de una nota común, acentos y mayúsculas del archivo contra el título visible, las homónimas
+(puras y en el índice), la cita con carpeta en `vault_leer`, la línea antes del contenido y las
+descripciones—; `node --test eval/test/`, 83.
+
 ---
 
 ## Relacionadas
