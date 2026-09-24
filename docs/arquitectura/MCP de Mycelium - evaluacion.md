@@ -1048,7 +1048,52 @@ desarrollo; después se elige **una** versión candidata; recién entonces, la t
 
 ---
 
-## 15. Decisiones y preguntas abiertas
+## 15. Resultado de las conexiones: la candidata para las selladas (2026-09-24)
+
+Un solo cambio sobre la versión con citas: cada lectura termina con **quién enlaza a la
+nota** —hasta 10 entrantes, ordenados por especificidad, con el texto alrededor del enlace—
+(servidor `fe9c375`). Tanda `2026-09-24-mcp-conexiones`: 81 corridas, US$ 3,67, más US$ 0,28
+del juez.
+
+| | Acierto citado | Costo mediano | Contexto | Citas inventadas |
+|---|---|---|---|---|
+| Base (`grep`) | 70,0 % | US$ 0,062 | 14.809 | 4 |
+| MCP con citas | 68,8 % | US$ 0,033 | 5.717 | 0 |
+| **MCP con conexiones** | **74,4 %** | **US$ 0,039** | **7.359** | **1** |
+
+**La regla**: todos los filtros pasan. `Δ = +4,4` pts, IC [−10,0, +18,8]; `K = 0,54`, IC
+[0,46, 0,68]. **Fila 4: entra.** Es la **primera vez que la estimación del MCP queda por
+encima de `grep`** —sin que el intervalo lo pruebe— costando un 46 % menos.
+
+### El criterio de elección, aplicado como estaba escrito
+
+| Condición (escrita antes de correr) | Resultado | |
+|---|---|---|
+| Acierto citado ≥ 68,8 + 5 = **73,8 %** | **74,4 %** | ✓ por 0,6 pts |
+| `K` ≤ 0,7 | **0,54** | ✓ |
+
+**La versión con conexiones pasa a ser la candidata.** El margen sobre el umbral es fino
+—0,6 puntos—, y eso queda dicho. Pero hay una razón para confiar en el resultado más allá del
+agregado: **la mejora apareció exactamente donde el experimento la predijo**. Las conexiones
+se propusieron para las contradicciones resueltas y los dos saltos, y son las clases que más
+subieron respecto de la versión con citas: **C3 de +10 a +30**, **C4 de +10 a +30**; las
+enumeraciones (C6) mejoraron un poco, de −20 a −15. Un efecto que aparece donde se lo buscaba
+es más creíble que uno que aparece en cualquier lado.
+
+Quedan débiles **C7** (−20, con caída a `grep` en el 30 %: ya no bloquea) y **C5** (−10). Y el
+detector de red descartó **4 corridas** que intentaron salir a internet: funcionó, y esas se
+repitieron.
+
+### Lo que sigue
+
+La **tanda de decisión** sobre las 8 preguntas selladas, con la versión `fe9c375`: brazos
+**ciego, base y MCP intercalados**, con Haiku, más la réplica con Sonnet de base y MCP. Es la
+única vez que se abren las selladas. El juez puede validarse **después**: puntúa respuestas
+ya guardadas, y el informe dirá si la decisión depende de él.
+
+---
+
+## 16. Decisiones y preguntas abiertas
 
 ### Decisiones
 
