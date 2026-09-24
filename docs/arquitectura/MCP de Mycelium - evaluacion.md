@@ -984,7 +984,51 @@ sirvió, y si una ayuda y la otra perjudica, se tapan entre sí. El arnés es lo
 
 ---
 
-## 14. Decisiones y preguntas abiertas
+## 14. Resultado de las citas: la primera vez que la regla dice «entra» (2026-09-24)
+
+Un solo cambio sobre la fase 1b: las herramientas dicen **cómo se cita** cada nota (servidor
+`3ef9c8d`). Tanda `2026-09-24-mcp-citas`: 81 corridas, US$ 3,48, más US$ 0,28 del juez.
+
+| | Acierto citado | Costo mediano | Contexto | Citas inventadas |
+|---|---|---|---|---|
+| Base (`grep`) | 70,0 % | US$ 0,062 | 14.809 | 4 |
+| MCP fase 1 | 47,5 % | US$ 0,035 | 5.533 | 5 |
+| MCP fase 1b | 60,0 % | US$ 0,033 | 5.940 | 13 |
+| **MCP con citas** | **68,8 %** | **US$ 0,033** | **5.717** | **0** |
+
+**La regla**: filtros de validez, todos pasan. `Δ = −1,3` pts, IC [−13,8, +10,0];
+**`K = 0,56`, IC [0,49, 0,64]** —el intervalo del costo no toca el 1—. **Decide la fila 4:
+igual de exacto y claramente más barato: entra**, con el ahorro como justificación.
+
+El cambio de las citas hizo lo que el § 13 anticipaba: las citas inventadas pasaron de **13 a
+0**, y el acierto citado subió **8,8 puntos** sin mover ni la búsqueda ni el costo. Por clase
+contra la base: C1 **+20**, C3 +10, C4 +10, C2 0, C5 0, **C8 0** (era −30), C6 −20, **C7 −30**.
+
+### Por qué esto todavía no es la decisión
+
+> [!warning] Las preguntas de desarrollo ya se usaron cuatro veces para iterar
+> Cada rediseño se probó contra las **mismas 16 preguntas**, y la dirección de cada arreglo
+> salió de mirar sus fallos. Es exactamente el sobreajuste contra el que existen las **8
+> preguntas selladas**: la confirmación la dan ellas, que nadie vio. Un «entra» sobre el
+> conjunto de desarrollo, después de cuatro vueltas sobre él, es una hipótesis fuerte, no una
+> conclusión.
+
+Lo que falta, en el orden que exige el protocolo:
+
+1. **La tanda de decisión sobre las selladas**, con los brazos **intercalados** esta vez —y
+   con eso se salda también la desviación de haber corrido la base en otra tanda—. Con Haiku,
+   más la réplica con Sonnet en todos los brazos.
+2. **C7 queda justo en el borde del bloqueante**: pierde **30 puntos**, y la regla bloquea
+   con *más* de 30; el agente cayó a `grep` en solo el **10 %** de esas corridas (en la
+   fase 1b había llegado al 40 %). No dispara el bloqueo por la letra de la regla, pero es el
+   punto más débil, y un producto que no sabe ir al código cuando la documentación no alcanza
+   tiene un defecto aunque la tabla lo deje pasar.
+3. **El juez no está validado** contra el patrón humano. Esta vez no cambió ninguna fila, así
+   que la decisión no depende de él; en la tanda de decisión podría.
+
+---
+
+## 15. Decisiones y preguntas abiertas
 
 ### Decisiones
 
