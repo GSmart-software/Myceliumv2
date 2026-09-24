@@ -528,6 +528,21 @@ los enlaces en el navegador del sistema era viable.
 > clic en algo que en cualquier documento es inofensivo, y basta con que una nota importada
 > traiga un enlace.
 
+# DEF-102
+El **grafo** y las **etiquetas** cuentan lo que está escrito **dentro de código**. Un
+`[[enlace]]` o un `#algo` que aparece en código en línea o en un bloque de código —donde se
+escribió para **mostrar** la sintaxis, no para usarla— se cuenta igual que uno de verdad:
+aparece como arista del grafo hacia una nota que no existe, y como etiqueta en la lista.
+
+El caso más visible son los **colores**: un `#0F6E56` dentro de un bloque de CSS aparece como
+etiqueta.
+
+Detectado el 2026-09-23 por la prueba de equivalencia del índice del MCP (`FUN-L-09`), que
+comparó el escáner de la app con uno que salta el código. Medido: en el vault de este
+repositorio, **1.014 aristas y 174 etiquetas** de código; en el vault personal del usuario,
+**49 aristas y 185 etiquetas**, casi todas colores. Emparentado con `DEF-089`, que es la
+misma ceguera en la edición en vivo.
+
 ---
 
 > [!warning] Defectos sin reporte original
