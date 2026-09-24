@@ -1097,6 +1097,96 @@ de una nota común, acentos y mayúsculas del archivo contra el título visible,
 (puras y en el índice), la cita con carpeta en `vault_leer`, la línea antes del contenido y las
 descripciones—; `node --test eval/test/`, 83.
 
+## 16. Cada lectura termina con quién enlaza a la nota (2026-09-24)
+
+**Por qué.** Es el segundo experimento del § 13 de [[MCP de Mycelium - evaluacion]], idea
+del usuario: que la lectura traiga las notas conectadas. El **contenido** quedó descartado
+(~16 enlaces × ~3.000 tokens ≈ 50.000 por lectura); se prueba una **lista compacta**. Apunta
+a las **contradicciones resueltas** —la nota que corrige una decisión vieja suele enlazarla— y
+a las **enumeraciones** —todo lo que apunta a un tema—. Un solo cambio sobre el servidor con
+citas (`3ef9c8d`); el criterio de elección del § 14 de la evaluación ya está escrito y no se
+toca.
+
+**Qué se hizo** (rama `feat/mcp-conexiones`, sin correr ninguna tanda):
+
+```
+← conexiones: la enlazan 23 notas; las 10 que más hablan de ella (el resto: grep -rlF "[[terminal-integrada" --include=*.md):
+  ↔ [[Mycelium como memoria de la IA]] [[…]] — dónde corre el asistente, con el cwd en el vault.
+  ← [[Version 2.1.0]] Las consolas no pertenecían al vault · DEF-099 · desktop · [[…]]
+  ← [[Bugs_errores_y_defectos]] …lo que se hizo. No lo es: es el CA7 de [[…]]. Cerrar la pestaña solo la oculta —la…
+```
+
+- **Al final** de cada lectura (sección, nota entera o índice de una nota grande), después de
+  todo el contenido, y **una vez por llamada**: tres secciones de la misma nota no repiten la
+  lista; va detrás del último bloque de esa nota.
+- **Solo los entrantes.** Los salientes ya están en el texto leído y en la línea
+  `→ enlaza a:`; repetirlos es pagar dos veces lo mismo. Los entrantes son lo que `grep` no
+  da barato —y da mal, § 5—. Si la nota leída **también** enlaza a la que la cita, la línea
+  lleva `↔` en vez de `←`. Sin entrantes, una línea: `← conexiones: ninguna nota la enlaza`.
+- **Cita**: con la misma regla que el resto (`indice/citar.rs`), homónimas incluidas; los
+  entrantes se resuelven como la app, así que un `[[Plan]]` que la app lleva a otra `Plan`
+  no cuenta. Salen de la tabla `enlaces` (`Indice::entrantes`), no de escanear el vault.
+- La **descripción** de `vault_leer` dice qué es la lista y cuándo seguirla (si el texto
+  sugiere que la corrige, la reemplaza o la actualiza, o si la pregunta pide todo lo de un
+  tema). El `CLAUDE.md` y la skill del corpus no se tocaron (grupo de control, § 14.3).
+
+### El tope: 10, por el costo
+
+Entrantes por nota en el corpus (115 notas `.md`, notas distintas que la enlazan):
+
+| Mediana | p75 | p90 | p95 | Máximo | Sin entrantes |
+|---|---|---|---|---|---|
+| 7 | 10 | 21 | 26 | 67 (el mapa) · 61 (`BACKLOG`) | 14 |
+
+**10 es el p75**: tres de cada cuatro notas salen con la lista **completa**, que es lo que
+pide una enumeración. Medido sobre las 115: una línea cuesta **~26 tokens**, y la lista
+entera **≈183 de mediana y ≈342 como máximo**. Un hub no convierte la lectura en cien líneas:
+lo que queda afuera se cuenta y la cabecera dice cómo pedirlo.
+
+### La pertinencia: quién **habla** de la nota, no quién la enumera
+
+Se ordena por **especificidad** = enlaces de la otra nota a esta / notas distintas a las que
+enlaza la otra. El mapa y el `BACKLOG` enlazan a todo, así que un enlace suyo dice poco y
+quedan al fondo; una nota que enlaza a tres y a esta dos veces está hablando de ella —es la
+misma idea que el `idf`, del lado de quien enlaza—. A igualdad: más enlaces, menos salientes,
+ruta. **No** se usa la fecha (el `mtime` de un vault versionado miente, § 6) ni el nombre de la
+sección (depende de las convenciones de este vault).
+
+### La pista: el texto alrededor del enlace
+
+~80 caracteres repartidos antes y después del enlace, cortando en palabra, con el enlace como
+`[[…]]` (o `[[…|alias]]`, que es vocabulario). Se suman los renglones vecinos solo si es prosa
+partida en renglones; las celdas de una tabla van separadas por `·`.
+
+| Pista candidata | Por qué no, o por qué sí |
+|---|---|
+| El `# Título` de la nota que enlaza | Casi siempre repite su nombre, que ya va en la cita |
+| El encabezado de la sección del enlace | El **34 %** de los enlaces entrantes del corpus están bajo `## Relacionadas`, que no dice nada |
+| **El texto alrededor** | Dice la **relación**: «reemplaza a [[…]]», «es el CA7 de [[…]]», «DEF-099 · …». Es lo que decide si abrirla |
+
+Si el texto no llega a 25 caracteres («Ver [[…]].») se le antepone el encabezado de la sección;
+si el archivo cambió y el enlace ya no está en esa línea, queda solo el encabezado.
+
+### Lo que cuesta, medido con la prueba gratis (§ 14.5)
+
+| | Con citas (`3ef9c8d`) | Con conexiones |
+|---|---|---|
+| Listas de las 181 búsquedas | — | **idénticas** (0 distintas) |
+| `vault_leer` repetidas: mediana · total de las 129 | ≈1.659 · ≈271.000 tokens | ≈2.033 · ≈312.900 tokens |
+| `tools/list` (una vez por sesión) | ≈916 | ≈1.053 |
+
+Una lectura crece **≈324 tokens de media** (+15 % del total): más que la mediana de la lista
+porque las lecturas de la tanda van mucho a hubs y a veces traen varias notas. Con ~1,6
+lecturas por corrida son **≈+520 tokens por corrida** sobre la mediana de 5.717 (~9 %): del
+orden de 0,05 en `K`, lejos del techo de 0,7 del criterio de elección. Lo que cuesta de verdad
+lo dice la tanda: si el agente sigue las conexiones, va a leer más notas.
+
+**Verificación**: `cargo test --workspace` —121: los 114 de antes más 7 (el orden por
+especificidad y la exclusión de la propia nota, los entrantes con homónimas, el fragmento, una
+nota sin entrantes, una con más entrantes que el tope, que las citas de la lista resuelvan a la
+nota que enlaza, y que la lista vaya después del contenido y una vez por nota)—; `node --test
+eval/test/`, 83.
+
 ---
 
 ## Relacionadas
