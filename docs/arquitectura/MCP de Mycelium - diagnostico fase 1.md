@@ -238,7 +238,9 @@ contra 2 del MCP, que es la causa 5 vista desde otro ángulo.
 > **D12 r3** (`2f42f55e`) hizo `curl` al bucket real de R2 y leyó el `versions.json` de
 > internet: el brazo tiene `Bash` y red. Acertó el contenido, citó mal y la fila quedó en 0, así
 > que no movió el resultado. Pero una corrida puede contestar desde fuera del corpus; conviene
-> que el arnés lo detecte como detecta las instrucciones ajenas.
+> que el arnés lo detecte como detecta las instrucciones ajenas. *(Hecho: el arnés la descarta
+> con motivo propio y la revisión de las 258 corridas encontró solo esta; ver
+> [[MCP de Mycelium - memoria]] § 14.4.)*
 
 ---
 
@@ -392,5 +394,5 @@ D09 y D10 son de ausencia: no tienen sección oro.
 ## Relacionadas
 
 - [[MCP de Mycelium - evaluacion]] — la regla que decidió «se rehace» y el resultado (§ 11 y § 12) que esta nota explica.
-- [[MCP de Mycelium - memoria]] — el diseño del servidor: el «Y» y el respaldo por intersección (§ 4), la lectura por sección y el tope de 8 KB (§ 7), lo construido distinto (§ 13).
+- [[MCP de Mycelium - memoria]] — el diseño del servidor: el «Y» y el respaldo por intersección (§ 4), la lectura por sección y el tope de 8 KB (§ 7), lo construido distinto (§ 13), y **lo rehecho por este diagnóstico, con la prueba gratis (§ 14)**.
 - [[MCP de Mycelium - plan]] — las fases; lo que se rehace entra acá.
