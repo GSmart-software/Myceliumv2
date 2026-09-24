@@ -305,6 +305,13 @@ El modelo chico tiene una ventana de **200.000 tokens**. De ahí salen dos probl
 No invalida la decisión —el argumento de que un modelo grande tapa las diferencias sigue en
 pie—, pero cambia qué se puede medir con él.
 
+> [!success] Resuelto por el usuario (2026-09-24)
+> El brazo del corpus entero corre con **Sonnet**, no con Opus: ventana de ~1M y un modelo
+> que compensa menos, por el mismo argumento que eligió el chico. Para no comparar método y
+> modelo a la vez, **«el modelo grande» es Sonnet en los dos usos**: también la réplica de
+> las preguntas de reserva, en todos los brazos. Y cada corrida registra si hubo
+> compactación. Detalle en [[MCP de Mycelium - evaluacion]].
+
 ## 8. Lo que sigue esperando una decisión del usuario
 
 1. ~~**Con qué modelo se corre la evaluación.**~~ **Decidido** (usuario, 2026-09-23): el

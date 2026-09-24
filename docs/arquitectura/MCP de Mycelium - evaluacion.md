@@ -699,6 +699,24 @@ Reglas de higiene del formato, que son las que evitan el desastre a los tres mes
 >
 > El modelo exacto de cada corrida ya viaja como columna (`modelo`) en `resultados.jsonl`,
 > así que dos tandas con modelos distintos nunca se confunden.
+
+> [!success] Decidido por el usuario (2026-09-24): **Sonnet** para lo que no entra en el chico
+> La revisión crítica mostró que el modelo chico tiene **200.000 tokens** de ventana y que el
+> brazo del corpus entero —~290.000, como piso— no entra. Ese brazo corre con **Sonnet**
+> (ventana de ~1M) y **no con Opus**, por el mismo argumento que eligió el modelo chico: un
+> modelo más fuerte compensa más, y lo que queremos ver es la herramienta.
+>
+> **La consecuencia, y cómo se resuelve sin costo de diseño.** Si el brazo del corpus entero
+> corre con Sonnet y los demás con el chico, compararlos mezcla **dos variables a la vez**
+> —el método y el modelo— y ninguna diferencia se puede atribuir a una de las dos. Por eso
+> **«el modelo grande» pasa a ser Sonnet en los dos usos**: la réplica de las preguntas de
+> reserva —que ya existía para comprobar que la conclusión no depende del tamaño— corre con
+> Sonnet para **todos** los brazos. Así, sobre las preguntas de reserva, el corpus entero se
+> compara contra la base y contra el MCP **con el mismo modelo**, y la réplica sigue
+> cumpliendo su función original.
+>
+> Y en cada corrida se registra si **el cliente compactó** el contexto a mitad de camino
+> (columna `compactado`): el brazo base, con el chico, queda al borde de su ventana.
 - **¿El brazo C debería tener una variante sin `grep`?** Un cuarto brazo «MCP puro» diría
   si las herramientas se bastan solas. Cuesta un 33 % más de corridas. Tal vez solo sobre
   las clases C4, C6 y C7.
