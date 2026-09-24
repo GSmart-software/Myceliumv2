@@ -162,7 +162,9 @@ nuevo que **coexiste** con el SQLite clásico durante el desarrollo:
 1. El usuario elige la carpeta del vault (diálogo nativo, ya disponible). Puede estar
    **vacía** o contener ya `.md`/`.excalidraw` (p. ej. una carpeta de Obsidian, o el
    resultado de "Exportar a carpeta" de la opción 1).
-2. Se crea `.mycelium/index.db` y se indexa lo que haya (vacío → vault vacío).
+2. Se crea el índice y se indexa lo que haya (vacío → vault vacío). *Al implementarlo, el
+   índice pasó del `.mycelium/index.db` que planteaba este paso al app-data (ver
+   «Ubicación del índice», más abajo).*
 3. **El `mycelium.db` clásico no se toca**: queda intacto y separado. Quien quiera
    sembrar la carpeta desde su vault SQLite usa "Exportar a carpeta" (opción 1),
    manualmente.

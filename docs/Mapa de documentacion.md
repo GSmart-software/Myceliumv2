@@ -42,6 +42,8 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
   haría abandonar el diseño.
 - [[Memoria documental para IA - estado del arte]] — qué existe hoy para darle memoria a una
   IA sobre documentación, y por qué casi todo resuelve otro problema.
+- [[MCP de Mycelium - revision critica]] — la revisión adversarial del diseño: qué está mal,
+  qué va a doler y dónde va a fallar primero.
 
 ## Decisiones
 

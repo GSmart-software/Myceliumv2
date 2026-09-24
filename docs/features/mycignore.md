@@ -47,8 +47,9 @@ fija en Rust). Ahora esa regla es el **valor por defecto**, y es configurable.
    - `nombre` → archivos o carpetas con ese nombre, en cualquier nivel.
    - `ruta/anidada/` (con `/` interno) → **anclada** a la raíz del vault.
    - `*` y `?` → comodines dentro de un segmento (`*.tmp.md`, `.*/`).
-4. **CA4 — `.mycelium/` siempre ignorado**: el índice interno y la papelera nunca
-   se indexan, esté o no listado.
+4. **CA4 — `.mycelium/` siempre ignorado**: la papelera y las preferencias del vault nunca
+   se indexan, esté o no listado. (El índice en sí no vive ahí sino en el app-data; ver
+   [[Capa de datos del desktop]].)
 5. **CA5 — Alcance**: aplica al **indexado** (archivos y carpetas, incluidas las
    vacías) y al **watcher** de cambios externos. Editar el `.mycignore` desde fuera
    de la app también dispara reindex.

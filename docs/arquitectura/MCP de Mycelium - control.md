@@ -120,15 +120,26 @@ flowchart LR
         WV["Webview de la ventana<br/>stores + lib/api.ts"]
     end
 
-    DISCO[("Carpeta del vault<br/>.mycelium/ — índice SQLite")]
+    DISCO[("Carpeta del vault<br/>los .md: la fuente de verdad")]
+    AIDX[("Índice de la app<br/>app-data/index-hash.db")]
+    MIDX[("Índice propio del MCP<br/>app-data/mcp-hash.db")]
 
     CC -- "stdio · MCP" --> MCP
     MCP -- "named pipe / socket UNIX<br/>uno por vault abierto" --> RS
     RS -- "window.emit" --> WV
     WV -- "comando mcp_responder" --> RS
     WV --> DISCO
-    MCP -. "solo lectura, si la app está cerrada" .-> DISCO
+    WV --> AIDX
+    MCP --> MIDX
+    MIDX -. "revalidación perezosa" .-> DISCO
 ```
+
+> [!warning] Diagrama corregido el 2026-09-23
+> La primera versión mostraba el índice dentro de `.mycelium/` y al servidor **leyendo el
+> índice de la app** con ella cerrada. Las dos cosas quedaron superadas: el índice de la app
+> vive en el app-data ([[Capa de datos del desktop]]), y [[MCP de Mycelium - memoria]] decidió
+> que el servidor mantiene **el suyo** y nunca abre el de la app. Lo señaló la
+> [[MCP de Mycelium - revision critica]].
 
 ### 2.2 Decisión — *named pipe* en Windows, socket UNIX en el resto
 
@@ -193,7 +204,7 @@ cambia es qué puede hacer:
 | Con la app cerrada | Qué pasa |
 |---|---|
 | `mycelium_estado` | **Funciona.** Devuelve `app: "cerrada"`, la ruta del vault y la frescura del índice leída del disco. `ventana: null` |
-| Las herramientas de memoria ([[MCP de Mycelium - memoria]]) | **Funcionan**, en modo lector del índice SQLite |
+| Las herramientas de memoria ([[MCP de Mycelium - memoria]]) | **Funcionan**, sobre el **índice propio** del servidor, que revalida contra el disco |
 | Las siete restantes de esta nota | Fallan con `APP_CERRADA`, y el error dice qué sí se puede hacer |
 
 No se ofrece «lanzar Mycelium si está cerrado». Abrir una ventana en el escritorio de

@@ -8,8 +8,18 @@ Cómo persiste Mycelium en la versión de escritorio (`desktop-tauri`). Parte de
 Desde el [[vault-en-carpeta]], el vault es una **carpeta real** del sistema:
 
 - Los `.md` y `.excalidraw` **en disco** son la fuente de verdad.
-- `<vault>/.mycelium/` guarda el **índice SQLite derivado** (búsqueda, grafo, metadatos)
-  y la **papelera** (`.mycelium/.trash/`).
+- El **índice SQLite derivado** (búsqueda, grafo, metadatos) vive en el **app-data** de la
+  aplicación, un archivo por vault: `%APPDATA%/com.mycelium.desktop/index-<hash>.db`, con el
+  *hash* de la ruta del vault. **No** vive dentro del vault.
+- `<vault>/.mycelium/` guarda la **papelera** (`.mycelium/.trash/`) y las **preferencias del
+  vault** (`.mycelium/preferencias.json`, [[preferencias-por-vault]]).
+
+> [!warning] Esta nota dijo durante dos meses que el índice vivía en `.mycelium/`
+> Fue el diseño inicial, pero al implementarlo (2026-07-20, fase 2 de [[vault-en-carpeta]])
+> se decidió ponerlo en el app-data —ahí está escrito, § «Ubicación del índice»— y esta
+> nota, junto con otras cuatro, nunca se actualizó. Lo detectó la revisión crítica del
+> diseño del MCP el 2026-09-23, verificado en `lib/db/client.ts` (`sqlite:index-${hash}.db`,
+> que `tauri-plugin-sql` resuelve en el app-data) y en el disco.
 - El índice se puede **reconstruir** desde los archivos: es caché, no origen.
 
 > [!important] Consecuencia de diseño

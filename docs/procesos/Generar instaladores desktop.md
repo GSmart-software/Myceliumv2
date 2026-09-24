@@ -110,7 +110,8 @@ define bloques `wix`/`nsis`, así que aplican los defaults).
 Ninguno de los dos instaladores toca:
 
 - **El vault**: vive en la carpeta que eligió el usuario, fuera de la instalación
-  (ver [[vault-en-carpeta]]), con su índice en `<vault>/.mycelium/`.
+  (ver [[vault-en-carpeta]]). En `<vault>/.mycelium/` quedan la papelera y las preferencias
+  del vault; **el índice no**: vive en el app-data, un `index-<hash>.db` por vault.
 - **`AppData/Roaming/com.mycelium.desktop/`**: la base del modo SQLite clásico, la
   lista de vaults conocidos y el `localStorage` del WebView2 (donde viven los stores
   persistidos: pestañas, layout, preferencias, terminales…).

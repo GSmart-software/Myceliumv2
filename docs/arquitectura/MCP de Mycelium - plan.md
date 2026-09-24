@@ -20,7 +20,7 @@ graph TD
     MCP -->|lee y escribe| IDX[("Índice propio<br/>mcp-hash.db")]
     IDX -.->|revalidación perezosa| FS[("Vault: .md en disco<br/>LA FUENTE DE VERDAD")]
     MCP -->|named pipe por vault| APP["Mycelium (Tauri)"]
-    APP -->|escribe| AIDX[("Índice de la app<br/>.mycelium/index.db")]
+    APP -->|escribe| AIDX[("Índice de la app<br/>app-data/index-hash.db")]
     AIDX -.->|watcher| FS
     APP -->|confirmación con foco en Cancelar| U(["Usuario"])
     EV["Arnés de evaluación"] -.->|mide 3 brazos| CC
@@ -94,9 +94,18 @@ peor que uno lento. Toca el framework (`FUN-L-08`), que sube de versión.
 > lugar que manda. Dos indexadores es el mismo error, un orden de magnitud más grande.
 
 **La salida no es renunciar al índice propio** —el argumento de la frescura con la app
-cerrada es sólido— sino **no dejar dos**: el indexador en Rust del MCP tiene que ser **el
-indexador**, y la app pasar a consumirlo. Eso es exactamente `FUN-L-10`
-(`VAULT-INDEX-EN-RUST`), que ya está en el BACKLOG y hasta hoy no tenía quién lo empujara.
+cerrada es sólido— sino **no dejar dos implementaciones**. Lo que converge es **el código**,
+no el archivo: un único *crate* de Rust —recorrido de la carpeta, parsers de wikilinks,
+frontmatter y secciones, y el escritor del índice— que usan **los dos**, cada uno sobre su
+propia base. Eso es exactamente `FUN-L-10` (`VAULT-INDEX-EN-RUST`), que ya está en el
+BACKLOG y hasta hoy no tenía quién lo empujara.
+
+> [!warning] Corregido el 2026-09-23 por la revisión crítica
+> La primera versión de este párrafo decía que «la app pasa a consumir» el índice del MCP.
+> Eso contradecía el § 2.3 —que cierra el problema de los dos escritores justamente porque
+> nunca comparten archivo— y además es **imposible**: el índice del MCP deja fuera
+> `contenidos`, `papelera`, `css_snippets` y `usuarios`, que son la base de la app. Lo que
+> se comparte es la biblioteca, no la base. Ver [[MCP de Mycelium - revision critica]].
 
 **Decisión**: `FUN-L-09` y `FUN-L-10` se planifican como **una sola línea de trabajo**. El
 MCP no es un consumidor del índice: es la excusa para que el índice viva donde debía.
@@ -249,7 +258,54 @@ por separado para que no viajen escondidas:
 Las fases 1 y 2 se miden con el mismo arnés. Si la fase 1 no le gana a `grep`, **no se sigue
 a la 2**: se revisa el diseño.
 
-## 7. Lo que sigue esperando una decisión del usuario
+## 7. La revisión crítica, y lo que hay que arreglar antes de medir
+
+El diseño completo pasó por una revisión adversarial el 2026-09-23:
+[[MCP de Mycelium - revision critica]]. **Veredicto: se puede construir como está**, a
+condición de arreglar el pre-registro de la evaluación antes de la fase 0. Y un dato que
+ordena prioridades: **la mitad de memoria no va a fallar**; si hay que recortar, se recorta
+control.
+
+### 7.1 Lo que ya se corrigió al integrarla
+
+- **§ 3 contradecía al § 2.3**: decía que la app «consume» el índice del MCP. Lo que converge
+  es el *crate*, no la base. Corregido arriba.
+- **El índice de la app no vive en `.mycelium/`** sino en el app-data. El error estaba en
+  cinco notas del vault —la decisión se tomó al implementar la fase 2 de [[vault-en-carpeta]]
+  y nunca se propagó— y en los diagramas de este plan y de [[MCP de Mycelium - control]].
+  Corregido en todas.
+
+### 7.2 Lo que falta, en orden, y nada de esto cuesta código
+
+1. **La regla de decisión pre-registrada no existe todavía.** El § 4.2 decidió que manda el
+   costo en dólares, pero [[MCP de Mycelium - evaluacion]] § 9 sigue decidiendo por tokens y
+   no tiene ningún umbral de costo escrito. Hay que reescribir esa sección con una razón de
+   costo y sus umbrales, y **congelarla antes de la fase 0**: un pre-registro que se escribe
+   después de ver los datos no es un pre-registro.
+2. **El modelo chico no puede correr el cuarto brazo**, y es una consecuencia de una decisión
+   del usuario que nadie vio: ver el § 7.3.
+3. **La ruta del vault no tiene forma canónica.** La app hashea la cadena tal como llega
+   —verificado en `hashRuta` y `registrar_vault`—, así que un servidor que resuelva el vault
+   desde el `cwd` con otras mayúsculas u otras barras calcula **otro** *hash*: otro índice y
+   otro nombre de *pipe*, y contesta `APP_CERRADA` **con la app abierta**. Es, según la
+   revisión, lo primero que va a fallar el día que alguien lance Claude Code desde fuera de
+   la terminal integrada. Propuesta: la forma canónica es la cadena que guarda `vaults.json`.
+
+### 7.3 Una consecuencia de «el modelo más chico» que nadie vio
+
+El modelo chico tiene una ventana de **200.000 tokens**. De ahí salen dos problemas:
+
+- **El brazo del corpus entero en contexto no entra**: son ~290.000 tokens, y esa cifra es un
+  piso. Ese brazo tiene que correr con un modelo de ventana grande, como sub-experimento.
+- **El brazo base queda al borde**: `grep` trae 173.000 tokens de candidatas más el
+  `CLAUDE.md`. Si el cliente **compacta** a mitad de corrida, la métrica de contexto ocupado
+  deja de significar algo. Hace falta registrar si hubo compactación, y probablemente
+  ampliar el piso del 50 % que se fijó al elegir el modelo.
+
+No invalida la decisión —el argumento de que un modelo grande tapa las diferencias sigue en
+pie—, pero cambia qué se puede medir con él.
+
+## 8. Lo que sigue esperando una decisión del usuario
 
 1. ~~**Con qué modelo se corre la evaluación.**~~ **Decidido** (usuario, 2026-09-23): el
    **modelo más chico** para la tanda principal, y las preguntas de reserva repetidas con el
@@ -274,6 +330,7 @@ a la 2**: se revisa el diseño.
 
 - [[MCP de Mycelium - encuadre]] — los hechos y las restricciones de partida.
 - [[Memoria documental para IA - estado del arte]] — contra qué se contrastó este plan.
+- [[MCP de Mycelium - revision critica]] — la revisión adversarial del diseño completo.
 - [[MCP de Mycelium - memoria]] · [[MCP de Mycelium - control]] · [[MCP de Mycelium - evaluacion]] — las tres partes.
 - [[Mycelium como memoria de la IA]] — la decisión de producto de la que sale todo.
 - [[BACKLOG]] — `FUN-L-09` y `FUN-L-10`, que este plan une.

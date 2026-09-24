@@ -14,7 +14,8 @@ npm run tauri dev
 
 - No hay login: entra directo al workspace (ver [[desktop-sin-login]]).
 - Los datos viven en la **carpeta del vault** que elijas (ver [[vault-en-carpeta]]);
-  el índice SQLite queda en `<vault>/.mycelium/`.
+  el índice SQLite queda en el app-data, `%APPDATA%/com.mycelium.desktop/index-<hash>.db`
+  (uno por vault). **No** en `<vault>/.mycelium/`, que solo guarda papelera y preferencias.
 - Cuando cambiás **Rust**, hay que reiniciar (se recompila). Cambios de frontend
   recargan en caliente.
 - La config de ventana (`tauri.conf.json`) tampoco recarga en caliente: reiniciar.
