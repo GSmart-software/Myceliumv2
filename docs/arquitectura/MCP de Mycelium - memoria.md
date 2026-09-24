@@ -11,6 +11,12 @@ restricciones; las otras dos mitades son [[MCP de Mycelium - control]] (operar l
 > [!important] Solo se planifica
 > No hay código todavía. Lo que sigue son decisiones con su porqué, no una implementación.
 
+> [!success] Actualización 2026-09-24: la fase 1 está construida
+> `vault_buscar` y `vault_leer` sobre el índice propio, en el crate compartido
+> `mycelium-vault` y el binario `mycelium-mcp` (rama `feat/mcp-memoria`). Lo que se
+> construyó **distinto** de lo que dice esta nota, y lo que se midió, está en el
+> § 13. El resto de la nota sigue siendo el diseño.
+
 > [!info] Cómo leer los números
 > Todo lo medido se midió **sobre este repo** el 2026-09-23 (`docs/`, 93 notas) y sobre el
 > vault personal `Trabajo y Estudio` (1220 notas), que sirve de segundo caso real. Lo
@@ -724,6 +730,151 @@ que los otros — no como un sistema paralelo.
    Inclinación: **reescribirlos** para que usen el MCP y caigan a `grep` si no responde.
 7. **¿Cuánto pesa de verdad el índice?** Las cifras de § 3 son estimadas a 1–1,5× el texto.
    Es lo primero que hay que medir cuando exista el primer índice real.
+
+---
+
+## 13. Notas de implementación de la fase 1 (2026-09-24)
+
+Lo construido para la fase 1 del [[MCP de Mycelium - plan]] (§ 6): `vault_buscar` y
+`vault_leer`. Esta sección dice **qué quedó distinto de lo diseñado arriba y por qué**,
+y los números medidos que reemplazan a las estimaciones.
+
+### 13.1 Dónde está cada cosa
+
+| Pieza | Dónde | Qué |
+|---|---|---|
+| Crate compartido | `frontend/src-tauri/crates/mycelium-vault` | `.mycignore`, `rutas` (`misma_ruta`, `hash_ruta`), `registro` (`vaults.json`), `tipos`, `recorrido` (el walker), `wikilinks`, `frontmatter`, `markdown` (código, enlaces, tags, secciones) y, detrás de la feature `indice`, el índice SQLite |
+| Servidor | `frontend/src-tauri/crates/mycelium-mcp` | Binario delgado: resolución del vault, protocolo, formato de respuesta, registro de búsquedas |
+| Prueba de equivalencia | `frontend/scripts/equivalencia-indice.mjs` | Parsers de TS contra los de Rust, sobre un vault real |
+
+`src-tauri/` pasó a ser un **workspace** con la app como paquete raíz: `target/` y
+`Cargo.lock` no se movieron y `tauri build` sigue compilando solo la app. Lo que la app
+ya tenía en Rust y el MCP necesitaba —`mycignore.rs`, `misma_ruta`, el walker de
+`listar_archivos_meta`, los tipos de archivo, el formato de `vaults.json`— **se movió** al
+crate (no se copió) y la app lo usa desde ahí; sus 43 tests pasan igual.
+
+### 13.2 Lo que se construyó distinto, y por qué
+
+- **`secciones_fts` usa el `rowid`** (= `secciones.id`) en vez de una columna
+  `seccion_id UNINDEXED`. Es lo mismo, sin una columna más en cada fila del FTS.
+- **La `ref` es `ruta#s<orden>`**, y el orden `0` existe **solo** si hay preámbulo con
+  contenido (frontmatter incluido): una nota que empieza con `#` arranca en `#s1`.
+  `ENLACES` guarda `seccion_orden` en vez de `seccion_id`, y además `destino` (sin alias):
+  así la sección de un enlace se resuelve por `(nota, orden)` sin otro join.
+- **Los enlaces se materializan ya en la fase 1**, aunque `vault_vecinos` sea de la
+  fase 2: la señal `pop` los necesita y `vault_leer` devuelve «a qué enlaza esta
+  sección» (con rotos y ambiguos). Lo que queda para la fase 2 son las herramientas.
+- **El código es texto buscable pero nunca estructura.** Plan § 3.1 dice que el código
+  «no es texto indexable de la misma forma»: se implementó como que su texto **sí** va al
+  FTS —un identificador entre acentos graves, `FUN-L-09`, `vault_buscar`, es justo lo que
+  se busca— pero **nunca** produce enlaces, etiquetas ni cortes de sección.
+- **Las migas omiten el H1-título.** Si un documento tiene un solo H1 y es su primer
+  encabezado, hace de título y como ancestro no entra: `Nota > H2 > H3`, que es como las
+  escribe el plan § 4.4. En el preview se omite además el título de la nota, que ya está
+  en la `ref`.
+- **Cinco señales, no cuatro**: `rel pop prox rec anc` (la quinta es la del plan § 4.1,
+  el texto de los enlaces entrantes, sobre `enlaces_fts`). Todas en peso 0 salvo `rel`. En
+  el preview van como `[1 .46 0 1 0]` con la leyenda una sola vez en la cabecera: los
+  nombres repetidos diez veces eran ~80 tokens que no le sirven al agente. `anc` es una
+  señal **de nota** aplicada igual a todas sus secciones; la regla de fusión que pide la
+  revisión (§ 3.8) queda para la calibración.
+- **BM25 con pesos de columna 4 · 2 · 1** (título · migas · cuerpo), tokenizador
+  `unicode61 remove_diacritics 2` («indice» encuentra «Índice») y prefijo en cada término
+  («enlace» encuentra «enlaces»). Los tres pesos quedan escritos en cada línea del registro
+  de búsquedas: son parámetros de calibración, no decisiones.
+- **Registro de búsquedas** (plan § 4.3): `mcp-<hash>-busquedas.jsonl`, al lado del índice.
+  Una línea por `vault_buscar` con la consulta, la expresión FTS, los filtros, el modo, el
+  total y la lista ordenada con `bm25`, las cinco señales y el puntaje. Rota a los 20 MB.
+- **El arranque en frío no bloquea `initialize`** (revisión § 3.3): corre en un hilo, y una
+  herramienta llamada antes devuelve `INDEXANDO (hechas/total)`.
+- **`vault_leer` revalida la nota antes de resolver la `ref`** (revisión § 2.5); si cambió,
+  la reindexa y lo avisa en la respuesta.
+- **Transacciones `IMMEDIATE`**, y la comprobación de versión del esquema dentro de una:
+  con dos sesiones en frío sobre el mismo índice, SQLite devuelve «locked» sin pasar por
+  `busy_timeout` en dos puntos (el paso a WAL y una transacción que empieza leyendo y
+  después escribe). Con `IMMEDIATE` la segunda sesión espera su turno.
+- **Los tipos que no son `.md` entran como nodos sin secciones** (la inclinación de § 12.4
+  y del plan § 8.4, que sigue abierta como decisión del usuario): `[[Mi base]]` resuelve y
+  no cuenta como roto.
+- **Nota de más de 8 KB pedida entera**: índice de secciones (hasta 40 filas; si hay más,
+  solo hasta H3/H2/H1) + la primera sección + el precio de la entera.
+
+### 13.3 Decisiones de construcción
+
+- **Protocolo a mano, no el SDK oficial (`rmcp`)**: la superficie es `initialize`, `ping`,
+  `tools/list` y `tools/call` sobre JSON-RPC por línea (~150 líneas). El SDK trae tokio,
+  macros y `schemars` para un servidor síncrono de una llamada a la vez, alarga la
+  compilación en una máquina que ya compila Tauri con `CARGO_BUILD_JOBS=2` y su API cambia
+  entre menores. Si hacen falta notificaciones, cancelación o HTTP, se migra: las
+  herramientas no dependen del transporte.
+- **rusqlite 0.32**, con la **misma** `libsqlite3-sys` 0.30 que sqlx: el crate declara
+  `links = "sqlite3"` y un workspace no admite dos. La feature `indice` hace que la app no
+  lo compile mientras siga indexando desde el frontend.
+- **Empaquetado (sin cablear)**: el binario se llama `mycelium-mcp` y comparte `target/`
+  con la app; va como `bundle.externalBin` (sidecar), que lo instala junto a
+  `Mycelium.exe`. Así la ruta a registrar en Claude Code es estable entre versiones.
+
+### 13.4 Medido (reemplaza las estimaciones de §§ 3, 7 y 9)
+
+Binario de release, Windows, 2026-09-24. Tokens a 4 bytes por token, como en el resto de
+la nota.
+
+| Qué | Estimado | Medido |
+|---|---|---|
+| `vault_buscar` con 10 previews («enlaces») | ~420 tokens | **2.292 bytes ≈ 573 tokens** |
+| `vault_buscar` con 5 previews («dos escritores») | — | 1.531 bytes ≈ 383 tokens |
+| `vault_leer` de una sección (plan § 2.3) | ~225 tokens | 630 bytes ≈ 158 tokens |
+| `vault_leer` de `BACKLOG.md` entero sin `forzar` | — | 2.635 bytes ≈ 659 tokens (contra ≈ 31.980 la nota entera) |
+| `tools/list` (una vez por sesión) | — | 2.635 bytes ≈ 659 tokens |
+| Índice, vault del repo sin copias (107 archivos) | 2–3 MB | **4,2 MB** |
+| Índice, `Trabajo y Estudio` (1.223 archivos) | 9–14 MB | **16,4 MB** |
+| Arranque en frío, 107 archivos | 1–3 s | **~0,33 s** (2,2–2,4 s en algunas corridas con la máquina cargada) |
+| Arranque en frío, 1.223 archivos | 1–3 s | **3,95 s** |
+| Revalidación sin cambios, 107 archivos | pocos ms | 2–3 ms |
+| Revalidación sin cambios, 1.004 / 1.223 archivos | pocos ms | **48–62 ms** / **53–55 ms** |
+
+> [!warning] A ~1.200 notas, la pasada de `stat` ya está en el umbral de § 9
+> § 9 decidió cambiar a un watcher si la revalidación perezosa pasa de ~50 ms. En los dos
+> vaults de más de mil archivos está **justo ahí** (48–62 ms). No se cambió: el umbral se
+> fijó a ojo y el costo real es 50 ms por consulta como mucho una vez cada 2 s. Pero es la
+> primera decisión que la medición pone en discusión.
+
+> [!danger] El vault del repo indexa las copias de los worktrees
+> El `.mycignore` de la raíz no ignora `.claude/`, así que cada worktree de un subagente
+> (`.claude/worktrees/agent-*/docs/…`) entra al índice —**el de la app también**, porque es
+> el mismo `.mycignore` y el mismo walker—: 1.004 archivos en vez de 107, y la búsqueda
+> «enlaces» devolvía nueve copias de la misma sección. El MCP respeta el `.mycignore` a
+> propósito; lo que falta es agregar `.claude/` ahí (decisión del usuario, que además
+> tiene que ver con versionar ese archivo: revisión crítica § 3.2).
+
+### 13.5 Prueba de equivalencia
+
+`node scripts/equivalencia-indice.mjs <vault>` (plan § 3) transpila los parsers de la app
+y compara archivo por archivo con `mycelium-mcp volcar`. Resultado el 2026-09-24:
+**ninguna diferencia inesperada** en `docs/` (99 notas), en el vault raíz del repo (1.004
+archivos, 588 filas de propiedades) ni en `Trabajo y Estudio` (1.223, 164 filas). Las
+esperadas, listadas y no escondidas:
+
+| Diferencia intencional | `docs/` | Vault raíz | `Trabajo y Estudio` |
+|---|---|---|---|
+| Enlaces que la app cuenta y están dentro de código | 111 | 1.014 | 49 |
+| Etiquetas que la app cuenta y están dentro de código (casi todas colores `#0F6E56`) | 19 | 174 | 185 |
+| `[[Nota#Sección]]` a notas que existen: la app no los resuelve, el MCP sí | 0 | 0 | 10 |
+
+### 13.6 Pendiente o distinto del plan
+
+- **`misma_ruta` sigue ignorando mayúsculas siempre.** El plan § 7.3 pide hacerlo solo
+  donde el sistema de archivos no las distingue (no en Linux); es un cambio de
+  comportamiento de la app y va aparte. Tampoco se tocó `vincular_vault` (deduplicar con
+  esa normalización, § 7.3.3).
+- **La app sigue parseando en TypeScript**: el crate ya tiene los parsers, pero pasar el
+  indexador de la app a Rust es `FUN-L-10` y no entra en la fase 1. Hasta entonces, la
+  prueba de equivalencia es lo que evita la deriva.
+- **El ranking no está calibrado**: con BM25 y el título pesando 4, «enlaces» llena el
+  top 10 con secciones de `enlaces-externos`. Es exactamente lo que la fase 3 viene a
+  medir con el registro de búsquedas.
+- **No se registró el servidor en Claude Code** (ni `.mcp.json` ni ámbito de usuario): se
+  probó por stdio directo. Cómo se registra sigue siendo la pregunta 5 del § 12.
 
 ---
 

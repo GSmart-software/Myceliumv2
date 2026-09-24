@@ -52,6 +52,14 @@ y qué principio general dejó.
    Cuando un elemento se ve mal y su propio CSS es correcto, **subí por los ancestros
    antes de tocarle nada**. La salida es el portal al `body`. Regla completa en
    [[DESIGN_SYSTEM]] § Estados visuales comunes.
+7. **`busy_timeout` no cubre todos los «database is locked» de SQLite.** Con WAL y dos
+   procesos sobre el mismo archivo hay dos que llegan **sin esperar**: el cambio de modo
+   de journal (`PRAGMA journal_mode=WAL`) cuando otro está haciendo lo mismo, y una
+   transacción `DEFERRED` que empieza leyendo y después quiere escribir si otro escribió
+   en el medio (SQLite no espera para no provocar un interbloqueo). Apareció al probar dos
+   servidores MCP arrancando en frío a la vez (`FUN-L-09`). La salida es pedir la
+   escritura al empezar —`BEGIN IMMEDIATE`, ahí sí espera— y reintentar la apertura un
+   rato. Detalle en [[MCP de Mycelium - memoria]] § 13.2.
 
 ## Relacionadas
 
