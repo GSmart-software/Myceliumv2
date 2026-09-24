@@ -489,10 +489,8 @@ la diferencia es apreciable, se cambia; si no, gana la coherencia.
 4. **¿Qué pasa si la app se actualiza mientras hay una sesión MCP viva?** El canal muere con
    el proceso, pero el agente puede estar a mitad de una tanda. Falta decidir si el servidor
    reintenta la conexión en silencio o si `APP_CERRADA` alcanza. Toca [[autoactualizacion]].
-5. **¿Hay registro de lo que hizo el agente, y dónde se ve?** Un «últimas veinte operaciones
-   MCP» es barato y tranquiliza mucho. La duda no es si hace falta, sino **si vive en la
-   interfaz** —un panel, una pestaña del rail— o solo en la respuesta de la herramienta. Sería
-   funcionalidad nueva de la app, así que probablemente sea otro `FUN-*`.
+5. ~~**¿Hay registro de lo que hizo el agente, y dónde se ve?**~~ **Decidido por el usuario
+   el 2026-09-23**: sí, y **en el rail**, para no comerse espacio de pantalla. Ver § 8.
 6. **¿Se expone «leer preferencias» aunque no se exponga escribirlas?** Saber que la carpeta
    de Esporas es `Moldes/` y no `Esporas/` le evita al agente una suposición equivocada
    ([[esporas-plantillas]]). Se podría meter en `mycelium_estado` sin herramienta nueva.
@@ -506,6 +504,71 @@ la diferencia es apreciable, se cambia; si no, gana la coherencia.
    muestra que casi no se usa, se retira.
 
 ---
+
+## 8. Dos decisiones del usuario (2026-09-23)
+
+### 8.1 El registro de actividad vive en el rail
+
+**Decisión**: un ítem propio en el rail —el mismo grupo que el Explorador, la Búsqueda y las
+Esporas— que abre un panel con **lo que hizo el agente**: qué operación, cuándo, sobre qué
+nota y con qué resultado. Del rail y no de un aviso flotante, por lo que pidió el usuario: no
+ocupar pantalla. Se mira cuando se quiere mirar.
+
+> [!important] Este panel no es un adorno: es lo que hace aceptable el resto
+> Sin registro, un agente que renombra, mueve y borra opera **invisible**, y la única defensa
+> posible sería preguntar por todo — que es como se arruina la herramienta—. Con registro, la
+> regla del § 4 se sostiene: lo reversible **no pregunta**, porque se ve y se deshace.
+
+Lo que hace falta que tenga, y el porqué de cada cosa:
+
+| Qué | Por qué |
+|---|---|
+| Operación, momento y **efecto** («renombró *X* → *Y*, reescribió 7 enlaces») | El efecto es lo que el usuario necesita juzgar, no el nombre de la herramienta |
+| Ir a lo afectado | Un registro que no lleva a la nota obliga a buscarla a mano |
+| **Deshacer**, donde aplique | Reusa lo de [[avisos-y-confirmaciones]]; un registro sin deshacer solo informa del daño |
+| Estado del canal (encendido, conectado, apagado) | Es el lugar natural para ver si el MCP está vivo — y para encenderlo si no |
+| Lo **rechazado** por el usuario y lo que falló | Media depuración es entender qué pidió el agente y por qué no pasó |
+
+**Dónde se guarda**: `.mycelium/actividad.jsonl`, *append-only* y con tope. Ahí y no en el
+vault visible porque **no es contenido**: ensuciaría el árbol y el grafo. Y en un archivo
+suelto y no en el índice, porque es descartable — si se pierde, no se pierde nada del vault.
+
+**Es funcionalidad de la app, no del MCP**: va al BACKLOG como `FUN-*` propio y se entrega
+**junto con** las primeras herramientas de escritura, no después. Un registro que llega tarde
+llega cuando ya hubo que confiar a ciegas.
+
+### 8.2 El MCP se puede apagar, desde Configuración → Vault
+
+**Decisión**: un interruptor en **Configuración → Vault → «Asistente IA (Claude Code)»**,
+donde ya vive el generador del framework. **Por vault** (en `.mycelium/preferencias.json`,
+[[preferencias-por-vault]]) y **apagado por defecto**, igual que el framework, que también es
+opt-in: que un proceso externo pueda manejar la aplicación es algo que se concede, no algo
+que viene puesto.
+
+> [!warning] El motivo real es el control, no el ahorro — conviene no venderlo mal
+> El usuario lo pidió «para ahorrar recursos si no usa IA», y eso hay que matizarlo: el
+> servidor MCP **lo lanza Claude Code** y vive lo que vive esa sesión, así que con la IA
+> apagada no consume nada. Del lado de la app, lo que se apaga es **una escucha en un pipe**:
+> memoria y CPU despreciables.
+>
+> Lo que el interruptor apaga de verdad es **la superficie**: con él en «no», ningún proceso
+> de la máquina puede pedirle a Mycelium que abra, cree, renombre o borre nada. Eso sí vale,
+> y es razón suficiente — pero si lo documentamos como una optimización, el día que alguien
+> mida el consumo va a concluir que la funcionalidad no servía para lo que decía servir.
+
+Qué implica, exactamente:
+
+- **Apagado**: la ventana no abre el pipe. Las herramientas `mycelium_*` fallan con
+  `MCP_DESACTIVADO` —un código propio, distinto de `APP_CERRADA`— que dice **dónde** se
+  enciende. Fallar claro y rápido; nunca quedarse esperando.
+- **Las `vault_*` siguen funcionando**, y hay que decirlo sin adornos: leen el índice propio
+  del servidor, no la app. **Apagar esto no le impide a Claude Code leer el vault** — puede
+  hacerlo con `grep` desde siempre. El interruptor gobierna **el canal de control**, no el
+  acceso a archivos del usuario en su propia máquina. Prometer lo otro sería mentir.
+- **Encender o apagar no requiere reiniciar** ni la app ni la sesión de la IA: la escucha se
+  abre y se cierra en caliente, como el watcher.
+- El **ítem del rail** refleja el estado y ofrece encenderlo, para que el usuario no tenga que
+  saber de memoria dónde estaba el ajuste.
 
 ## Relacionadas
 

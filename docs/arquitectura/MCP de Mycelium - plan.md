@@ -216,7 +216,16 @@ por separado para que no viajen escondidas:
    código—. Hoy no molesta porque solo pregunta el usuario; con un agente pidiendo cosas, su
    petición cancelaría el diálogo abierto y el borrado del usuario **no ocurriría, sin
    explicación**. Hay que pasarlo a cola y rotular quién pregunta.
-2. **La terminal tiene que pasar el vault en el entorno.** `terminal_abrir` hoy solo define
+2. **Un panel de actividad en el rail** (usuario, 2026-09-23): qué hizo el agente, cuándo,
+   sobre qué y con qué resultado, con «ir a» y «deshacer». Es lo que **hace aceptable** que
+   las operaciones reversibles no pregunten: sin registro, el agente opera invisible y la
+   única defensa sería preguntar por todo. Se entrega **junto con** las primeras herramientas
+   de escritura, no después. Detalle en [[MCP de Mycelium - control]] § 8.1.
+3. **Un interruptor para apagar el MCP** (usuario, 2026-09-23), en Configuración → Vault,
+   junto al generador del framework; por vault y **apagado por defecto**. Ojo con cómo se
+   cuenta: el ahorro de recursos es despreciable —el servidor solo vive mientras corre Claude
+   Code— y lo que de verdad apaga es la **superficie de control**. Ver § 8.2 de la misma nota.
+4. **La terminal tiene que pasar el vault en el entorno.** `terminal_abrir` hoy solo define
    `TERM`. Sumar `MYCELIUM_VAULT` y el *token* de la ventana deja autenticado, sin
    configurar nada, al Claude Code que corre en la terminal integrada.
 

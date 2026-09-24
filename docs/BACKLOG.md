@@ -718,9 +718,11 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   propio indexador en Rust, así que dejar el de TypeScript en la app serían **dos
   implementaciones** de «qué es un enlace» derivando. `FUN-L-09` es la excusa para que el
   índice viva donde debía.
-- **Arrastra dos cambios en la app** que no son del MCP: la confirmación tiene que ser una
-  **cola** (hoy una pregunta cancela la anterior) y la terminal tiene que pasar el vault en
-  el entorno.
+- **Arrastra cuatro cambios en la app** que no son del MCP: la confirmación tiene que ser
+  una **cola** (hoy una pregunta cancela la anterior), la terminal tiene que pasar el vault
+  en el entorno, un **panel de actividad en el rail** con lo que hizo el agente (usuario,
+  2026-09-23 — es lo que permite que lo reversible no pregunte) y un **interruptor** en
+  Configuración → Vault para apagar el canal de control, por vault y apagado por defecto.
 
 #### `FUN-L-10` · `VAULT-INDEX-EN-RUST` (—)
 - **Qué es**: mover el indexado del vault del frontend a **Rust**: que el walker lea los
