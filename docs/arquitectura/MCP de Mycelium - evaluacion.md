@@ -591,7 +591,12 @@ Los sesgos ordenados por cuánto daño hacen. Cada uno con su contramedida concr
 >
 > Y hay un detalle que la vuelve robusta: **cuando los dos brazos usan el mismo modelo, `K`
 > solo depende de los pesos relativos entre categorías** —la lectura de caché a 0,1× la
-> entrada, la escritura a 1,25×—, no del precio absoluto. Por eso lo que se congela son esos
+> entrada, la escritura a **2×**—, no del precio absoluto.
+>
+> *Corregido al construir el arnés (2026-09-24)*: esta nota decía 1,25× para la escritura,
+> que es el precio del caché de **5 minutos**. **Claude Code escribe con el de 1 hora**, que
+> cuesta 2×; con ese peso el recálculo reproduce la factura exacta. Los precios quedaron
+> congelados en `eval/pesos-costo.json`, con fecha y fuente. Por eso lo que se congela son esos
 > cocientes, que cambian mucho menos que las tarifas. `total_cost_usd` se sigue registrando,
 > como control de que el recálculo no se desvía.
 
@@ -601,8 +606,10 @@ contexto le cuesta aciertos a un brazo, el acierto lo va a mostrar.
 
 ### 9.2 Primero, ¿la comparación es válida?
 
-Antes de leer `Δ` o `K`, cada brazo pasa tres filtros. Si alguno falla, **no hay
-conclusión**: hay una tarea.
+Antes de leer `Δ` o `K`, cada brazo pasa tres filtros. Si falla **uno de los dos
+primeros**, **no hay conclusión**: hay una tarea. Si falla **el de compactación**, la
+conclusión queda a medias: se puede leer la **exactitud** —filas 1 y 2 de la tabla— pero no
+el **costo**, y las filas 3 a 6 quedan sin decidir hasta repetir sin compactación.
 
 | Filtro | Si falla | Qué se hace |
 |---|---|---|
@@ -622,6 +629,16 @@ Se lee **en orden**; la primera fila que se cumple decide.
 | 4 | `K ≤ 0,6` y el `IC` de `K` sin el 1 | Igual de exacto y claramente más barato | **Entra**, con el ahorro como justificación explícita |
 | 5 | `0,6 < K ≤ 1` | Ni más exacto ni lo bastante más barato | **No entra como está.** Se rehace el diseño de las herramientas o se recorta el alcance |
 | 6 | `K > 1` | Cuesta más que `grep` sin acertar más | Falla el objetivo declarado —«rápido y barato»—. **Se rehace** |
+| 7 | **Ninguna de las anteriores** | El ahorro o la mejora no están probados | Se lee como la **fila 5**: no entra como está. En particular, `K ≤ 0,6` con el `IC` de `K` tocando el 1 **no** es un ahorro demostrado |
+
+> [!warning] Corregido el 2026-09-24, antes de cualquier corrida del brazo C
+> La versión de la mañana de esta tabla —reescrita para cerrar un hueco— **abría otro**: un
+> `K ≤ 0,6` cuyo intervalo tocaba el 1 no cumplía la fila 4 ni ninguna otra. Lo encontró el
+> arnés al implementar la regla de forma mecánica, que es exactamente para lo que sirve
+> implementarla. La fila 7 hace la tabla **exhaustiva por construcción**: cualquier
+> resultado cae en alguna fila, y el que no demuestra nada no entra. Solo se habían corrido
+> los brazos ciego y base sobre una pregunta, para probar el arnés: ningún dato del MCP
+> informó el cambio.
 
 > [!info] Por qué el umbral de ahorro es 0,6 y no 0,9
 > Un MCP no es gratis después de construido: suma un binario, un índice y un segundo
@@ -647,11 +664,30 @@ Además, y fuera del orden de la tabla:
 > 6 son alcanzables con datos plausibles. La 6 en particular: un MCP que devuelve notas
 > enteras «por las dudas» cuesta más que un `grep` bien apuntado.
 
-### 9.4 Lo que se completa al congelar
+### 9.4 Lo que la construcción del arnés decidió, y queda aceptado
 
-Dos cosas que son datos del día y no decisiones: la **tabla de pesos** de costo por categoría
-de token, con su fecha y su fuente, y el **commit** del vault que se usa como corpus. Con esas
-dos anotadas, esta sección queda cerrada.
+El arnés encontró puntos donde esta nota no se podía aplicar tal como estaba escrita. Las
+decisiones que tomó quedan como parte de la regla:
+
+- **Las preguntas de ausencia (C5) quedan fuera del filtro de contaminación** (§ 8.2): el
+  brazo ciego siempre «acierta» que algo no está, así que el filtro las sacaba a todas.
+- **El bloqueante de C7** se lee así: «sí cae a `grep`» solo si **nunca** deja de hacerlo;
+  si cae alguna vez, el resultado es «indeterminado» y se revisa a mano.
+- **Los resultados solo se agregan** (§ 10): una corrección es una fila nueva con el mismo
+  `session_id`, y manda la última. Marcar la vieja como descartada sería reescribirla.
+- **La clave admite** grupos de cadenas obligatorias para las enumeraciones, alternativas
+  dentro de `notas_clave` —el vault repite datos en varias notas— y `fuentes_codigo` en las
+  C7, donde no hay nota que los sostenga.
+- **La respuesta Y del ejemplo del § 4** no la puntúa la regla mecánica —no usa ninguna marca
+  del vocabulario de negación—: va al juez. El ejemplo le daba 1 a mano, y eso era la mitad
+  de la lección: una regla mecánica tiene que poder aplicarse sin la intuición de quien la
+  escribió.
+
+### 9.5 Lo que se completa al congelar
+
+Dos cosas que son datos del día y no decisiones, **ya completadas**: la **tabla de pesos**
+(`eval/pesos-costo.json`, precios oficiales consultados el 2026-09-24) y el **commit** del
+corpus (`c0a33b8`, en `eval/config.json`). **La regla queda congelada.**
 
 ---
 
