@@ -1026,6 +1026,26 @@ Lo que falta, en el orden que exige el protocolo:
 3. **El juez no está validado** contra el patrón humano. Esta vez no cambió ninguna fila, así
    que la decisión no depende de él; en la tanda de decisión podría.
 
+### Antes de las selladas: el experimento de las conexiones, y cómo se elige
+
+**Las selladas se usan una sola vez.** Si se abrieran ahora para confirmar la versión con
+citas y después se probaran las conexiones, no quedaría ningún conjunto limpio para confirmar
+esa segunda versión. Por eso el orden es: primero las conexiones sobre las preguntas de
+desarrollo; después se elige **una** versión candidata; recién entonces, la tanda de decisión.
+
+> [!important] Criterio de elección, escrito el 2026-09-24 antes de correr las conexiones
+> La versión con conexiones reemplaza a la versión con citas **solo si**, sobre las mismas 16
+> preguntas de desarrollo contra la misma base:
+>
+> - su **acierto citado supera** al de la versión con citas (68,8 %) en **al menos 5 puntos**,
+>   **y**
+> - su **`K` no pasa de 0,7** —conserva al menos un 30 % de ahorro contra `grep`—.
+>
+> Si no cumple las dos, **se queda la versión con citas**, que es más simple: una mejora que
+> no se nota con claridad no paga lo que suma en tokens y en código. El umbral de 5 puntos es
+> el mismo que la regla usa para «empeora», por simetría: si 5 puntos alcanzan para
+> rechazar, son lo mínimo para preferir.
+
 ---
 
 ## 15. Decisiones y preguntas abiertas
