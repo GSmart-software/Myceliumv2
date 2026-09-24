@@ -838,7 +838,72 @@ puede moverse cuando el juez exista. **Implementarlo es condición para la tanda
 
 ---
 
-## 12. Decisiones y preguntas abiertas
+## 12. Resultado de la fase 1: el MCP empeora la recuperación (2026-09-24)
+
+Tanda `2026-09-24-mcp-fase1`: brazo **MCP** —`vault_buscar` y `vault_leer`, servidor en
+`c487c58`—, Haiku 4.5, las mismas 16 preguntas × 5. 81 corridas, US$ 3,16, más US$ 0,28 del
+juez. Se compara contra la línea base del § 11.
+
+| | Acierto citado | Costo mediano | Contexto metido |
+|---|---|---|---|
+| Base (`grep`) | **70,0 %** | US$ 0,062 | 14.809 tokens |
+| **MCP** | **47,5 %** | **US$ 0,035** | **5.533 tokens** |
+
+**La regla (§ 9), aplicada por el informe sin intervención:** los cuatro filtros de validez
+pasan —la adopción del MCP fue del **97,5 %**: el agente sí usó las herramientas—. Después:
+
+- **`Δ = −22,5 pts`**, IC 95 % **[−42,5, −2,5]**: el intervalo no toca el cero.
+- `K = 0,53`, IC [0,34, 0,69]: cuesta la mitad.
+- **Decide la fila 1: el MCP empeora la recuperación. Se abandona o se rehace de cero, y se
+  investiga por qué.**
+
+> [!danger] Más barato y más rápido, y peor
+> Es exactamente el caso que la § 9 pone primero por una razón: **barato y rápido no vale
+> nada si está mal**, y un error de recuperación no se nota —la respuesta suena igual de
+> segura—. El MCP metió **un tercio** del contexto de `grep` y costó **la mitad**. Y acertó
+> **veintidós puntos menos**.
+>
+> Vale anotar también cómo engañaba la impresión: una consulta de prueba por stdio, hecha a
+> mano antes de la tanda, devolvió la respuesta correcta en 467 tokens y parecía un éxito.
+> Una consulta no es una medición.
+
+### Por clase, dónde gana y dónde pierde
+
+| Clase | Δ (MCP − base) | Lectura |
+|---|---|---|
+| C1 hecho puntual | **+20** | Donde el MCP brilla: una búsqueda, una sección, la respuesta |
+| C3 contradicción resuelta | +10 | |
+| C5 ausencia | 0 | |
+| C2 decisión y porqué | **−60** | El porqué no está en la sección que responde el qué |
+| C4 dos saltos | −40 | Esperable: los vecinos del grafo son la fase 2 |
+| C6 enumeración | −40 | Enumerar exige juntar **todo**; la búsqueda devuelve lo mejor |
+| C7 fuera del índice | −30 | El agente dejó `grep`: cayó a él en **solo el 10 %** de estas corridas |
+| C8 vocabulario | −40 | `grep` con el modelo reformulando llegó al 100 % |
+
+### Lo que la tanda no puede decir, y no cambia la decisión
+
+- **El juez no está validado** todavía —el patrón humano no se puntuó—, así que formalmente
+  no puede decidir. Pero cambió **una sola fila** (D05, del MCP, de 0 a 1): sin el juez el
+  Δ sería **−23,7**. La decisión no depende de él.
+- **Los brazos no corrieron intercalados** (§ 7): base y MCP son tandas de horas distintas.
+  Un Δ de −22,5 con el intervalo lejos del cero no es algo que explique una deriva del
+  servicio a lo largo de la tarde.
+- **Son 16 preguntas**, dos por clase: el intervalo es ancho. Lo que está firme es la
+  dirección, no el tamaño exacto.
+- **El bloqueante de C7 no se pudo aplicar mecánicamente**: la regla no dice cuánta caída a
+  `grep` alcanza. Queda como hallazgo, y apunta en la misma dirección que todo lo demás.
+
+### Lo que sigue, según la propia regla
+
+«Se investiga por qué» **antes** de rehacer: leer las transcripciones de las corridas que
+fallaron —el costo es cero, no hay que correr nada— y ver qué hizo el agente distinto de lo
+que hacía con `grep`. El reparto por clase ya sugiere dónde mirar: el agente **lee menos y
+para antes** —un tercio del contexto—, confía en la primera búsqueda donde con `grep`
+reformulaba, y abandona `grep` justo donde era imprescindible.
+
+---
+
+## 13. Decisiones y preguntas abiertas
 
 ### Decisiones
 
