@@ -961,6 +961,27 @@ salida de las herramientas: decir **cómo se cita** cada nota.
 3. Otra tanda contra la misma base. **La regla sigue congelada**; las selladas siguen sin
    abrirse hasta la tanda que decida.
 
+### Los dos experimentos siguientes, en orden (decidido el 2026-09-24)
+
+**Uno por tanda**: si se cambian dos cosas a la vez y el resultado mejora, no se sabe cuál
+sirvió, y si una ayuda y la otra perjudica, se tapan entre sí. El arnés es lo bastante barato
+—unos US$ 3,50 por tanda— como para darse ese lujo.
+
+1. **Primero, las citas.** Cada resultado y cada lectura dicen **cómo se cita** la nota —el
+   nombre que resuelve como `[[enlace]]`—. No es una apuesta sino un defecto: una cita que no
+   resuelve no le sirve a nadie, gane o no la evaluación. Es chico y explica hasta 5 de las 8
+   corridas que separan al MCP de la base.
+2. **Después, las conexiones.** Idea del usuario al ver la estructura de una respuesta: que
+   la lectura traiga **las notas conectadas**. Con los números de este vault —unos 16 enlaces
+   por nota y unos 3.000 tokens por nota— adjuntar su **contenido** costaría ~50.000 tokens
+   por lectura, ocho veces una corrida entera del MCP: descartado. Lo que se prueba es una
+   **lista compacta** —nombre, dirección y una pista de qué es, ~25 tokens por conexión—,
+   con prioridad para los **enlaces entrantes**, que es lo que `grep` no encuentra barato:
+   *quién menciona esta nota*. Apunta a dos clases concretas: las **contradicciones
+   resueltas** (la nota que corrige una decisión vieja suele enlazarla) y las
+   **enumeraciones** (todo lo que apunta a un tema). Se mide sobre el servidor que ya cite
+   bien, para que su efecto no se mezcle con el de las citas.
+
 ---
 
 ## 14. Decisiones y preguntas abiertas
