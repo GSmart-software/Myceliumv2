@@ -56,6 +56,30 @@ puntos** en **C7** (dato fuera del índice) o en **C9** (dato solo en un PDF) **
 `grep` ni leer el PDF**, hay que garantizar ese repliegue antes de seguir, gane lo que gane en el
 resto.
 
+## Enmienda del 2026-09-25: la revisión de citas
+
+Escrita **después** de la tanda de desarrollo y **antes** de la de decisión, sin haber visto
+ninguna respuesta a las selladas.
+
+> [!important] Qué cambia
+> Una corrida que **acierta** pero cita una nota que no está en la clave recupera el acierto
+> citado si esa nota **sostiene el dato**. Lo decide un juez (`eval/revisar-citas.mjs`, mismo
+> modelo y mismo aislamiento que el juez de acierto) que ve la pregunta, el dato y el texto de la
+> nota —**no la respuesta ni el brazo**—: un veredicto vale para el par (pregunta, nota), y por eso
+> trata igual a cualquier brazo que la haya citado.
+
+**Por qué**: en desarrollo, el MCP acertaba citando la fuente cruda —la página web guardada, el
+informe crudo de una investigación, la ficha del paper— y la clave solo aceptaba las notas de
+síntesis ([[MCP de Mycelium - tesina, protocolo]] § 7). En desarrollo se corrigieron las claves a
+mano; en las selladas no se puede sin leerlas.
+
+**Alcance**: solo preguntas con **un** grupo de notas clave. Las de varios (C4) quedan como están:
+una nota que sostiene «el dato» no dice qué parte cubre. Las de ausencia (C5) y las de PDF (C9) no
+tienen notas clave. Un `duda` no rescata la fila.
+
+**Se informa por separado**: la decisión se toma con la revisión, y el resultado **sin** ella
+(las filas revisadas filtradas) se muestra al lado, para que se vea cuánto movió.
+
 ## Lo que se completa al congelar
 
 El commit de la tesina que se usa como corpus, el conjunto de preguntas sellado con su
