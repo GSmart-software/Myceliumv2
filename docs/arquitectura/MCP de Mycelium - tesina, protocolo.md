@@ -266,6 +266,67 @@ mirando las preguntas que lo miden es lo que el sellado de la fase 1 enseñó a 
 de la clave no sirve —los patrones cortos aparecen en cientos de notas—, y leerlas rompería el
 sello. El defecto 1 queda abierto para la tanda de decisión.
 
+## 8. Dos mejoras, probadas en desarrollo (2026-09-25)
+
+Las dos salieron del diagnóstico del § 7 y son generales, no parches por pregunta:
+
+| Mejora | Qué hace | Resultado en desarrollo | Queda |
+|---|---|---|---|
+| **Tope de tamaño** de `vault_leer` (`7ed976a`) | Una llamada nunca pasa de 48 KB: índice abreviado por nivel en notas enormes, `forzar` por tramos con `desde` | Respuestas rechazadas por Claude Code: de **11 de 119** corridas a **0 de 122**. Costo igual | **Sí** |
+| **Búsqueda por raíz** (6 letras) | Encontrar variantes («concluye» desde «conclusiones») | No rescató la pregunta que la motivó (la brecha era de vocabulario, no de morfología); dos preguntas bajaron | **No**: revertida en `c8191d5` |
+
+El brazo MCP con las dos juntas quedó en 69,6 % de acierto citado contra 74,8 % del anterior:
+dentro del ruido (±16 puntos con 5 repeticiones), pero sin evidencia a favor de la raíz.
+
+> [!warning] Una corrida inválida, y el arreglo en el arnés
+> La primera vez, los `mcp.json` de los tres procesos se generaron con las barras invertidas
+> comidas por la shell: el servidor nunca arrancó y 45 corridas del «brazo MCP» fueron `grep`
+> puro (~US$ 2,5). Claude Code **no falla** si un servidor MCP no arranca: sigue sin él. Desde
+> `83ec63b`, `correr.mjs` arranca el servidor, le pide las herramientas y hace una búsqueda
+> antes de la primera corrida, y no corre si algo falla (`eval/lib/sonda-mcp.mjs`).
+
+## 9. La tanda de decisión (2026-09-25): el MCP no entra
+
+Las 13 selladas, abiertas por única vez, con el servidor `c8191d5`. Brazos ciego, base y MCP
+intercalados y **en serie** (el tiempo decide), Haiku y la réplica con Sonnet: 392 corridas,
+US$ 25,03, más US$ 2,1 de juez y US$ 0,7 de revisión de citas.
+
+| Modelo | Base (`grep`) | MCP | Δ | `K` | `R` | Decide |
+|---|---|---|---|---|---|---|
+| **Haiku** | 67,7 % | 66,2 % | −1,5 · IC [−18,5, +16,9] | 0,34 · IC [0,29, 0,60] | 0,52 · IC [0,42, 0,67] | Fila 4 (entra), **pero salta el bloqueante C9** |
+| **Sonnet** | **93,8 %** | 76,9 % | **−16,9** · IC [−32,3, −3,1] | 0,40 · IC [0,28, 0,66] | 0,49 · IC [0,38, 0,64] | **Fila 1: no entra** |
+
+Todos los filtros de validez pasan y no hay preguntas contaminadas. **Ni el juez ni la revisión
+de citas cambian la decisión**: sin juez, Sonnet da Δ = −6,1 (sigue en la fila 1); sin la
+revisión de citas, Haiku da Δ = −4,6 (sigue en la fila 4). La revisión rescató 6 filas, todas de
+Haiku.
+
+**Dónde pierde**, pregunta por pregunta:
+
+- **El dato solo en un PDF (C9): 0 de 10**, con los dos modelos. El MCP encuentra la nota que
+  transcribe parte del PDF, concluye «el vault no lo tiene» y **nunca abre el PDF**; `grep` sí
+  (con `pdftotext`). Es el bloqueante de la regla: hay que garantizar ese repliegue antes de
+  seguir. En desarrollo había acertado 100 %: allí la nota del vault llevaba al PDF.
+- **Contar elementos a lo largo de un capítulo de 4.000 líneas** (C3): 0–1 de 5 contra 2–3 de 5.
+  La base lee el archivo entero con `Read`; el MCP lee por secciones y cuenta mal.
+- **Una pregunta que cruza varias notas** (C4): 0–2 de 5 contra 2–4 de 5.
+
+**Dónde gana**: la de vocabulario propio (C8), 4 de 5 contra 0 de 5 con Haiku; el resto empata.
+
+### Lectura
+
+- **Costo y tiempo, confirmados en un vault diez veces más grande**: el MCP cuesta un tercio a
+  dos quintos y tarda la mitad, más rápido en 12 de 13 preguntas con los dos modelos. Es la
+  ventaja más sólida de toda la evaluación.
+- **Pero con un modelo fuerte, `grep` acierta casi todo también aquí** (93,8 %), y el MCP pierde
+  exactitud justo donde hay que leer mucho de corrido o salir del índice (PDF). La hipótesis
+  de que la ventaja del MCP crecería con el tamaño del vault **no se confirmó** en exactitud;
+  sí en costo y tiempo.
+- **Lo que haría falta para reabrirlo**, en orden: (1) que el MCP sepa decir que un documento no
+  está indexado y remita al PDF —el bloqueante C9—; (2) una lectura de corrido de un capítulo
+  largo que no cueste lo que cuesta `Read`. Y validarlo sobre preguntas nuevas: las 13 selladas
+  ya se usaron.
+
 ## Relacionadas
 
 - [[MCP de Mycelium - tesina, regla de decision]] — cómo se decide, escrita antes de correr.
