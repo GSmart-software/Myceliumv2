@@ -99,6 +99,9 @@ lo digo.
 | 2026-09-22 | Varias ventanas de Mycelium comparten las consolas; cada vault debería tener las suyas | `DEF-100`, la otra cara del `DEF-099`: la lista vive en una sola clave de `localStorage`. Los procesos **sí** están separados por ventana desde `FUN-L-16` |
 | 2026-09-22 | Integrar draw.io en Mycelium, como se integró Excalidraw | `FUN-L-20` `FILES-DRAWIO` · va sola · spec en [[drawio]]. Lo caro no es el editor sino **cómo se embebe**: draw.io no tiene componente React, y apuntar a su sitio público rompería el funcionar sin conexión |
 | 2026-09-23 | Un botón para crear temas propios: nombre y colores generales (no los fondos), listados bajo «Temas personalizados» como tarjetas | **Descartada el mismo día**, por vos, al ver el costo y el riesgo: demasiada personalización puede arruinar el producto, y quien quiera tocar colores tiene los snippets de CSS. El razonamiento y lo que dejó aprendido, en [[Los temas los define Mycelium, no el usuario]] |
+| 2026-09-25 | Los elementos `$...$` no se renderizan en la edición en vivo | `DEF-103`. Tampoco los `$$…$$` de bloque: KaTeX solo está conectado al camino de lectura |
+| 2026-09-25 | Los márgenes vacíos al ver un markdown son muy grandes; reducirlos a la mitad, en los dos lados (`cm-scroller`, `cm-content`) | `FUN-S-22` `HOJA-MAS-ANCHA` en el [[BACKLOG]]. Es una **idea** y no un defecto: los márgenes salen de la medida de lectura de 42rem que fija [[DESIGN]]; cambiarla es cambiar esa decisión |
+| 2026-09-25 | Con la ventana dividida, al achicar un draw.io el divisor deja de arrastrar cuando el puntero entra al editor de diagramas | `DEF-104`. El draw.io es un `iframe` y se queda con los eventos del puntero; por lo mismo debería pasar con un PDF o un video |
 
 > [!note] Esta tabla se puede vaciar cuando moleste
 > Es una comodidad para que veas en qué terminó cada cosa, no un registro canónico. La

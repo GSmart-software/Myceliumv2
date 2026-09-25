@@ -543,6 +543,22 @@ repositorio, **1.014 aristas y 174 etiquetas** de código; en el vault personal 
 **49 aristas y 185 etiquetas**, casi todas colores. Emparentado con `DEF-089`, que es la
 misma ceguera en la edición en vivo.
 
+# DEF-103
+Las expresiones matemáticas —`$…$` en línea y `$$…$$` en bloque— **no se renderizan en la
+edición en vivo**: quedan como texto crudo, con los signos `$` a la vista, aunque el cursor
+esté lejos. En la **vista de lectura** sí se ven como fórmula.
+
+Reportado por el usuario el 2026-09-25.
+
+# DEF-104
+Con la ventana **dividida** y un **draw.io** en uno de los paneles, **no se puede cambiar el
+tamaño** arrastrando el divisor hacia el lado del draw.io. En cuanto el puntero entra al
+editor de diagramas mientras se arrastra, el divisor **deja de seguirlo**: queda donde estaba
+y el arrastre se corta, aunque el botón siga apretado. Achicar el panel del draw.io se vuelve
+imposible o a los saltos.
+
+Reportado por el usuario el 2026-09-25.
+
 ---
 
 > [!warning] Defectos sin reporte original

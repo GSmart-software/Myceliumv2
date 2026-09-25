@@ -76,6 +76,7 @@ y **priorizar** qué implementar antes.
 | `FUN-S-19` | `EMBED-CANVAS` | Que `![[lienzo.canvas]]` **muestre el lienzo** dentro de la nota, como ya hace `![[dibujo.excalidraw]]`. Hoy no dibuja nada: los embeds de canvas **nunca se implementaron** —la spec de `FUN-L-18` no los prometía— y el texto queda escrito tal cual. Se descubrió el 2026-09-23, probando `FUN-L-20`, al comparar los tres tipos: el de Excalidraw anda y los otros dos no | ambas | — |
 | `FUN-S-20` 🟢 | `LINK-EXTERNO-NAVEGADOR` | Que un enlace a una página web **abra el navegador predeterminado** en vez de navegar la ventana de la app. Corrige `DEF-101`, que hoy se lleva Mycelium entero con un clic. La trampa está en **dónde**: los clics en enlaces se atienden en cinco sitios —vista de lectura, edición en vivo, widget de tablas, widget de propiedades y canvas—, así que va en un helper único; más `on_navigation` en Rust como red de seguridad, para que ningún camino olvidado pueda secuestrar la ventana. Necesita `tauri-plugin-opener` y su permiso —los **dos**: `allow-open-url` habilita el comando con el alcance vacío, los esquemas los trae `allow-default-urls`—. **Implementado en desktop y confirmado en la app** el 2026-09-23. Corrige `DEF-101`. Spec en [[enlaces-externos]] | ambas (difiere) | — |
 | `FUN-S-21` 🟢 | `EMBED-VIDEO` | Pegar el enlace de un video de YouTube como embed —`![](https://youtu.be/…)`— y que se **renderice el reproductor** dentro de la nota, como en Obsidian. Va por `youtube-nocookie.com` (mismo reproductor, sin cookies de seguimiento antes del play) y **en los dos caminos**: `lib/markdown.ts` para lectura y un widget en `lib/editor/livePreview.ts` para la edición en vivo, o se ve al leer y desaparece al editar (la lección de `FUN-L-20`). Sin conexión tiene que degradar con dignidad: un recuadro con el enlace, no un hueco. Vimeo entró, que salía casi gratis al hacer genérica la detección. **Implementado en desktop y confirmado en la app** el 2026-09-23. El `sandbox` necesita `allow-same-origin` —sin él el reproductor queda **negro**, medido— y eso no le da acceso a la app: el iframe conserva su propio origen. Spec en [[video-embebido]] | ambas | — |
+| `FUN-S-22` | `HOJA-MAS-ANCHA` | Que la nota **aproveche más el ancho** del panel: los márgenes vacíos a los costados de la hoja, **a la mitad** de lo que son hoy, en los dos lados. Hoy la hoja mide 42rem fijos y todo lo que sobra del panel se reparte en márgenes, así que en una pantalla ancha el texto ocupa una franja angosta en el medio. Toca una decisión de [[DESIGN]] —la medida de lectura—, que se actualiza junto con el cambio. Pedido por el usuario el 2026-09-25 | ambas | — |
 ### 1.2 Intermedias — tamaño M
 
 | ID | Nombre | Descripción | Aplica | Orig. |
@@ -342,6 +343,22 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   empaquetar draw.io para no depender de la red. Ahí se trataba de que *la app* funcione sin
   conexión; acá la conexión la pide **el usuario**, explícitamente, al pegar un video.
 - **Sin conexión**: un recuadro con el enlace y el motivo, nunca un hueco en blanco.
+
+#### `FUN-S-22` · `HOJA-MAS-ANCHA` (—)
+- **Qué es**: reducir a la mitad los márgenes vacíos a izquierda y derecha de la nota.
+- **De dónde sale**: del usuario, el 2026-09-25, en la bandeja: «los espacios de margen
+  vacíos al visualizar un markdown son muy grandes haciendo que el contenido ocupe muy poco
+  espacio». Señaló `.cm-scroller` y `.cm-content` como los elementos que lo producen.
+- **Por qué no es un defecto**: los márgenes son una decisión de diseño, no una falla. La
+  hoja mide `--mic-ancho-lectura: 42rem` (unos 80 caracteres) y el relleno de
+  `.cm-scroller` reparte el resto del panel a los dos lados (`styles/editor.css`). Lo que
+  cambia es la decisión, y por eso se actualiza [[DESIGN]] con ella.
+- **Qué significa «la mitad»**: si cada margen pasa de `(panel − 42rem) / 2` a la mitad de
+  eso, la hoja deja de tener ancho fijo y **crece con el panel**: en un panel de 1400 px, de
+  42rem a unos 65rem. Hay que decidir si lleva **un tope**, porque en un monitor muy ancho
+  las líneas se vuelven difíciles de seguir.
+- **Las dos vistas**: la hoja tiene que medir lo mismo en edición en vivo y en lectura, o el
+  texto salta de lugar al cambiar de modo. Esa regla de [[DESIGN]] no cambia.
 
 ### Pendientes — tamaño M
 
