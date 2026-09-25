@@ -1140,6 +1140,34 @@ del estado del arte ya lo anticipaba: este corpus entra entero en el contexto de
 
 ---
 
+## 16 bis. El tiempo: el MCP es claramente más rápido, y eso no cambia la decisión ya tomada
+
+El usuario pidió medir el tiempo además del costo y la exactitud. Las corridas ya guardaban la
+duración; se analizaron **después** de la decisión del § 16.
+
+| Selladas (brazos intercalados) | `grep` | MCP | Razón MCP/base (IC95) | MCP más rápido |
+|---|---|---|---|---|
+| Haiku | 32,7 s | 23,3 s | **0,76** [0,66, 0,85] | **8 de 8** preguntas |
+| Sonnet | 20,9 s | 11,1 s | **0,63** [0,45, 0,74] | **8 de 8** preguntas |
+
+**No es ruido del servicio**, que era el motivo para dejar el tiempo fuera de la regla: los
+brazos corrieron intercalados, el efecto aparece en todas las preguntas y tiene una causa
+mecánica —el MCP resuelve en **5–6 turnos** lo que a `grep` le lleva **8–9**, y cada turno es
+una llamada al modelo—.
+
+> [!warning] Esto no reabre la decisión del § 16
+> La regla congelada no incluía el tiempo, y agregarlo **después de ver los resultados** sería
+> exactamente lo que el pre-registro existe para impedir. El § 16 queda como está: el MCP no
+> entró **por la regla que se había escrito**.
+>
+> Lo que sí hace este hallazgo es cambiar **la pregunta de producto**. El objetivo que planteó
+> el usuario al empezar fue «máxima velocidad para encontrar información, y con el menor
+> costo». En este vault, el MCP **iguala en exactitud** (con Haiku), es **un tercio más
+> barato** sin llegar a demostrarlo, y es **un cuarto a un tercio más rápido, demostrado**.
+> Si el tiempo cuenta, tiene que contar **en la próxima evaluación**, escrito antes de correrla.
+
+---
+
 ## 17. Decisiones y preguntas abiertas
 
 ### Decisiones
