@@ -135,6 +135,7 @@ y **priorizar** qué implementar antes.
 | `FUN-L-17` 🛠️ | `VAULT-RELINKEADO-UI` | La auditoría y conversión de `FUN-M-17` como **pantalla de la app**, consumiendo el mismo núcleo. Sirve a quien nunca usa la IA y hoy no tiene ninguna salida. **Implementada en desktop** el 2026-08-08 (sin confirmar), y con ella el **núcleo de `FUN-M-17`**, que no existía: `lib/enlaces.ts`. Sale en la [[Version 1.6.0]]. Ver [[auditoria-y-relinkeado]] § 17 | ambas | — |
 | `FUN-L-15` 🟢 | `RELEASE-SCRIPT-PUBLICACION` | Un `npm run publicar` que compruebe, compile, firme, suba a R2 con `wrangler`, escriba los tres manifiestos y **verifique lo publicado**, en vez de hacer esos cuatro pasos a mano. Tiene modo `--simulacro`. **Script local, no CI**: usar el workflow obligaría a alinear `origin` y a poner la clave de firma como secreto de GitHub. **Confirmado**: publicó la 1.5.0 de verdad el 2026-08-03. El proceso, en [[Publicar una version]] § 2 | desktop | — |
 | `FUN-L-20` 🟢 | `FILES-DRAWIO` | Integrar **draw.io** como un tipo de archivo más del vault, igual que Excalidraw: crear, abrir y editar un diagrama dentro de Mycelium, guardado en la carpeta del vault. No compite con Excalidraw —aquel es trazo a mano, este es figura y conector que se engancha— ni con el canvas. El trabajo real no es el editor sino **cómo se embebe**: draw.io no publica un componente React, se integra como su aplicación web en modo embebido (`iframe` + `postMessage`), así que hay que decidir entre apuntar al sitio público (no funciona sin conexión) o **empaquetar la webapp** en el instalador. **Decidido por el usuario el 2026-09-23**: webapp **empaquetada y recortada** y **solo desktop**. **Implementado y confirmado en la app** el 2026-09-23, con el instalador en **40,3 MB** —por encima de los 30-35 estimados, aceptado por el usuario: el sobrecosto son las bibliotecas de formas, que son el motivo de traer draw.io—. La webapp no entra a git: la baja `scripts/preparar-drawio.mjs`, que ahora corre dentro de `npm run build`. Spec en [[drawio]] | desktop | — |
+| `FUN-L-21` | `DIAGNOSTICO-FALLOS` | Que **ningún fallo pase en silencio**: todo lo que sale mal, en el frontend o en Rust, deja una línea en la consola de F12 con el área, la operación y el error original. Para depurar y para usuarios experimentados. No es sembrar `console.error`: es una **fachada única** (`lib/fallos.ts`) con **tres niveles** —fallo, degradado, esperado—, destinos intercambiables, redes globales para lo que escapa de todo `catch`, `tauri-plugin-log` hacia la webview también en release, y un **chequeo automático** que impide volver a escribir un `catch {}` vacío. Medido el 2026-09-25: de 100 `catch`, **6** registran algo; 24 están vacíos y 40 siguen de largo en silencio. Pedido por el usuario el 2026-09-25. Spec en [[registro-de-fallos]] | ambas (difiere) | — |
 
 ### 1.4 Muy grandes — tamaño XL
 
@@ -558,6 +559,20 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   si desde el embed se edita o solo se lee.
 
 ### Pendientes — tamaño L
+
+#### `FUN-L-21` · `DIAGNOSTICO-FALLOS` (—)
+- **Estado**: definida el 2026-09-25, **no implementada**. Spec completa en
+  [[registro-de-fallos]].
+- **Qué es**: que cada fallo deje rastro en la consola de F12, con un formato único y
+  filtrable por área. El usuario común no ve nada nuevo.
+- **De dónde sale**: del usuario, el 2026-09-25, antes de atacar `DEF-105`–`DEF-108`: «no
+  deberíamos tener fallos y bugs silenciosos». Pidió explícitamente **recorrer todo el
+  proyecto con una estructura correcta y patrones de diseño**, no parches sueltos.
+- **Por qué es L**: la infraestructura es chica; lo grande es el **recorrido**. Son unos 90
+  sitios en el frontend y unos 46 en Rust, y en cada uno hay que **decidir el nivel**:
+  distinguir un fallo real de un `catch` que es control de flujo no es mecánico.
+- **Lo que la hace durar**: el chequeo de `scripts/check-fallos.mjs`. Sin él, el próximo
+  `catch {}` vuelve a entrar sin que nadie lo note.
 
 #### `FUN-L-19` 🟢 · `EDITOR-TABLAS-EN-SITIO` (—)
 - **Estado**: implementado en `desktop-tauri` el 2026-08-16, **sin confirmar en la app**;
