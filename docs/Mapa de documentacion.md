@@ -40,6 +40,8 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
   permisos.
 - [[MCP de Mycelium - evaluacion]] — cómo se mide con MCP y sin MCP, y qué resultado nos
   haría abandonar el diseño.
+- [[MCP de Mycelium - tesina, protocolo]] — la segunda evaluación, sobre un vault diez veces
+  más grande: cómo se copia, qué se excluye, las clases nuevas y el piloto.
 - [[Memoria documental para IA - estado del arte]] — qué existe hoy para darle memoria a una
   IA sobre documentación, y por qué casi todo resuelve otro problema.
 - [[MCP de Mycelium - revision critica]] — la revisión adversarial del diseño: qué está mal,
