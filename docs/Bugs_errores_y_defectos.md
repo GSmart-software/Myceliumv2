@@ -559,6 +559,49 @@ imposible o a los saltos.
 
 Reportado por el usuario el 2026-09-25.
 
+# DEF-105
+Abrir un vault después de que **se borraron muchos archivos desde fuera, con la app
+cerrada**, **se queda colgado** en la pantalla de carga: la barra llega a «Leyendo los
+archivos de la carpeta 6701 de 6701» y **nunca pasa** a «Cargando tus ajustes». No hay error
+ni salida; solo el aviso de que lleva minutos sin avanzar. Se reprodujo dos veces.
+
+El caso: un vault de 2.1.0 con un repositorio git adentro, donde `git worktree remove`
+borró unos **5.000 archivos `.md` y 8.173 carpetas** mientras Mycelium estaba cerrado. El
+único remedio fue apartar el archivo del índice para que se reconstruyera, con la pérdida que
+describe `DEF-107`.
+
+Reportado por el usuario el 2026-09-25, con un informe de investigación hecho en otra PC
+(Windows 11, vault de 6.699 notas en disco y 11.780 en el índice).
+
+# DEF-106
+Un archivo **creado o agregado desde fuera de Mycelium** —otro editor, el explorador de
+Windows, un agente de IA— **tarda en aparecer** en el explorador de archivos de la app y en
+lo demás (búsqueda, enlaces, grafo). En un vault grande la demora se nota, y a veces **no
+aparece hasta que ocurre otro cambio** en la carpeta.
+
+Reportado por el usuario el 2026-09-25, junto con `DEF-105`.
+
+# DEF-107
+**Reconstruir el índice de un vault borra datos que no están en ningún otro lado.** La
+forma de reconstruirlo —la única, porque la app no lo ofrece— es borrar o apartar el archivo
+`index-<hash>.db` del app-data. Al hacerlo se pierden, sin aviso:
+
+- los **snippets CSS** del usuario;
+- el **tema, el modo oscuro y las preferencias** (fuentes, tamaño del editor);
+- el **registro de la papelera**: los archivos siguen en `.mycelium/.trash/`, pero la app
+  ya no sabe de dónde venían ni los muestra.
+
+Detectado el 2026-09-25 en el mismo incidente que `DEF-105`: hubo que extraer esas tablas a
+mano antes de apartar el índice.
+
+# DEF-108
+El **índice de un vault ocupa mucho más de lo que justifica su contenido, y no se achica**
+cuando se borran notas. En el incidente de `DEF-105` pesaba **479 MB** para 11.780 notas
+—unos 42 KB por nota—, contra 13, 17 y 108 MB de los otros tres vaults de la misma PC, y
+**siguió pesando lo mismo** después de que se borraran 5.000 notas.
+
+Reportado por el usuario el 2026-09-25, junto con `DEF-105`.
+
 ---
 
 > [!warning] Defectos sin reporte original
