@@ -332,7 +332,9 @@ public static partial class Frontmatter
             var tags = fm.Props.FirstOrDefault(p => EsTags(p.Clave));
             if (tags is not null) foreach (var t in tags.Valores) Push(t);
         }
-        foreach (Match m in TagRegex().Matches(Cuerpo(texto, fm))) Push(m.Groups[1].Value);
+        // Sin el código (`DEF-102`): un color `#0F6E56` de un bloque de CSS no es
+        // una etiqueta.
+        foreach (Match m in TagRegex().Matches(SinCodigo.Aplicar(Cuerpo(texto, fm)))) Push(m.Groups[1].Value);
         return [.. salida];
     }
 }

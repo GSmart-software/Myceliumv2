@@ -302,7 +302,9 @@ public static partial class SearchEndpoints
         var aristas = new HashSet<(string From, string To)>();
         foreach (var (notaId, contenido) in contenidos)
         {
-            foreach (Match m in WikilinkRegex().Matches(contenido))
+            // Sin el código (`DEF-102`): un `[[x]]` escrito para mostrar la
+            // sintaxis no es una arista del grafo.
+            foreach (Match m in WikilinkRegex().Matches(SinCodigo.Aplicar(contenido)))
             {
                 // [[destino|alias]] y [[Carpeta/destino]]: el enlace apunta al
                 // título (parte antes del `|`, último segmento de la ruta). La
