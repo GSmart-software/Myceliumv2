@@ -225,6 +225,47 @@ arranca el proceso hasta que la primera búsqueda deja de contestar `INDEXANDO`)
 En una tanda solo la primera corrida del brazo MCP encontraría el índice frío, y la absorbe el
 calentamiento.
 
+## 7. La tanda de desarrollo (2026-09-25)
+
+346 corridas con Haiku, 23 preguntas × ciego, base y MCP × 5, servidor `fe9c375`; US$ 16,73 más
+~US$ 2 de juez (120 filas). Es exploratoria: **no decide**.
+
+| | base (`grep`) | MCP |
+|---|---|---|
+| Acierto citado, tal como se corrió | 61,7 % | 60,9 % |
+| Acierto citado, con las claves corregidas (abajo) | 63,5 % | 74,8 % |
+| Costo mediano | US$ 0,080 | US$ 0,038 |
+| Tiempo mediano | 41,5 s | 22,2 s |
+
+`K` = 0,45 [0,35, 0,61] y `R` = 0,50 [0,49, 0,75], el MCP más rápido en 20 de 23. Con las claves
+corregidas, `Δ` = +11,3 pts [−7,0, +28,7]: ancho, no concluye.
+
+> [!warning] La mitad de las derrotas del MCP eran de la clave, no suyas
+> Tres defectos, que la tanda destapó:
+>
+> 1. **Citas de la fuente cruda.** El MCP contestaba bien citando la nota que de verdad trae el dato
+>    —la página web guardada, el informe crudo de una investigación, la ficha del paper— y la clave
+>    solo aceptaba las notas de síntesis. Se agregaron esas notas como alternativas, **después de
+>    comprobar que cada una contiene el dato**, y con el **control simétrico**: la misma revisión
+>    sobre las citas no acreditadas del brazo base, que encontró un caso igual.
+> 2. **Un distractor que castigaba la respuesta correcta**: en una pregunta de ausencia, explicar la
+>    trampa («ese autor es conocido por otra cosa») contaba como afirmarla.
+> 3. **El vocabulario de ausencia** no reconocía «no encuentro» ni «no se encontró». Se corrigió en
+>    el puntuador (`eval/lib/puntuacion.mjs`, con test): vale para los dos brazos y para las selladas.
+>
+> Las claves corregidas son `T10b`, `T11b`, `T12b`, `T27b` y `U03b` (§ 10, regla 2: las viejas quedan
+> retiradas). La tanda **no se rehízo**: el informe corregido sale de una copia de los resultados
+> re-puntuada, y el registro oficial queda intacto.
+
+**La derrota real**: dos preguntas sobre decisiones de la tesina (0 de 5 cada una) que viven en una
+bitácora de más de 7.000 líneas. `grep` va a la línea; el MCP encuentra una nota vecina que se
+parece. Es una mejora posible del MCP, que **no** se hace antes de la tanda de decisión: ajustarlo
+mirando las preguntas que lo miden es lo que el sellado de la fase 1 enseñó a no hacer.
+
+**Las selladas no se pueden revisar igual.** Contar a ciegas cuántas notas contienen el dato fuera
+de la clave no sirve —los patrones cortos aparecen en cientos de notas—, y leerlas rompería el
+sello. El defecto 1 queda abierto para la tanda de decisión.
+
 ## Relacionadas
 
 - [[MCP de Mycelium - tesina, regla de decision]] — cómo se decide, escrita antes de correr.
