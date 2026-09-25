@@ -83,6 +83,7 @@ spacing:
   rail: "56px"
   editor-min: "420px"
   ancho-lectura: "42rem"
+  ancho-hoja-max: "72rem"
 components:
   button-primary:
     backgroundColor: "{colors.hifa}"
@@ -205,8 +206,8 @@ viene por defecto, y el claro es su versión diurna, no al revés.
 Conviven dos densidades, y cada una tiene su lugar. **El marco es denso y técnico**, como
 un IDE: texto de interfaz de 13px, controles de 22 a 40px, pestañas de 34px, mucho a la
 vista y nada que pida atención en reposo. **La nota es serena**: en lectura cambia a una
-serif, respira con interlineado de 1.7 y se limita a una medida de 42rem (unos 80
-caracteres de serif), la misma en vivo que en lectura. Lo orgánico
+serif, respira con interlineado de 1.7 y parte de una medida de 42rem (unos 80
+caracteres de serif) que crece con el panel hasta 72rem, la misma en vivo que en lectura. Lo orgánico
 del micelio se ve en los detalles, no en la cantidad: esquinas suaves, el degradé
 brote→hifa (en el logo, el título del documento y el énfasis triple), el halo del
 isotipo, títulos que alternan los dos colores de la marca.
@@ -367,7 +368,7 @@ Pro); la interfaz siempre va en Geist.
   H6 van en 1rem. Se distinguen por **color** además de por tamaño: la rampa alterna
   Hifa y Brote y pierde intensidad en cada nivel, hasta que el H6 queda en Humus tenue.
 - **Reading** (400, 16px, interlineado 1.7): el cuerpo de la nota en lectura, a la
-  medida de lectura (42rem).
+  medida de lectura (de 42rem a 72rem, según el panel).
 - **Editor** (400, 16px, interlineado 1.65): la mono del editor en vivo y en crudo.
 - **Body** (400, 0.8125rem): **el tamaño de la interfaz**. Pestañas, menús, botones,
   árbol de archivos, campos.
@@ -413,6 +414,17 @@ Qué va en cada zona, y nada más:
 de modo. Va en **rem y no en ch** porque el `ch` de la mono del editor es más ancho que
 el de la serif de lectura: con 72ch la hoja saltaba al cambiar de modo. 42rem son unos 80
 caracteres de serif y unos 70 de mono.
+
+> [!info] Desde el 2026-09-25 la hoja crece con el panel (`FUN-S-22`)
+> Los 42rem pasaron a ser el **punto de partida**, no la medida. Los márgenes vacíos son la
+> **mitad** de lo que dejaba una hoja de 42rem, así que la hoja mide `(panel + 42rem) / 2`,
+> entre 42rem y **`--mic-ancho-hoja-max: 72rem`**. Lo pidió el usuario: en una pantalla
+> ancha el texto ocupaba una franja angosta en el medio. El tope existe porque sin él, en
+> un monitor ancho, el renglón se vuelve demasiado largo para seguirlo.
+>
+> La regla de una sola hoja no cambió: en vivo la dan los márgenes de `.cm-scroller`; en
+> lectura, el `max-width` de `.mic-preview.mic-layout-read > div`, que le devuelve al 100 %
+> el relleno de `.mic-preview` para medir lo mismo.
 
 El ritmo de separación es corto y en rem: 0.25 / 0.35 / 0.5 / 0.75 / 1rem.
 
@@ -666,7 +678,7 @@ del encabezado de las tablas en vivo era un defecto, `DEF-093`, corregido.
 - **Do** reservar el brillo de Brote para lo que tiene significado: foco, selección,
   conexión, lo activo.
 - **Do** mantener la interfaz en 13px y la lectura en 16px con serif, a la misma medida
-  (42rem) en vivo y en lectura.
+  (de 42rem a 72rem, según el panel) en vivo y en lectura.
 - **Do** teñir las sombras con Esporo profundo y darles sombra solo a los elementos que
   flotan.
 - **Do** mostrar atenuada, y con su motivo, la acción que no está disponible, en vez de
