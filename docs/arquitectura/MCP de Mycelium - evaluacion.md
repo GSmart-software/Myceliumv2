@@ -1093,7 +1093,54 @@ ya guardadas, y el informe dirá si la decisión depende de él.
 
 ---
 
-## 16. Decisiones y preguntas abiertas
+## 16. La tanda de decisión: el MCP de memoria **no entra como está** (2026-09-24)
+
+Las 8 preguntas **selladas**, abiertas por única vez, con la candidata elegida por el
+criterio del § 15 (servidor `fe9c375`). Brazos ciego, base y MCP **intercalados**, Haiku y la
+réplica con Sonnet: 242 corridas, US$ 12,68, más US$ 0,94 del juez.
+
+| Modelo | Base (`grep`) | MCP | Δ | `K` | Decide |
+|---|---|---|---|---|---|
+| **Haiku** | 62,5 % | 62,5 % | **0,0** · IC [−22,5, +20,0] | 0,67 · IC [0,46, **1,07**] | **Fila 5**: no entra como está |
+| **Sonnet** | **100 %** | 90,0 % | **−10,0** · IC [−30,0, 0,0] | 0,66 · IC [0,57, 1,18] | **Fila 1**: se rehace |
+
+Todos los filtros de validez pasan; ninguna pregunta contaminada. **El juez no cambia la
+decisión**: movió tres filas en Haiku (Δ de +2,5 a 0,0), y con cualquiera de los dos valores
+decide la fila 5 por el costo.
+
+> [!important] Las selladas hicieron exactamente su trabajo
+> Sobre las preguntas de desarrollo —usadas cinco veces para iterar— la candidata había
+> quedado **+4,4 sobre `grep`** y un 46 % más barata. Sobre preguntas que nadie vio, **empata
+> en acierto y el ahorro se achica a un tercio, sin quedar demostrado** (su intervalo llega a
+> 1,07). Es el sobreajuste que el diseño temía desde el principio, y la razón de haber sellado
+> un conjunto. Sin él, el MCP habría entrado en el producto por un resultado que no se sostiene.
+
+### Lo que dicen los números, más allá de la fila
+
+- **Con un modelo fuerte, `grep` ya es perfecto en este vault**: Sonnet con la skill y `grep`
+  acertó las 8 preguntas en las 5 repeticiones. Ahí el MCP no tiene margen de exactitud que
+  ganar: su único valor posible es el costo, y el costo no alcanza el umbral.
+- **Toda la pérdida con Sonnet es una sola pregunta, la de ausencia** (R05). El MCP **sí**
+  detectó que el dato no estaba —marcó «no está» en 5 de 5, igual que la base—, pero en 4 de 5
+  respuestas contestó desde el conocimiento general **sin decir que el vault no lo registra**.
+  La base casi siempre abrió con «el vault no dice nada sobre esto». Es la debilidad que ya
+  asomaba en las preguntas de desarrollo (C5 en −10), y va al corazón del producto: una memoria
+  tiene que decir **de dónde** sale lo que responde.
+- **Donde el MCP ganó**, en Haiku: hechos puntuales (+40) y el dato fuera del índice (+40, con
+  caída a `grep` en el 100 %). Las conexiones y las citas sí dejaron algo.
+
+### Lectura
+
+**Para un vault de este tamaño —unas 100 notas, 1,2 MB— la memoria actual (la skill y `grep`)
+ya es la herramienta correcta.** El MCP iguala en exactitud y abarata algo, pero no lo
+suficiente ni de forma demostrada como para pagar lo que suma en mantenimiento. Esa conclusión
+vale **para este vault**: la ventaja teórica del MCP crece con el tamaño —`grep` cuesta más
+cuanto más hay que leer—, y el vault personal del usuario tiene 1.220 notas. La investigación
+del estado del arte ya lo anticipaba: este corpus entra entero en el contexto de un modelo.
+
+---
+
+## 17. Decisiones y preguntas abiertas
 
 ### Decisiones
 
