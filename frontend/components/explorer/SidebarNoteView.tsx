@@ -186,7 +186,7 @@ function ReadOnlyNote({ notaId }: { notaId: string }) {
   useEffect(() => {
     let vigente = true;
     let timer: ReturnType<typeof setTimeout> | null = null;
-    // Carga inicial (backend/db, con caché offline como respaldo).
+    // Carga inicial, del disco.
     void fetchNoteContent(notaId)
       .then((content) => {
         if (vigente) setHtml(renderNota(content));
@@ -210,7 +210,7 @@ function ReadOnlyNote({ notaId }: { notaId: string }) {
   useEffect(() => {
     if (containerRef.current) {
       void renderMermaidIn(containerRef.current);
-      void renderExcalidrawIn(containerRef.current, notaId);
+      void renderExcalidrawIn(containerRef.current);
       void renderDrawioIn(containerRef.current);
     }
   }, [html, notaId]);

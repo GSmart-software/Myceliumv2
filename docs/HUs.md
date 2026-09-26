@@ -357,6 +357,13 @@ Como usuario, quiero insertar y editar diagramas de forma libre directamente des
 6. Si el archivo no existe o no se puede cargar, se muestra un placeholder de error sin romper la nota.
 7. El editor Excalidraw se integra via `@excalidraw/excalidraw` como componente React embebido.
 
+> [!info] En desktop, el CA4 ya no aplica (`FUN-M-40`, 2026-09-26)
+> Un dibujo es siempre un **archivo `.excalidraw` del vault**, en la carpeta de la nota, y
+> la nota lo muestra con `![[título.excalidraw]]`: lo crea igual la barra de herramientas
+> (CA1a) que el drop (CA1b). El segundo mecanismo —la escena guardada en una tabla
+> `diagramas` del índice con un embed `![[<uuid>.excalidraw]]`— se retiró por `DEF-112`: el
+> índice es un caché y reconstruirlo perdía el dibujo. Ver [[auditoria-editor-y-enlaces]].
+
 ---
 
 ### HU-17 · Exportar Excalidraw como imagen (2 SP, media)
