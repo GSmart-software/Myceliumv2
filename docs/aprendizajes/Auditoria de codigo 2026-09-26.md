@@ -69,6 +69,8 @@ Los agentes quedaron definidos en `.claude/agents/` (`auditor-complejidad`,
 
 ### Tanda 2 · Limpieza confirmada (sin decisiones salvo la D4)
 
+> [!success] Hecha en `feat/auditoria-limpieza-desktop` (`FUN-M-39`): ver [[auditoria-limpieza-1]].
+
 - Dependencias: `codemirror`, `highlight.js`, script `deploy:pages`.
 - Permisos de Tauri redundantes (`dialog:allow-confirm/ask`, `sql:allow-*`), bloque
   `bundle.android`.

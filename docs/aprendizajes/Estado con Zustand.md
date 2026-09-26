@@ -39,23 +39,38 @@ Patrón usado en todos los stores: `persist` + `partialize` para excluir el esta
 ## Ids sentinela en lugar de tipos paralelos
 
 El árbol de pestañas guarda `notaId`, pero no todas las pestañas son notas. En vez de
-agregar un campo `tipo`, se usan **ids sentinela**:
+agregar un campo `tipo`, se usan **ids sentinela**. Hoy son cinco, además de la nota:
 
 - `graph:global` → la pestaña del grafo.
-- `terminal:<uuid>` → una consola integrada.
+- `enlaces:global` → las referencias del vault (`FUN-L-17`).
+- `calendario:global` → el calendario de recordatorios (`FUN-L-22`).
+- `terminal:<uuid>` → una consola integrada (`FUN-L-07`).
+- `archivo:<ruta>` → el visor de un archivo que Mycelium no indexa (`FUN-L-11`).
 
 Esto mantiene un solo tipo `Tab` y permite reutilizar toda la maquinaria de paneles.
 El precio: cada lugar que trate a las pestañas como notas debe **excluir los
-sentinela**. Los tres que importaron:
+sentinela**. Desde la auditoría del 2026-09-26 (`FUN-M-39`) la lista vive en **un solo
+sitio, `frontend/lib/pestanas.ts`**: los ids, `tipoDePestana(notaId)` (discriminado
+`nota | grafo | enlaces | calendario | terminal | archivo`), `esSentinela` y la tabla
+`PESTANA_SENTINELA` de título e ícono por tipo, con `tituloDePestana` e
+`iconoDePestana` encima. Antes cada componente tenía su lista paralela —cuatro en
+total— y dos de ellas (el dock lateral y el visor anclado) no sabían de las referencias.
 
-1. `openNote`: las terminales no pueden ser pestaña de **preview** (si no, abrir otra
-   nota reemplaza la pestaña y **mata la sesión**).
-2. `reconcileNotes`: al descartar pestañas de notas borradas, conservar los sentinela.
+Quién pregunta:
+
+1. `tabsStore.openNote`: los sentinela no pueden ser pestaña de **preview** (si no,
+   abrir otra nota reemplaza la pestaña y **mata la sesión** de una consola) ni entrar
+   en una línea de historial.
+2. `tabsStore.reconcileNotes`: al descartar pestañas de notas borradas, conservarlos.
 3. `sidebarViewerStore.reconcile`: lo mismo para las pestañas ancladas en el lateral.
+4. `EditorPane` y `SidebarNoteView` eligen la vista por `tipoDePestana`; `TabBar` y
+   `SidebarDock` toman título e ícono de la tabla.
 
 > [!warning] Al agregar un tipo nuevo de pestaña
-> Revisá esos tres puntos. Un olvido se manifiesta como "la pestaña desaparece sola"
-> o "la sesión se reinicia al abrir otra nota".
+> Se agrega en `lib/pestanas.ts` —el `Record` de la tabla no compila hasta que se
+> contesta título e ícono— y se le da vista en `EditorPane` y `SidebarNoteView`. Un
+> olvido se manifiesta como "la pestaña desaparece sola", "la sesión se reinicia al
+> abrir otra nota" o un visor anclado que muestra «…».
 
 ## Estado que vive fuera del store
 
