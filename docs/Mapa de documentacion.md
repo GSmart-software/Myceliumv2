@@ -108,6 +108,8 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
   la nota (`FUN-S-21`).
 - [[registro-de-fallos]] — que ningún fallo pase en silencio: todo lo que sale mal deja una
   línea en la consola de F12, por una fachada única con tres niveles (`FUN-L-21`).
+- [[calendario-recordatorios]] — un calendario de recordatorios que avisan, del vault y sin
+  archivos (`FUN-L-22`).
 - [[bases-tabla]] — el archivo `.base`: agregar notas por sus propiedades en una tabla
   (`FUN-L-03`). Continuación directa de [[metadata-yaml]].
 - [[edicion-en-el-render]] — las propiedades y las tablas dejan de abrirse en crudo con el

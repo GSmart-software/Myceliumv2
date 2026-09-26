@@ -102,6 +102,7 @@ lo digo.
 | 2026-09-25 | Los elementos `$...$` no se renderizan en la edición en vivo | `DEF-103`. Tampoco los `$$…$$` de bloque: KaTeX solo está conectado al camino de lectura |
 | 2026-09-25 | Los márgenes vacíos al ver un markdown son muy grandes; reducirlos a la mitad, en los dos lados (`cm-scroller`, `cm-content`) | `FUN-S-22` `HOJA-MAS-ANCHA` en el [[BACKLOG]]. Es una **idea** y no un defecto: los márgenes salen de la medida de lectura de 42rem que fija [[DESIGN]]; cambiarla es cambiar esa decisión |
 | 2026-09-25 | Con la ventana dividida, al achicar un draw.io el divisor deja de arrastrar cuando el puntero entra al editor de diagramas | `DEF-104`. El draw.io es un `iframe` y se queda con los eventos del puntero; por lo mismo debería pasar con un PDF o un video |
+| 2026-09-25 | Un calendario con recordatorios que avisan al iniciar; con o sin hora, repetición diaria, semanal, mensual o anual; título, detalle en markdown con referencias a notas, sin archivo ni grafo; colores; como pestaña o panel lateral con la lista de día, semana o mes | `FUN-L-22` `CALENDARIO-RECORDATORIOS` · spec en [[calendario-recordatorios]]. Decidiste: de cada vault, aviso en la app y en Windows, paleta fija, solo desktop por ahora |
 
 > [!note] Esta tabla se puede vaciar cuando moleste
 > Es una comodidad para que veas en qué terminó cada cosa, no un registro canónico. La
