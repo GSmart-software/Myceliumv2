@@ -136,3 +136,15 @@ CREATE TABLE IF NOT EXISTS css_snippets (
 );
 
 CREATE INDEX IF NOT EXISTS idx_css_snippets_usuario ON css_snippets(usuario_id);
+
+-- Recordatorios del calendario (FUN-L-22). Son DEL VAULT, como en desktop, donde
+-- viven en `.mycelium/recordatorios.json`. Acá se guarda ese mismo documento JSON
+-- entero ({version, recordatorios, ocurrencias}) por vault: el modelo
+-- (`lib/recordatorios.ts`) es el mismo en las dos versiones y el servidor no
+-- interpreta nada. No son notas: no entran al árbol, al FTS ni al grafo.
+-- Concurrencia: última escritura gana (el cliente reemplaza el documento).
+CREATE TABLE IF NOT EXISTS recordatorios_vault (
+  vault_id       TEXT PRIMARY KEY REFERENCES vaults(id) ON DELETE CASCADE,
+  datos          TEXT NOT NULL,
+  actualizado_en TEXT NOT NULL
+);
