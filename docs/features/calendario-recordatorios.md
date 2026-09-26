@@ -263,6 +263,26 @@ notificación de Windows— falta probarlo.
 - Los tests puros cubren los criterios **6, 7 y 9** enteros y la lógica de **4 y 5**
   (cuándo toca y cuándo es vencido); el resto es de UI o de integración.
 
+## Saltar lejos: el selector de mes y año
+
+Pedido por el usuario el 2026-09-25, al probar la primera versión: con solo «mes anterior /
+siguiente», ir cinco años atrás eran sesenta clics. Es parte de `FUN-L-22`, que todavía no
+estaba cerrada, así que no lleva número propio.
+
+- **El título del mes es un botón** («septiembre 2026») que abre un selector, en la pestaña y
+  en el panel (`components/recordatorios/SelectorMes.tsx`).
+- **El año** se mueve de a uno (`‹ ›`) o de a diez (`« »`), o se escribe; en el campo, las
+  flechas ↑ ↓ también lo cambian. Solo salta con un año completo: escribir «20» camino a
+  «2021» no lleva al año 20.
+- **Los doce meses** en una grilla: el que se está mirando va relleno, y el de hoy,
+  contorneado. Elegir uno lleva ahí y cierra.
+- **«Ir a hoy»** al pie: el panel no tiene botón «Hoy» propio y quedaba varado en el año al
+  que se había saltado.
+- Se cierra con Escape (devolviendo el foco al título) o haciendo clic afuera.
+
+Verificado con Playwright el mismo día: de septiembre de 2026 a marzo de 2021 en cinco
+clics, a diciembre de 1998 escribiendo el año, y de vuelta con «Ir a hoy».
+
 ## Relacionadas
 
 - [[BACKLOG]] — `FUN-L-22`, y `FUN-M-07` (nota diaria), que es otra cosa.
