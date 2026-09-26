@@ -18,10 +18,16 @@ Los agentes quedaron definidos en `.claude/agents/` (`auditor-complejidad`,
 `auditor-seguridad`, sin correr todavía). Los scripts de medición están en
 `docs/aprendizajes/scripts-auditoria-2026-09-26/`.
 
-> [!important] Estado: **diagnóstico terminado, nada implementado**
-> Este documento ordena lo que salió y separa lo que se puede hacer sin preguntar de lo
-> que exige una decisión del usuario. Cada tanda que se apruebe va por el flujo del
-> orquestador (spec si hace falta, subagente en worktree, `tsc`/`cargo check`, merge).
+> [!success] Estado: **las cuatro tandas implementadas e integradas en desktop el 2026-09-26**
+> El usuario respondió las nueve decisiones el mismo día (D1 sí, D2 quitar, D3 por vault,
+> D5 borrar; D4 y D6–D9 aprobadas) y cada tanda fue por el flujo del orquestador con un
+> subagente en worktree: `FUN-M-39` limpieza (`882eb46`), `FUN-M-38` rendimiento
+> (`ccdb44b`), `FUN-L-24` capa de datos (`4a0c82a`), `FUN-M-40` editor y enlaces
+> (`dc83afa`). En el árbol final: `tsc`, 55 tests de Rust, 458 tests headless y `next
+> build` en verde. **Todo sin confirmar en la app**: cada spec tiene su lista de
+> confirmación. Queda para después: reflejar a web lo que [[RAMAS]] marca, y el plan de
+> `DEF-109` sobre el cúmulo, con la tabla de enlaces primero
+> ([[Como construye Obsidian su grafo]]).
 
 ## 1. Lo que la auditoría cambió de lo que se creía
 
@@ -129,6 +135,24 @@ Lo que hay que corregir en los agentes:
   sirven; para retomar en un mes, hay que releer.
 - Faltó que cada agente pusiera **fecha y commit base** (`git rev-parse HEAD`) en la
   cabecera de su informe. Se agregó como regla.
+
+Lo que la fase de implementación enseñó (subagentes con worktree, uno por tanda):
+- **Dos tandas en paralelo sobre la misma capa chocan.** Se repartieron zonas de archivos
+  por adelantado y el segundo en terminar rebasó sobre el merge del primero: dos
+  conflictos, resueltos por el propio agente. Con tres o más tandas conviene serializar.
+- **Un segundo implementador revisa mejor que uno solo.** Cuando el usuario pidió cambiar el
+  modelo de los subagentes a Opus, el trabajo a medias del primer intento se guardó como
+  commit provisional y el agente nuevo lo revisó archivo por archivo antes de seguir:
+  encontró **tres regresiones** (cuentas de conexiones, renombrar con una nota abierta,
+  adjuntos al mover carpetas) y dos errores de lógica en el guardado. Vale más que un
+  reinicio desde cero, y la revisión del intento previo debería ser un paso explícito.
+- **La migración de datos es donde la spec se queda corta.** En dos tandas el agente
+  detectó casos que la spec no preveía (quien viene de la 2.1.0 tenía su tema solo en
+  las tablas viejas; un embed borrado no borraba su fila de `diagramas`) y los resolvió
+  con migraciones reanudables y sin borrar lo viejo hasta que se lea. Toda spec que
+  retire un almacenamiento debe preguntar «¿quién tiene datos solo ahí?».
+- **Los tests headless con `setExecutor` fueron la red**: pasaron de 424 a 458 y cada
+  tanda agregó los suyos; `next build` atrapó imports rotos que `tsc` no ve.
 
 ## Relacionadas
 
