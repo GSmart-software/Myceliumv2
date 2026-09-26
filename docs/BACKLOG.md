@@ -562,8 +562,14 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 ### Pendientes — tamaño L
 
 #### `FUN-L-22` 🛠️ · `CALENDARIO-RECORDATORIOS` (—)
-- **Estado**: especificada el 2026-09-25 e **implementada en desktop el mismo día, sin
-  confirmar en la app** (rama `feat/calendario-desktop`). Spec completa en
+- **Estado**: especificada el 2026-09-25 e **implementada en desktop el mismo día**
+  (rama `feat/calendario-desktop`, integrada en `32f277d`). **Verificada con Playwright** el
+  mismo día: crear con color y enlace, que no aparezca en el explorador, la búsqueda ni los
+  retroenlaces, el aviso a su hora, «Abrir», el enlace de la tarjeta, «Listo» y «Posponer»
+  persistidos al reabrir, los vencidos al abrir (el diario perdido cinco días avisa una vez,
+  por hoy), los colores en claro y el aislamiento entre vaults. **Falta** que el usuario lo
+  confirme, y el criterio 8 —la notificación de Windows— con la app instalada: en desarrollo
+  el toast sale a nombre de PowerShell. Spec completa en
   [[calendario-recordatorios]], con lo que quedó en su § «Cómo quedó».
 - **Qué es**: un calendario de recordatorios que avisa, dentro de Mycelium.
 - **Decisiones del usuario** (2026-09-25): los recordatorios son **de cada vault**; el
