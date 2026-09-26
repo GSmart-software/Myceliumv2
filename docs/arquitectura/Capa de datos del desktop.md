@@ -11,8 +11,24 @@ Desde el [[vault-en-carpeta]], el vault es una **carpeta real** del sistema:
 - El **índice SQLite derivado** (búsqueda, grafo, metadatos) vive en el **app-data** de la
   aplicación, un archivo por vault: `%APPDATA%/com.mycelium.desktop/index-<hash>.db`, con el
   *hash* de la ruta del vault. **No** vive dentro del vault.
-- `<vault>/.mycelium/` guarda la **papelera** (`.mycelium/.trash/`) y las **preferencias del
-  vault** (`.mycelium/preferencias.json`, [[preferencias-por-vault]]).
+- `<vault>/.mycelium/` guarda la **papelera** (`.mycelium/.trash/` y su registro,
+  `papelera.json`), las **preferencias del vault** con su apariencia —tema, modo oscuro,
+  atmósferas, tipografía— (`preferencias.json`, [[preferencias-por-vault]]), los **snippets
+  CSS** (`snippets.json`) y los **recordatorios** (`recordatorios.json`). Todo pasa por un
+  solo par de comandos Rust, `leer_estado_vault` / `escribir_estado_vault`, con una lista
+  cerrada de nombres (`src-tauri/src/prefs_vault.rs`).
+
+> [!important] Solo hay vault en carpeta, y no hay identidad (desde `FUN-L-24`, 2026-09-26)
+> El «modo SQLite clásico» —notas dentro de `mycelium.db`, sin carpeta— se retiró
+> ([[El modo SQLite clasico queda muerto]]): no hay otra base, ni migración sqlx, ni rama
+> `vault === null` en los repos. Sin vault abierto, `getVaultActual()` y `getExecutor()`
+> **lanzan**, y el workspace redirige a la selección de vaults. Un `mycelium.db` que quede
+> en el app-data de una instalación vieja se ignora.
+>
+> Tampoco hay identidad interna: `authStore` es una fachada de constantes (el vault es
+> siempre `LOCAL_VAULT_ID`, porque cada vault tiene su propio índice) y el esquema del
+> índice ya no crea `usuarios`, `vaults`, `membresias` ni `css_snippets`. Ver
+> [[auditoria-capa-de-datos]].
 
 > [!warning] Esta nota dijo durante dos meses que el índice vivía en `.mycelium/`
 > Fue el diseño inicial, pero al implementarlo (2026-07-20, fase 2 de [[vault-en-carpeta]])
@@ -20,7 +36,10 @@ Desde el [[vault-en-carpeta]], el vault es una **carpeta real** del sistema:
 > nota, junto con otras cuatro, nunca se actualizó. Lo detectó la revisión crítica del
 > diseño del MCP el 2026-09-23, verificado en `lib/db/client.ts` (`sqlite:index-${hash}.db`,
 > que `tauri-plugin-sql` resuelve en el app-data) y en el disco.
-- El índice se puede **reconstruir** desde los archivos: es caché, no origen.
+- El índice se puede **reconstruir** desde los archivos: es caché, no origen. La única
+  tabla que no se deriva de ningún archivo, `papelera`, se respalda en
+  `.mycelium/papelera.json` en cada cambio y se rellena desde él al abrir (`DEF-107`,
+  `lib/db/estadoVault.ts`); lo demás que es del vault ni siquiera pasa por el índice.
 
 > [!important] Consecuencia de diseño
 > El **id de una nota o carpeta es su ruta relativa**. Eso hace que renombrar o mover
@@ -35,8 +54,10 @@ Desde el [[vault-en-carpeta]], el vault es una **carpeta real** del sistema:
 
 | Responsabilidad | Dónde |
 |---|---|
-| Repos de datos (árbol, notas, papelera, contenido + FTS, preferencias) | `frontend/lib/db/*` (TS, sobre `tauri-plugin-sql`) |
-| Dispatcher que emula la API HTTP | `frontend/lib/api.ts` |
+| Repos de datos (árbol, notas, papelera, contenido + FTS, propiedades, bases) | `frontend/lib/db/*` (TS, sobre `tauri-plugin-sql`) |
+| Dispatcher que emula la API HTTP (sin rutas de autenticación) | `frontend/lib/api.ts` |
+| Preferencias + apariencia y snippets CSS del vault | `stores/prefsVaultStore.ts` (con `preferencesStore`) y `stores/cssStore.ts`, directo contra `.mycelium/` |
+| Archivos de estado de `.mycelium/` | `src-tauri/src/prefs_vault.rs` |
 | Lectura/escritura de archivos, papelera, revelar en el SO | `src-tauri/src/vault_fs.rs` |
 | Recorrido del vault para indexar | `src-tauri/src/archivos.rs` |
 | Watcher de cambios externos | `src-tauri/src/vault_watch.rs` |
@@ -67,15 +88,23 @@ otro editor, un `git pull` o una sincronización tipo Dropbox.
 No hay bucle de realimentación: el indexador **solo lee**, así que el ciclo
 "app escribe → watcher dispara → reindexa" termina en un reindex idempotente.
 
-## Migraciones
+## Esquema y migraciones
 
-El esquema vive en `src-tauri/migrations/001_init.sql`, aplicado por
-`tauri-plugin-sql`.
+El esquema del índice vive en `frontend/lib/db/indexer.ts` (`ESQUEMA_INDICE`) y se crea
+al abrir cada vault con `CREATE TABLE IF NOT EXISTS`. **No hay migraciones sqlx**: un
+cambio de columnas va como `ALTER TABLE` defensivo en `crearEsquemaIndice` (así entraron
+`papelera.ruta_papelera` y `notas.hash_indexable`), que es lo que permite abrir sin error
+un índice creado por una versión anterior. Y como el índice es desechable, el remedio
+ante uno roto es borrarlo: se reconstruye releyendo la carpeta.
 
-> [!danger] No modificar una migración ya aplicada
-> sqlx valida su checksum: editarla rompe la app con *"migration 1 was previously
-> applied but has been modified"*. Todo cambio de esquema va en una migración **nueva**.
-> Ver [[Compilacion y entorno de desarrollo]].
+> [!info] Hasta el 2026-09-26 había una migración sqlx, `001_init.sql`
+> Era de `mycelium.db`, la base del modo clásico, y sqlx validaba su checksum —por eso
+> la identidad interna no se podía quitar del esquema ([[desktop-sin-login]])—. Se borró
+> con `FUN-L-24` junto con el modo. Los índices de antes conservan las tablas viejas
+> (`usuarios`, `vaults`, `membresias`, `css_snippets`) sin que nadie las lea, salvo la
+> **migración única** de `lib/db/legado.ts`, que saca de ahí la apariencia y los snippets
+> de quien actualiza desde la 2.1.0. Por eso no se hace `DROP TABLE`: ver
+> [[auditoria-capa-de-datos]] § Cómo quedó.
 
 ## Futuro
 
@@ -87,4 +116,6 @@ conciencia* (nunca automático), que sería una rearquitectura de esta capa.
 - [[Capa de datos de la web]] — la contraparte, para entender la divergencia.
 - [[vault-en-carpeta]] — la spec completa del modelo actual (7 fases).
 - [[mycignore]] — qué entra al índice y qué no.
+- [[auditoria-capa-de-datos]] — `FUN-L-24`: la simplificación que dejó esta capa así.
+- [[El modo SQLite clasico queda muerto]] — por qué ya no hay `mycelium.db`.
 - [[Arquitectura de Mycelium]] — visión general.

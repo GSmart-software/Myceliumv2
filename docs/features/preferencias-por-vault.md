@@ -6,6 +6,9 @@ carpeta, en `.mycelium/preferencias.json`.
 > [!info] Estado
 > Implementado en desktop el 2026-09-05, con sus dos primeros consumidores:
 > los números de línea (`FUN-M-28`) y los modos de nombres del grafo (`FUN-M-21`).
+> Desde `FUN-L-24` (2026-09-26) guarda también **la apariencia** —tema, modo oscuro,
+> atmósferas, tipografía y el resto de `preferencesStore`—: en desktop es el único
+> mecanismo de preferencias. Ver § 7.
 
 ---
 
@@ -79,9 +82,14 @@ gusta.
 ## 4. Ciclo de vida
 
 Se cargan al **abrir** el vault y se limpian al **salir**: en desktop lo hace
-`vaultSessionStore`; en web, el efecto del workspace cuando hay vault activo. La
-carga no se espera: si tarda o falla, el vault se abre igual con los valores por
-defecto — un ajuste de aspecto no puede demorar la apertura.
+`vaultSessionStore`; en web, el efecto del workspace cuando hay vault activo. Si la
+lectura falla, el vault se abre igual con los valores por defecto — un ajuste de
+aspecto no puede impedir la apertura.
+
+En desktop, desde `FUN-L-24`, la carga **se espera** (etapa «ajustes» de la pantalla de
+carga): el archivo trae ahora el tema, y aplicarlo antes de mostrar el workspace evita
+que se vea un instante con la apariencia del vault anterior. Es una lectura de un JSON
+chico; la espera es imperceptible. Antes de cargar corre la migración única de § 7.
 
 En Configuración, un control cuya preferencia es del vault se **desactiva**
 mientras no haya dónde escribir. La pregunta se le hace al **propio almacén**
@@ -148,8 +156,73 @@ aspecto. Si algún día tienen que viajar, lo único que cambia es el cuerpo de
 > habría metido un import solo-desktop en `BaseView.tsx`, que es de los últimos
 > componentes grandes que quedan compartidos enteros.
 
+## 7. La apariencia en el mismo archivo (`FUN-L-24`, solo-desktop, 2026-09-26)
+
+Hasta acá, en desktop había **dos** mecanismos para «ajustes del vault»: este, y el de
+`preferencesStore` (tema, modo oscuro, tipografía…), que en web es de la persona pero en
+desktop ya era por vault por un camino de seis saltos —`PUT` al dispatcher → fila
+`usuarios` del índice → copia en `.mycelium/apariencia.json` → al abrir, de vuelta al
+índice → `authStore` → `hydrateFromUser`—. La decisión **D3** del usuario (tema,
+tipografía y atmósfera son **por vault**) permitió fundirlos
+([[auditoria-capa-de-datos]] § 3).
+
+### Las claves nuevas de `PrefsVault`
+
+| Clave | Tipo | Por defecto | Saneo en `normalizar` |
+|---|---|---|---|
+| `tema` | `"bioluminiscencia"` \| `"cantarela"` | `"bioluminiscencia"` | otro valor → defecto |
+| `modoOscuro` | `boolean` | `true` | no booleano → defecto |
+| `preferencias` | objeto | `{}` | no objeto (o lista) → `{}` |
+
+`preferencias` es el objeto `Preferencias` de `preferencesStore` tal cual —tipografías y
+tamaños del editor y de la vista, atmósferas de cada modo, ancho de tabulación, opciones
+del grafo, de la búsqueda, de las pestañas, la carpeta de Esporas—. `normalizar` solo
+garantiza que sea un objeto; **cada clave** la sanea `preferencesStore` al cargarla con
+`sanearContraDefectos(crudo, DEFAULT_PREFS)`: se queda con las claves que conoce y que
+tienen el tipo de su valor por defecto (un número finito donde va un número, una lista
+donde va una lista). Así un `"editorSize": "grande"` escrito a mano cae al defecto en vez
+de llegar al CSS, y `prefsVaultStore` no tiene que conocer las ~20 preferencias de otro
+store (ni importarlo: el ciclo `preferencesStore` ↔ `prefsVaultStore` sería de runtime).
+
+Las tres claves se escriben siempre juntas. `preferencesStore.persistPrefs` llama a
+`prefsVaultStore.set` para cada una, y el guardado diferido de 400 ms de este store las
+junta en una sola escritura; `hydrateFromUser` (nombre conservado por la forma compartida
+con web) las lee de `prefsVaultStore.prefs`. Esas dos funciones son lo único de
+`preferencesStore.ts` que diverge de web.
+
+Ejemplo de `.mycelium/preferencias.json` con todo:
+
+```json
+{
+  "numerosDeLinea": false,
+  "nombresGrafo": "todos",
+  "disposicionGrafo": "cumulo",
+  "anchosTabla": {},
+  "tema": "cantarela",
+  "modoOscuro": false,
+  "preferencias": { "editorSize": 18, "atmosferaClaro": "bosque", "tabWidth": 2 }
+}
+```
+
+### Un solo par de comandos
+
+`leer_prefs_vault` / `escribir_prefs_vault` desaparecieron: este archivo va por
+`leer_estado_vault` / `escribir_estado_vault` con `nombre: "preferencias.json"`, el mismo
+par que usan `snippets.json`, `papelera.json` y `recordatorios.json`. La lista cerrada de
+nombres está en `prefs_vault.rs` (`ESTADOS`).
+
+### Migración única
+
+Al abrir, antes de cargar, `lib/db/legado.ts` busca la apariencia si
+`preferencias.json` todavía no tiene `tema`: primero en `.mycelium/apariencia.json` (las
+versiones de desarrollo con `DEF-107`), y si no, en la fila `usuarios` de un índice de la
+2.1.0. La funde con lo que el archivo ya tuviera y **borra** `apariencia.json` —ese nombre
+solo se puede leer y borrar (`LEGADOS` en Rust), no escribir—. Hace lo mismo con los
+snippets: si no hay `snippets.json`, los saca de la tabla `css_snippets` del índice viejo.
+
 ## Relacionadas
 
+- [[auditoria-capa-de-datos]] — `FUN-L-24`: la apariencia pasó a este archivo.
 - [[numeros-de-linea]] — el primer consumidor, y el que más pulido necesitó.
 - [[bases-tabla]] — `FUN-M-25`, el consumidor que forzó el porte a web.
 - [[grafo-disposiciones]] — `FUN-L-23`, la disposición del grafo global.
