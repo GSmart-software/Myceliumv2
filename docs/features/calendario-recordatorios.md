@@ -194,6 +194,75 @@ al viajar o con el horario de verano.
 12. Borrar el índice del vault no los pierde: viven en `.mycelium/`.
 13. Los ocho colores se leen en los dos temas, en claro y en oscuro.
 
+## Cómo quedó
+
+Implementado en desktop el 2026-09-25, rama `feat/calendario-desktop`. **Sin confirmar en
+la app**: los tests puros y `tsc`/`cargo check` están verdes, pero lo visible —y la
+notificación de Windows— falta probarlo.
+
+### Archivos
+
+| Pieza | Archivo |
+|---|---|
+| Modelo puro (repetición, ocurrencias, qué avisa, lectura del archivo) | `frontend/lib/recordatorios.ts` |
+| Tests (23) | `frontend/scripts/test-recordatorios.mjs` |
+| Store del vault + modal | `frontend/stores/recordatoriosStore.ts` (carga/vacía desde `vaultSessionStore`) |
+| Programador y notificación | `frontend/lib/avisosRecordatorio.ts` |
+| Vistas | `frontend/components/recordatorios/`: `CalendarioVista` (pestaña), `CalendarioPanel` (panel y anclado en el costado), `ListaRecordatorios`, `ModalRecordatorio` (ver y editar), `EditorDetalle`, `TarjetaRecordatorio` (tarjetas + monta el modal), `comun.ts` |
+| Pestaña y panel | `CALENDAR_TAB_ID` en `tabsStore`; `calendario` en `RailSection`, `Rail`, `LeftPanel`; `EditorPane`, `TabBar`, `SidebarDock`, `SidebarNoteView`, `sidebarViewerStore`; dos comandos en la paleta |
+| Colores | `--mic-recordatorio-1..8` en `styles/tokens.css` |
+| Rust | `recordatorios.json` en `ESTADOS` (`prefs_vault.rs`, con test); `src-tauri/src/recordatorios.rs` (comando `notificar_recordatorio`); `tauri-plugin-notification` + `tauri-winrt-notification` en `Cargo.toml` |
+
+### Decisiones que hubo que tomar
+
+- **La notificación de Windows no va por la API JS del plugin.** En escritorio esa API no
+  avisa del clic, y sin manejador Windows resuelve el clic **relanzando el ejecutable**,
+  que la instancia única convierte en una ventana nueva (`DEF-073`). El toast lo arma
+  `recordatorios.rs` con `tauri-winrt-notification` —la crate que el plugin usa por
+  debajo— y le cuelga un `on_activated` que desminimiza y enfoca la ventana que lo pidió.
+  El plugin queda registrado para los demás sistemas; por eso **no** se agregó
+  `@tauri-apps/plugin-notification` a `package.json` ni su permiso a la capability: la
+  webview solo invoca un comando propio. `isFocused`/`isMinimized` ya vienen en
+  `core:default`.
+- **`vigenteDesde`**: un recordatorio no avisa por ocurrencias anteriores a que existiera
+  (o a que se le cambiara la fecha, la hora o la repetición). Sin esto, crear a las 11 uno
+  diario «a las 9» avisaba en el acto. Consecuencia: uno **de todo el día para hoy**
+  creado hoy no avisa hoy —su momento es la medianoche, anterior a crearlo—.
+- **Vencido**: con hora, si llega más de dos minutos tarde (un tic del programador es un
+  minuto); de todo el día, si su día ya no es hoy. Se marca «Era a las 10:00», «Era ayer a
+  las 10:00» o «Era el 20 de septiembre».
+- **Pospuesto y repetición**: si una ocurrencia pospuesta queda detrás de otra más nueva
+  del mismo recordatorio, manda la nueva (sigue valiendo «una sola vez por la más
+  reciente»).
+- **«Abrir» no descarta**: abre la pestaña en ese día con el recordatorio resaltado y la
+  tarjeta sigue hasta Listo o Posponer. El panel lateral no resalta: «Abrir» va a la
+  pestaña.
+- **Archivo dañado**: el calendario arranca vacío y **no se escribe** mientras tanto; si
+  se crea o cambia algo, se avisa una vez que no se está guardando.
+- **Limpieza**: al cargar y al borrar se tira el estado de ocurrencias de más de 31 días
+  (salvo las pospuestas a futuro) y el de recordatorios borrados; si no, uno diario
+  sumaría una entrada por día para siempre.
+- **Semana de lunes a domingo**; los días de meses vecinos que asoman en la grilla también
+  muestran sus recordatorios.
+- **Al guardar** el formulario se pasa a «ver» el recordatorio; seguir un `[[enlace]]`
+  desde el formulario abre la nota detrás **sin cerrarlo**, para no perder lo escrito.
+- **Nombres de los colores**: Hifa, Musgo, Liquen, Yesca, Amanita, Coral, Espora, Bruma.
+  Un juego de valores para claro y otro para oscuro, medidos contra lienzo y niebla de los
+  dos temas (peor caso 3.78:1 en claro, 6.0:1 en oscuro); no hizo falta uno por tema.
+
+### Qué falta o no se pudo
+
+- **Probar en la app** los criterios visibles: 1–5, 7 y 8 (la notificación y su clic, en
+  especial con la app **instalada**, que es la que tiene AppUserModelID; en desarrollo el
+  toast sale a nombre de PowerShell) y 10–13.
+- Si Windows quita el toast del centro de actividades después de cerrarse Mycelium, un
+  clic ahí relanza la app como cualquier acceso directo (ventana nueva). No hay forma de
+  evitarlo sin registrar un activador COM.
+- Renombrar una nota **no** actualiza los `[[enlaces]]` de los recordatorios (ya estaba
+  fuera de esta versión, § 4.3).
+- Los tests puros cubren los criterios **6, 7 y 9** enteros y la lógica de **4 y 5**
+  (cuándo toca y cuándo es vencido); el resto es de UI o de integración.
+
 ## Relacionadas
 
 - [[BACKLOG]] — `FUN-L-22`, y `FUN-M-07` (nota diaria), que es otra cosa.
