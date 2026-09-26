@@ -84,6 +84,13 @@ Recuperación: resetear la base (`mycelium.db` en
 > Las migraciones aplicadas son **inmutables**. Todo cambio de esquema va en una
 > migración nueva.
 
+> [!info] Desde `FUN-L-24` (2026-09-26) desktop no tiene migraciones sqlx
+> `001_init.sql` y `mycelium.db` se retiraron con el modo SQLite clásico
+> ([[El modo SQLite clasico queda muerto]]). El índice de cada vault se crea con
+> `CREATE TABLE IF NOT EXISTS` y los cambios de columnas van como `ALTER TABLE`
+> defensivo ([[Capa de datos del desktop]] § Esquema y migraciones). La regla de arriba
+> sigue valiendo si algún día se vuelve a usar `add_migrations`.
+
 ## Verificación antes de integrar
 
 | Qué tocaste | Comando |

@@ -454,6 +454,31 @@ entre ramas):
     `ShareModal.module.css` eran idénticos y en desktop **se borraron**: en web se quedan.
   - `lib/pestanas.ts` (nuevo, H9) es genérico: si se refleja a web, adaptar `TabBar`,
     `EditorPane`, `SidebarNoteView` y los stores de pestañas, que ya divergían.
+- **Capa de datos (`FUN-L-24`, solo-desktop, 2026-09-26)**: se retiraron el modo SQLite
+  clásico (D1), la identidad interna y el segundo camino de la apariencia (D3). **No se
+  refleja**: en web hay usuarios de verdad, y el tema y los snippets son de la cuenta.
+  Detalle en [[auditoria-capa-de-datos]].
+  - **Pasan a diverger, acotado a la persistencia** (no traer enteros a web):
+    `stores/preferencesStore.ts` —solo `persistPrefs` y `hydrateFromUser`, que en desktop
+    delegan en `prefsVaultStore` (y los dos imports de arriba); el resto del archivo es
+    idéntico y se sigue reflejando igual— y `stores/cssStore.ts` —solo el bloque
+    «Persistencia» (`leerSnippets`/`guardarSnippets`, contra `.mycelium/snippets.json`) y
+    los cuerpos que lo llaman; la API del store y `applySnippets` son idénticos—. Motivo:
+    en desktop todo eso es **del vault** y viaja en su carpeta; en web va a la cuenta por
+    el backend. Al reflejar un cambio de esos dos archivos, aplicarlo a mano.
+  - **Ya divergían y divergen más**: `stores/authStore.ts` (en desktop es una fachada de
+    constantes, sin `restore()` real ni `/auth` de por medio; conserva la forma
+    `user`/`vaults`/`accessToken`/`initialized` para que los componentes compartidos no
+    cambien), `stores/prefsVaultStore.ts` (en desktop `PrefsVault` suma `tema`,
+    `modoOscuro` y `preferencias`, y exporta `sanearContraDefectos`; la superficie que
+    consumen `BaseView`, `NoteEditor`, `EditorSection`, `MiniGraph` y `GraphOptionsMenu`
+    no cambió), `app/(workspace)/workspace/page.tsx` (el guard decide por el vault
+    abierto, no por el usuario, y sin vault va a `/vaults`), `lib/api.ts` (sin rutas de
+    autenticación) y `components/settings/CustomCssSection.tsx` (el texto dice que los
+    snippets viajan con el vault).
+  - Los componentes que leen `useAuthStore` o `api(..., { token })` —`BaseView`,
+    `CanvasView`, `PropiedadesTab`, `NoteEditor`, `ExplorerPanel`, `GraphView`…— **no se
+    tocaron**: `ApiOptions.token` sigue aceptándose y se ignora.
 
 ### Artefactos solo-web (no existen en `desktop-tauri`)
 

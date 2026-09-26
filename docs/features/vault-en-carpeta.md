@@ -337,6 +337,13 @@ sean texto plano: no hay nada propietario que rescatar.
 - Latencia perceptible al guardar pese al debounce.
 
 ### Procedimiento de vuelta
+
+> [!warning] Desde `FUN-L-24` (2026-09-26) este procedimiento ya no se sostiene tal cual
+> El modo SQLite clásico se retiró del código: la app ya no abre ningún `mycelium.db` ni
+> tiene su migración. Volver exigiría restaurar esa capa desde el historial de git (el
+> merge de `FUN-L-24` es el punto de corte), no solo reimportar. Ver
+> [[El modo SQLite clasico queda muerto]] y [[auditoria-capa-de-datos]].
+
 1. **Importar la carpeta a SQLite**: `collectFromNativeFolder()` + el pipeline de
    importación **ya existen y quedan funcionando**. Un vault en carpeta se reimporta a
    un `mycelium.db` clásico sin escribir código nuevo.
