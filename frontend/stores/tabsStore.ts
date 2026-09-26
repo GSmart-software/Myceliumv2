@@ -9,6 +9,13 @@ import { usePreferencesStore } from "@/stores/preferencesStore";
 export const GRAPH_TAB_ID = "graph:global";
 
 /**
+ * Pestaña del calendario de recordatorios (`FUN-L-22`). Como la del grafo: un id
+ * reservado que no es una nota, así que se mueve, divide y cierra como
+ * cualquier pestaña pero nunca es de preview ni se descarta al reconciliar.
+ */
+export const CALENDAR_TAB_ID = "calendario:global";
+
+/**
  * Pestaña: instancia de una nota abierta en un pane (HU-25). `preview` marca
  * la pestaña efímera (estilo Obsidian/VSCode): si solo se está viendo el
  * archivo, abrir otro la reemplaza; al editarla o fijarla pasa a permanente.
@@ -75,11 +82,11 @@ const newId = () => Math.random().toString(36).slice(2, 10);
 
 /**
  * Ids que no son notas del vault (ver "ids sentinela" en
- * docs/aprendizajes/Estado con Zustand.md). Acá solo el grafo: la versión de
- * escritorio suma las terminales, que en web no existen. No pueden ser pestaña
- * de preview ni encabezar una línea de historial.
+ * docs/aprendizajes/Estado con Zustand.md). Acá el grafo y el calendario
+ * (`FUN-L-22`): la versión de escritorio suma las terminales, que en web no
+ * existen. No pueden ser pestaña de preview ni encabezar una línea de historial.
  */
-const esSentinela = (notaId: string) => notaId === GRAPH_TAB_ID;
+const esSentinela = (notaId: string) => notaId === GRAPH_TAB_ID || notaId === CALENDAR_TAB_ID;
 
 // ── Historial por pestaña (DEF-040) ───────────────────────────────
 

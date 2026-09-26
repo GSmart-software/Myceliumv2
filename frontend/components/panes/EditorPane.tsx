@@ -7,7 +7,14 @@ import { CanvasView } from "@/components/canvas/CanvasView";
 import { ExcalidrawFileEditor } from "@/components/editor/ExcalidrawFileEditor";
 import { NoteEditor } from "@/components/editor/NoteEditor";
 import { GraphView } from "@/components/graph/GraphView";
-import { GRAPH_TAB_ID, useTabsStore, type LeafPane, type SplitEdge } from "@/stores/tabsStore";
+import { CalendarioVista } from "@/components/recordatorios/CalendarioVista";
+import {
+  CALENDAR_TAB_ID,
+  GRAPH_TAB_ID,
+  useTabsStore,
+  type LeafPane,
+  type SplitEdge,
+} from "@/stores/tabsStore";
 import { useSidebarViewerStore } from "@/stores/sidebarViewerStore";
 import { useVaultStore } from "@/stores/vaultStore";
 import { LinkedPreviewPane } from "./LinkedPreviewPane";
@@ -46,6 +53,8 @@ export function EditorPane({ pane }: { pane: LeafPane }) {
           <LinkedPreviewPane pane={pane} />
         ) : activeTab && activeTab.notaId === GRAPH_TAB_ID ? (
           <GraphView key={activeTab.id} />
+        ) : activeTab && activeTab.notaId === CALENDAR_TAB_ID ? (
+          <CalendarioVista key={activeTab.id} />
         ) : activeTab && activeTipo === "excalidraw" ? (
           <ExcalidrawFileEditor key={activeTab.id} notaId={activeTab.notaId} />
         ) : activeTab && activeTipo === "base" ? (

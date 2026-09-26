@@ -2,7 +2,7 @@
 
 import { Folder, Maximize2, Minimize2, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { findLeaf, GRAPH_TAB_ID, useTabsStore } from "@/stores/tabsStore";
+import { CALENDAR_TAB_ID, findLeaf, GRAPH_TAB_ID, useTabsStore } from "@/stores/tabsStore";
 import { EXPLORER_TAB, useSidebarViewerStore } from "@/stores/sidebarViewerStore";
 import { useVaultStore } from "@/stores/vaultStore";
 import { ExplorerPanel } from "./ExplorerPanel";
@@ -39,7 +39,9 @@ export function ExplorerDock() {
   const tituloDe = (notaId: string) =>
     notaId === GRAPH_TAB_ID
       ? "Grafo de conexiones"
-      : notas.find((n) => n.id === notaId)?.titulo ?? "…";
+      : notaId === CALENDAR_TAB_ID
+        ? "Calendario"
+        : notas.find((n) => n.id === notaId)?.titulo ?? "…";
 
   const hayDocs = tabs.length > 0;
   const activeEsDoc = tabs.includes(activeTab);

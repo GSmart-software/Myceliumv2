@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { GRAPH_TAB_ID } from "@/stores/tabsStore";
+import { CALENDAR_TAB_ID, GRAPH_TAB_ID } from "@/stores/tabsStore";
 
 /**
  * Valor de `activeTab` que representa la pestaña del árbol de archivos. Solo se usa
@@ -94,8 +94,11 @@ export const useSidebarViewerStore = create<SidebarViewerState>()(
 
       reconcile(validIds) {
         const { tabs, activeTab } = get();
-        // El grafo no es una nota real: nunca se descarta por reconciliación.
-        const rest = tabs.filter((id) => id === GRAPH_TAB_ID || validIds.has(id));
+        // El grafo y el calendario no son notas reales: nunca se descartan por
+        // reconciliación.
+        const rest = tabs.filter(
+          (id) => id === GRAPH_TAB_ID || id === CALENDAR_TAB_ID || validIds.has(id),
+        );
         if (rest.length === tabs.length) return;
         // `EXPLORER_TAB` (árbol) siempre es un activeTab válido.
         const activaOk = activeTab === EXPLORER_TAB || rest.includes(activeTab);
