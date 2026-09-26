@@ -1,12 +1,15 @@
 # Estado del proyecto
 
-**Actualizado**: 2026-09-22 · rama activa `desktop-tauri`
+**Actualizado**: 2026-09-26 · rama activa `desktop-tauri`
 
 Foto de dónde está Mycelium hoy. Para el detalle de cada tema, seguir los enlaces.
 
 ## Resumen
 
-- **Versión: desktop `2.1.0`** ([[Version 2.1.0]], **publicada el 2026-09-23**: draw.io como tipo de
+- **Versión: desktop `2.2.0` en preparación** ([[Version 2.2.0]]: el calendario con
+  recordatorios `FUN-L-22` y las disposiciones del grafo `FUN-L-23`, las dos implementadas
+  y **sin confirmar en la app**; más `DEF-105` a `DEF-108` del índice). La última
+  **publicada** es la `2.1.0` ([[Version 2.1.0]], 2026-09-23: draw.io como tipo de
   archivo, los enlaces web al navegador y el vídeo en la nota) · **web `2.1.0`** (le llega
   el vídeo y los enlaces; draw.io y las consolas son solo-desktop). La anterior de
   escritorio, [[Version 2.0.0]], se publicó el 2026-09-21. Las dos líneas **no
