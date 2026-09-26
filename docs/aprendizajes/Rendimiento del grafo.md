@@ -357,6 +357,8 @@ describe.
 
 ## Relacionadas
 
+- [[Como construye Obsidian su grafo]] — el modelo de referencia (2026-09-26): confirma
+  el orden del plan: tabla de enlaces primero, worker y Barnes-Hut después, WebGL nunca.
 - [[Aprendizajes tecnicos]] — mapa del área.
 - [[Bugs_errores_y_defectos]] · `DEF-109` — el reporte que motivó el segundo análisis;
   estado en [[bugs-progreso]].
