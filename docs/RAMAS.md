@@ -431,6 +431,29 @@ entre ramas):
   los walkers de `archivos.rs` + el watcher, con editor en `VaultSection.tsx`. En
   **web** la funcionalidad es distinta por naturaleza (no hay carpeta en disco):
   filtro de importación/visualización con la config en el backend — pendiente.
+  Desde `FUN-M-39` la plantilla del editor sale del comando `mycignore_default()` de
+  Rust (antes era una copia en `VaultSection.tsx`).
+- **Limpieza de la auditoría (`FUN-M-39`, 2026-09-26)**: desktop borró código muerto y
+  quitó compartir/colaboración (decisión **D2**: quedan en web). Por la decisión **D4**
+  lo muerto en archivos idénticos a web se limpió acá igual, así que **estos archivos que
+  eran idénticos pasan a diverger** hasta que el orquestador los refleje. Detalle en
+  [[auditoria-limpieza-1]].
+  - **Reflejables tal cual** (lo borrado también está muerto en web; comprobado con
+    `git grep` sobre `web-cloud`): `lib/bases.ts`, `lib/canvas.ts`,
+    `lib/editor/wikilink.ts`, `lib/editor/viewRegistry.ts`, `lib/idb.ts`,
+    `stores/preferencesStore.ts`, `styles/tokens.css`, `BaseView.module.css`,
+    `EditorToolbar.module.css`, `ExplorerPanel.module.css`, `Recordatorios.module.css`,
+    `Panels.module.css`, y los cinco SVG de `public/` (se borran). Traerlos enteros con
+    `git checkout desktop-tauri -- <archivo>` los vuelve a igualar.
+  - **Divergen de verdad (no traer enteros a web)**: `stores/uiStore.ts` (desktop perdió
+    `shareTarget`, que web usa), `next.config.ts` (el comentario de web habla de
+    Cloudflare Pages, que en web sí rige), `frontend/README.md` (el de desktop apunta a la
+    línea `desktop-tauri`), `components/recordatorios/comun.ts` (importa
+    `CALENDAR_TAB_ID` de `lib/pestanas.ts`, que web no tiene: se iguala si se refleja
+    `lib/pestanas.ts` junto con los componentes de pestañas). `SharedSection.tsx` y
+    `ShareModal.module.css` eran idénticos y en desktop **se borraron**: en web se quedan.
+  - `lib/pestanas.ts` (nuevo, H9) es genérico: si se refleja a web, adaptar `TabBar`,
+    `EditorPane`, `SidebarNoteView` y los stores de pestañas, que ya divergían.
 
 ### Artefactos solo-web (no existen en `desktop-tauri`)
 
