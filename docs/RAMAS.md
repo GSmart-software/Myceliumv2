@@ -479,6 +479,41 @@ entre ramas):
   - Los componentes que leen `useAuthStore` o `api(..., { token })` —`BaseView`,
     `CanvasView`, `PropiedadesTab`, `NoteEditor`, `ExplorerPanel`, `GraphView`…— **no se
     tocaron**: `ApiOptions.token` sigue aceptándose y se ignora.
+- **Editor y enlaces (`FUN-M-40`, 2026-09-26)**: tanda 4 de la auditoría. D6, D7 y D9 son
+  solo-desktop; D8 es genérico y **hay que reflejarlo**. Detalle en
+  [[auditoria-editor-y-enlaces]].
+  - **Reflejar a web (D8)**: `lib/wikilinks.ts` —el resolutor único `resolveWikilink` /
+    `resolveWikilinkEnIndice` / `indexarPorTitulo`, `folderSegments`, `refUnivoca` y
+    `EXCALIDRAW_RE`; fuera `destinoDeWikilink`, que web tampoco usa— y
+    `lib/editor/wikilink.ts`, que ahora solo reexporta. Se traen enteros. Dos cuidados:
+    `lib/wikilinks.ts` ya **no es sin imports** (importa `lib/extensionesDeTipo`, también
+    puro), y `scripts/test-wikilinks.mjs` prueba además `lib/db/grafo.ts`, que en web no
+    existe: allá van sin los dos tests del grafo. El grafo de web lo arma el backend .NET
+    con «primera nota con ese título»: la misma regla (pista de carpeta, sin extensión,
+    empate a la ruta más corta y después por ruta) está **pendiente** en
+    `SearchEndpoints`; sin eso, en web el clic y el grafo siguen pudiendo ir a homónimas
+    distintas.
+  - **Pasan a diverger por D6** (web conserva el mecanismo embebido `diagramas`, con su
+    backend): `lib/editor/livePreview.ts` (`liveExtensions`, `livePreview` y
+    `buildDecorations` sin el parámetro `notaId`; el widget llama a
+    `renderExcalidrawInto(block, ref)`), `components/recordatorios/EditorDetalle.tsx` (la
+    llamada a `liveExtensions` sin el `null`) y `components/editor/ExcalidrawModal.tsx`
+    (solo `fileId`). Al reflejar `livePreview.ts` a web —se refleja seguido— hay que
+    reponer allá el `notaId` o retirar también allá los embebidos. `lib/markdown.ts`
+    importa `EXCALIDRAW_RE` de `lib/wikilinks.ts` (una línea). `lib/excalidraw.ts` y
+    `lib/export.ts` ya divergían.
+  - **Por D7**: `lib/idb.ts` **borrado** en desktop (en web la caché tiene sentido y se
+    queda); ningún componente compartido lo importa ya, así que no hizo falta un módulo
+    vacío. Divergen `components/panes/LinkedPreviewPane.tsx` (primer render del editor de
+    origen o del disco) y `components/editor/EditorToolbar.tsx` (solo el tipo
+    `SyncState`, sin `offline`); `BarraEstado.tsx` y `NoteEditor.tsx` ya divergían.
+    `NoteEditor.module.css .conflictBar` y `panes.module.css .dot_offline` **se
+    conservan**: muertas en desktop, vivas en web, y los archivos siguen idénticos.
+  - **Por D9** (importar es copiar un árbol con Rust; en web sigue siendo por nota contra
+    el backend): `lib/import.ts`, `stores/importStore.ts` (`run` recibe
+    `{ carpeta } | { archivos }`), `components/explorer/ImportDialogs.tsx` (el texto del
+    conflicto ya no dice «nota»), las dos llamadas a `run` de `ExplorerPanel.tsx` y la de
+    `VaultSection.tsx`. `importStore.ts` e `ImportDialogs.tsx` eran idénticos.
 
 ### Artefactos solo-web (no existen en `desktop-tauri`)
 
