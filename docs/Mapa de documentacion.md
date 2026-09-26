@@ -115,6 +115,8 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
   línea en la consola de F12, por una fachada única con tres niveles (`FUN-L-21`).
 - [[calendario-recordatorios]] — un calendario de recordatorios que avisan, del vault y sin
   archivos (`FUN-L-22`).
+- [[auditoria-rendimiento-1]] — tanda 1 de la auditoría: guardar sin reindexar, indexado
+  por tandas multi-fila, un solo recorrido del disco, búsqueda desde dos letras (`FUN-M-38`).
 - [[auditoria-capa-de-datos]] — tanda 3 de la auditoría: retirar el modo clásico y la
   identidad interna, un solo mecanismo de preferencias por vault (`FUN-L-24`).
 - [[auditoria-editor-y-enlaces]] — tanda 4: Excalidraw como archivo, sin caché IndexedDB,
