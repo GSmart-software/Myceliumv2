@@ -139,6 +139,9 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
 - [[Aprendizajes tecnicos]] — **mapa del área** (leer primero).
 - [[CodeMirror y la vista en vivo]] · [[Drag and drop en Mycelium]] · [[Estado con Zustand]]
 - [[Tauri y el WebView]] · [[Terminal integrada - PTY y xterm]] · [[Compilacion y entorno de desarrollo]]
+- [[Auditoria de codigo 2026-09-26]] — la auditoría a tres bandas (complejidad, eficiencia,
+  código muerto): qué se creía y no era, `DEF-110` a `DEF-113`, y el plan en tandas con las
+  decisiones pendientes.
 - [[Rendimiento del grafo]] — análisis del costo por frame, propuestas de optimización y el segundo análisis para vaults de más de 1.000 notas (`DEF-109`).
 - [[Rendimiento de la apertura del vault]] — por qué tarda abrir un vault grande y cómo acelerarlo.
 

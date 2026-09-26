@@ -1,0 +1,8 @@
+== tesina
+  'a'          actual   645.5 ms · snippet solo top-50  720.8 ms · mismo resultado: True
+  'e'          actual  1953.1 ms · snippet solo top-50 2200.8 ms · mismo resultado: True
+  'de'         actual   775.8 ms · snippet solo top-50  846.0 ms · mismo resultado: True
+  'la de'      actual  2592.3 ms · snippet solo top-50 2708.1 ms · mismo resultado: True
+  'que'        actual   244.6 ms · snippet solo top-50  285.9 ms · mismo resultado: True
+  'proyecto'   actual    17.7 ms · snippet solo top-50   48.9 ms · mismo resultado: True
+  indexado frío en TANDAS de 250 (una transacción por tanda): 3368 ms

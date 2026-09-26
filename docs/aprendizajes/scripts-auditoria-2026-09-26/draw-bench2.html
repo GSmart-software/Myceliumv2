@@ -1,0 +1,26 @@
+<!doctype html><html><body style="margin:0;background:#111"><canvas id="c"></canvas><script>
+const canvas = document.getElementById('c'); canvas.width = 1600; canvas.height = 900; const ctx = canvas.getContext('2d');
+function makeGraph(N, deg) {
+  const sim = []; const R = Math.sqrt(N) * 40;
+  for (let i = 0; i < N; i++) { const a = Math.random()*Math.PI*2, r = Math.sqrt(Math.random())*R; sim.push({ x: Math.cos(a)*r, y: Math.sin(a)*r, r: 6 }); }
+  const edges = []; for (let i = 0; i < N*deg; i++) { const s = sim[Math.floor(Math.random()*N)], t = sim[Math.floor(Math.random()*N)]; if (s !== t) edges.push({ s, t, ph: Math.random() }); }
+  return { sim, edges };
+}
+let dot; function dotSprite() { if (dot) return dot; dot = document.createElement('canvas'); dot.width = dot.height = 8; const c = dot.getContext('2d'); c.fillStyle = '#5DCAA5'; c.shadowColor = '#5DCAA5'; c.shadowBlur = 3; c.beginPath(); c.arc(4,4,1.6,0,Math.PI*2); c.fill(); return dot; }
+function ctrl(e) { const mx=(e.s.x+e.t.x)/2, my=(e.s.y+e.t.y)/2, nx=-(e.t.y-e.s.y), ny=e.t.x-e.s.x; return { cx: mx+nx*0.12, cy: my+ny*0.12 }; }
+function setup(scale) { ctx.setTransform(1,0,0,1,0,0); ctx.clearRect(0,0,1600,900); ctx.translate(800,450); ctx.scale(scale,scale); }
+// A) como hoy: un beginPath/stroke por arista
+function edgesPerPath(edges, scale) { ctx.strokeStyle='rgba(160,224,208,0.22)'; ctx.lineWidth=1.1/scale; for (const e of edges) { const {cx,cy}=ctrl(e); ctx.beginPath(); ctx.moveTo(e.s.x,e.s.y); ctx.quadraticCurveTo(cx,cy,e.t.x,e.t.y); ctx.stroke(); } }
+// B) todas las aristas del mismo estilo en UN path y un solo stroke
+function edgesBatched(edges, scale) { ctx.strokeStyle='rgba(160,224,208,0.22)'; ctx.lineWidth=1.1/scale; ctx.beginPath(); for (const e of edges) { const {cx,cy}=ctrl(e); ctx.moveTo(e.s.x,e.s.y); ctx.quadraticCurveTo(cx,cy,e.t.x,e.t.y); } ctx.stroke(); }
+// C) flujo como hoy: dash animado por arista
+function flowDash(edges, scale) { const off = -((performance.now()/1000)*30)/scale; ctx.setLineDash([2/scale,9/scale]); ctx.lineDashOffset=off; ctx.strokeStyle='#5DCAA5'; ctx.globalAlpha=0.5; ctx.lineWidth=1.5/scale; for (const e of edges) { const {cx,cy}=ctrl(e); ctx.beginPath(); ctx.moveTo(e.s.x,e.s.y); ctx.quadraticCurveTo(cx,cy,e.t.x,e.t.y); ctx.stroke(); } ctx.setLineDash([]); ctx.globalAlpha=1; }
+// D) flujo como partícula: un punto por arista que recorre la bezier (drawImage de un sprite 8px)
+function flowParticles(edges, scale) { const sp = dotSprite(); const t0 = (performance.now()/1000)*0.5; const lado = sp.width/scale; for (const e of edges) { const {cx,cy}=ctrl(e); const t = (t0 + e.ph) % 1, u = 1-t; const x = u*u*e.s.x + 2*u*t*cx + t*t*e.t.x, y = u*u*e.s.y + 2*u*t*cy + t*t*e.t.y; ctx.drawImage(sp, x-lado/2, y-lado/2, lado, lado); } }
+window.bench = function(N, scale, frames = 15) {
+  const { edges } = makeGraph(N, 3); const out = {};
+  const run = (name, fn) => { for (let i=0;i<2;i++){setup(scale);fn(edges,scale);} const t0=performance.now(); for (let i=0;i<frames;i++){setup(scale);fn(edges,scale);} ctx.getImageData(0,0,1,1); out[name]=+((performance.now()-t0)/frames).toFixed(1); };
+  run('A_aristas_por_path', edgesPerPath); run('B_aristas_batched', edgesBatched); run('C_flujo_dash', flowDash); run('D_flujo_particulas', flowParticles);
+  return { N, aristas: edges.length, scale, ...out };
+};
+</script></body></html>

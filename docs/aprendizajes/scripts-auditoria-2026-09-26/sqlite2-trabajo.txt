@@ -1,0 +1,8 @@
+== trabajo
+  'a'          actual    26.3 ms · snippet solo top-50   58.4 ms · mismo resultado: True
+  'e'          actual    51.0 ms · snippet solo top-50   86.5 ms · mismo resultado: True
+  'de'         actual    38.4 ms · snippet solo top-50   64.5 ms · mismo resultado: True
+  'la de'      actual    27.0 ms · snippet solo top-50   47.7 ms · mismo resultado: True
+  'que'        actual     8.9 ms · snippet solo top-50   20.8 ms · mismo resultado: True
+  'proyecto'   actual     2.9 ms · snippet solo top-50    7.5 ms · mismo resultado: True
+  indexado frío en TANDAS de 250 (una transacción por tanda): 713 ms

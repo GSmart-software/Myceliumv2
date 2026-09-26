@@ -1,0 +1,50 @@
+<!doctype html><html><body style="margin:0;background:#111"><canvas id="c"></canvas><script>
+// Réplica del draw() de MiniGraph.tsx (aristas base + flujo dashed + flecha opcional,
+// nodos como sprite, etiquetas) para medir ms/frame por componente en Chromium.
+const canvas = document.getElementById('c'); const dpr = 1;
+canvas.width = 1600; canvas.height = 900; const ctx = canvas.getContext('2d');
+const spriteCache = new Map();
+function nodeSprite(fill, shadow, rPix, blurPix) {
+  const key = `${fill}|${shadow}|${rPix}|${blurPix}`; const hit = spriteCache.get(key); if (hit) return hit;
+  const lado = Math.ceil(2 * (rPix + blurPix) + 2); const c = document.createElement('canvas'); c.width = lado; c.height = lado;
+  const cx = c.getContext('2d'); cx.shadowColor = shadow; cx.shadowBlur = blurPix; cx.fillStyle = fill; cx.beginPath(); cx.arc(lado/2, lado/2, rPix, 0, Math.PI*2); cx.fill();
+  spriteCache.set(key, c); return c;
+}
+function makeGraph(N, deg) {
+  const sim = []; const R = Math.sqrt(N) * 40; // radio aproximado del layout asentado (k=80)
+  for (let i = 0; i < N; i++) { const a = Math.random()*Math.PI*2, r = Math.sqrt(Math.random())*R; sim.push({ id: String(i), titulo: 'Nota de ejemplo ' + i, x: Math.cos(a)*r, y: Math.sin(a)*r, r: 4 + Math.random()*8 }); }
+  const edges = []; for (let i = 0; i < N*deg; i++) { const s = sim[Math.floor(Math.random()*N)], t = sim[Math.floor(Math.random()*N)]; if (s !== t) edges.push({ s, t }); }
+  return { sim, edges };
+}
+function draw(sim, simEdges, { scale, showFlow, showArrow, labels }) {
+  const w = canvas.width, h = canvas.height, ox = 0, oy = 0;
+  ctx.setTransform(1,0,0,1,0,0); ctx.clearRect(0,0,w,h); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.translate(w/2+ox, h/2+oy); ctx.scale(scale, scale);
+  const cw = w/dpr, ch = h/dpr, margen = 40/scale;
+  const visL = (-cw/2-ox)/scale-margen, visR = (cw/2-ox)/scale+margen, visT = (-ch/2-oy)/scale-margen, visB = (ch/2-oy)/scale+margen;
+  const dentro = (x,y) => x>=visL && x<=visR && y>=visT && y<=visB;
+  const flowOffset = showFlow ? -((performance.now()/1000)*30)/scale : 0;
+  let aristasVis = 0, nodosVis = 0;
+  for (const e of simEdges) {
+    if (Math.max(e.s.x,e.t.x)<visL || Math.min(e.s.x,e.t.x)>visR || Math.max(e.s.y,e.t.y)<visT || Math.min(e.s.y,e.t.y)>visB) continue;
+    aristasVis++;
+    const mx=(e.s.x+e.t.x)/2, my=(e.s.y+e.t.y)/2, nx=-(e.t.y-e.s.y), ny=e.t.x-e.s.x, len=Math.max(Math.hypot(nx,ny),1), bend=0.12;
+    const cx=mx+(nx/len)*len*bend, cy=my+(ny/len)*len*bend;
+    const curve=()=>{ctx.beginPath();ctx.moveTo(e.s.x,e.s.y);ctx.quadraticCurveTo(cx,cy,e.t.x,e.t.y);ctx.stroke();};
+    ctx.setLineDash([]); ctx.globalAlpha=1; ctx.strokeStyle='rgba(160,224,208,0.22)'; ctx.lineWidth=1.1/scale; curve(); ctx.shadowBlur=0;
+    if (showFlow) { ctx.setLineDash([2/scale,9/scale]); ctx.lineDashOffset=flowOffset; ctx.strokeStyle='#5DCAA5'; ctx.globalAlpha=0.5; ctx.lineWidth=1.5/scale; curve(); ctx.setLineDash([]); ctx.lineDashOffset=0; ctx.globalAlpha=1; }
+    if (showArrow) { const bx=0.25*e.s.x+0.5*cx+0.25*e.t.x, by=0.25*e.s.y+0.5*cy+0.25*e.t.y, a=Math.atan2(e.t.y-e.s.y,e.t.x-e.s.x), size=6/scale; ctx.fillStyle='rgba(160,224,208,0.22)'; ctx.beginPath(); ctx.moveTo(bx+Math.cos(a)*size,by+Math.sin(a)*size); ctx.lineTo(bx+Math.cos(a+2.6)*size,by+Math.sin(a+2.6)*size); ctx.lineTo(bx+Math.cos(a-2.6)*size,by+Math.sin(a-2.6)*size); ctx.closePath(); ctx.fill(); }
+  }
+  const escalaPix = scale*dpr;
+  for (const n of sim) { if (!dentro(n.x,n.y)) continue; nodosVis++; const rPix=Math.max(0.5,Math.round(n.r*escalaPix*2)/2); const sp=nodeSprite('#5DCAA5','#5DCAA5',rPix,12); const lado=sp.width/escalaPix; ctx.drawImage(sp,n.x-lado/2,n.y-lado/2,lado,lado); }
+  if (labels && scale > 0.5) { ctx.textAlign='center'; ctx.font=`${12/scale}px system-ui, sans-serif`; ctx.fillStyle='rgba(206,232,224,0.82)'; for (const n of sim) { if (!dentro(n.x,n.y)) continue; ctx.fillText(n.titulo, n.x, n.y+n.r+13/scale); } }
+  return { aristasVis, nodosVis };
+}
+window.bench = async function(N, deg, opts, frames = 40) {
+  const { sim, edges } = makeGraph(N, deg);
+  let vis; for (let i = 0; i < 5; i++) vis = draw(sim, edges, opts);
+  const t0 = performance.now(); for (let i = 0; i < frames; i++) draw(sim, edges, opts);
+  // forzar el flush del rasterizado leyendo un píxel
+  ctx.getImageData(0,0,1,1); const ms = (performance.now()-t0)/frames;
+  return { N, aristas: edges.length, ...vis, ms: +ms.toFixed(2) };
+};
+</script></body></html>

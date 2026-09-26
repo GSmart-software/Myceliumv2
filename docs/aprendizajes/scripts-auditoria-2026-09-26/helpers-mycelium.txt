@@ -1,0 +1,14 @@
+== mycelium: 116 notas (112 md), 10 dirs, 1.5 MB
+separarFrontmatter (todas)                     min 2.6 ms · med 2.8 ms
+textoIndexable (todas)                         min 2.6 ms · med 2.7 ms
+  notas con frontmatter: 2 · filas de propiedades: 7 · statements por indexado frío ≈ 587 (5/nota + 1/propiedad)
+sinCodigo (todas; 107 con backtick)            min 72.1 ms · med 76.0 ms
+etiquetasDe(contenido, sinCodigo) (todas)      min 70.6 ms · med 80.1 ms
+wikilinks: sinCodigo + regex + destino (todas) min 77.0 ms · med 82.3 ms
+  wikilinks encontrados: 1608
+JSON.parse de leer_archivos(todo) (1.5 MB)     min 4.4 ms · med 4.5 ms
+resolveWikilink ×1000 (títulos existentes)     min 17.2 ms · med 19.6 ms
+resolveWikilink ×1000 (inexistentes)           min 14.1 ms · med 15.3 ms
+renderNota p50 (7524 chars: docs/estado/Version 2.1.0.md) min 48.0 ms · med 59.2 ms
+renderNota p90 (29553 chars: docs/features/autoactualizacion.md) min 102.3 ms · med 108.5 ms
+renderNota max (134906 chars: docs/BACKLOG.md) min 528.2 ms · med 553.4 ms

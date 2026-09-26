@@ -1,0 +1,5 @@
+== notas-mycelium.json: 116 notas · salidas distintas: 0
+sinCodigo (actual)           min 111.2 ms · med 112.8 ms
+sinCodigo (variante)         min 301.6 ms · med 335.3 ms
+actual, nota max (134906)    min 11.4 ms · med 21.6 ms
+variante, nota max           min 112.3 ms · med 122.1 ms

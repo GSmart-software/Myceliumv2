@@ -1,0 +1,11 @@
+== tesina
+  'a'          actual   786.1 ms · snippet por rowid IN top-50 2583.6 ms · mismo: True
+  'e'          actual  2417.9 ms · snippet por rowid IN top-50 4075.0 ms · mismo: True
+  'de'         actual   805.7 ms · snippet por rowid IN top-50 1638.1 ms · mismo: True
+  'la de'      actual  2389.8 ms · snippet por rowid IN top-50 3495.7 ms · mismo: True
+  'que'        actual   223.1 ms · snippet por rowid IN top-50  429.0 ms · mismo: True
+  'proyecto'   actual    15.3 ms · snippet por rowid IN top-50   21.0 ms · mismo: True
+  'es'         actual   237.4 ms · por rowid  624.6 ms
+  'co'         actual   335.5 ms · por rowid 1323.2 ms
+  'pr'         actual    79.6 ms · por rowid  518.6 ms
+  indexado frío MULTI-FILA por tanda de 250, autocommit: 2892 ms en 36 sentencias (filas fts 1301, propiedades 6966)

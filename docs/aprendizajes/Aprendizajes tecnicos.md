@@ -18,6 +18,7 @@ y qué principio general dejó.
 | [[Estado con Zustand]] | `persist`, `partialize` y el efecto de `set()` sobre el DOM en el mismo handler |
 | [[Tauri y el WebView]] | ConPTY, `dragDropEnabled`, `elementFromPoint`, límites del WebView2 |
 | [[Compilacion y entorno de desarrollo]] | `cargo` sin memoria, `tee` que oculta fallos, procesos huérfanos en `:3000` |
+| [[Auditoria de codigo 2026-09-26]] | Auditoría a tres bandas (complejidad, eficiencia, código muerto) con mediciones sobre tres vaults, cuatro defectos nuevos y el plan en tandas; los tres informes crudos enlazados desde ahí |
 | [[Rendimiento del grafo]] | Dónde se va el tiempo por frame (repulsión O(n²), `shadowBlur`, flujo animado) y el segundo análisis para más de 1.000 notas (`DEF-109`) |
 | [[Rendimiento de la apertura del vault]] | Por qué tarda abrir un vault grande: `.mycignore` insuficiente, 14 MB por IPC, 11.000 statements sueltos |
 

@@ -1,0 +1,5 @@
+== notas-trabajo.json: 1223 notas · salidas distintas: 0
+sinCodigo (actual)           min 399.1 ms · med 443.5 ms
+sinCodigo (variante)         min 215.9 ms · med 243.9 ms
+actual, nota max (518382)    min 74.5 ms · med 82.9 ms
+variante, nota max           min 56.5 ms · med 61.7 ms

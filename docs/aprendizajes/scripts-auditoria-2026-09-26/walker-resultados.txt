@@ -1,0 +1,33 @@
+== C:\Trabajo\GSmart\Mycelium
+listar_archivos_meta   : min 5.7 ms · med 7.0 ms · 180 archivos · JSON 17 KB
+listar_directorios     : min 3.0 ms · med 3.6 ms · 38 dirs
+listar_otros_archivos  : min 6.6 ms · med 6.7 ms · 165 otros · JSON 21 KB
+rutas_observables      : min 9.5 ms · med 10.5 ms · 218 rutas
+walker FUSIONADO       : min 9.9 ms · med 10.8 ms · 180 archivos · 38 dirs
+mycignore::ignorada    : min 2.830 ms · med 3.349 ms para 218 rutas (13 patrones, 0 ignoradas)
+leer_archivos (todo)   : min 12.0 ms · med 12.5 ms · 180 archivos · 2.0 MB texto · JSON 2.1 MB
+serde_json de leer_todo: min 3.0 ms · med 3.1 ms
+leer_archivos en tandas: 16.0 ms · 1 tandas · JSON total 2.1 MB
+tamaño de nota         : mediana 6465 B · p90 25308 B · max 137681 B
+== C:\Users\gabip\OneDrive\Desktop\Universidad, Cursos y Educación\Universidad\Tesina
+listar_archivos_meta   : min 66.0 ms · med 69.2 ms · 1329 archivos · JSON 204 KB
+listar_directorios     : min 46.6 ms · med 51.2 ms · 445 dirs
+listar_otros_archivos  : min 93.5 ms · med 100.2 ms · 6199 otros · JSON 703 KB
+rutas_observables      : min 108.2 ms · med 120.6 ms · 1774 rutas
+walker FUSIONADO       : min 120.7 ms · med 140.8 ms · 1329 archivos · 445 dirs
+mycignore::ignorada    : min 10.711 ms · med 12.744 ms para 1774 rutas (4 patrones, 0 ignoradas)
+leer_archivos (todo)   : min 154.1 ms · med 178.9 ms · 1329 archivos · 20.3 MB texto · JSON 20.9 MB
+serde_json de leer_todo: min 56.4 ms · med 68.0 ms
+leer_archivos en tandas: 260.8 ms · 6 tandas · JSON total 20.9 MB
+tamaño de nota         : mediana 7087 B · p90 36636 B · max 443727 B
+== C:\Trabajo\Trabajo y Estudio
+listar_archivos_meta   : min 95.9 ms · med 107.3 ms · 1223 archivos · JSON 220 KB
+listar_directorios     : min 65.0 ms · med 67.2 ms · 436 dirs
+listar_otros_archivos  : min 65.6 ms · med 71.1 ms · 396 otros · JSON 62 KB
+rutas_observables      : min 80.4 ms · med 90.4 ms · 1659 rutas
+walker FUSIONADO       : min 80.9 ms · med 91.1 ms · 1223 archivos · 436 dirs
+mycignore::ignorada    : min 23.537 ms · med 24.937 ms para 1659 rutas (5 patrones, 0 ignoradas)
+leer_archivos (todo)   : min 103.2 ms · med 117.5 ms · 1223 archivos · 5.6 MB texto · JSON 5.9 MB
+serde_json de leer_todo: min 16.0 ms · med 16.6 ms
+leer_archivos en tandas: 133.5 ms · 5 tandas · JSON total 5.9 MB
+tamaño de nota         : mediana 1521 B · p90 7002 B · max 518772 B

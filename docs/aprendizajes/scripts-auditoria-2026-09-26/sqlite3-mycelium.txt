@@ -1,0 +1,11 @@
+== mycelium
+  'a'          actual    87.9 ms · snippet por rowid IN top-50  203.6 ms · mismo: True
+  'e'          actual   286.8 ms · snippet por rowid IN top-50  477.7 ms · mismo: True
+  'de'         actual   139.3 ms · snippet por rowid IN top-50  217.0 ms · mismo: True
+  'la de'      actual   235.3 ms · snippet por rowid IN top-50  329.5 ms · mismo: True
+  'que'        actual    44.1 ms · snippet por rowid IN top-50   52.0 ms · mismo: True
+  'proyecto'   actual    12.6 ms · snippet por rowid IN top-50   19.0 ms · mismo: True
+  'es'         actual    32.2 ms · por rowid   77.7 ms
+  'co'         actual    66.3 ms · por rowid  170.5 ms
+  'pr'         actual    27.7 ms · por rowid   66.2 ms
+  indexado frío MULTI-FILA por tanda de 250, autocommit: 182 ms en 6 sentencias (filas fts 116, propiedades 7)

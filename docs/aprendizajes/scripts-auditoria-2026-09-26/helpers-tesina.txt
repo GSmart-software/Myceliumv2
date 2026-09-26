@@ -1,0 +1,14 @@
+== tesina: 1306 notas (1306 md), 159 dirs, 20.1 MB
+separarFrontmatter (todas)                     min 51.1 ms · med 74.7 ms
+textoIndexable (todas)                         min 102.0 ms · med 110.0 ms
+  notas con frontmatter: 765 · filas de propiedades: 6966 · statements por indexado frío ≈ 13496 (5/nota + 1/propiedad)
+sinCodigo (todas; 1213 con backtick)           min 990.6 ms · med 1160.7 ms
+etiquetasDe(contenido, sinCodigo) (todas)      min 917.5 ms · med 1006.0 ms
+wikilinks: sinCodigo + regex + destino (todas) min 785.1 ms · med 796.5 ms
+  wikilinks encontrados: 6722
+JSON.parse de leer_archivos(todo) (20.3 MB)    min 49.2 ms · med 55.2 ms
+resolveWikilink ×1000 (títulos existentes)     min 292.8 ms · med 342.1 ms
+resolveWikilink ×1000 (inexistentes)           min 307.4 ms · med 397.7 ms
+renderNota p50 (6953 chars: Docs/Fuentes/FTE-0202 Myrvold — Philosop) min 34.1 ms · med 39.4 ms
+renderNota p90 (36012 chars: Docs/Investigaciones/INV-0036/crudo-web/) min 86.8 ms · med 88.2 ms
+renderNota max (433940 chars: Trabajo agéntico/Estado de la tesina.md) min 1491.0 ms · med 1853.0 ms

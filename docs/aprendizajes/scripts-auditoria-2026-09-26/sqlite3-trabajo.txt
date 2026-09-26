@@ -1,0 +1,11 @@
+== trabajo
+  'a'          actual    45.0 ms · snippet por rowid IN top-50  383.3 ms · mismo: True
+  'e'          actual    49.6 ms · snippet por rowid IN top-50  484.3 ms · mismo: True
+  'de'         actual    33.0 ms · snippet por rowid IN top-50  195.2 ms · mismo: True
+  'la de'      actual    28.4 ms · snippet por rowid IN top-50  219.4 ms · mismo: True
+  'que'        actual     7.9 ms · snippet por rowid IN top-50   22.5 ms · mismo: True
+  'proyecto'   actual     4.1 ms · snippet por rowid IN top-50    8.1 ms · mismo: True
+  'es'         actual    13.4 ms · por rowid  108.8 ms
+  'co'         actual    18.0 ms · por rowid  226.0 ms
+  'pr'         actual    14.1 ms · por rowid  116.3 ms
+  indexado frío MULTI-FILA por tanda de 250, autocommit: 624 ms en 28 sentencias (filas fts 1219, propiedades 164)

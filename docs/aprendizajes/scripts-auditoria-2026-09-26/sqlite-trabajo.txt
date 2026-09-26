@@ -1,0 +1,17 @@
+== trabajo: 1223 notas, 436 carpetas
+carpetas (autocommit, 436 stmts)      : 670.7 ms
+indexado frío AUTOCOMMIT (6279 stmts)  : 15782 ms  → 12.90 ms/nota (SQL puro, sin IPC)
+indexado frío UNA TRANSACCIÓN              : 5145.2 ms
+tamaño del índice                          : 19.2 MB (contenido 5.6 MB: se guarda dos veces, contenidos + notas_fts)
+apertura en caliente (3 SELECT de estado)  : 2.4 ms
+tree() ×5 (1223 filas)                  : 81.8 ms → 16.4 ms cada uno
+SELECT del grafo (1223 filas, 6.2 MB JSON): SQL 75.7 ms + JSON ida/vuelta 102.8 ms
+putContenido ×20 (nota más grande, 518382 chars, 8 stmts): 7490.3 ms → 374.5 ms cada uno
+búsqueda FTS5 (prefijo, como al teclear):
+  'a'          coincide  1137 notas · con snippet    33.9 ms · sin snippet   44.2 ms
+  'e'          coincide  1176 notas · con snippet    74.5 ms · sin snippet   27.0 ms
+  'de'         coincide  1172 notas · con snippet    42.8 ms · sin snippet    9.3 ms
+  'pro'        coincide   916 notas · con snippet    13.0 ms · sin snippet   19.2 ms
+  'proyecto'   coincide   203 notas · con snippet     5.5 ms · sin snippet    2.9 ms
+  'la de'      coincide  1026 notas · con snippet    56.3 ms · sin snippet   29.2 ms
+  'que'        coincide   926 notas · con snippet    16.0 ms · sin snippet    5.1 ms

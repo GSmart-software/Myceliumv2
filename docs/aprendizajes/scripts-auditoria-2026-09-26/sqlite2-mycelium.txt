@@ -1,0 +1,8 @@
+== mycelium
+  'a'          actual    83.6 ms · snippet solo top-50   90.7 ms · mismo resultado: True
+  'e'          actual   244.1 ms · snippet solo top-50  242.5 ms · mismo resultado: True
+  'de'         actual   107.0 ms · snippet solo top-50   99.2 ms · mismo resultado: True
+  'la de'      actual   196.7 ms · snippet solo top-50  207.3 ms · mismo resultado: True
+  'que'        actual    25.7 ms · snippet solo top-50   28.5 ms · mismo resultado: True
+  'proyecto'   actual    10.2 ms · snippet solo top-50    9.9 ms · mismo resultado: True
+  indexado frío en TANDAS de 250 (una transacción por tanda): 157 ms

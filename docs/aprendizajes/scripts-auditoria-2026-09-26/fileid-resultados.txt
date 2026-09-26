@@ -1,0 +1,6 @@
+== C:\Trabajo\GSmart\Mycelium
+  get_file_id × 128 rutas (sin ocultas): min 4.1 ms → 32 µs por ruta
+== C:\Users\gabip\OneDrive\Desktop\Universidad, Cursos y Educación\Universidad\Tesina
+  get_file_id × 1464 rutas (sin ocultas): min 80.9 ms → 55 µs por ruta
+== C:\Trabajo\Trabajo y Estudio
+  get_file_id × 1659 rutas (sin ocultas): min 72.5 ms → 44 µs por ruta

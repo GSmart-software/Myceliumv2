@@ -1,0 +1,17 @@
+== tesina: 1306 notas, 159 carpetas
+carpetas (autocommit, 159 stmts)      : 42.4 ms
+indexado frío AUTOCOMMIT (13496 stmts)  : 8193 ms  → 6.27 ms/nota (SQL puro, sin IPC)
+indexado frío UNA TRANSACCIÓN              : 15422.0 ms
+tamaño del índice                          : 54.8 MB (contenido 20.1 MB: se guarda dos veces, contenidos + notas_fts)
+apertura en caliente (3 SELECT de estado)  : 8.1 ms
+tree() ×5 (1306 filas)                  : 43.4 ms → 8.7 ms cada uno
+SELECT del grafo (1306 filas, 22.2 MB JSON): SQL 134.3 ms + JSON ida/vuelta 426.6 ms
+putContenido ×20 (nota más grande, 433940 chars, 12 stmts): 2013.0 ms → 100.7 ms cada uno
+búsqueda FTS5 (prefijo, como al teclear):
+  'a'          coincide  1300 notas · con snippet   740.6 ms · sin snippet   92.2 ms
+  'e'          coincide  1300 notas · con snippet  2332.3 ms · sin snippet   83.7 ms
+  'de'         coincide  1299 notas · con snippet   897.6 ms · sin snippet   54.2 ms
+  'pro'        coincide  1235 notas · con snippet    48.1 ms · sin snippet   22.5 ms
+  'proyecto'   coincide   608 notas · con snippet    20.7 ms · sin snippet    3.8 ms
+  'la de'      coincide  1286 notas · con snippet  3065.9 ms · sin snippet   84.3 ms
+  'que'        coincide  1281 notas · con snippet   314.9 ms · sin snippet   16.2 ms

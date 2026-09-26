@@ -615,6 +615,40 @@ para vaults de unos cientos de notas, pero no para este tamaño.
 
 Reportado por el usuario el 2026-09-25.
 
+# DEF-110
+**Al renombrar o mover una nota que tiene frontmatter, sus propiedades desaparecen del
+índice** hasta que se vuelve a editar el contenido: una tabla `.base` que la listaba por un
+tag o una propiedad deja de mostrarla, aunque el archivo siga teniendo el frontmatter.
+
+Detectado en la [[Auditoria de codigo 2026-09-26]] leyendo el código; **sin reproducir en la
+app** todavía.
+
+# DEF-111
+**En la búsqueda global, una respuesta lenta pisa a una más nueva.** Al escribir rápido
+(por ejemplo «e» y después «es»), la lista puede mostrar los resultados de la primera letra
+después de haber mostrado los de la palabra completa, porque la consulta anterior sigue en
+vuelo y llega más tarde. Con vaults grandes una sola letra tarda segundos.
+
+Detectado en la [[Auditoria de codigo 2026-09-26]] (eficiencia, H2).
+
+# DEF-112
+**Un diagrama Excalidraw que se suelta sobre el editor no queda en el vault.** Se inserta
+como `![[<uuid>.excalidraw]]` y se guarda solo en el índice de la app: si el índice se
+reconstruye, el diagrama se pierde sin aviso y el embed queda roto. El diagrama creado
+desde la barra de herramientas sí es un archivo del vault.
+
+Detectado en la [[Auditoria de codigo 2026-09-26]] (complejidad, H4). Mismo tipo de pérdida
+que `DEF-107`, que no cubrió este caso.
+
+# DEF-113
+**Dos vaults con una nota en la misma ruta relativa se contaminan.** Al abrir
+`Notas/plan.md` en un vault se muestra por un instante el contenido de la nota homónima
+del otro vault y, si aquella quedó con cambios sin guardar, aparece un aviso de conflicto
+que no corresponde.
+
+Detectado en la [[Auditoria de codigo 2026-09-26]] (complejidad, H5); sin reproducir en la
+app.
+
 ---
 
 > [!warning] Defectos sin reporte original

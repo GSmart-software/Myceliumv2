@@ -1,0 +1,14 @@
+== trabajo: 1223 notas (1220 md), 436 dirs, 5.6 MB
+separarFrontmatter (todas)                     min 8.3 ms · med 10.6 ms
+textoIndexable (todas)                         min 15.3 ms · med 16.0 ms
+  notas con frontmatter: 83 · filas de propiedades: 164 · statements por indexado frío ≈ 6279 (5/nota + 1/propiedad)
+sinCodigo (todas; 440 con backtick)            min 326.2 ms · med 356.1 ms
+etiquetasDe(contenido, sinCodigo) (todas)      min 371.5 ms · med 379.0 ms
+wikilinks: sinCodigo + regex + destino (todas) min 326.0 ms · med 355.9 ms
+  wikilinks encontrados: 2308
+JSON.parse de leer_archivos(todo) (5.9 MB)     min 12.3 ms · med 15.9 ms
+resolveWikilink ×1000 (títulos existentes)     min 136.8 ms · med 150.2 ms
+resolveWikilink ×1000 (inexistentes)           min 127.5 ms · med 144.6 ms
+renderNota p50 (1507 chars: Cursos/Fundamentos IA (IBM)/6- Su Futuro) min 8.2 ms · med 8.7 ms
+renderNota p90 (6973 chars: Estudios - Teoría - Prácticas/Tecnología) min 12.7 ms · med 18.8 ms
+renderNota max (518382 chars: Softka/AI Center/Investigación CodeGraph) min 173.4 ms · med 186.5 ms

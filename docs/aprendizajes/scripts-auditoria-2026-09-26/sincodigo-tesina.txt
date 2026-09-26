@@ -1,0 +1,5 @@
+== notas-tesina.json: 1306 notas · salidas distintas: 0
+sinCodigo (actual)           min 703.4 ms · med 848.2 ms
+sinCodigo (variante)         min 543.7 ms · med 653.6 ms
+actual, nota max (433940)    min 27.4 ms · med 28.4 ms
+variante, nota max           min 67.7 ms · med 73.5 ms
