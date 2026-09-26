@@ -5,9 +5,9 @@ detalle en markdown, un color, una fecha —con hora o sin ella— y, si hace fa
 repetición. Cuando llega el momento, **avisa**. Pedido por el usuario el 2026-09-25 en la
 bandeja.
 
-**Solo desktop por ahora** (decisión del usuario, 2026-09-25): en web hacen falta una tabla
-y endpoints nuevos en el backend .NET, y los avisos del navegador funcionan distinto. Queda
-anotado como pendiente en [[BACKLOG]].
+**Desktop primero y web después**, el mismo día (2026-09-25): el usuario decidió empezar solo
+por desktop y, confirmado ahí, pidió reflejarlo. Cómo se adaptó a web, en § «Cómo quedó en
+web».
 
 > [!important] No es la nota diaria
 > `FUN-M-07` (`DAILY-NOTE`) crea **una nota por fecha**, un archivo del vault. Un
@@ -282,6 +282,37 @@ estaba cerrada, así que no lleva número propio.
 
 Verificado con Playwright el mismo día: de septiembre de 2026 a marzo de 2021 en cinco
 clics, a diciembre de 1998 escribiendo el año, y de vuelta con «Ir a hoy».
+
+## Cómo quedó en web
+
+Reflejado a `web-cloud` el 2026-09-25 (merge `07a7727`, rama `feat/calendario-web`),
+**adaptado**: no fue copiar código, porque en web no hay carpeta de vault ni Rust.
+
+- **Iguales a desktop**: el modelo (`lib/recordatorios.ts`) y sus 23 tests, todos los
+  componentes de `components/recordatorios/` —vistas, formulario, tarjetas, selector de mes
+  y año— y los tokens de color.
+- **Guardado**: un **documento JSON por vault**, con el mismo formato que
+  `recordatorios.json`, en la tabla `recordatorios_vault` (en `d1/schema.sql` y en
+  `local_schema.sql`). Endpoints `GET` y `PUT /vaults/{id}/recordatorios`
+  (`RecordatoriosEndpoints.cs`): el servidor no interpreta el documento, solo lo guarda. Leer
+  pide acceso al vault; escribir, rol editor o propietario. Cuerpo: objeto JSON de hasta 1 MB.
+- **Avisos**: la misma tarjeta, y en lugar de la notificación de Windows, la del
+  **navegador** cuando la pestaña está oculta o sin foco. El permiso se pide al guardar el
+  primer recordatorio con hora, no al cargar la página.
+- **Ciclo del vault**: en web no hay `vaultSessionStore`; los recordatorios se cargan y se
+  vacían con el `vaultId` del workspace.
+
+> [!warning] Limitaciones de web
+> - **Varios dispositivos**: gana la última escritura. Dos navegadores editando el
+>   calendario a la vez pueden pisarse.
+> - **D1 en producción**: la tabla nueva hay que aplicarla a mano con
+>   `wrangler d1 execute … schema.sql`, como el resto del esquema, al desplegar.
+> - Quien solo tiene una **carpeta compartida** (sin rol en el vault) ve el calendario vacío:
+>   los recordatorios son del vault.
+
+Verificado: `dotnet build`, `npm ci`, `tsc`, `next build` y los 14 scripts de test; los
+endpoints, contra el backend local con curl (200, 400, 401, 403 y 413 donde corresponde). **Sin
+probar en el navegador** todavía.
 
 ## Relacionadas
 
