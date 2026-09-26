@@ -173,6 +173,10 @@ El modo activo (SQLite clásico vs carpeta) se resuelve por configuración: si h
 carpeta de vault seleccionada, la app trabaja contra ella; si no, sigue con el SQLite
 clásico. A futuro el modo carpeta puede volverse el único de desktop.
 
+> [!important] Decidido el 2026-09-26: el modo carpeta es el único
+> El modo SQLite clásico se declaró muerto y se retira del código en `FUN-L-24`. Ver
+> [[El modo SQLite clasico queda muerto]].
+
 ## 7. Fases de implementación
 
 1. **Selección y persistencia del vault** — elegir carpeta, guardarla, arrancar contra ella.

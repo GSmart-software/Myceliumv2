@@ -6,6 +6,11 @@ Eliminar el concepto de usuario/login de la experiencia de escritorio. Como en
 Obsidian: se abre la app y se está en el vault local. Sin páginas de auth, sin
 sección "Cuenta" en Configuración, sin avatar en la topbar.
 
+> [!warning] Superada el 2026-09-26
+> Esta decisión dependía de `mycelium.db` y su migración sqlx. Con
+> [[El modo SQLite clasico queda muerto]] ese archivo desaparece, y la identidad interna se
+> retira en `FUN-L-24` ([[auditoria-capa-de-datos]] § 2). Se conserva como registro.
+
 ## Decisión clave: el esquema NO cambia
 
 Las tablas `usuarios`, `vaults` y `membresias` y el seed `local-user` se

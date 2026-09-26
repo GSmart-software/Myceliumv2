@@ -51,6 +51,8 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
 - [[Implementacion independiente por rama]] — la regla de oro: nada de merge entre versiones.
 - [[Diferencias funcionales aceptadas entre versiones]] — qué existe solo en una y por qué.
 - [[Mycelium como memoria de la IA]] — el objetivo de fondo de la terminal y el framework.
+- [[El modo SQLite clasico queda muerto]] — 2026-09-26: el vault en carpeta es el único
+  modo de desktop; el modo sin carpeta era inalcanzable y costaba una rama por función.
 - [[Los temas los define Mycelium, no el usuario]] — por qué no hay creador de temas, y
   qué queda aprendido para los estilos que sí se agreguen.
 
@@ -113,6 +115,10 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
   línea en la consola de F12, por una fachada única con tres niveles (`FUN-L-21`).
 - [[calendario-recordatorios]] — un calendario de recordatorios que avisan, del vault y sin
   archivos (`FUN-L-22`).
+- [[auditoria-capa-de-datos]] — tanda 3 de la auditoría: retirar el modo clásico y la
+  identidad interna, un solo mecanismo de preferencias por vault (`FUN-L-24`).
+- [[auditoria-editor-y-enlaces]] — tanda 4: Excalidraw como archivo, sin caché IndexedDB,
+  un solo resolutor de wikilinks, importar por Rust (`FUN-M-40`).
 - [[grafo-disposiciones]] — tres disposiciones más para el grafo global, elegibles por
   vault: anillo de colonias, crecimiento y sustrato (`FUN-L-23`). Sale de
   [[Representaciones de micelio para el grafo]].
