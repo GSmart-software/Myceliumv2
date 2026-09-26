@@ -121,6 +121,8 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
   identidad interna, un solo mecanismo de preferencias por vault (`FUN-L-24`).
 - [[auditoria-editor-y-enlaces]] — tanda 4: Excalidraw como archivo, sin caché IndexedDB,
   un solo resolutor de wikilinks, importar por Rust (`FUN-M-40`).
+- [[grafo-indice-y-motor]] — el plan de `DEF-109` implementado: tabla de enlaces en el
+  índice y motor del cúmulo con capa estática, Barnes-Hut y worker (`FUN-L-25`).
 - [[grafo-disposiciones]] — tres disposiciones más para el grafo global, elegibles por
   vault: anillo de colonias, crecimiento y sustrato (`FUN-L-23`). Sale de
   [[Representaciones de micelio para el grafo]].
