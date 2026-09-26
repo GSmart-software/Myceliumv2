@@ -105,6 +105,13 @@ Tres modos: todos, el apuntado y sus vecinos, o solo el apuntado. El control
 está en el menú del grafo y no en Configuración: es una opción de esa vista y se
 toca mientras se la mira.
 
+### `FUN-L-23` — disposición del grafo
+
+`disposicionGrafo`: `cumulo` (por defecto, para que un vault existente no
+cambie de aspecto al actualizar), `anillo`, `crecimiento` o `sustrato`. Un
+valor desconocido cae a `cumulo`. Como los nombres, el control está en el menú
+del grafo. Ver [[grafo-disposiciones]].
+
 ### `FUN-M-25` — ancho de las columnas de un archivo tabla
 
 `anchosTabla`: `id del .base` → `referencia de columna` → píxeles. Es el único
@@ -145,6 +152,7 @@ aspecto. Si algún día tienen que viajar, lo único que cambia es el cuerpo de
 
 - [[numeros-de-linea]] — el primer consumidor, y el que más pulido necesitó.
 - [[bases-tabla]] — `FUN-M-25`, el consumidor que forzó el porte a web.
+- [[grafo-disposiciones]] — `FUN-L-23`, la disposición del grafo global.
 - [[BACKLOG]] — `FUN-M-28`, `FUN-M-21`, `FUN-M-25` y `FUN-M-29`.
 - [[RAMAS]] — la divergencia con web: qué se trae entero y qué no.
 - [[mycignore]] — por qué `.mycelium/` no aparece en la app.
