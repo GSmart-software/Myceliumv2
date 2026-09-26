@@ -77,6 +77,9 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
   con reglas para los agentes que diseñen pantallas. Complementa a [[DESIGN_SYSTEM]].
 - [[Auditoria de UI 2026-09-19]] — línea base técnica (14/20) antes de cambiar nada: los
   temas claros no calibran el color de brillo.
+- [[Representaciones de micelio para el grafo]] — la exploración de 2026-09-25/26 con
+  cuatro formas de dibujar el grafo como micelio, probadas sobre tres vaults; tres se
+  adoptaron en `FUN-L-23`.
 
 ## Funcionalidades (especificaciones)
 
@@ -110,6 +113,9 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
   línea en la consola de F12, por una fachada única con tres niveles (`FUN-L-21`).
 - [[calendario-recordatorios]] — un calendario de recordatorios que avisan, del vault y sin
   archivos (`FUN-L-22`).
+- [[grafo-disposiciones]] — tres disposiciones más para el grafo global, elegibles por
+  vault: anillo de colonias, crecimiento y sustrato (`FUN-L-23`). Sale de
+  [[Representaciones de micelio para el grafo]].
 - [[bases-tabla]] — el archivo `.base`: agregar notas por sus propiedades en una tabla
   (`FUN-L-03`). Continuación directa de [[metadata-yaml]].
 - [[edicion-en-el-render]] — las propiedades y las tablas dejan de abrirse en crudo con el
@@ -133,7 +139,7 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
 - [[Aprendizajes tecnicos]] — **mapa del área** (leer primero).
 - [[CodeMirror y la vista en vivo]] · [[Drag and drop en Mycelium]] · [[Estado con Zustand]]
 - [[Tauri y el WebView]] · [[Terminal integrada - PTY y xterm]] · [[Compilacion y entorno de desarrollo]]
-- [[Rendimiento del grafo]] — análisis del costo por frame y propuestas de optimización.
+- [[Rendimiento del grafo]] — análisis del costo por frame, propuestas de optimización y el segundo análisis para vaults de más de 1.000 notas (`DEF-109`).
 - [[Rendimiento de la apertura del vault]] — por qué tarda abrir un vault grande y cómo acelerarlo.
 
 ## Producto y planificación

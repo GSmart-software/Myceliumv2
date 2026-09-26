@@ -602,6 +602,19 @@ cuando se borran notas. En el incidente de `DEF-105` pesaba **479 MB** para 11.7
 
 Reportado por el usuario el 2026-09-25, junto con `DEF-105`.
 
+# DEF-109
+**Con más de 1.000 documentos el grafo de conexiones es inusable.** Al abrirlo, la
+animación va a tirones y tarda mucho en asentarse; al alejar el zoom para abarcarlo entero
+—que es lo que hace falta con esa cantidad de notas— la app se congela varios segundos por
+frame y sigue así aunque no se toque nada. Arrastrar un nodo o pasar el cursor por encima
+responde con retraso. Además, en un vault de ese tamaño, **abrir o guardar cualquier nota
+produce una pausa perceptible** aunque el grafo no esté a la vista.
+
+La mejora anterior del grafo (sprites, culling, ver [[Rendimiento del grafo]]) alcanzó
+para vaults de unos cientos de notas, pero no para este tamaño.
+
+Reportado por el usuario el 2026-09-25.
+
 ---
 
 > [!warning] Defectos sin reporte original

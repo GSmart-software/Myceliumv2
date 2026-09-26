@@ -1,0 +1,822 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>[hidden]{display:none!important}</style>
+<title>Micelio del vault</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;1,9..144,300&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400&display=swap">
+<style>
+  :root {
+    --bg: #0B100E;
+    --bg2: #111915;
+    --ink: #E6EEE9;
+    --muted: #8AA093;
+    --line: #22302A;
+    --hypha: #CFE6D8;
+    --glow: #5DCAA5;
+    --cap: #F2E4C4;
+    --accent: #19E6FF;
+    color-scheme: dark;
+  }
+  html, body { height: 100%; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "IBM Plex Sans", system-ui, sans-serif; font-size: 14px; line-height: 1.45;
+  }
+  .app { display: grid; grid-template-rows: auto 1fr; height: 100%; }
+  header {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px;
+    padding: 10px 16px; border-bottom: 1px solid var(--line);
+  }
+  h1 { font-family: Fraunces, Georgia, serif; font-weight: 300; font-size: 22px; margin: 0; letter-spacing: .01em; }
+  h1 em { font-style: italic; color: var(--glow); }
+  .tabs { display: flex; gap: 4px; flex-wrap: wrap; }
+  .tab {
+    background: none; border: 1px solid var(--line); color: var(--muted);
+    padding: 6px 12px; border-radius: 999px; cursor: pointer; font: inherit; font-size: 13px;
+  }
+  .tab[aria-selected="true"] { color: var(--ink); border-color: var(--glow); background: rgba(93,202,165,.10); }
+  .tab:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .spacer { flex: 1; }
+  .size { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; }
+  select, .btn {
+    background: var(--bg2); color: var(--ink); border: 1px solid var(--line); border-radius: 6px;
+    padding: 5px 8px; font: inherit; font-size: 13px; cursor: pointer;
+  }
+  .main { display: grid; grid-template-columns: 1fr 312px; min-height: 0; }
+  .stage { position: relative; min-height: 0; }
+  canvas { display: block; width: 100%; height: 100%; cursor: grab; }
+  .hint {
+    position: absolute; left: 12px; bottom: 10px; color: var(--muted); font-size: 12px;
+    font-family: "IBM Plex Mono", ui-monospace, monospace; pointer-events: none;
+  }
+  .cultivando[hidden] { display: none; }
+  .cultivando {
+    position: absolute; inset: 0; display: grid; place-items: center; background: rgba(11,16,14,.7);
+    font-family: Fraunces, Georgia, serif; font-style: italic; font-size: 18px; color: var(--glow);
+  }
+  aside {
+    border-left: 1px solid var(--line); padding: 16px; overflow: auto;
+    display: flex; flex-direction: column; gap: 18px; background: var(--bg2);
+  }
+  aside h2 { font-family: Fraunces, Georgia, serif; font-weight: 500; font-size: 18px; margin: 0 0 6px; text-wrap: balance; }
+  aside p { margin: 0 0 8px; color: var(--ink); }
+  aside p.m { color: var(--muted); }
+  .eyebrow { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 12px; font-variant-numeric: tabular-nums; }
+  .stats span:nth-child(odd) { color: var(--muted); }
+  .growth { display: flex; flex-direction: column; gap: 8px; }
+  .growth .row { display: flex; align-items: center; gap: 10px; }
+  input[type="range"] { flex: 1; min-width: 0; accent-color: var(--glow); }
+  .date { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 12px; color: var(--glow); white-space: nowrap; }
+  .nota { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; min-height: 84px; }
+  .nota .t { font-weight: 500; }
+  .nota .r { color: var(--muted); font-size: 12px; font-family: "IBM Plex Mono", ui-monospace, monospace; }
+  .cost { display: flex; gap: 6px; flex-wrap: wrap; }
+  .pill { font-size: 11px; border: 1px solid var(--line); border-radius: 999px; padding: 2px 8px; color: var(--muted); }
+  .pill.ok { color: var(--glow); border-color: rgba(93,202,165,.5); }
+  .pill.warn { color: var(--cap); border-color: rgba(242,228,196,.4); }
+  @media (max-width: 760px) {
+    .main { grid-template-columns: 1fr; grid-template-rows: 1fr auto; }
+    aside { border-left: 0; border-top: 1px solid var(--line); max-height: 42%; }
+  }
+  @media (prefers-reduced-motion: reduce) { .tab, .btn { transition: none; } }
+</style>
+
+<div class="app">
+  <header>
+    <h1>Micelio <em>del vault</em></h1>
+    <div class="tabs" role="tablist" aria-label="Representación">
+      <button class="tab" role="tab" data-mode="radial" aria-selected="true">Rizoma radial</button>
+      <button class="tab" role="tab" data-mode="anillo" aria-selected="false">Anillo de colonias</button>
+      <button class="tab" role="tab" data-mode="crecimiento" aria-selected="false">Crecimiento</button>
+      <button class="tab" role="tab" data-mode="sustrato" aria-selected="false">Sustrato</button>
+    </div>
+    <div class="spacer"></div>
+    <label class="size">Notas
+      <select id="tamano">
+        <option value="800">800</option>
+        <option value="1500" selected>1.500</option>
+        <option value="3000">3.000</option>
+      </select>
+    </label>
+    <button class="btn" id="recentrar" type="button">Recentrar</button>
+  </header>
+  <div class="main">
+    <div class="stage">
+      <canvas id="lienzo" aria-label="Grafo del vault dibujado como micelio"></canvas>
+      <div class="hint" id="hint">rueda: zoom · arrastrar: mover · clic: fijar una nota</div>
+      <div class="cultivando" id="cultivando" hidden>cultivando el sustrato…</div>
+    </div>
+    <aside>
+      <div>
+        <div class="eyebrow">Vault sintético</div>
+        <div class="stats" id="stats"></div>
+      </div>
+      <div id="explica"></div>
+      <div class="growth">
+        <div class="eyebrow">Crecimiento cronológico</div>
+        <div class="row">
+          <button class="btn" id="play" type="button">Reproducir</button>
+          <input type="range" id="reveal" min="1" max="1500" value="1500" aria-label="Notas reveladas">
+          <span class="date" id="fecha"></span>
+        </div>
+        <p class="m" style="font-size:12px">Vale en las cuatro vistas: se revelan las notas por fecha de creación. En «Crecimiento» además el lugar de cada nota depende de ese orden.</p>
+      </div>
+      <div>
+        <div class="eyebrow">Nota</div>
+        <div class="nota" id="nota"><p class="m">Pasá el cursor por un nodo, o hacé clic para fijarlo.</p></div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script>
+(() => {
+"use strict";
+
+// ───────────────────────── utilidades ─────────────────────────
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+const TAU = Math.PI * 2;
+const reducido = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+// ───────────────────────── vault sintético ─────────────────────────
+const AREAS = [
+  { n: "Proyectos",     sub: ["Mycelium", "Sofka", "Casa", "Freelance"], w: 5,   hue: 158 },
+  { n: "Personas",      sub: ["Equipo", "Clientes", "Amigos"],           w: 2.5, hue: 28  },
+  { n: "Decisiones",    sub: ["Arquitectura", "Producto"],               w: 1.5, hue: 190 },
+  { n: "Aprendizajes",  sub: ["Rust", "Web", "Datos", "Diseño"],         w: 3,   hue: 88  },
+  { n: "Reuniones",     sub: ["2025", "2026"],                           w: 4,   hue: 340 },
+  { n: "Ideas",         sub: [],                                         w: 2,   hue: 262 },
+  { n: "Lecturas",      sub: ["Libros", "Artículos", "Papers"],          w: 3,   hue: 48  },
+  { n: "Diario",        sub: ["2025", "2026"],                           w: 4,   hue: 210 },
+  { n: "Procesos",      sub: ["Desarrollo", "Operación"],                w: 1,   hue: 120 },
+  { n: "Referencias",   sub: ["Herramientas", "Glosario"],               w: 2,   hue: 10  },
+];
+const PREFIJOS = {
+  Proyectos: ["Plan de", "Estado de", "Retro de", "Alcance de", "Riesgos de", "Entrega de", "Spec de"],
+  Personas: ["Reunión con", "Notas sobre", "Perfil de", "Acuerdos con", "Seguimiento de"],
+  Decisiones: ["Adoptar", "Dejar de usar", "Separar", "Unificar", "Postergar", "Migrar"],
+  Aprendizajes: ["Cómo funciona", "Por qué falla", "Cuándo usar", "Límites de", "Trampas de"],
+  Reuniones: ["Sync de", "Planificación de", "Revisión de", "Kickoff de", "Cierre de"],
+  Ideas: ["Y si", "Explorar", "Prototipo de", "Boceto de", "Alternativa a"],
+  Lecturas: ["Resumen de", "Notas de", "Ideas de", "Crítica de", "Citas de"],
+  Diario: ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"],
+  Procesos: ["Cómo publicar", "Cómo revisar", "Cómo medir", "Checklist de", "Runbook de"],
+  Referencias: ["Glosario:", "Comando", "Atajo de", "API de", "Formato"],
+};
+const TEMAS = ["el grafo", "el índice", "la terminal", "el watcher", "la migración", "el editor", "los enlaces",
+  "el calendario", "la papelera", "las esporas", "el canvas", "la búsqueda", "los tags", "el frontmatter",
+  "SQLite", "Tauri", "el rendimiento", "la memoria", "los agentes", "el instalador", "la sincronización",
+  "el diseño", "los paneles", "las pestañas", "la exportación", "el tema oscuro", "los callouts", "Mermaid"];
+
+function generarVault(N, semilla) {
+  const rnd = mulberry32(semilla);
+  const pick = (a) => a[Math.floor(rnd() * a.length)];
+  const nodos = [];
+  const titulos = new Set();
+  const inicio = Date.UTC(2024, 2, 1), span = Date.UTC(2026, 8, 25) - inicio;
+  const fecha = (t) => new Date(t).toISOString().slice(0, 10);
+  const nuevo = (titulo, area, sub, t, esMapa) => {
+    let tt = titulo, k = 2;
+    while (titulos.has(tt)) tt = `${titulo} ${["II", "III", "IV", "V", "VI", "VII"][Math.min(k - 2, 5)]}${k > 7 ? k : ""}`, k++;
+    titulos.add(tt);
+    const id = nodos.length;
+    nodos.push({ id, titulo: tt, area, sub, creado: t, fecha: fecha(t), out: [], in: [], mapa: !!esMapa, huerfana: false });
+    return id;
+  };
+  // Raíz y mapas por área, tempranos.
+  const raiz = nuevo("Mapa del vault", -1, "", inicio + span * 0.01, true);
+  const mapas = AREAS.map((a, i) => nuevo(`Mapa de ${a.n}`, i, "", inicio + span * (0.01 + rnd() * 0.05), true));
+  const totalW = AREAS.reduce((s, a) => s + a.w, 0);
+  const porArea = AREAS.map(() => []);
+  for (let i = nodos.length; i < N; i++) {
+    let r = rnd() * totalW, ai = 0;
+    while (r > AREAS[ai].w) r -= AREAS[ai++].w;
+    const a = AREAS[ai];
+    const sub = a.sub.length ? pick(a.sub) : "";
+    const t = inicio + Math.pow(rnd(), 0.75) * span; // más notas recientes que viejas
+    let titulo;
+    if (a.n === "Diario") titulo = `${pick(PREFIJOS.Diario)} ${fecha(t)}`;
+    else titulo = `${pick(PREFIJOS[a.n])} ${pick(TEMAS)}`;
+    const id = nuevo(titulo, ai, sub, t, false);
+    porArea[ai].push(id);
+  }
+  nodos.sort((a, b) => a.creado - b.creado);
+  const idx = new Map(nodos.map((n, i) => [n.id, i]));
+  nodos.forEach((n, i) => (n.id = i));
+  const remap = (id) => idx.get(id);
+  const raizId = remap(raiz), mapasId = mapas.map(remap);
+  porArea.forEach((l, i) => (porArea[i] = l.map(remap)));
+
+  // Huérfanas: un 4 % no enlaza ni es enlazado.
+  for (const n of nodos) if (!n.mapa && rnd() < 0.03) n.huerfana = true;
+  const grado = new Int32Array(nodos.length);
+  const aristas = []; const vistas = new Set();
+  const enlazar = (s, t) => {
+    if (s === t || nodos[t].huerfana || nodos[s].huerfana) return;
+    const k = s * 100000 + t; if (vistas.has(k)) return;
+    vistas.add(k); aristas.push([s, t]); nodos[s].out.push(t); nodos[t].in.push(s); grado[s]++; grado[t]++;
+  };
+  // Mapas: la raíz enlaza a los mapas; cada mapa a una parte de su área.
+  for (const m of mapasId) enlazar(raizId, m);
+  porArea.forEach((lista, ai) => { for (const id of lista) if (rnd() < 0.32) enlazar(mapasId[ai], id); });
+  // Enlaces por nota: geométrica (media ≈ 1,7), 78 % dentro del área, preferencia por hubs.
+  const todos = nodos.map((n) => n.id);
+  const torneo = (pool) => {
+    let mejor = pool[Math.floor(rnd() * pool.length)];
+    for (let k = 0; k < 2; k++) { const c = pool[Math.floor(rnd() * pool.length)]; if (grado[c] > grado[mejor]) mejor = c; }
+    return mejor;
+  };
+  for (const n of nodos) {
+    if (n.huerfana || n.mapa) continue;
+    let c = 1; while (rnd() < 0.6 && c < 9) c++;
+    for (let k = 0; k < c; k++) {
+      const local = n.area >= 0 && rnd() < 0.78;
+      const pool = local ? porArea[n.area] : todos;
+      const t = torneo(pool.length ? pool : todos);
+      // Enlaza casi siempre hacia notas más viejas (se cita lo que ya existe).
+      if (nodos[t].creado > n.creado && rnd() < 0.5) continue;
+      enlazar(n.id, t);
+    }
+  }
+  nodos.forEach((n, i) => (n.grado = grado[i]));
+  return { nodos, aristas, raiz: raizId };
+}
+
+// ───────────────────────── componentes y estadísticas ─────────────────────────
+function componentes(g) {
+  const N = g.nodos.length, comp = new Int32Array(N).fill(-1);
+  const listas = [];
+  for (let s = 0; s < N; s++) {
+    if (comp[s] >= 0) continue;
+    const c = listas.length, cola = [s]; comp[s] = c;
+    const lista = [];
+    while (cola.length) {
+      const u = cola.pop(); lista.push(u);
+      for (const v of g.nodos[u].out) if (comp[v] < 0) { comp[v] = c; cola.push(v); }
+      for (const v of g.nodos[u].in) if (comp[v] < 0) { comp[v] = c; cola.push(v); }
+    }
+    listas.push(lista);
+  }
+  return { comp, listas };
+}
+
+// ───────────────────────── layouts ─────────────────────────
+// Árbol de expansión por BFS desde una raíz, con los hubs primero (quedan más al centro).
+function arbolBFS(g, raiz, dentro) {
+  const padre = new Map(); padre.set(raiz, -1);
+  const hijos = new Map(); const orden = [raiz];
+  for (let i = 0; i < orden.length; i++) {
+    const u = orden[i];
+    const vec = [...g.nodos[u].out, ...g.nodos[u].in].filter((v) => dentro(v) && !padre.has(v));
+    vec.sort((a, b) => g.nodos[b].grado - g.nodos[a].grado);
+    const hs = [];
+    for (const v of vec) { if (padre.has(v)) continue; padre.set(v, u); hs.push(v); orden.push(v); }
+    hijos.set(u, hs);
+  }
+  return { padre, hijos, orden };
+}
+
+// 1 · Rizoma radial: la raíz al centro, cada nivel un anillo, ángulo proporcional a las hojas.
+function layoutRadial(g, comps) {
+  const N = g.nodos.length;
+  const pos = new Float64Array(N * 2), hojas = new Float64Array(N), prof = new Int32Array(N);
+  const padreDe = new Int32Array(N).fill(-1);
+  const colocarArbol = (raiz, lista, cx, cy, espaciado) => {
+    const set = new Set(lista);
+    const { padre, hijos, orden } = arbolBFS(g, raiz, (v) => set.has(v));
+    for (let i = orden.length - 1; i >= 0; i--) {
+      const u = orden[i], hs = hijos.get(u);
+      hojas[u] = hs.length ? hs.reduce((s, h) => s + hojas[h], 0) : 1;
+      padreDe[u] = padre.get(u);
+    }
+    // Radio por nivel: al menos un paso, y más si ese nivel tiene muchos nodos.
+    const porNivel = []; prof[raiz] = 0;
+    for (const u of orden) { const d = u === raiz ? 0 : prof[padre.get(u)] + 1; prof[u] = d; porNivel[d] = (porNivel[d] || 0) + 1; }
+    const radio = [0];
+    // Anillos apretados: paso mínimo corto, y solo se abren si ese nivel tiene tantos
+    // nodos que no entrarían en la circunferencia.
+    for (let d = 1; d < porNivel.length; d++) radio[d] = Math.max(radio[d - 1] + 50, (porNivel[d] * espaciado) / TAU);
+    const asignar = (u, a0, a1) => {
+      const a = (a0 + a1) / 2, r = radio[prof[u]];
+      pos[u * 2] = cx + Math.cos(a) * r; pos[u * 2 + 1] = cy + Math.sin(a) * r;
+      let acc = a0;
+      for (const h of hijos.get(u)) { const w = ((a1 - a0) * hojas[h]) / hojas[u]; asignar(h, acc, acc + w); acc += w; }
+    };
+    asignar(raiz, 0, TAU);
+    return radio[radio.length - 1] || 8;
+  };
+  const listas = comps.listas.slice().sort((a, b) => b.length - a.length);
+  const principal = listas[0];
+  const raizP = principal.includes(g.raiz) ? g.raiz : principal.reduce((m, v) => (g.nodos[v].grado > g.nodos[m].grado ? v : m), principal[0]);
+  const Rp = colocarArbol(raizP, principal, 0, 0, 6.5);
+  // Islas y huérfanas: alrededor, en anillos exteriores, como esporas sueltas en el sustrato.
+  let anillo = Rp + 90, ang = 0, maxR = 0;
+  for (let i = 1; i < listas.length; i++) {
+    const l = listas[i];
+    const r = l.reduce((m, v) => (g.nodos[v].grado > g.nodos[m].grado ? v : m), l[0]);
+    const tmp = new Float64Array(0); // (posiciones se escriben directo)
+    const subR = l.length === 1 ? 6 : colocarArbol(r, l, 0, 0, 5) + 10;
+    if (l.length > 1) { /* trasladar */ }
+    const paso = (2 * subR + 26) / anillo;
+    if (ang + paso > TAU) { anillo += 2 * maxR + 60; ang = 0; maxR = 0; }
+    ang += paso / 2;
+    const cx = Math.cos(ang) * anillo, cy = Math.sin(ang) * anillo;
+    for (const v of l) { pos[v * 2] += cx; pos[v * 2 + 1] += cy; }
+    ang += paso / 2; if (subR > maxR) maxR = subR;
+    void tmp;
+  }
+  return { pos, hojas, padre: padreDe };
+}
+
+// 2 · Anillo de colonias: las notas en un círculo agrupadas por carpeta, las hifas agrupadas.
+function layoutAnillo(g) {
+  const N = g.nodos.length;
+  const orden = g.nodos.map((n) => n.id).sort((a, b) => {
+    const A = g.nodos[a], B = g.nodos[b];
+    return (A.area - B.area) || A.sub.localeCompare(B.sub) || (A.creado - B.creado);
+  });
+  const R = Math.max(420, (N * 2.3) / TAU);
+  const pos = new Float64Array(N * 2), ang = new Float64Array(N);
+  const gap = 0.025, nAreas = AREAS.length + 1, util = TAU - gap * nAreas;
+  const arcos = [];
+  let a = -Math.PI / 2, i = 0, actual = null, ini = 0;
+  for (const id of orden) {
+    const n = g.nodos[id];
+    if (n.area !== actual) { if (actual !== null) arcos.push({ area: actual, a0: ini, a1: a }); actual = n.area; a += gap; ini = a; }
+    a += util / N; ang[id] = a; pos[id * 2] = Math.cos(a) * R; pos[id * 2 + 1] = Math.sin(a) * R; i++;
+  }
+  arcos.push({ area: actual, a0: ini, a1: a });
+  return { pos, ang, R, arcos };
+}
+
+// 3 · Crecimiento: cada nota brota cerca de las que ya enlazaba; sin vecinas, cae en la frontera.
+function layoutCrecimiento(g, rnd) {
+  const N = g.nodos.length, pos = new Float64Array(N * 2);
+  const celda = 22, grid = new Map();
+  const key = (x, y) => `${Math.floor(x / celda)},${Math.floor(y / celda)}`;
+  const libre = (x, y) => {
+    const cx = Math.floor(x / celda), cy = Math.floor(y / celda);
+    for (let i = -1; i <= 1; i++) for (let j = -1; j <= 1; j++) {
+      const l = grid.get(`${cx + i},${cy + j}`); if (!l) continue;
+      for (const v of l) { const dx = pos[v * 2] - x, dy = pos[v * 2 + 1] - y; if (dx * dx + dy * dy < 14 * 14) return false; }
+    }
+    return true;
+  };
+  const poner = (u, x, y) => { pos[u * 2] = x; pos[u * 2 + 1] = y; const k = key(x, y); (grid.get(k) || grid.set(k, []).get(k)).push(u); };
+  const centroArea = AREAS.map(() => ({ x: 0, y: 0, n: 0 }));
+  let frontera = 30;
+  for (let u = 0; u < N; u++) {
+    const n = g.nodos[u];
+    const vec = [...n.out, ...n.in].filter((v) => v < u);
+    let x, y;
+    if (vec.length) {
+      let sx = 0, sy = 0; for (const v of vec) { sx += pos[v * 2]; sy += pos[v * 2 + 1]; }
+      sx /= vec.length; sy /= vec.length;
+      // Brota alrededor de sus vecinas, en cualquier dirección, con un sesgo suave
+      // hacia afuera de la colonia para que el micelio avance en vez de apretarse.
+      const L = Math.hypot(sx, sy) || 1, out = 26 + rnd() * 30;
+      const aFuera = Math.atan2(sy, sx), a = rnd() < 0.35 ? aFuera + (rnd() - 0.5) * 1.2 : rnd() * TAU;
+      x = sx + Math.cos(a) * out; y = sy + Math.sin(a) * out; void L;
+    } else if (n.area >= 0 && centroArea[n.area].n > 0) {
+      const c = centroArea[n.area]; const a = rnd() * TAU, r = 30 + rnd() * 90;
+      x = c.x / c.n + Math.cos(a) * r; y = c.y / c.n + Math.sin(a) * r;
+    } else {
+      const a = rnd() * TAU; x = Math.cos(a) * (frontera + 20); y = Math.sin(a) * (frontera + 20);
+    }
+    // Si el sitio está ocupado, empujar hacia afuera en espiral hasta encontrar hueco.
+    for (let k = 0; k < 40 && !libre(x, y); k++) { const a = Math.atan2(y, x) + (rnd() - 0.5) * 0.6, r = Math.hypot(x, y) + 12; x = Math.cos(a) * r; y = Math.sin(a) * r; }
+    poner(u, x, y);
+    const R = Math.hypot(x, y); if (R > frontera) frontera = R;
+    if (n.area >= 0) { const c = centroArea[n.area]; c.x += x; c.y += y; c.n++; }
+  }
+  return { pos };
+}
+
+// 4 · Sustrato: la física actual (repulsión + resortes) con Barnes-Hut, calculada por tandas.
+function* layoutSustrato(g, rnd) {
+  const N = g.nodos.length, pos = new Float64Array(N * 2), vel = new Float64Array(N * 2);
+  for (let u = 0; u < N; u++) {
+    const n = g.nodos[u], a = (n.area < 0 ? 0 : (n.area / AREAS.length) * TAU) + (rnd() - 0.5) * 0.9, r = 80 + rnd() * 380;
+    pos[u * 2] = Math.cos(a) * r; pos[u * 2 + 1] = Math.sin(a) * r;
+  }
+  // Repulsión y reposo de los resortes más cortos que en el grafo actual (k = 80):
+  // la colonia queda más apretada y las hifas, más cortas.
+  const k = 45, CAP = N * 6 + 16;
+  const child = new Int32Array(CAP * 4), mass = new Float64Array(CAP), cx = new Float64Array(CAP), cy = new Float64Array(CAP);
+  const leaf = new Int32Array(CAP), half = new Float64Array(CAP), ox = new Float64Array(CAP), oy = new Float64Array(CAP);
+  const stack = new Int32Array(512);
+  const ITER = 240; let alpha = 1;
+  for (let it = 0; it < ITER; it++) {
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    for (let u = 0; u < N; u++) { const x = pos[u * 2], y = pos[u * 2 + 1]; if (x < minX) minX = x; if (x > maxX) maxX = x; if (y < minY) minY = y; if (y > maxY) maxY = y; }
+    const size = Math.max(maxX - minX, maxY - minY) + 1;
+    child.fill(-1); mass.fill(0); cx.fill(0); cy.fill(0); leaf.fill(-2);
+    let count = 1; half[0] = size / 2; ox[0] = minX + size / 2; oy[0] = minY + size / 2; leaf[0] = -1;
+    const nuevoHijo = (node, q, i, x, y) => {
+      const c = count++; child[node * 4 + q] = c; half[c] = half[node] / 2;
+      ox[c] = ox[node] + (q & 1 ? half[c] : -half[c]); oy[c] = oy[node] + (q & 2 ? half[c] : -half[c]);
+      leaf[c] = i; mass[c] = 1; cx[c] = x; cy[c] = y; return c;
+    };
+    for (let i = 0; i < N; i++) {
+      const x = pos[i * 2], y = pos[i * 2 + 1]; let node = 0;
+      for (let d = 0; d < 48; d++) {
+        mass[node]++; cx[node] += x; cy[node] += y;
+        const q = (x >= ox[node] ? 1 : 0) + (y >= oy[node] ? 2 : 0);
+        let c = child[node * 4 + q];
+        if (c === -1) { nuevoHijo(node, q, i, x, y); break; }
+        if (leaf[c] >= 0) {
+          const o = leaf[c], x2 = pos[o * 2], y2 = pos[o * 2 + 1];
+          if (x2 === x && y2 === y) { mass[c]++; cx[c] += x; cy[c] += y; break; }
+          leaf[c] = -1; mass[c] = 1; cx[c] = x2; cy[c] = y2;
+          const q2 = (x2 >= ox[c] ? 1 : 0) + (y2 >= oy[c] ? 2 : 0); nuevoHijo(c, q2, o, x2, y2);
+        }
+        node = c;
+      }
+    }
+    const theta2 = 0.85 * 0.85;
+    for (let i = 0; i < N; i++) {
+      const x = pos[i * 2], y = pos[i * 2 + 1]; let sp = 0; stack[sp++] = 0; let fx = 0, fy = 0;
+      while (sp > 0) {
+        const node = stack[--sp], m = mass[node]; if (m === 0) continue;
+        const mx = cx[node] / m, my = cy[node] / m;
+        let dx = x - mx, dy = y - my, d2 = dx * dx + dy * dy; const w = half[node] * 2;
+        if (leaf[node] >= 0 || w * w < theta2 * d2) {
+          if (leaf[node] === i) continue;
+          if (d2 < 1) { dx = rnd() - 0.5; dy = rnd() - 0.5; d2 = 1; }
+          const d = Math.sqrt(d2), f = Math.min((k * k) / d2, 6) * 0.7 * alpha * m;
+          fx += (dx / d) * f; fy += (dy / d) * f;
+        } else for (let q = 0; q < 4; q++) { const c = child[node * 4 + q]; if (c !== -1) stack[sp++] = c; }
+      }
+      vel[i * 2] += fx; vel[i * 2 + 1] += fy;
+    }
+    for (const [s, t] of g.aristas) {
+      const dx = pos[t * 2] - pos[s * 2], dy = pos[t * 2 + 1] - pos[s * 2 + 1];
+      const d = Math.max(Math.sqrt(dx * dx + dy * dy), 1), f = ((d - k) / d) * 0.2 * alpha * 0.05;
+      vel[s * 2] += dx * f; vel[s * 2 + 1] += dy * f; vel[t * 2] -= dx * f; vel[t * 2 + 1] -= dy * f;
+    }
+    for (let u = 0; u < N; u++) {
+      vel[u * 2] -= pos[u * 2] * 0.004 * alpha; vel[u * 2 + 1] -= pos[u * 2 + 1] * 0.004 * alpha;
+      vel[u * 2] *= 0.85; vel[u * 2 + 1] *= 0.85; pos[u * 2] += vel[u * 2]; pos[u * 2 + 1] += vel[u * 2 + 1];
+    }
+    alpha = Math.max(alpha * 0.985, 0.02);
+    if (it % 8 === 7) yield it / ITER;
+  }
+  return { pos };
+}
+
+// ───────────────────────── estado ─────────────────────────
+const lienzo = document.getElementById("lienzo");
+const ctx = lienzo.getContext("2d");
+const estatico = document.createElement("canvas");
+const sctx = estatico.getContext("2d");
+let dpr = 1, W = 0, H = 0;
+let g = null, comps = null, layout = null, modo = "radial", cache = {};
+let cam = { scale: 1, ox: 0, oy: 0 };
+let hover = -1, fijo = -1, reveal = 0, playing = false, revealAt = null, tiempoPlay = 0;
+let sucioEstatico = true, sucio = true, frame = 0, arrastrando = false, ultimo = null, downAt = null;
+let cultivo = null;
+
+const spriteCache = new Map();
+function glowSprite(color, r, blur) {
+  const key = `${color}|${r}|${blur}`; let s = spriteCache.get(key); if (s) return s;
+  if (spriteCache.size > 300) spriteCache.clear();
+  const lado = Math.ceil(2 * (r + blur) + 2); s = document.createElement("canvas"); s.width = s.height = lado;
+  const c = s.getContext("2d"); c.shadowColor = color; c.shadowBlur = blur; c.fillStyle = color;
+  c.beginPath(); c.arc(lado / 2, lado / 2, r, 0, TAU); c.fill(); spriteCache.set(key, s); return s;
+}
+const tinte = (area, l = 62, a = 1) => area < 0 ? `hsla(150,20%,${l}%,${a})` : `hsla(${AREAS[area].hue},34%,${l}%,${a})`;
+
+// Hifa ahusada: un polígono relleno a lo largo de una bézier, con un leve ondular orgánico.
+function hifa(c, x0, y0, cx, cy, x1, y1, w0, w1, semilla, frac) {
+  const pasos = 8, L = Math.hypot(x1 - x0, y1 - y0), amp = Math.min(L * 0.045, 6);
+  const px = new Float64Array(pasos + 1), py = new Float64Array(pasos + 1), nx = new Float64Array(pasos + 1), ny = new Float64Array(pasos + 1);
+  for (let i = 0; i <= pasos; i++) {
+    const t = (i / pasos) * frac, u = 1 - t;
+    let x = u * u * x0 + 2 * u * t * cx + t * t * x1, y = u * u * y0 + 2 * u * t * cy + t * t * y1;
+    const dx = 2 * u * (cx - x0) + 2 * t * (x1 - cx), dy = 2 * u * (cy - y0) + 2 * t * (y1 - cy), l = Math.hypot(dx, dy) || 1;
+    const n1 = -dy / l, n2 = dx / l, ond = Math.sin(t * 9.4 + semilla) * amp * Math.sin(t * Math.PI);
+    x += n1 * ond; y += n2 * ond; px[i] = x; py[i] = y; nx[i] = n1; ny[i] = n2;
+  }
+  c.beginPath();
+  for (let i = 0; i <= pasos; i++) { const w = (w0 + (w1 - w0) * (i / pasos)) / 2; const f = i ? c.lineTo : c.moveTo; f.call(c, px[i] + nx[i] * w, py[i] + ny[i] * w); }
+  for (let i = pasos; i >= 0; i--) { const w = (w0 + (w1 - w0) * (i / pasos)) / 2; c.lineTo(px[i] - nx[i] * w, py[i] - ny[i] * w); }
+  c.closePath(); c.fill();
+}
+
+// ───────────────────────── construir ─────────────────────────
+function construir(N) {
+  g = generarVault(N, 7);
+  comps = componentes(g);
+  cache = {};
+  reveal = N; fijo = -1; hover = -1; playing = false; revealAt = null;
+  const slider = document.getElementById("reveal"); slider.max = N; slider.value = N;
+  const huerf = comps.listas.filter((l) => l.length === 1).length;
+  document.getElementById("stats").innerHTML =
+    `<span>notas</span><span>${N.toLocaleString("es")}</span>` +
+    `<span>enlaces</span><span>${g.aristas.length.toLocaleString("es")}</span>` +
+    `<span>carpetas</span><span>${AREAS.length} áreas</span>` +
+    `<span>hubs (≥ 20)</span><span>${g.nodos.filter((n) => n.grado >= 20).length}</span>` +
+    `<span>islas</span><span>${comps.listas.length - 1 - huerf}</span>` +
+    `<span>huérfanas</span><span>${huerf}</span>`;
+  hubs = g.nodos.filter((n) => n.grado >= 12).sort((a, b) => b.grado - a.grado).slice(0, 24).map((n) => n.id);
+  aplicarModo(modo, true);
+}
+let hubs = [];
+
+function aplicarModo(m, forzar) {
+  modo = m;
+  for (const t of document.querySelectorAll(".tab")) t.setAttribute("aria-selected", String(t.dataset.mode === m));
+  document.getElementById("explica").innerHTML = EXPLICA[m];
+  if (cache[m] && !forzar) { layout = cache[m]; recentrar(); return; }
+  if (cultivo) { cultivo = null; document.getElementById("cultivando").hidden = true; }
+  const rnd = mulberry32(11);
+  const t0 = performance.now();
+  if (m === "radial") layout = layoutRadial(g, comps);
+  else if (m === "anillo") layout = layoutAnillo(g);
+  else if (m === "crecimiento") layout = layoutCrecimiento(g, rnd);
+  else {
+    // Física por tandas para no bloquear: mientras tanto se muestra el aviso.
+    const gen = layoutSustrato(g, rnd); cultivo = gen; layout = null;
+    const aviso = document.getElementById("cultivando"); aviso.hidden = false;
+    const paso = () => {
+      if (cultivo !== gen) return;
+      const r = gen.next();
+      if (r.done) { layout = r.value; cache[m] = layout; layout.ms = Math.round(performance.now() - t0); cultivo = null; aviso.hidden = true; indexar(); recentrar(); return; }
+      aviso.textContent = `cultivando el sustrato… ${Math.round(r.value * 100)} %`;
+      setTimeout(paso, 0);
+    };
+    paso();
+    return;
+  }
+  layout.ms = Math.round(performance.now() - t0);
+  cache[m] = layout; indexar(); recentrar();
+}
+
+// Rejilla para apuntar nodos con el cursor.
+function indexar() {
+  const celda = 40, grid = new Map(), pos = layout.pos;
+  for (let u = 0; u < g.nodos.length; u++) { const k = `${Math.floor(pos[u * 2] / celda)},${Math.floor(pos[u * 2 + 1] / celda)}`; (grid.get(k) || grid.set(k, []).get(k)).push(u); }
+  layout.grid = grid; layout.celda = celda;
+}
+function apuntar(wx, wy) {
+  if (!layout) return -1;
+  const { grid, celda, pos } = layout, umbral = 9 / cam.scale + 3;
+  const cx = Math.floor(wx / celda), cy = Math.floor(wy / celda); let mejor = -1, md = Infinity;
+  for (let i = -1; i <= 1; i++) for (let j = -1; j <= 1; j++) {
+    const l = grid.get(`${cx + i},${cy + j}`); if (!l) continue;
+    for (const u of l) { if (u >= reveal) continue; const dx = pos[u * 2] - wx, dy = pos[u * 2 + 1] - wy, d = dx * dx + dy * dy; const r = umbral + radio(u); if (d < r * r && d < md) { md = d; mejor = u; } }
+  }
+  return mejor;
+}
+const radio = (u) => { const n = g.nodos[u]; return n.grado >= 20 ? 3.2 + Math.min(n.grado, 80) * 0.07 : 1.4 + Math.min(n.grado, 20) * 0.11; };
+
+function recentrar() {
+  if (!layout) return;
+  const pos = layout.pos; let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  const hayEnlazadas = g.nodos.some((n) => n.grado > 0);
+  for (let u = 0; u < g.nodos.length; u++) { if (hayEnlazadas && g.nodos[u].grado === 0) continue; const x = pos[u * 2], y = pos[u * 2 + 1]; if (x < minX) minX = x; if (x > maxX) maxX = x; if (y < minY) minY = y; if (y > maxY) maxY = y; }
+  if (modo === "anillo") { minX = minY = -layout.R - 95; maxX = maxY = layout.R + 95; }
+  const s = Math.min((W - 40) / (maxX - minX + 1), (H - 40) / (maxY - minY + 1));
+  cam = { scale: Math.max(0.03, Math.min(s, 3)), ox: -((minX + maxX) / 2) * s, oy: -((minY + maxY) / 2) * s };
+  sucioEstatico = true; despertar();
+}
+
+// ───────────────────────── dibujo ─────────────────────────
+function aplicarCamara(c) { c.setTransform(dpr, 0, 0, dpr, 0, 0); c.translate(W / 2 + cam.ox, H / 2 + cam.oy); c.scale(cam.scale, cam.scale); }
+function visible() { const m = 60 / cam.scale; return { l: (-W / 2 - cam.ox) / cam.scale - m, r: (W / 2 - cam.ox) / cam.scale + m, t: (-H / 2 - cam.oy) / cam.scale - m, b: (H / 2 - cam.oy) / cam.scale + m }; }
+const fracDe = (u, ahora) => { if (!revealAt || reducido) return 1; const t = revealAt[u]; return t ? Math.min(1, (ahora - t) / 420) : 1; };
+
+function dibujarEstatico() {
+  const c = sctx, pos = layout.pos, ahora = performance.now();
+  c.setTransform(1, 0, 0, 1, 0, 0); c.fillStyle = "#0B100E"; c.fillRect(0, 0, estatico.width, estatico.height);
+  aplicarCamara(c);
+  const v = visible(), s = cam.scale;
+  const dentro = (x, y) => x >= v.l && x <= v.r && y >= v.t && y <= v.b;
+  const cruzaVista = (ax, ay, bx, by) => !(Math.max(ax, bx) < v.l || Math.min(ax, bx) > v.r || Math.max(ay, by) < v.t || Math.min(ay, by) > v.b);
+  let animando = false;
+
+  if (modo === "sustrato") {
+    // Sustrato: un halo difuso por nodo, más grande en los hubs, para que la colonia tenga cuerpo.
+    const sp = glowSprite("rgba(93,202,165,0.10)", 6, 26);
+    for (let u = 0; u < reveal; u++) { const x = pos[u * 2], y = pos[u * 2 + 1]; if (!dentro(x, y)) continue; const k = (18 + Math.min(g.nodos[u].grado, 60) * 1.2) * 2; c.drawImage(sp, x - k / 2, y - k / 2, k, k); }
+  }
+  if (modo === "anillo") {
+    // Arcos de las carpetas y las hifas agrupadas (cúbicas hacia el centro cuando cruzan de colonia).
+    for (const a of layout.arcos) { c.beginPath(); c.arc(0, 0, layout.R + 16, a.a0, a.a1); c.strokeStyle = tinte(a.area, 50, 0.9); c.lineWidth = 6; c.stroke(); }
+    c.lineWidth = Math.max(0.5, 0.9 / Math.sqrt(s));
+    for (const [sI, tI] of g.aristas) {
+      if (sI >= reveal || tI >= reveal) continue;
+      const x0 = pos[sI * 2], y0 = pos[sI * 2 + 1], x1 = pos[tI * 2], y1 = pos[tI * 2 + 1];
+      const misma = g.nodos[sI].area === g.nodos[tI].area && g.nodos[sI].area >= 0;
+      c.beginPath(); c.moveTo(x0, y0);
+      if (misma) { const am = (layout.ang[sI] + layout.ang[tI]) / 2, sep = Math.abs(layout.ang[sI] - layout.ang[tI]); const r = layout.R * Math.max(0.12, 1 - sep * 1.6); c.quadraticCurveTo(Math.cos(am) * r, Math.sin(am) * r, x1, y1); c.strokeStyle = tinte(g.nodos[sI].area, 66, 0.20); }
+      else { c.bezierCurveTo(x0 * 0.12, y0 * 0.12, x1 * 0.12, y1 * 0.12, x1, y1); c.strokeStyle = "rgba(207,230,216,0.07)"; }
+      c.stroke();
+    }
+  } else if (modo === "radial") {
+    // Enlaces que no son del árbol: anastomosis finas, curvadas hacia el centro.
+    c.strokeStyle = "rgba(207,230,216,0.06)"; c.lineWidth = Math.max(0.4, 0.8 / Math.sqrt(s));
+    for (const [sI, tI] of g.aristas) {
+      if (sI >= reveal || tI >= reveal || layout.padre[tI] === sI || layout.padre[sI] === tI) continue;
+      const x0 = pos[sI * 2], y0 = pos[sI * 2 + 1], x1 = pos[tI * 2], y1 = pos[tI * 2 + 1];
+      if (!cruzaVista(x0, y0, x1, y1)) continue;
+      c.beginPath(); c.moveTo(x0, y0); c.quadraticCurveTo((x0 + x1) * 0.28, (y0 + y1) * 0.28, x1, y1); c.stroke();
+    }
+    // El árbol: hifas ahusadas del padre a cada hijo, gruesas según cuánto cuelga de ellas.
+    c.fillStyle = "rgba(207,230,216,0.62)";
+    for (let u = 0; u < reveal; u++) {
+      const p = layout.padre[u]; if (p < 0 || p >= reveal) continue;
+      const x0 = pos[p * 2], y0 = pos[p * 2 + 1], x1 = pos[u * 2], y1 = pos[u * 2 + 1];
+      if (!cruzaVista(x0, y0, x1, y1)) continue;
+      // Grosor: crece con el logaritmo de lo que cuelga, pero acotado para que un
+      // cordón con cientos de hojas siga siendo un hilo al lado de las esporas.
+      const w = 0.3 + 0.5 * Math.log2(1 + layout.hojas[u]);
+      const mx = (x0 + x1) / 2, my = (y0 + y1) / 2, rl = Math.hypot(x0, y0) || 1;
+      const f = fracDe(u, ahora); if (f < 1) animando = true;
+      hifa(c, x0, y0, mx + (x0 / rl) * 10, my + (y0 / rl) * 10, x1, y1, w + 0.15, Math.max(0.22, w * 0.55), u * 0.7, f);
+    }
+  } else {
+    // Crecimiento y sustrato: cada enlace es una hifa de la nota vieja a la nueva, más fina en la punta.
+    // Hifas tenues y verdosas en las dos vistas: donde se juntan muchas no deben
+    // tapar las esporas, que son lo que se quiere ver.
+    c.fillStyle = modo === "sustrato" ? "rgba(150,214,190,0.20)" : "rgba(150,214,190,0.24)";
+    for (const [sI, tI] of g.aristas) {
+      if (sI >= reveal || tI >= reveal) continue;
+      const viejo = g.nodos[sI].creado <= g.nodos[tI].creado ? sI : tI, nuevo = viejo === sI ? tI : sI;
+      const x0 = pos[viejo * 2], y0 = pos[viejo * 2 + 1], x1 = pos[nuevo * 2], y1 = pos[nuevo * 2 + 1];
+      if (!cruzaVista(x0, y0, x1, y1)) continue;
+      const gv = g.nodos[viejo].grado, w0 = 0.6 + Math.min(gv, 40) * 0.05;
+      const mx = (x0 + x1) / 2, my = (y0 + y1) / 2, dx = x1 - x0, dy = y1 - y0, L = Math.hypot(dx, dy) || 1;
+      const bend = ((sI * 7919) % 13 - 6) / 6 * 0.13;
+      const f = fracDe(nuevo, ahora); if (f < 1) animando = true;
+      hifa(c, x0, y0, mx - dy * bend, my + dx * bend, x1, y1, w0, 0.35, sI * 0.37, f);
+    }
+  }
+  // Esporas y cuerpos fructíferos.
+  const pix = s * dpr;
+  for (let u = 0; u < reveal; u++) {
+    const x = pos[u * 2], y = pos[u * 2 + 1]; if (!dentro(x, y)) continue;
+    const n = g.nodos[u], r = radio(u), f = fracDe(u, ahora); if (f < 1) continue;
+    if (n.grado >= 20 || n.mapa) {
+      const rp = Math.max(1, Math.round(r * pix * 2) / 2), sp = glowSprite(n.mapa ? "#F2E4C4" : "#E9DDB9", rp, 14);
+      const lado = sp.width / pix; c.drawImage(sp, x - lado / 2, y - lado / 2, lado, lado);
+    } else {
+      c.fillStyle = n.huerfana ? "rgba(138,160,147,0.55)" : tinte(n.area, 70, 0.95);
+      c.beginPath(); c.arc(x, y, r, 0, TAU); c.fill();
+    }
+  }
+  return animando;
+}
+
+function dibujar() {
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.drawImage(estatico, 0, 0);
+  if (!layout) return;
+  const pos = layout.pos, s = cam.scale, foco = hover >= 0 ? hover : fijo;
+  const aPantalla = (u) => [W / 2 + cam.ox + pos[u * 2] * s, H / 2 + cam.oy + pos[u * 2 + 1] * s];
+  // Resaltado del foco: sus hifas en el color de acento, sus vecinas nombradas.
+  const vecinos = new Set();
+  if (foco >= 0 && foco < reveal) {
+    aplicarCamara(ctx);
+    ctx.strokeStyle = "#19E6FF"; ctx.lineWidth = 1.6 / s; ctx.lineCap = "round";
+    ctx.shadowColor = "#19E6FF"; ctx.shadowBlur = 8;
+    const n = g.nodos[foco];
+    for (const v of [...n.out, ...n.in]) {
+      if (v >= reveal) continue; vecinos.add(v);
+      const x0 = pos[foco * 2], y0 = pos[foco * 2 + 1], x1 = pos[v * 2], y1 = pos[v * 2 + 1];
+      ctx.beginPath(); ctx.moveTo(x0, y0);
+      if (modo === "anillo") ctx.quadraticCurveTo(0, 0, x1, y1); else ctx.quadraticCurveTo((x0 + x1) / 2, (y0 + y1) / 2, x1, y1);
+      ctx.stroke();
+    }
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = "#EAFFF8"; ctx.beginPath(); ctx.arc(pos[foco * 2], pos[foco * 2 + 1], radio(foco) + 1.5 / s, 0, TAU); ctx.fill();
+    ctx.fillStyle = "#19E6FF";
+    for (const v of vecinos) { ctx.beginPath(); ctx.arc(pos[v * 2], pos[v * 2 + 1], radio(v) + 0.8 / s, 0, TAU); ctx.fill(); }
+  }
+  // Etiquetas en espacio de pantalla: hubs siempre, vecinas del foco, y todas al acercarse.
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.font = '11px "IBM Plex Sans", system-ui, sans-serif'; ctx.textAlign = "left"; ctx.textBaseline = "middle";
+  const ocupados = [];
+  const rotular = (u, color, peso, forzar) => {
+    const [x, y] = aPantalla(u); if (x < -10 || x > W + 10 || y < -10 || y > H + 10) return;
+    const t = g.nodos[u].titulo, dx = radio(u) * s + 5;
+    ctx.font = `${peso} 11px "IBM Plex Sans", system-ui, sans-serif`;
+    const w = ctx.measureText(t).width, caja = [x + dx - 2, y - 7, w + 4, 14];
+    // Una etiqueta que pisa a otra ya puesta no se dibuja (salvo la del foco y sus vecinas).
+    if (!forzar && ocupados.some((o) => caja[0] < o[0] + o[2] && caja[0] + caja[2] > o[0] && caja[1] < o[1] + o[3] && caja[1] + caja[3] > o[1])) return;
+    ocupados.push(caja);
+    ctx.fillStyle = "rgba(11,16,14,0.75)"; ctx.fillRect(caja[0], caja[1], caja[2], caja[3]);
+    ctx.fillStyle = color; ctx.fillText(t, x + dx, y);
+  };
+  let cuantos = 0;
+  if (s >= 1.8) { for (let u = 0; u < reveal && cuantos < 260; u++) { const [x, y] = aPantalla(u); if (x < 0 || x > W || y < 0 || y > H) continue; rotular(u, "rgba(206,232,224,0.75)", 400); cuantos++; } }
+  else if (s >= (modo === "anillo" ? 1.0 : 0.35)) for (const u of hubs) if (u < reveal) rotular(u, "rgba(242,228,196,0.9)", 500);
+  if (modo === "anillo") {
+    // Nombre de cada colonia por fuera del anillo.
+    ctx.font = '500 12px "IBM Plex Sans", system-ui, sans-serif'; ctx.textAlign = "center";
+    for (const a of layout.arcos) { const am = (a.a0 + a.a1) / 2, r = (layout.R + 62); const x = W / 2 + cam.ox + Math.cos(am) * r * s, y = H / 2 + cam.oy + Math.sin(am) * r * s; if (x < 0 || x > W || y < 0 || y > H) continue; ctx.fillStyle = tinte(a.area, 74, 1); ctx.fillText(a.area < 0 ? "Raíz" : AREAS[a.area].n, x, y); }
+    ctx.textAlign = "left";
+  }
+  for (const v of vecinos) rotular(v, "#BFF4FF", 400, true);
+  if (foco >= 0 && foco < reveal) rotular(foco, "#FFFFFF", 500, true);
+}
+
+function tick() {
+  frame = 0;
+  let animando = false;
+  if (playing) {
+    const ahora = performance.now();
+    const porSeg = Math.max(60, g.nodos.length / 22);
+    const objetivo = Math.min(g.nodos.length, Math.floor(reveal + ((ahora - tiempoPlay) / 1000) * porSeg));
+    if (objetivo > reveal) { revealAt = revealAt || new Float64Array(g.nodos.length); for (let u = reveal; u < objetivo; u++) revealAt[u] = ahora; reveal = objetivo; tiempoPlay = ahora; actualizarSlider(); sucioEstatico = true; }
+    if (reveal >= g.nodos.length) { playing = false; document.getElementById("play").textContent = "Reproducir"; }
+    animando = true;
+  }
+  if (layout && sucioEstatico) { animando = dibujarEstatico() || animando; sucioEstatico = animando; sucio = true; }
+  if (layout && sucio) { dibujar(); sucio = false; }
+  if (animando) frame = requestAnimationFrame(tick);
+}
+function despertar() { sucio = true; if (!frame) frame = requestAnimationFrame(tick); }
+function actualizarSlider() { document.getElementById("reveal").value = reveal; document.getElementById("fecha").textContent = reveal > 0 ? g.nodos[reveal - 1].fecha : ""; }
+
+// ───────────────────────── interacción ─────────────────────────
+function redimensionar() {
+  const p = lienzo.parentElement; dpr = window.devicePixelRatio || 1; W = p.clientWidth; H = p.clientHeight;
+  lienzo.width = estatico.width = Math.round(W * dpr); lienzo.height = estatico.height = Math.round(H * dpr);
+  sucioEstatico = true; despertar();
+}
+new ResizeObserver(redimensionar).observe(lienzo.parentElement);
+const aMundo = (ev) => { const r = lienzo.getBoundingClientRect(); return { x: (ev.clientX - r.left - W / 2 - cam.ox) / cam.scale, y: (ev.clientY - r.top - H / 2 - cam.oy) / cam.scale }; };
+lienzo.addEventListener("pointerdown", (ev) => { arrastrando = true; ultimo = { x: ev.clientX, y: ev.clientY }; downAt = ultimo; lienzo.setPointerCapture(ev.pointerId); lienzo.style.cursor = "grabbing"; });
+lienzo.addEventListener("pointermove", (ev) => {
+  if (arrastrando) { cam.ox += ev.clientX - ultimo.x; cam.oy += ev.clientY - ultimo.y; ultimo = { x: ev.clientX, y: ev.clientY }; sucioEstatico = true; despertar(); return; }
+  const p = aMundo(ev), h = apuntar(p.x, p.y);
+  if (h !== hover) { hover = h; mostrarNota(h >= 0 ? h : fijo); despertar(); }
+});
+lienzo.addEventListener("pointerup", (ev) => {
+  arrastrando = false; lienzo.style.cursor = "grab";
+  if (downAt && Math.hypot(ev.clientX - downAt.x, ev.clientY - downAt.y) < 4) { const p = aMundo(ev); const h = apuntar(p.x, p.y); fijo = h === fijo ? -1 : h; mostrarNota(fijo >= 0 ? fijo : hover); despertar(); }
+});
+lienzo.addEventListener("wheel", (ev) => {
+  ev.preventDefault(); const f = ev.deltaY < 0 ? 1.12 : 1 / 1.12, r = lienzo.getBoundingClientRect();
+  const mx = ev.clientX - r.left - W / 2, my = ev.clientY - r.top - H / 2;
+  const ns = Math.min(Math.max(cam.scale * f, 0.02), 6), ff = ns / cam.scale;
+  cam.ox = mx - (mx - cam.ox) * ff; cam.oy = my - (my - cam.oy) * ff; cam.scale = ns; sucioEstatico = true; despertar();
+}, { passive: false });
+for (const t of document.querySelectorAll(".tab")) t.addEventListener("click", () => aplicarModo(t.dataset.mode, false));
+document.getElementById("tamano").addEventListener("change", (ev) => construir(+ev.target.value));
+document.getElementById("recentrar").addEventListener("click", recentrar);
+document.getElementById("reveal").addEventListener("input", (ev) => { reveal = +ev.target.value; playing = false; revealAt = null; document.getElementById("play").textContent = "Reproducir"; actualizarSlider(); sucioEstatico = true; despertar(); });
+document.getElementById("play").addEventListener("click", () => {
+  if (playing) { playing = false; document.getElementById("play").textContent = "Reproducir"; return; }
+  if (reveal >= g.nodos.length) reveal = 1;
+  playing = true; tiempoPlay = performance.now(); revealAt = new Float64Array(g.nodos.length); document.getElementById("play").textContent = "Pausar"; actualizarSlider(); sucioEstatico = true; despertar();
+});
+function mostrarNota(u) {
+  const el = document.getElementById("nota");
+  if (u < 0 || !g) { el.innerHTML = '<p class="m">Pasá el cursor por un nodo, o hacé clic para fijarlo.</p>'; return; }
+  const n = g.nodos[u], ruta = n.area < 0 ? "raíz" : `${AREAS[n.area].n}${n.sub ? " / " + n.sub : ""}`;
+  el.innerHTML = `<div class="t">${n.titulo}</div><div class="r">${ruta}</div><div class="r">creada ${n.fecha}</div>` +
+    `<div class="r">${n.out.length} salientes · ${n.in.length} entrantes${n.huerfana ? " · huérfana" : ""}${n.mapa ? " · mapa" : ""}</div>`;
+}
+
+// ───────────────────────── textos ─────────────────────────
+const EXPLICA = {
+  radial: `<h2>Rizoma radial</h2>
+    <p>El mapa del vault es la espora de origen. De él salen los mapas de cada área y de cada mapa, sus notas: cada nivel de distancia es un anillo. Las hifas son gruesas cuando de ellas cuelga mucho y finas en las puntas, como los cordones y las hifas de un micelio real.</p>
+    <p>Los enlaces que no forman parte de ese árbol se ven como filamentos tenues que cruzan por el centro: son las fusiones entre ramas (anastomosis). Las islas y las huérfanas quedan afuera, como esporas que todavía no se unieron a la colonia.</p>
+    <p class="m">Se lee como una jerarquía de distancia al centro: qué tan lejos del mapa está cada nota. Depende de tener un mapa raíz; sin uno, se toma la nota más enlazada.</p>
+    <div class="cost"><span class="pill ok">sin física</span><span class="pill ok">determinista</span><span class="pill ok">capa estática</span></div>`,
+  anillo: `<h2>Anillo de colonias</h2>
+    <p>Cada carpeta es una colonia y ocupa un arco del anillo; las notas se ordenan por subcarpeta y fecha. Las hifas que unen notas de la misma colonia se curvan cerca del borde, con el tinte de su carpeta; las que cruzan a otra colonia pasan por el centro y forman el tapiz pálido.</p>
+    <p>Se ve enseguida qué colonias se hablan entre sí y cuáles viven aisladas, algo que el cúmulo de fuerzas nunca muestra con claridad.</p>
+    <p class="m">Es la vista para entender la estructura del vault entero. Con muchas notas cada punto es pequeño, así que sirve más para navegar carpetas que notas.</p>
+    <div class="cost"><span class="pill ok">sin física</span><span class="pill ok">determinista</span><span class="pill ok">capa estática</span></div>`,
+  crecimiento: `<h2>Crecimiento</h2>
+    <p>El vault se dibuja como creció. Cada nota brota cerca de las notas que ya citaba y se aleja del centro de la colonia, así el micelio avanza hacia afuera con el tiempo. Una nota sin enlaces cae en la frontera de su carpeta. Las hifas van de la nota vieja a la nueva y se afinan en la punta.</p>
+    <p>Con «Reproducir» se ve brotar el micelio en orden cronológico, hifa por hifa. Es la misma construcción temporal que ya existe, pero en un dibujo que la representa.</p>
+    <p class="m">El lugar de una nota es estable: agregar notas nuevas no mueve las viejas, así que el mapa mental se conserva entre sesiones.</p>
+    <div class="cost"><span class="pill ok">sin física</span><span class="pill ok">incremental</span><span class="pill ok">capa estática</span></div>`,
+  sustrato: `<h2>Sustrato</h2>
+    <p>La disposición de siempre (repulsión y resortes), pero dibujada como micelio: un halo difuso donde la colonia es densa, hifas ahusadas en vez de líneas, esporas pequeñas y cuerpos fructíferos en las notas más enlazadas.</p>
+    <p>Sirve para comparar: misma física, otra piel. La física corre una sola vez al construir, con Barnes-Hut, y después la capa queda quieta.</p>
+    <p class="m">Conserva lo que ya gusta del grafo actual, pero hereda su costo: cada nota nueva reacomoda a las demás.</p>
+    <div class="cost"><span class="pill warn">física al construir</span><span class="pill ok">capa estática</span></div>`,
+};
+
+redimensionar();
+construir(1500);
+actualizarSlider();
+})();
+</script>
+
+</html>

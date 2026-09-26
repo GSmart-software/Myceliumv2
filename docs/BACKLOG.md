@@ -137,6 +137,7 @@ y **priorizar** qué implementar antes.
 | `FUN-L-20` 🟢 | `FILES-DRAWIO` | Integrar **draw.io** como un tipo de archivo más del vault, igual que Excalidraw: crear, abrir y editar un diagrama dentro de Mycelium, guardado en la carpeta del vault. No compite con Excalidraw —aquel es trazo a mano, este es figura y conector que se engancha— ni con el canvas. El trabajo real no es el editor sino **cómo se embebe**: draw.io no publica un componente React, se integra como su aplicación web en modo embebido (`iframe` + `postMessage`), así que hay que decidir entre apuntar al sitio público (no funciona sin conexión) o **empaquetar la webapp** en el instalador. **Decidido por el usuario el 2026-09-23**: webapp **empaquetada y recortada** y **solo desktop**. **Implementado y confirmado en la app** el 2026-09-23, con el instalador en **40,3 MB** —por encima de los 30-35 estimados, aceptado por el usuario: el sobrecosto son las bibliotecas de formas, que son el motivo de traer draw.io—. La webapp no entra a git: la baja `scripts/preparar-drawio.mjs`, que ahora corre dentro de `npm run build`. Spec en [[drawio]] | desktop | — |
 | `FUN-L-21` | `DIAGNOSTICO-FALLOS` | Que **ningún fallo pase en silencio**: todo lo que sale mal, en el frontend o en Rust, deja una línea en la consola de F12 con el área, la operación y el error original. Para depurar y para usuarios experimentados. No es sembrar `console.error`: es una **fachada única** (`lib/fallos.ts`) con **tres niveles** —fallo, degradado, esperado—, destinos intercambiables, redes globales para lo que escapa de todo `catch`, `tauri-plugin-log` hacia la webview también en release, y un **chequeo automático** que impide volver a escribir un `catch {}` vacío. Medido el 2026-09-25: de 100 `catch`, **6** registran algo; 24 están vacíos y 40 siguen de largo en silencio. Pedido por el usuario el 2026-09-25. Spec en [[registro-de-fallos]] | ambas (difiere) | — |
 | `FUN-L-22` 🛠️ | `CALENDARIO-RECORDATORIOS` | Un **calendario** con **recordatorios**: título, detalle en markdown con `[[enlaces]]`, color de una paleta fija, fecha con hora o sin ella, y repetición diaria, semanal, mensual o anual. **Avisa** con una tarjeta propia en la app y una notificación de Windows si la ventana no está al frente; lo vencido con la app cerrada se avisa al abrir. Se abre como pestaña (grilla del mes + lista escondible) o como panel lateral (mes compacto + lista). Los recordatorios son **del vault** y viven en `.mycelium/recordatorios.json`: no son archivos, así que no aparecen en el explorador, la búsqueda ni el grafo. No es la nota diaria (`FUN-M-07`). Pedido por el usuario el 2026-09-25. **Implementado en desktop el 2026-09-25, sin confirmar en la app**. Spec en [[calendario-recordatorios]]. **Reflejada en web** el 2026-09-25 (`07a7727`), con guardado en el backend .NET y avisos del navegador | ambas (difiere) | — |
+| `FUN-L-23` | `GRAPH-DISPOSICIONES` | Tres **disposiciones** más para el grafo global, elegibles **por vault** desde el menú del grafo, además del cúmulo de fuerzas actual: **Anillo de colonias** (las notas en un anillo agrupadas por carpeta, los enlaces curvados por el borde o por el centro según crucen o no), **Crecimiento** (cada nota brota junto a las que ya enlazaba, en orden de creación; sin física y estable al agregar notas) y **Sustrato** (la simulación del cúmulo dibujada como micelio: hifas ahusadas, esporas, cuerpos fructíferos en los hubs y un halo en las zonas densas). Salen de la exploración de [[Representaciones de micelio para el grafo]] sobre tres vaults; el «Rizoma radial» se descartó porque presupone una nota raíz. Las tres nuevas se dibujan a una capa estática (sin redibujo en reposo). Decidido por el usuario el 2026-09-26. Spec en [[grafo-disposiciones]] | ambas | — |
 
 ### 1.4 Muy grandes — tamaño XL
 
@@ -560,6 +561,34 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   si desde el embed se edita o solo se lee.
 
 ### Pendientes — tamaño L
+
+#### `FUN-L-23` · `GRAPH-DISPOSICIONES` (—)
+- **Estado**: especificada el 2026-09-26 e **implementada en desktop el mismo día**
+  (rama `feat/grafo-disposiciones-desktop`, integrada con `--no-ff`). `tsc` en verde y
+  17 tests headless del módulo puro (`frontend/scripts/test-disposiciones.mjs`: colonias,
+  orden de creación, estabilidad del crecimiento al agregar notas, 3.000 notas en menos
+  de un segundo). **Sin confirmar en la app**: el menú, la persistencia de la preferencia
+  y los cuatro dibujos los confirma el usuario (lista en [[grafo-disposiciones]] § «Cómo
+  quedó»). Playwright no se pudo automatizar: necesita la app corriendo con IPC. **Web:
+  pendiente** de reflejar tras la confirmación. Sale en la `2.2.0`, junto con el
+  calendario.
+- **Qué es**: que el usuario elija, por vault, cómo se dispone el grafo global: el cúmulo
+  de siempre, un anillo por carpetas, un crecimiento cronológico sin física, o el cúmulo con
+  piel de micelio.
+- **De dónde sale**: de la exploración de [[Representaciones de micelio para el grafo]]
+  (2026-09-25/26), con demos sobre un vault sintético de 1.500 notas y sobre dos vaults
+  reales (la Tesina, 1.306 notas y 3.275 enlaces; «Trabajo y Estudio», hecho en Obsidian,
+  1.220 notas y 1.777 enlaces). El usuario ajustó grosor de hifas, distancia entre anillos,
+  repulsión y brillo sobre las demos antes de decidir.
+- **Decisiones del usuario** (2026-09-26): conservar el cúmulo actual; sumar Anillo,
+  Crecimiento y Sustrato; **descartar el Rizoma radial** porque presupone una nota raíz de
+  la que cuelga todo, y los vaults que se trabajan con Mycelium no se estructuran así.
+- **Por qué es L**: son tres algoritmos de disposición, un dibujo nuevo (hifas ahusadas,
+  esporas, halo, nombres sin solaparse) con capa estática, una preferencia por vault, el
+  menú, y el reflejo a web. El cúmulo no se toca.
+- **Relación con `DEF-109`**: independiente. Sustrato comparte el motor del cúmulo, así
+  que hereda sus mejoras; la capa estática de las disposiciones nuevas es la misma idea que
+  la propuesta 1 del segundo análisis de [[Rendimiento del grafo]].
 
 #### `FUN-L-22` 🛠️ · `CALENDARIO-RECORDATORIOS` (—)
 - **Estado**: especificada el 2026-09-25 e **implementada en desktop el mismo día**
