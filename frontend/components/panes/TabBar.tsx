@@ -5,11 +5,12 @@ import { useRouter } from "next/navigation";
 import { useCallback, useRef, useState } from "react";
 import { exportNoteMd, exportNotePdfActive } from "@/lib/export";
 import { useMenuEmergente } from "@/lib/useMenuEmergente";
-import { ICONO_GRAFO, ICONO_POR_TIPO } from "@/lib/iconosDeTipo";
+import { ICONO_CALENDARIO, ICONO_GRAFO, ICONO_POR_TIPO } from "@/lib/iconosDeTipo";
 import { usePreferencesStore } from "@/stores/preferencesStore";
 import { useSyncStore } from "@/stores/syncStore";
 import {
   allLeaves,
+  CALENDAR_TAB_ID,
   GRAPH_TAB_ID,
   useTabsStore,
   type LeafPane,
@@ -62,6 +63,7 @@ export function TabBar({ pane }: { pane: LeafPane }) {
 
   function tituloDeNotaId(notaId: string) {
     if (notaId === GRAPH_TAB_ID) return "Grafo de conexiones";
+    if (notaId === CALENDAR_TAB_ID) return "Calendario";
     return notas.find((n) => n.id === notaId)?.titulo ?? "…";
   }
 
@@ -72,8 +74,8 @@ export function TabBar({ pane }: { pane: LeafPane }) {
   /**
    * El ícono del tipo de documento de una pestaña (`FUN-S-11`).
    *
-   * El grafo se resuelve **antes** de mirar `notas`, porque no tiene fila ahí.
-   * Lo que no es el grafo es una nota del vault y toma el ícono de su tipo; si
+   * El grafo y el calendario se resuelven **antes** de mirar `notas`, porque no
+   * tienen fila ahí. Lo que no es ninguno de los dos es una nota del vault y toma el ícono de su tipo; si
    * todavía no llegó el índice, el de markdown, que es lo que casi siempre
    * resulta ser.
    *
@@ -84,6 +86,7 @@ export function TabBar({ pane }: { pane: LeafPane }) {
    */
   function iconoDeTab(notaId: string) {
     if (notaId === GRAPH_TAB_ID) return ICONO_GRAFO;
+    if (notaId === CALENDAR_TAB_ID) return ICONO_CALENDARIO;
     const tipo = notas.find((n) => n.id === notaId)?.tipo;
     return ICONO_POR_TIPO[tipo ?? "markdown"];
   }
@@ -100,6 +103,7 @@ export function TabBar({ pane }: { pane: LeafPane }) {
   /** Tooltip: nombre completo + ruta de carpetas (HU-25 comportamiento). */
   function tooltipOf(tab: Tab) {
     if (tab.notaId === GRAPH_TAB_ID) return "Grafo de conexiones";
+    if (tab.notaId === CALENDAR_TAB_ID) return "Calendario";
     const nota = notas.find((n) => n.id === tab.notaId);
     if (!nota) return "";
     const parts: string[] = [];

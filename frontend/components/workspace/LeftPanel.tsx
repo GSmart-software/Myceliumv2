@@ -4,6 +4,7 @@ import { ExplorerDock } from "@/components/explorer/ExplorerDock";
 import { EsporasPanel } from "@/components/explorer/EsporasPanel";
 import { SearchPanel } from "@/components/explorer/SearchPanel";
 import { TrashPanel } from "@/components/explorer/TrashPanel";
+import { CalendarioPanel } from "@/components/recordatorios/CalendarioPanel";
 import { usePanelLayoutStore, type RailSection } from "@/stores/panelLayoutStore";
 import { ResizeHandle } from "./ResizeHandle";
 import styles from "./Panels.module.css";
@@ -13,6 +14,7 @@ const SECTION_TITLES: Record<RailSection, string> = {
   search: "Búsqueda",
   tags: "Tags",
   esporas: "Esporas",
+  calendario: "Calendario",
   trash: "Papelera",
 };
 
@@ -60,6 +62,8 @@ function SectionContent({ section }: { section: RailSection }) {
       return <p className={styles.placeholder}>La vista de tags está planificada para una versión futura.</p>;
     case "esporas":
       return <EsporasPanel />;
+    case "calendario":
+      return <CalendarioPanel />;
     case "trash":
       return <TrashPanel />;
   }

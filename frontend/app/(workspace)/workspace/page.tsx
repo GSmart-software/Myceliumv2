@@ -5,6 +5,7 @@ import { Suspense, useEffect, useRef } from "react";
 import { ImportDialogs } from "@/components/explorer/ImportDialogs";
 import { ShareModal } from "@/components/explorer/ShareModal";
 import { PaneTree } from "@/components/panes/PaneTree";
+import { Recordatorios } from "@/components/recordatorios/TarjetaRecordatorio";
 import { AppTopbar } from "@/components/workspace/AppTopbar";
 import { Avisos } from "@/components/workspace/Avisos";
 import { BarraEstado } from "@/components/workspace/BarraEstado";
@@ -15,6 +16,7 @@ import { Rail } from "@/components/workspace/Rail";
 import { VentanaAjustes } from "@/components/settings/VentanaAjustes";
 import { useAuthStore } from "@/stores/authStore";
 import { usePrefsVaultStore } from "@/stores/prefsVaultStore";
+import { useRecordatoriosStore } from "@/stores/recordatoriosStore";
 import { usePanelLayoutStore } from "@/stores/panelLayoutStore";
 import { useCssStore } from "@/stores/cssStore";
 import { usePreferencesStore } from "@/stores/preferencesStore";
@@ -108,6 +110,20 @@ function WorkspaceShell() {
   // efecto se repita.
   useEffect(() => {
     void usePrefsVaultStore.getState().cargar(vaultId);
+  }, [vaultId]);
+
+  // Los recordatorios del calendario (`FUN-L-22`) también son del vault. En
+  // desktop los carga `vaultSessionStore` al abrir la carpeta; acá, entrar al
+  // workspace con un vault activo. Al cargarlos arranca el programador, que
+  // avisa en el acto lo que venció con la página cerrada. La limpieza los
+  // vacía —y detiene el programador— al cambiar de vault o al salir del
+  // workspace (cerrar sesión desmonta este shell): fuera del vault no se
+  // muestran ni avisan.
+  useEffect(() => {
+    void useRecordatoriosStore.getState().cargar(vaultId);
+    return () => {
+      void useRecordatoriosStore.getState().cargar(null);
+    };
   }, [vaultId]);
 
   // Una vez cargado el árbol, descartar del layout restaurado las pestañas cuyas
@@ -283,6 +299,8 @@ function WorkspaceShell() {
       <ShareModal />
       <PaletaComandos />
       <Avisos />
+      {/* Tarjetas de aviso y modal del calendario (FUN-L-22). */}
+      <Recordatorios />
       <DialogoConfirmar />
     </div>
   );
