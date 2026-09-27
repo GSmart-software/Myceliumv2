@@ -758,6 +758,56 @@ al asentarse.
 7. Sustrato: se asienta rápido y se detiene; la construcción temporal crece y se asienta.
 8. Mini-grafo del panel: igual que antes (sin discos planos).
 
+## Parte D · Movimiento sin perder el estilo (2026-09-26)
+
+El usuario probó la Parte C: el asentamiento ya es rápido, pero **rechaza que las curvas
+se vuelvan rectas** mientras el grafo se mueve («arruina el estilo de Mycelium»), y en
+las tres disposiciones de micelio el problema sigue: **el modo rápido solo existía en el
+cúmulo**; Sustrato repinta las 3.275 hifas ahusadas (8 segmentos con ondulación, halo por
+nodo) en cada lote de posiciones, y Anillo y Crecimiento las repintan en **cada paso de
+paneo o zoom**. Decisión del usuario: **las curvas se quedan siempre**; lo que se
+prescinde durante el movimiento es el brillo de los nodos y las sombras.
+
+### Qué cambiar
+
+1. **La cámara nunca repinta a mitad de gesto** (las tres disposiciones de micelio y
+   el cúmulo en reposo). Paneo: se copia la capa ya pintada **desplazada** (`drawImage`
+   con offset), sin dibujar nada. Zoom con rueda: se copia la capa **escalada** alrededor
+   del puntero durante el gesto (se verá levemente borrosa unos instantes) y, ~150 ms
+   después del último evento de rueda, un repintado completo. Ninguna curva desaparece.
+2. **Curvas siempre.** En el cúmulo, el modo rápido de la Parte C deja de trazar rectas:
+   traza las mismas curvas (`quadraticCurveTo`), sin flujo ni flecha. En micelio, las
+   hifas siguen siendo polígonos ahusados con curva; durante el movimiento con **4
+   segmentos** en vez de 8 y **sin ondulación** (la curva y el ahusamiento se conservan; la
+   ondulación fina no se distingue en movimiento). Al detenerse, repintado completo con 8
+   y ondulación.
+3. **Sin brillo ni sombras en movimiento** (decisión del usuario): nodos como discos
+   planos del mismo color y radio (sin sprite con glow), sin halo del sustrato, sin
+   `shadowBlur` de hover. Al detenerse vuelven en el repintado completo. Si medido esto no
+   alcanza, es preferible **bajar la frecuencia de repintado** (ver 4) antes que tocar las
+   curvas.
+4. **Repintado acotado en Sustrato**: durante la física, la capa se repinta como máximo a
+   ~30 fps y con el presupuesto adaptativo de la Parte C (si el último repintado pasó de
+   12 ms, se salta el siguiente lote); entre repintados el hilo principal no hace nada. Es
+   la misma regla del cúmulo, aplicada al dibujo de micelio.
+5. **Medición con la Tesina real** (extractor de `docs/design/demos/`), DPR 1,5, en las
+   cuatro disposiciones: paneo y zoom (ms por frame, frames >50 ms), asentamiento del
+   sustrato (tiempo, frames >50 ms), y el cúmulo con curvas en movimiento comparado con
+   las rectas de la Parte C. Si con curvas el cúmulo supera 50 ms por frame a zoom 1, se
+   reporta la cifra y se decide con el usuario; **no** se vuelve a las rectas por defecto.
+
+### Criterios
+
+1. Panear en cualquier disposición con la Tesina: ningún repintado durante el gesto;
+   frames < 16 ms.
+2. Zoom con rueda: sin frames > 50 ms; el repintado completo llega en < 300 ms tras
+   soltar.
+3. Sustrato asentándose: < 8 s y ningún frame > 50 ms; las hifas se ven curvas y
+   ahusadas todo el tiempo.
+4. Cúmulo en movimiento: curvas visibles; sin brillo; sin frames > 50 ms (o la cifra,
+   si no se logra a zoom 1).
+5. Quieto, todo idéntico a hoy: ondulación, brillo, halo, nombres sin pisarse.
+
 ## Versionado
 
 Es la corrección de `DEF-109` más mejoras internas: **patch**, absorbido por la `2.2.0`
