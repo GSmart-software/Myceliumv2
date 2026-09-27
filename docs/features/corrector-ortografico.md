@@ -3,7 +3,7 @@
 Subraya las palabras mal escritas del editor —**también las que ya estaban escritas**—,
 sugiere correcciones con el clic derecho y deja agregar palabras a un diccionario del vault.
 Motor propio con diccionarios Hunspell que el usuario descarga. **Especificado el
-2026-09-27; en implementación.**
+2026-09-27; implementado en desktop el mismo día, sin confirmar en la app (§ 9).**
 
 > [!important] Historia corta
 > Primero se implementó con el corrector **del sistema** (desktop `85ee186`, web
@@ -198,6 +198,101 @@ diccionarios/
 > - La GPL-3 del italiano: el usuario decidió incluirlo ahora; distribuirlo como descarga
 >   separada y sin modificar es la posición más defendible, pero no se consultó a un
 >   abogado.
+
+## 9. Cómo quedó (desktop)
+
+Implementado el 2026-09-27 en `feat/corrector-desktop`, **sin probar dentro de la app**
+(la de desarrollo estaba abierta en otra sesión). Sí se probó fuera: el mismo código en
+Edge headless —el motor de WebView2— con Tauri simulado y los diccionarios reales.
+
+### Las piezas
+
+| Pieza | Dónde |
+|---|---|
+| Motor (spellbook → WASM, API C sin wasm-bindgen: cargar varios, revisar, sugerir, agregar) | `frontend/wasm/ortografia/` → `public/ortografia/motor.wasm` (328 KB; 106 KB en gzip). Se regenera con `npm run wasm:ortografia` |
+| Lado JS del motor | `lib/ortografia/motor.ts` |
+| Worker (correcta en **alguno** de los cargados, o en el diccionario del vault / ignoradas) | `lib/ortografia/corrector.worker.ts` |
+| Servicio de la ventana: arranca/apaga el worker, caché, recarga, «Agregar», «Ignorar», propuesta de descarga | `lib/ortografia/corrector.ts` |
+| Palabras, exclusiones, caché, archivo del vault | `lib/ortografia/palabras.ts` (puro) |
+| Idioma y región del sistema, variante | `lib/ortografia/idioma.ts` (puro) |
+| Manifiesto y estado de cada idioma | `lib/ortografia/manifiesto.ts` (puro) |
+| **Capa desktop** (lo único que diverge de web) | `lib/ortografia/diccionarios.ts` |
+| Extensión de CodeMirror y menú propio | `lib/editor/ortografia.ts`, `components/editor/MenuOrtografia.tsx` |
+| Lo que no es prosa | `lib/editor/ortografiaExclusiones.ts` |
+| Configuración → Editor | `components/settings/DiccionariosCorrector.tsx` |
+| Descarga, verificación, lectura (Rust) | `src-tauri/src/diccionarios.rs` |
+| Diccionario del vault | `.mycelium/diccionario.txt` (`prefs_vault.rs`, lista `ESTADOS`) |
+| Armar y publicar los diccionarios | `scripts/publicar-diccionarios.mjs` |
+| Tests | `scripts/test-ortografia.mjs` (21) y `cargo test --lib diccionarios` (9) |
+
+### Decisiones tomadas al implementar
+
+- **Desktop descomprime en Rust**, no con `DecompressionStream`: el gzip se descomprime
+  mientras baja (`flate2`), se calcula el `sha256` de lo descomprimido (`sha2`) y se
+  guardan `.aff`/`.dic` planos. Verificar el hash de lo descomprimido obligaba a
+  descomprimir en Rust de todos modos. Web sí usará `DecompressionStream`.
+- **Los bytes van al worker por un comando** (`diccionarios_leer`, `ipc::Response`
+  crudo), no por `asset:`: el ámbito de `asset:` se abre carpeta por carpeta para los
+  vaults y no hacía falta sumarle `%LOCALAPPDATA%`. El worker no puede invocar a Tauri,
+  así que el hilo principal los lee y se los **transfiere**.
+- **La configuración es de la instalación**: `diccionarios/config.json` (`activas`,
+  `propuestaHecha`, `urlManifiesto` opcional), junto a los diccionarios. Lo que se activa
+  es la **lengua** (`es`), no la variante; la variante sale de la región del sistema al
+  descargar.
+- **Todas las variantes de español** de wooorm/dictionaries (España + 21 regiones), no
+  solo AR/ES/MX: cuesta lo mismo y cubre a cualquier hispanohablante.
+- **Palabras personales en el worker como conjunto**, con la regla de mayúsculas de
+  Hunspell (`casa` vale «Casa» y «CASA»), y además **agregadas a cada diccionario** para
+  que las sugerencias las propongan. Quitar una recarga los diccionarios desde sus bytes:
+  spellbook no sabe «desagregar».
+- **Qué se revisa**: lo visible ± 3.000 caracteres. Se descartan los tokens con dígitos o
+  `_`, los `camelCase` y las letras sueltas. A las exclusiones de antes se sumaron URLs y
+  correos sueltos y el tipo de los callouts (`[!warning]`).
+- **Una marca sobre algo que se está editando se quita al instante** y se vuelve a decidir
+  al dejar de tipear, para que no quede subrayada media palabra.
+- **La propuesta de descarga** sale una sola vez por instalación como aviso flotante (con
+  «Descargar») y, mientras no haya ninguno, también arriba de la lista en Configuración.
+- **URL del manifiesto**: por defecto `…r2.dev/diccionarios/manifiesto.json`; la cambia
+  la variable `MYCELIUM_DICCIONARIOS` (una URL o una carpeta local) o `urlManifiesto` en
+  `config.json`. Las URLs del manifiesto son relativas, así que la misma carpeta sirve
+  desde R2, desde un servidor local o desde el disco (`file://`).
+
+### Cómo probarlo localmente
+
+1. `cd frontend && npm run publicar-diccionarios -- --simulacro` → deja todo en
+   `frontend/.diccionarios/` (fuera de git).
+2. Arrancar la app con la variable apuntando ahí:
+   `set MYCELIUM_DICCIONARIOS=C:\…\frontend\.diccionarios` y `npm run tauri dev` (en
+   PowerShell, `$env:MYCELIUM_DICCIONARIOS = "…"`).
+3. Configuración → Editor: descargar Español (y Inglés), abrir una nota con errores.
+
+Para publicarlos de verdad: el mismo script **sin** `--simulacro` (necesita `wrangler`
+autenticado). **Todavía no se subió nada a R2**: sin eso, la app instalada muestra «No se
+pudo consultar la lista de diccionarios».
+
+### Qué cubren los tests y qué falta probar en la app
+
+- **Cubierto sin la app**: criterio 3 (voseo con es-AR, con los diccionarios reales), 4
+  (es + en), 5 (exclusiones, con un `EditorState` real), la validación del manifiesto,
+  el *fallback* de región, la caché y, en Rust, 9 (descarga cortada, hash distinto,
+  cancelación: nada queda a medias y la versión anterior sigue) y 10 (listar/borrar). En
+  Edge headless: 1, 2, 6, 7 (el archivo se escribe y la marca se va) y 8, y el
+  desplazamiento hasta el final de una nota de 400 renglones sin trabas.
+- **Falta en la app**: todo lo que depende de Tauri de verdad —la descarga real con su
+  progreso y «Cancelar», los eventos entre ventanas, que el worker y el `.wasm` carguen
+  desde `tauri.localhost` en la app **empaquetada** (en `next build` quedan en `out/`)—, el
+  criterio 11 (sin conexión), 12 con una nota larga real, 13 (apagar termina el worker:
+  se ve en el administrador de tareas del devtools), 14 (licencias) y el menú en modo
+  oscuro.
+
+### Lo que no se hizo
+
+- Web (otra rama).
+- Subir los diccionarios a R2 (lo hace el usuario con sus credenciales).
+- El `LICENSE.txt` de cada diccionario lleva autor, fuente, licencia, las URLs del texto
+  completo de cada licencia y el aviso que trae el paquete, pero **no el texto completo
+  de la GPL/LGPL/MPL** (los paquetes no lo incluyen). Revisarlo junto con la advertencia
+  del § 8.
 
 ---
 
