@@ -54,6 +54,14 @@ y qué principio general dejó.
    Cuando un elemento se ve mal y su propio CSS es correcto, **subí por los ancestros
    antes de tocarle nada**. La salida es el portal al `body`. Regla completa en
    [[DESIGN_SYSTEM]] § Estados visuales comunes.
+7. **Al imprimir, Chromium ahorra tinta si no le decís lo contrario.** Sin
+   `print-color-adjust: exact`, no dibuja ningún fondo y oscurece los colores claros del
+   texto. Las opciones de estilo del PDF (`DEF-024`) funcionaban solo si el usuario tildaba
+   «Gráficos de fondo» en el diálogo de impresión, y un día dejaron de verse (`DEF-116`).
+   Se comprobó imprimiendo con Edge desde Playwright (`page.pdf({ printBackground: false })`
+   imita el diálogo por defecto) y rasterizando con `pdftoppm`: sin la propiedad, blanco y
+   negro; con ella, el tema entero. **Todo CSS pensado para imprimir la declara.** En web no
+   se veía porque el backend genera el PDF con `PrintBackground = true`.
 
 ## Relacionadas
 
