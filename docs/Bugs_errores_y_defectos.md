@@ -649,6 +649,16 @@ que no corresponde.
 Detectado en la [[Auditoria de codigo 2026-09-26]] (complejidad, H5); sin reproducir en la
 app.
 
+# DEF-114
+Mientras un vault **se está abriendo** —la pantalla «Abriendo el vault», con sus etapas y la
+barra de progreso— **no se ven los botones de la ventana**: minimizar, maximizar y cerrar no
+están, ni hay franja de dónde arrastrarla. La app no se puede cerrar ni minimizar de la forma
+habitual hasta que termina de cargar, y si la carga se traba (`DEF-105`), no hay forma
+evidente de salir. Lo mismo pasa en las otras pantallas de espera: «Abriendo tu espacio de
+trabajo…» al arrancar y el «Cargando…» del workspace.
+
+Reportado por el usuario el 2026-09-27.
+
 ---
 
 > [!warning] Defectos sin reporte original
