@@ -514,6 +514,21 @@ entre ramas):
     `{ carpeta } | { archivos }`), `components/explorer/ImportDialogs.tsx` (el texto del
     conflicto ya no dice «nota»), las dos llamadas a `run` de `ExplorerPanel.tsx` y la de
     `VaultSection.tsx`. `importStore.ts` e `ImportDialogs.tsx` eran idénticos.
+- **Motor del cúmulo (`FUN-L-25` · Parte B, 2026-09-26)**: capa estática, flujo acotado,
+  Barnes-Hut y la física en un Web Worker. Es frontend compartido: **hay que reflejarlo a
+  web**, pendiente de que el usuario lo confirme en desktop. Detalle en
+  [[grafo-indice-y-motor]] § Cómo quedó · Parte B.
+  - **Se traen enteros**: `components/graph/MiniGraph.tsx` (solo cambió el camino del
+    cúmulo y el `simulate()` del sustrato; si web todavía no tiene `FUN-L-23`, reflejar
+    eso antes o junto) y los tres nuevos, `components/graph/fisica.ts`,
+    `components/graph/motorFisica.ts` y `components/graph/sim.worker.ts`, más
+    `scripts/test-fisica.mjs`.
+  - **`tsconfig.json`**: desktop sumó `out` al `exclude` porque Turbopack copia la fuente
+    cruda del worker a `out/_next/static/media/`. En web aplica si el build también
+    exporta a `out/`; si no, igual es inocuo agregarlo.
+  - Al reflejar, comprobar con `npx next build` que sale `turbopack-worker-*.js` y que el
+    host de web (Cloudflare Pages) sirve el bootstrap y los chunks del mismo origen: el
+    worker los carga con `importScripts`. Si falla, el grafo cae solo al hilo principal.
 
 ### Artefactos solo-web (no existen en `desktop-tauri`)
 
