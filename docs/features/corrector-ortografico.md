@@ -294,6 +294,33 @@ pudo consultar la lista de diccionarios».
   de la GPL/LGPL/MPL** (los paquetes no lo incluyen). Revisarlo junto con la advertencia
   del § 8.
 
+### Probado en la app (2026-09-27, con Playwright)
+
+Integrado en `desktop-tauri` (merge `9f643d2`) y probado en `tauri dev` con los diccionarios
+generados por `publicar-diccionarios.mjs --simulacro` y `MYCELIUM_DICCIONARIOS` apuntando a
+esa carpeta. Todo esto **funcionó**:
+
+- **Configuración**: la lista sale del manifiesto local, detecta la región `AR` y propone
+  Español con su tamaño. Descargar baja la variante `es-AR` a
+  `%LOCALAPPDATA%\com.mycelium.desktop\diccionarios\es-AR\1.0.0\` con su `LICENSE.txt`;
+  Inglés, `en-US`.
+- **Criterio 1**: al abrir una nota **sin editarla** se marcan «tezto», «muchoz», «erorres»,
+  «arbol», «pais», «tambien», «habia» — justo lo que el corrector del sistema no hacía.
+- **Criterios 3, 4 y 5**: el voseo («tenés», «decís», «vení»), una frase en inglés, el código
+  en línea y en bloque, el `[[enlace]]` y la etiqueta no se marcan.
+- **Criterio 6**: el clic derecho ofrece sugerencias; elegir «texto» reemplazó la palabra.
+- **Criterio 7**: «Agregar al diccionario del vault» escribió `.mycelium/diccionario.txt` y
+  desmarcó la palabra.
+- **Criterio 13**: apagar el interruptor deja cero marcas; encenderlo, vuelven.
+- El `spellcheck` del sistema queda en `false`.
+
+Ajuste al probar: el menú no separaba las sugerencias de las acciones; ahora lleva una
+divisoria (`separadorAntes` en `ContextMenu`, `fe4e544`).
+
+**Falta**: la confirmación del usuario, la app **empaquetada**, sin conexión (11), una nota
+larga real (12), las licencias (14) y la subida real a R2. El orden de las sugerencias lo da
+el motor: para «tezto», «texto» sale cuarta, detrás de «teto», «tote» y «testo».
+
 ---
 
 # Historia
