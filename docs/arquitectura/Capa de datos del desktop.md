@@ -54,7 +54,7 @@ Desde el [[vault-en-carpeta]], el vault es una **carpeta real** del sistema:
 
 | Responsabilidad | Dónde |
 |---|---|
-| Repos de datos (árbol, notas, papelera, contenido + FTS, propiedades, bases) | `frontend/lib/db/*` (TS, sobre `tauri-plugin-sql`) |
+| Repos de datos (árbol, notas, papelera, contenido + FTS, propiedades, enlaces, bases) | `frontend/lib/db/*` (TS, sobre `tauri-plugin-sql`) |
 | Dispatcher que emula la API HTTP (sin rutas de autenticación) | `frontend/lib/api.ts` |
 | Preferencias + apariencia y snippets CSS del vault | `stores/prefsVaultStore.ts` (con `preferencesStore`) y `stores/cssStore.ts`, directo contra `.mycelium/` |
 | Archivos de estado de `.mycelium/` | `src-tauri/src/prefs_vault.rs` |
@@ -93,9 +93,28 @@ No hay bucle de realimentación: el indexador **solo lee**, así que el ciclo
 El esquema del índice vive en `frontend/lib/db/indexer.ts` (`ESQUEMA_INDICE`) y se crea
 al abrir cada vault con `CREATE TABLE IF NOT EXISTS`. **No hay migraciones sqlx**: un
 cambio de columnas va como `ALTER TABLE` defensivo en `crearEsquemaIndice` (así entraron
-`papelera.ruta_papelera` y `notas.hash_indexable`), que es lo que permite abrir sin error
-un índice creado por una versión anterior. Y como el índice es desechable, el remedio
-ante uno roto es borrarlo: se reconstruye releyendo la carpeta.
+`papelera.ruta_papelera`, `notas.hash_indexable` y `notas.hash_enlaces`), que es lo que
+permite abrir sin error un índice creado por una versión anterior. Y como el índice es
+desechable, el remedio ante uno roto es borrarlo: se reconstruye releyendo la carpeta.
+
+| Tabla | Qué guarda | Quién la escribe |
+|---|---|---|
+| `carpetas`, `notas` | El árbol: id = ruta, título, tipo, `mtime` y las dos huellas | Indexador; los repos al crear, renombrar, mover |
+| `contenidos` | El texto de cada nota | Indexador y guardado |
+| `notas_fts` + `fts_filas` | La búsqueda (FTS5) y qué `rowid` le toca a cada nota (`DEF-105`) | Indexador y guardado, si cambió `hash_indexable` |
+| `propiedades` | El frontmatter, una fila por elemento ([[metadata-yaml]]) | Ídem |
+| `enlaces` | Cada `[[enlace]]`, embed y referencia de canvas de una nota: lo escrito (`destino_texto`), su `clave` y `clave_ancla` de re-resolución, la nota a la que resuelve (`destino_id`, NULL si está roto), `tipo` y cuántas veces (`n`) | Indexador y guardado, si cambió `hash_enlaces`; re-resolución dirigida al crear, renombrar, mover, borrar o recuperar ([[grafo-indice-y-motor]]) |
+| `etiquetas` | Las etiquetas de cada nota (frontmatter + `#tags` del cuerpo) | Ídem |
+| `papelera` | Qué nota se borró y dónde quedó su archivo | Los repos de la papelera; se respalda en `papelera.json` |
+
+> [!important] Lo que el índice DERIVA lleva versión: `PRAGMA user_version` (`FUN-L-25`)
+> Una tabla nueva que se llena leyendo los archivos necesita una pasada completa en los
+> índices de antes, porque el reindexado incremental por `mtime` no vuelve a leer lo que
+> no cambió. `VERSION_DERIVADO` en `indexer.ts` es ese número (hoy `1`: `enlaces` y
+> `etiquetas`); si el índice tiene uno menor, `indexarVault` relee todo y lo escribe al
+> terminar. **No sirve preguntar si la tabla existe**: es lo que se hizo con
+> `propiedades` y dejó de andar sin que nadie lo notara, porque la apertura crea el
+> esquema antes de indexar.
 
 > [!info] Hasta el 2026-09-26 había una migración sqlx, `001_init.sql`
 > Era de `mycelium.db`, la base del modo clásico, y sqlx validaba su checksum —por eso
@@ -117,5 +136,6 @@ conciencia* (nunca automático), que sería una rearquitectura de esta capa.
 - [[vault-en-carpeta]] — la spec completa del modelo actual (7 fases).
 - [[mycignore]] — qué entra al índice y qué no.
 - [[auditoria-capa-de-datos]] — `FUN-L-24`: la simplificación que dejó esta capa así.
+- [[grafo-indice-y-motor]] — `FUN-L-25`: las tablas `enlaces` y `etiquetas`.
 - [[El modo SQLite clasico queda muerto]] — por qué ya no hay `mycelium.db`.
 - [[Arquitectura de Mycelium]] — visión general.
