@@ -131,7 +131,7 @@ y **priorizar** qué implementar antes.
 | `FUN-L-09` | `IA-MCP-MYCELIUM` | Servidor MCP de Mycelium: exponer a la IA el índice del vault (búsqueda, backlinks, grafo, metadatos) como herramientas estructuradas, en vez de grep sobre archivos | desktop | — |
 | `FUN-L-10` | `VAULT-INDEX-EN-RUST` | Mover el indexado entero a Rust: el walker lee y escribe el índice en el mismo proceso, en **una** transacción, sin pasar contenido por IPC. Resuelve de raíz lo que `FUN-M-12` mitigó desde el frontend (incluido el `BEGIN`/`COMMIT` que el pool de `tauri-plugin-sql` impide). Continuación de `FUN-M-12` | desktop | — |
 | `FUN-L-11` 🟢 | `FILES-OTROS-TIPOS` | **Abrir** los archivos que no son notas —texto, código, PDF e imágenes— en un visor propio, como una pestaña más. La mitad de *aparecer en el explorador* ya la resolvió `FUN-S-03`. **Solo-desktop**: en web esos archivos no existen en ninguna parte. Dejó de ser de solo lectura con `FUN-M-26`. **Implementado en desktop** el 2026-08-22 y **confirmado en la app** el 2026-09-03: pestaña `archivo:<ruta>` por centinela, texto por un comando propio que corta por tamaño y detecta lo que no decodifica, PDF/imagen por el protocolo `asset:` acotado a la carpeta del vault. Spec en [[otros-tipos-de-archivo]] | desktop | — |
-| `FUN-L-12` | `EDITOR-CORRECTOR-ORTOGRAFICO` | Corrector ortográfico activable en Configuración, con **varios idiomas simultáneos** (p. ej. español e inglés) y arquitectura preparada para sumar idiomas | ambas | — |
+| `FUN-L-12` 🛠️ | `EDITOR-CORRECTOR-ORTOGRAFICO` | Corrector ortográfico activable en Configuración. **Implementado el 2026-09-27 con el corrector del sistema** (WebView2 / navegador), en el idioma del sistema operativo: WebView2 no deja elegir idiomas desde la app y el usuario prefirió eso a un motor propio. Mycelium solo lo enciende y excluye el código, los enlaces y las fórmulas. Sin confirmar en la app. Spec en [[corrector-ortografico]] | ambas | — |
 | `FUN-L-13` | `UI-IDIOMAS` | La interfaz en varios idiomas (español, inglés, italiano) y preparada para agregar más. Hoy todos los textos están escritos en español dentro de los componentes | ambas | — |
 | `FUN-L-14` 🟢 | `UPDATER-AUTOACTUALIZACION` | Mycelium comprueba una vez al día si hay versión nueva, muestra su changelog y ofrece instalarla con un clic. Nunca obliga ni bloquea. `tauri-plugin-updater` + instaladores firmados en Cloudflare R2. **Confirmada de punta a punta** el 2026-08-03: bucket y claves en marcha, la 1.4.0 y la 1.5.0 publicadas en R2, y el usuario comprobó en la app que una instalación **detecta y aplica** la versión posterior. Ya no hacen falta instalaciones manuales. Spec en `docs/features/autoactualizacion.md`. Salió en [[Version 1.4.0]] | desktop | — |
 | `FUN-L-16` 🛠️ | `VAULT-VENTANAS-MULTIPLES` | Tener **varios vaults abiertos a la vez**, cada uno en su propia ventana y sin límite de cuántos. Hoy abrir uno cierra el anterior. Continuación natural de `FUN-L-04`, y comparte raíz con `DEF-044`. **Implementada en desktop** el 2026-08-13 (sin confirmar); sale en la [[Version 1.6.1]]. Spec en [[ventanas-multiples]] | desktop | — |
@@ -868,6 +868,10 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 > indexémoslos todos"): no. Ver [[mycignore]].
 
 #### `FUN-L-12` · `EDITOR-CORRECTOR-ORTOGRAFICO` (—)
+- **Estado (2026-09-27)**: 🛠️ implementado en desktop (`85ee186`) y web (`7b419c4`), **con el
+  corrector del sistema** y no con un motor propio: los idiomas y el diccionario personal
+  quedaron afuera a propósito. Lo que sigue abajo es el planteo original, que describe el
+  motor propio por si algún día hace falta. Detalle y motivos en [[corrector-ortografico]].
 - **Qué es**: subrayar las palabras mal escritas mientras se escribe, con la posibilidad
   de activarlo o desactivarlo en Configuración. Debe admitir **varios idiomas a la vez**
   (una palabra es correcta si lo es en alguno de los activos) y estar construido para
