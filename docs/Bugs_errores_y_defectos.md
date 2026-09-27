@@ -666,6 +666,15 @@ zoom, en un vault de más de mil notas; en vaults chicos sí aparece.
 
 Reportado por el usuario el 2026-09-27, probando `FUN-L-25` en la app con la Tesina.
 
+# DEF-116
+Las **opciones de estilo al exportar a PDF ya no hacen efecto**. El PDF sale con fondo
+blanco aunque se desmarque «Fondo blanco», y marcar «Incluir colores del texto», «Estilar
+callouts» o «Estilos de Mycelium» no cambia nada: el documento sale casi sin estilos. Son las
+cuatro opciones que agregó `DEF-024`, que en su momento funcionaban.
+
+Reportado por el usuario el 2026-09-27. Sospecha que se rompió con el rediseño de la UI, sin
+descartar que venga de antes.
+
 ---
 
 > [!warning] Defectos sin reporte original
