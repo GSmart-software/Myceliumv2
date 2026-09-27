@@ -1336,6 +1336,138 @@ dibujo (aristas largas que cruzan la pantalla).
    tests de `fisica`/`ciclo` se actualizan a las constantes nuevas, no se borran.
 4. La decisión final es visual y del usuario en la app.
 
+## Cómo quedó · Parte G
+
+Implementada el 2026-09-27 en `feat/grafo-parte-g-desktop`. **Sin confirmar en la app**: lo
+medido es con réplicas en Node sobre los grafos reales y con el componente real en Chromium
+headless. Solo cambió `fisica.ts` (y sus tests): ciclo, worker, precálculo, revelado,
+residual, arrastre y flujo de la Parte E están intactos.
+
+### Archivos
+
+| Archivo | Qué |
+|---|---|
+| `frontend/components/graph/fisica.ts` | `ConstantesFisica` gana `distanciaMin` (reemplaza a `topeRepulsion`), `distanciaEnlace`, `rigidezEnlace`, `normalizarGrado`, `gravedad` y `recentrar`. `crearEstado` precalcula grado, `fuerzaArista` (`1/min(grado)`), `sesgo` (el `bias` de `d3`) y `rigidezNorm`. `paso` aplica los resortes normalizados y, al final, `recentrar(e)` (exportada). `constantesAntes()` conserva las fuerzas de siempre; `constantesCumulo()` es el modelo nuevo, con el porqué de cada valor y el de Obsidian al lado. `MASA_POR_ENLACE`. |
+| `frontend/scripts/test-fisica.mjs` | Constantes nuevas y las de antes; el test «número por número» contra el `simulate()` viejo usa `constantesAntes`. +4 tests: reparto exacto de un resorte normalizado (y sin normalizar), el hub de 320 enlaces, el recentrado (centroide, distancias, fijo e inactivos) y que el mini-grafo no se recentra. |
+| `frontend/scripts/test-ciclo.mjs` | +1 test: fuerzas de antes contra las de ahora con el mismo ciclo, radio ±15 % y los mismos pasos. El de la estrella de 400 explica la masa por enlace (falla sin ella). |
+
+### Constantes, antes → después
+
+| Constante | Antes | Después | Obsidian | Por qué |
+|---|---|---|---|---|
+| `normalizarGrado` | no | **sí** | `linkStrength 1` ÷ `min(grado)` | Lo que agrupa: el hub ya no tira de cada vecino con la fuerza de todos sus enlaces. |
+| `rigidezEnlace` | 0,01 | **0,07** | — | Normalizada, una arista entre notas de grado 3 queda 2,3 veces más firme; hub→hoja tira de la hoja con 0,14 y del hub con 1/320 de eso. Punto medio medido (abajo). |
+| `distanciaEnlace` | 80 (`k`) | 80 | 250 | 50, 60 y 120 no agruparon mejor. |
+| `distanciaMin` | 28,3 (tope 8) | **30** | 30 | La clamp de siempre, redondeada al valor de Obsidian. |
+| `k`, `factorRepulsion` | 80, 1 | 80, 1 | −1.000 (cae como `1/d`) | El radio lo fija el cociente repulsión/centro; bajar ambos no agrupó más. |
+| `gravedad` (centro débil) | 0,004 | **0,003** | 0,1 | Imprescindible (ver desvíos); bajada para compensar los resortes más firmes. |
+| `recentrar` | no | **sí** | `forceCenter` | Centroide al origen tras cada paso (no en el mini-grafo: lo ancla su nodo central). |
+| Masa por enlace (inercia) | implícita | **0,01 por enlace** | — | Normalizado, el hub de una estrella de 400 saltaba 80 px por paso al arrastrar. |
+
+`ganancia` 12, `rozamiento` 0,4, `velocidadMax` 80, `theta` 0,9 y `distanciaMax` ∞ no cambian.
+
+### Métricas (réplica en Node)
+
+Grafos extraídos con `docs/design/demos/extraer-vault.mjs` (solo lectura): Tesina 1.306
+notas / 3.275 aristas (559 sueltas, grado máx. 320), Trabajo y Estudio 1.223 / 1.777 (164
+sueltas, grado máx. 213), este repo 120 / 1.221. Siembra y ciclo como `MiniGraph`
+(filotaxis por enlaces, precálculo desde 1, después la residual de 0,05). Media de tres
+semillas. (a) = distancia media entre conectados ÷ entre no conectados (más bajo, más
+agrupado); (b) = de los 8 vecinos espaciales más cercanos, fracción de la misma carpeta de
+primer nivel —dentro de `Docs`/`docs`, un nivel más, porque ahí vive casi todo—, con lo que
+daría el azar entre paréntesis. Las dos sobre los nodos con enlaces. Radio = RMS del cúmulo
+entero; «enlazado» = sin los sueltos.
+
+| Vault | (a) antes → después | (b) antes → después (azar) | Radio | Radio enlazado | Pasos precálculo / residual | Salto máx. de la residual |
+|---|---|---|---|---|---|---|
+| Tesina | 0,318 → **0,311** | 0,441 → **0,555** (0,316) | 932 → 995 (+7 %) | 588 → 591 | 300 / 170 → 300 / 170 | 3,9–5,9 → 1,8–3,4 px |
+| Trabajo y Estudio | 0,244 → **0,121** | 0,600 → **0,896** (0,375) | 927 → 1.020 (+10 %) | 831 → 919 | 300 / 170 → 300 / 170 | 3,6–4,4 → 3,9–7,4 px |
+| Este repo | 0,533 → 0,608 | 0,262 → **0,298** (0,181) | 224 → 237 (+6 %) | 212 → 224 | 300 / 170 → 300 / 170 | 1,0 → 0,8–1,2 px |
+
+El precálculo cuesta lo mismo (Tesina: 0,9 → 1,0 s en Node; 1,2 → 1,1 s en el banco).
+
+**Arrastre** (lo que decidió la rigidez): el nodo se lleva 600 px y vuelve en 240 pasos con
+energía 0,3, un paso por frame como la Parte E, y se suelta a la residual. Cifras: salto
+máximo de otro nodo en un paso / cuántos movimientos de más de 20 px / salto máximo al soltar.
+
+| Arrastrado | Antes | `rigidezEnlace` 0,1 | **0,07 (elegida)** |
+|---|---|---|---|
+| Hub de la Tesina (320) | 34,5 / 89 / 80 | 41,7 / 162 / 53,5 | 25,3 / **14** / 33,7 |
+| Nota de grado 4, Tesina | 13,9 / 0 / 4,6 | 30,9 / 29 / 36,0 | 24,9 / 5 / 13,0 |
+| Hub de Trabajo y Estudio (213) | 27,8 / 23 / 80 | 75,3 / **545** / 11,5 | 37,8 / **57** / 11,7 |
+| Nota de grado 4, Trabajo | 11,9 / 0 / 15,4 | 23,1 / 3 / 19,3 | 19,7 / 0 / 27,6 |
+
+Con 0,1 (y 0,2) agrupa apenas más —dentro del ruido de (b), ±0,02— pero la flor de un hub
+arrastrado se mueve en bloque y barre a los nodos que cruza. Como pide el encargo, se eligió
+el punto medio: 0,07.
+
+### Capturas
+
+Componente real (`MiniGraph.tsx` con esbuild, el banco de las Partes C/E) en Chromium
+headless, 1.600 × 1.000, nodos coloreados por carpeta (la comunidad de la métrica b), ya
+asentado tras la residual. Antes = `desktop-tauri` en `e37d10e`.
+
+- **Trabajo y Estudio** (zoom 0,24): antes, una sola bola verde de «Cursos» con dos flores
+  pegadas al borde. Después, el cambio más visible: **una decena de grupos separados** —la
+  flor naranja de «Estudios» al centro, el racimo rosa de «Proyectos», los lima de
+  «Academia», los azules de «Softka» a la izquierda, varias flores verdes de cursos— unidos
+  por pocas aristas largas. Es la imagen de Obsidian.
+- **Tesina** (zoom 0,24): el núcleo sigue mezclado —Fuentes e Investigaciones están
+  enlazadas entre sí de verdad (las fichas citan fuentes)—, pero las flores de los hubs
+  chicos y el grupo rosa de «Trabajo plan de tesina» salen del núcleo y se ven aparte, en
+  vez de repartirse por encima.
+- **Este repo** (zoom 1): antes los colores salpicados por todo el disco; después,
+  sectores: las notas del MCP (lima) arriba a la izquierda, aprendizajes (azul) a la
+  izquierda, versiones (naranja) abajo a la derecha. Es denso (10 enlaces por nota) y el
+  disco sigue lleno.
+
+### Lo que se apartó del encargo
+
+- **La gravedad por nodo no se quitó: queda como centro débil (0,004 → 0,003).** Sin ella
+  los nodos sueltos (559 en la Tesina) salen despedidos y el radio se duplica (933 →
+  1.871). Y medido a radio igual, **el centro no aplastaba los grupos**: con centro 0,001 y
+  repulsión 0,25, o centro 0,0083 (el 0,1 de Obsidian en estas unidades) y repulsión 2, (a)
+  y (b) salieron iguales. La causa 2 de la spec no se sostuvo; la 1 (resortes) es la que
+  agrupa.
+- **La repulsión sigue cayendo como `1/d²`** (la de `d3`, como `1/d`): lo que importaba era
+  la proporción resorte/repulsión, y se ajustó con la rigidez.
+- **Masa por enlace** (no pedida): normalizado, el hub casi no siente sus resortes pero
+  sigue rodeado de cientos de vecinos que lo empujan; sin la inercia de antes, el hub del
+  test de la estrella saltaba 80 px por paso al arrastrar. No cambia el equilibrio.
+- **(a) empeora en este repo** (0,533 → 0,608): grafo denso donde casi todo enlaza con todo,
+  y normalizar debilita justo esos enlaces. El criterio pide Tesina y Trabajo; (b) mejora
+  en los tres.
+- **Radio** dentro de ±15 % en los tres (+7, +10, +6 %); el sintético de `test-ciclo` (casi
+  todo enlazado), −7 %.
+- **La residual de Trabajo y Estudio salta algo más** (máx. 7,4 contra 4,4 px de mundo por
+  paso: 2–3 px de pantalla a zoom 0,35). Mismos pasos.
+- **Un solo commit de código**: las piezas se calibraron juntas y los tests pasan solo con
+  el conjunto.
+
+### Verificación
+
+- `npx tsc --noEmit -p tsconfig.json`: sin errores.
+- `node --test scripts/test-*.mjs`: **488 en verde, 7 saltados** (483 de antes + 5 nuevos).
+- `npx next build`: verde, con `turbopack-worker-*.js` en `out/_next/static/chunks/`.
+
+### Qué confirmar en la app
+
+1. Grafo global de Trabajo y Estudio y de la Tesina sin caché (primera apertura tras
+   iniciar): ¿se distinguen los grupos a simple vista? Probar con grupos de color por
+   carpeta, como en las capturas. **La decisión es visual y del usuario.**
+2. El tamaño del cúmulo, parecido al de antes (algo más grande, +7–10 %).
+3. Arrastrar el hub de 320 enlaces y una nota común a zoom 1: la flor del hub lo sigue en
+   bloque; no deberían verse nodos saltando. Si molesta, bajar `rigidezEnlace` (0,05 es más
+   calmo y agrupa algo menos: (b) 0,84 en Trabajo).
+4. Al soltar, el acomodo corto de la residual sin saltos.
+5. Con la caché de posiciones del modelo anterior, el primer arranque solo retoca (residual
+   de 0,05, sin fundido) y la forma nueva llega de a poco; para verla entera, reiniciar la
+   app (sin caché).
+6. Mini-grafo del panel: la nota central al medio y sus vecinos alrededor, como siempre.
+
+Si no gusta: `git revert -m 1 <merge>` devuelve las fuerzas de antes (que además quedan
+documentadas en `constantesAntes`).
+
 ## Versionado
 
 Es la corrección de `DEF-109` más mejoras internas: **patch**, absorbido por la `2.2.0`
