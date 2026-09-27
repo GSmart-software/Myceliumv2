@@ -160,6 +160,174 @@ comparte `simulate()`); las otras disposiciones de `FUN-L-23` no se tocan. `hifa
 
 ---
 
+## Cómo quedó · Parte B
+
+Implementada el 2026-09-26 en `feat/grafo-motor-desktop` (B1–B5, con el worker adentro).
+**Sin confirmar en la app**: lo medido es con réplicas y con el componente real en
+Chromium headless, no en WebView2.
+
+### Archivos
+
+| Archivo | Qué |
+|---|---|
+| `frontend/components/graph/fisica.ts` | **Nuevo.** El motor de fuerzas, puro (sin DOM ni imports): posiciones, velocidades y aristas en arrays tipados; `repulsionBarnesHut` (quadtree con centro de masa, θ = 0,9, las hojas par a par con la fórmula exacta de siempre), `repulsionPares` (la de antes, como referencia), `paso` (repulsión → resortes → gravedad, rozamiento e integración, en el mismo orden y con las mismas constantes), `enfriar` y `constantesDe(disposicion)` (cúmulo 80/8/1, sustrato 45/6/0,7). |
+| `frontend/components/graph/sim.worker.ts` | **Nuevo.** El worker: importa `fisica.ts` y responde cada pedido de paso con las posiciones en un `Float32Array` transferido. Exporta los tipos del protocolo. |
+| `frontend/components/graph/motorFisica.ts` | **Nuevo.** Esconde dónde corre la física detrás de `tomar()` / `avanzar(alpha, fijo, activos)` / `colocar(i, x, y)`: en el worker o, como respaldo, en el hilo principal con el mismo módulo. |
+| `frontend/components/graph/MiniGraph.tsx` | Solo el camino del cúmulo y el `simulate()` que comparte el sustrato: `SimNode` pierde `vx`/`vy` y gana `i` (su índice en el motor); lo que el hilo principal mueve a mano (arrastre, nodos que aparecen en la construcción temporal) pasa por `colocar`; el dibujo del cúmulo en tres pasadas con capas en reposo; el flujo acotado. El camino micelio (`tickMicelio`, `hifas.ts`, `disposiciones.ts`) no cambió salvo recibir las posiciones del motor. |
+| `frontend/scripts/test-fisica.mjs` | **Nuevo.** 10 tests headless del motor (ver Verificación). |
+| `frontend/tsconfig.json` | `exclude` suma `out`: Turbopack deja en `out/_next/static/media/` una copia cruda de `sim.worker.ts` y `tsc` fallaba sobre ella después de un `next build`. |
+
+### B1 · Capa estática y reposo real
+
+El dibujo del cúmulo va en tres pasadas, siempre en este orden: **aristas base** (que
+además guarda la geometría de las visibles), **flujo**, y **flechas + nodos + nombres**.
+
+- **En reposo**, las dos pasadas quietas se pintan a dos canvas offscreen que solo se
+  repintan si algo las ensucia (vista, tamaño, foco, lo revelado, una opción, el
+  movimiento reducido). Cada frame es copiar la capa de aristas, el flujo con la
+  geometría guardada y la capa de nodos. Sin flujo, no hay `requestAnimationFrame`.
+- **Mientras la simulación está activa** se dibuja directo, como antes. Es un desvío de
+  la spec, medido: con las capas también durante la simulación, arrastrar a 1.000 nodos
+  pasó de 13 a **60 ms** de JS por frame (y a 2.000, de 42 a 106), porque copiar una
+  capa offscreen obliga a rasterizarla en ese momento, y con los nodos moviéndose se
+  repintaba en cada frame igual. Un frame activo sin nada nuevo (el paso del worker
+  todavía no volvió) y sin flujo no dibuja.
+
+### B2 · Flujo acotado
+
+`FLUJO_ZOOM_MIN = 0.5` y `FLUJO_MAX_ARISTAS = 1500` (aristas **visibles**, después del
+culling). Fuera de eso queda el trazo base y la flecha si la opción la pide; la opción
+del menú no cambia. Los guiones son los de siempre (mismo patrón, ancho, alfa, color y
+velocidad).
+
+### B3 · Barnes-Hut y repulsión acotada
+
+Réplica en Node sobre un vault sintético (cada nota enlaza a 1–3 anteriores con
+preferencia por los hubs, 15 % sueltas), 700 pasos desde cero y 400 pasos desde la caché
+de posiciones (alpha 0,05, como al volver a la pestaña):
+
+| Nodos | ms/paso pares → BH | Radio RMS del cúmulo asentado | Desde la caché: desplazamiento medio por nodo |
+|---|---|---|---|
+| 1.000 | 8,6 → 2,0 | 793 → 777 (−2 %) | pares 16,7 px · BH 19,5 px |
+| 2.000 | 29 → 4,8 | 1.008 → 990 (−1,8 %) | 17,6 · 22,3 |
+| 4.000 | 119 → 12 | 1.272 → 1.249 (−1,8 %) | 20,7 · 26,1 |
+| 1.000, sustrato | 7,2 → 2,2 | 478 → 469 | 10,3 · 11,8 |
+
+La energía cinética final queda en el mismo orden (1.000: 6,3 → 5,1; 2.000: 14 → 18) y la
+longitud media de arista cambia menos de un 2 %. El −2 % de radio es el sesgo conocido de
+θ = 0,9 (una celda lejana empuja algo menos que sus nodos sueltos; con θ = 0,5 baja a
+−0,5 % pero cuesta el doble). El ruido entre dos semillas distintas con pares es del
+0,1 %, así que el −2 % es real, pero **a simple vista es indistinguible**: desde la caché
+cada nodo se mueve 3–5 px más que lo que ya se movía con la física anterior.
+
+> [!warning] `distanciaMax` queda implementada pero **apagada** (`Infinity`)
+> Desvío de la spec, medido a 1.000 nodos: cortar la repulsión a `4·k` achica el cúmulo
+> un **30 %** (radio 793 → 550) y desde la caché mueve cada nodo 160 px; `8·k` −19 %,
+> `12·k` −10 %, `16·k` −6 %. La gravedad (`0,004·x`) solo se equilibra con la **suma** de
+> muchas repulsiones lejanas y débiles, y el corte se la quita. Y el ahorro es de un 10 %
+> sobre Barnes-Hut (1,8 contra 2,0 ms), porque las celdas lejanas ya se calculan como un
+> solo nodo. En Obsidian funciona porque su layout se calibró con el corte; acá cambiaría
+> la forma del grafo de todos los vaults.
+
+### B4 · Worker
+
+- **Entró.** Turbopack (Next 16.2.9) reconoce `new Worker(new URL("./sim.worker.ts",
+  import.meta.url), { type: "module" })`: genera un bootstrap
+  `out/_next/static/chunks/turbopack-worker-*.js` que carga los chunks del worker con
+  `importScripts` (worker clásico, mismo origen; el `type: "module"` lo descarta el
+  runtime). Funciona con `output: export`: probado sirviendo `out/` como estático y
+  arrancando el worker con la misma URL que arma el runtime (responde con
+  `Float32Array`, 2,4 ms por paso a 500 nodos). La CSP de Tauri está en `null`.
+  La doc de Next en `node_modules` solo lo menciona de pasada (los *magic comments*
+  «funcionan con `new Worker()`»); lo demás salió de probar el build.
+- **Protocolo**, con un cambio respecto de la spec: el hilo principal **pide** cada paso
+  (`{ tipo: "paso", alpha, fijo, activos, colocados, buffer }`) y no pide otro hasta
+  recibir la respuesta, así que hay como mucho un mensaje por frame por construcción. La
+  energía (`alpha`) y el reposo los sigue llevando el hilo principal —es el que sabe si
+  hay arrastre o paneo—, por eso no hace falta un aviso de «asentado»: el hilo principal
+  deja de pedir. `alpha` baja un escalón por paso **dado** (no por frame), como antes.
+  `iniciar` lleva posiciones, aristas, centro y constantes; `constantes` existe en el
+  protocolo pero hoy cambiar de disposición reconstruye todo. El buffer de la respuesta
+  se devuelve con el pedido siguiente (sin reservar uno por frame). Sin
+  `SharedArrayBuffer`: exigiría cabeceras COOP/COEP en Tauri.
+- **Respaldo en el hilo principal** con el mismo `fisica.ts`: sin `Worker`, con
+  `prefers-reduced-motion` (leído al construir), si el worker falla al crearse o en
+  marcha (el estado del hilo principal se mantiene espejado y sigue desde ahí), y con
+  **menos de 200 nodos** (desvío: el mini-grafo del panel; ahí un paso cuesta menos de
+  medio milisegundo y no vale un worker por grafo).
+- Nota: Turbopack además copia la fuente cruda de `sim.worker.ts` a
+  `out/_next/static/media/` (un módulo de URL que nadie usa, 3 KB). Es inocuo; por eso el
+  `exclude` de `tsconfig.json`.
+
+### B5 · Mediciones
+
+Componente **real** (`MiniGraph.tsx` empaquetado con esbuild, stores sustituidos) en
+Chromium headless de Playwright, 1.600 × 900, dpr 1, vault sintético con la caché de
+posiciones ya asentada. «rAF/s» = frames por segundo que el bucle llegó a pedir; «JS» =
+tiempo del callback en el hilo principal. **En headless el canvas rasteriza por software**
+y eso limita los fps (sobre todo con nombres a zoom 1), así que los fps absolutos no son
+los de WebView2 con GPU; la comparación antes/después sí vale.
+
+| Caso | 1.000 nodos antes → después | 2.000 nodos antes → después |
+|---|---|---|
+| Reposo sin flujo | 0 rAF → 0 rAF (ya era así) | 0 → 0 |
+| Tiempo hasta el reposo (zoom 1 / 0,3) | 39 / 27 s → 32 / 21 s | 78 / 66 s → 52 / 36 s |
+| Reposo **con flujo**, zoom 1 | 7 rAF/s, 7,2 ms JS → **16,7 rAF/s, 0,85 ms** | 4,3 rAF/s, 9,4 ms → **0 rAF** (más de 1.500 aristas a la vista: sin guiones) |
+| Reposo con flujo, zoom 0,3 (todo visible) | 17,7 rAF/s, 5,4 ms → **0 rAF** | 6,7 rAF/s, 12,3 ms → **0 rAF** |
+| Arrastre, zoom 1 | 8,2 rAF/s, 12,9 ms → 8,8 rAF/s, **4,7 ms** (sin worker 5,6) | 3,8 rAF/s, 42,5 ms → 8,4 rAF/s, **5,9 ms** (sin worker 9,2) |
+| Arrastre, zoom 0,3 (todo visible) | 14,1 rAF/s, 13,1 ms → **31,3 rAF/s, 3,9 ms** (sin worker 5,4) | 5,9 rAF/s, 42,4 ms → **14,8 rAF/s, 6,9 ms** (sin worker 10,6) |
+
+Contra los criterios: (1) sin flujo, en reposo no hay rAF; con flujo, el frame de reposo
+cuesta 0,85 ms de JS (< 5 ms). (2) Todo visible a 2.000 nodos: 6,9 ms de JS por frame
+incluso arrastrando (< 20 ms); el resto del frame en headless es rasterizado por software.
+(3) Arrastre a 2.000 nodos: el hilo principal pasó de 42 a 6–7 ms por frame; que llegue a
+más de 30 fps en WebView2 **hay que confirmarlo en la app** (en headless el techo lo pone
+el rasterizado). (4)–(6) ver abajo.
+
+### Lo que se apartó de la spec
+
+- Capas solo en reposo; directo mientras simula (B1, medido arriba).
+- `distanciaMax` apagada (B3, medido arriba).
+- Protocolo del worker por pedido, sin aviso de asentado (B4).
+- Worker solo desde 200 nodos (B4).
+- **Orden de pintado del flujo**: antes cada arista se dibujaba entera (base, guiones,
+  flecha) antes de la siguiente; ahora todas las bases, después todos los guiones,
+  después todas las flechas. La única diferencia posible es que el guion de una arista
+  quede por encima de la base tenue (alfa 0,22) de otra que la cruza. No se notó en las
+  capturas.
+
+### Verificación
+
+- `npx tsc --noEmit -p tsconfig.json`: sin errores (también después de `next build`).
+- `node --test scripts/test-*.mjs`: **468 en verde** (458 + 10 nuevos de
+  `test-fisica.mjs`: Barnes-Hut con θ = 0 es exactamente los pares; con θ = 0,9 error
+  relativo < 8 % y sesgo < 3 %, y converge al bajar θ; `distanciaMax` corta y dentro del
+  corte coincide con los pares filtrados a mano; determinismo con semilla; `paso()` con
+  pares reproduce **número por número** el `simulate()` anterior; nodos superpuestos se
+  separan; activos, arrastrado y centro; el árbol crece con 5.000 nodos apretados; y
+  Barnes-Hut es varias veces más rápido a 2.000 nodos).
+- `npx next build`: verde, con `turbopack-worker-*.js` en `out/_next/static/chunks/`.
+- Capturas del componente real: cúmulo a zoom 1 con flujo y con flecha + flujo, cúmulo a
+  zoom 0,3, sustrato con worker y anillo: se ven como antes.
+
+### Queda por confirmar en la app
+
+1. Con el flujo animado (el valor por defecto) y el grafo quieto, el perfilador muestra
+   frames de menos de 5 ms; con el flujo apagado, ninguno.
+2. Los guiones se ven igual que antes con zoom ≥ 0,5; al alejar por debajo de 0,5
+   desaparecen y vuelven al acercar. En un vault grande, con más de 1.500 aristas en
+   pantalla, no hay guiones (decisión de la spec); ver si el techo resulta bajo.
+3. Arrastrar un nodo a 2.000 notas va fluido; hover, brillo de las aristas, colores de
+   grupo, flecha y nombres, como siempre.
+4. El layout con la caché de posiciones de un vault real es indistinguible del de antes.
+5. El sustrato se asienta y se detiene como antes; la construcción temporal funciona en
+   cúmulo y sustrato (los nodos que aparecen pasan al worker con `colocar`).
+6. El worker carga en Tauri: en las devtools, sin errores en la consola al abrir el grafo
+   global (si fallara, cae en silencio al hilo principal y el grafo anda igual, más lento).
+7. El mini-grafo del panel (menos de 200 nodos, sin worker) sigue igual.
+
+---
+
 ## Versionado
 
 Es la corrección de `DEF-109` más mejoras internas: **patch**, absorbido por la `2.2.0`
