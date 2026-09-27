@@ -55,11 +55,6 @@ export function idCarpetaEsporas(
   return actual;
 }
 
-/** ¿Existe en el vault la carpeta configurada? */
-export function existeCarpetaEsporas(): boolean {
-  return idCarpetaEsporas() !== null;
-}
-
 /**
  * Plantillas de la carpeta configurada, por nombre. La lista es PLANA a
  * propósito: las subcarpetas no se recorren (spec § 1). Se leen del árbol que ya

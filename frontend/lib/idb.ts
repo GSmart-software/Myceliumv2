@@ -51,13 +51,3 @@ export async function putCachedNote(note: CachedNote): Promise<void> {
     tx.onerror = () => reject(tx.error);
   });
 }
-
-export async function deleteCachedNote(notaId: string): Promise<void> {
-  const db = await openDb();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE, "readwrite");
-    tx.objectStore(STORE).delete(notaId);
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error);
-  });
-}
