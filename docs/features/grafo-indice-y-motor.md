@@ -465,6 +465,59 @@ el rasterizado). (4)–(6) ver abajo.
 
 ---
 
+## Parte C · Ciclo de asentamiento (segunda pasada, 2026-09-26)
+
+El usuario probó la Parte B en la app con la Tesina y **sigue lejos de Obsidian**: el
+grafo tarda decenas de segundos en asentarse y pierde fps mientras tanto. El propio
+informe de la Parte B lo anticipaba: «tiempo hasta asentarse 39 → 32 s a 1.000 nodos, 78 →
+52 s a 2.000». Obsidian asienta el mismo vault en pocos segundos. No es la repulsión: es
+el ciclo.
+
+### Diagnóstico (código integrado en `a2235d9`)
+
+| Qué | Mycelium | Obsidian / `d3-force` |
+|---|---|---|
+| Quién marca el ritmo de la física | El hilo principal: pide **un paso por frame** al worker y no pide otro hasta el `requestAnimationFrame` siguiente (`motorFisica.ts`, `sim.worker.ts`) | El worker corre **libre** (`run: true`) y el hilo principal dibuja las posiciones que le llegan |
+| Pasos hasta asentarse | `alpha ×= 0,995` por paso: 1 → 0,03 son **700 pasos** (`MiniGraph.tsx:432`), más 5 s de gracia | `alphaDecay ≈ 0,0228`: **~300 pasos** a `alphaMin 0,001`; y Obsidian arranca en `alpha 0,3` |
+| Posiciones iniciales | Al azar en un disco de radio 50–140 (`MiniGraph.tsx:272`): 1.300 nodos apretados que deben expandirse a empujones | Filotaxis (`d3`): radio `10·√i`, ya repartidos, poca energía que disipar |
+| Nombres durante la simulación | Con `scale > 0,5`, **todos** los visibles con `fillText` en cada frame (`MiniGraph.tsx:837`) | Texto como texturas en GPU y atenuado por zoom |
+
+### Qué cambiar (solo `cumulo` y `sustrato`; `fisica.ts` no cambia salvo constantes)
+
+1. **Worker libre.** Protocolo nuevo: `{ tipo: "correr", alpha, alphaObjetivo }` y `{ tipo:
+   "parar" }`. El worker itera por su cuenta (bucle con `setTimeout(0)` o
+   `MessageChannel`), tantos pasos como pueda, y **publica posiciones como máximo cada
+   16 ms** (un `Float32Array` transferido; si el principal no consumió el anterior, se
+   descarta el viejo). Lleva él `alpha` y avisa `{ tipo: "asentado" }` al bajar de
+   `alphaMin`. Arrastre: `{ tipo: "fijar", id, x, y }` sube `alphaObjetivo` a 0,3 mientras
+   dura, como Obsidian. En el hilo principal (fallback), varios pasos por frame dentro
+   de un presupuesto de 6 ms.
+2. **Decaimiento como `d3`**: `alpha += (alphaObjetivo − alpha) · alphaDecay` con
+   `alphaDecay = 1 − 0,001^(1/300)` y `alphaMin = 0,001`; `velocityDecay 0,4` en vez del
+   `×0,85` actual, ajustando `k`/fuerzas para que el layout final sea el mismo (medilo:
+   radio del cúmulo y energía, como en la Parte B). Arranque en frío `alpha 1`; con caché
+   de posiciones, `0,05`; nodos nuevos, `0,3`. `IDLE_GRACE_MS` baja a 1.000.
+3. **Siembra en filotaxis** para los nodos sin caché: radio `k/4 · √i`, ángulo
+   `i · 2,3999` (ángulo áureo), centrada en el nodo central si lo hay. Los nodos nuevos
+   con vecinos ya colocados siguen naciendo junto a ellos.
+4. **Nombres mientras simula**: con `alpha > 0,05` solo hubs (los 24 de más grado),
+   hover y centro; el resto aparece al asentarse, en la capa estática, y con el mismo
+   «sin pisarse» de `hifas.ts`. Con `scale > 0,5` en reposo, todos como hoy.
+5. **Verificable por el usuario**: una línea en consola al construir el grafo («grafo:
+   física en worker/hilo principal, N nodos») y otra al asentarse con el tiempo total,
+   para que la comprobación en F12 sea inmediata.
+
+### Criterios
+
+1. Tesina (1.306 notas, sin caché de posiciones): **asentado en menos de 8 s** en la app,
+   con la consola diciéndolo; con caché, menos de 1 s.
+2. Mientras asienta, el hilo principal no supera 8 ms por frame a 1.300 nodos
+   (perfilador); los nombres completos aparecen al asentarse.
+3. El layout final es del mismo tipo que hoy (radio ±5 %, mismos cúmulos), medido en Node.
+4. Arrastrar responde sin retraso perceptible (el worker sube `alphaObjetivo`, no espera
+   al frame).
+5. Todo lo anterior de la Parte B sigue (0 rAF en reposo sin flujo; flujo acotado).
+
 ## Versionado
 
 Es la corrección de `DEF-109` más mejoras internas: **patch**, absorbido por la `2.2.0`
