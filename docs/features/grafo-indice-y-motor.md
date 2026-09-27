@@ -1238,7 +1238,13 @@ activos y sus aristas, en un rectángulo sucio.
 
 ## Cómo quedó · Parte F (arrastre local)
 
-Integrada el 2026-09-27 (`d3b7fac`, revertible sola con `git revert -m 1 d3b7fac`). Cuatro
+> [!warning] Revertida el 2026-09-27 (`e672d9a`)
+> Por decisión del usuario: «revirtamos F, me gustaría ver cómo se comporta el rendimiento al
+> aplicar física a todos los nodos antes de decidir qué hacer al final». El código volvió al
+> estado de la Parte E; esta sección queda como registro de lo medido. Se puede volver a
+> aplicar con `git revert e672d9a` (revierte el revert).
+
+Integrada el 2026-09-27 (`d3b7fac`) y revertida el mismo día. Cuatro
 commits, uno por cambio. `tsc`, 489 tests headless (12 nuevos), `next build` con el
 worker en `out/`.
 
