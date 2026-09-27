@@ -141,9 +141,9 @@ public static partial class SearchEndpoints
                 return Results.Json(new { error = "Sin acceso a este vault." }, statusCode: 403);
             }
 
-            var (_, notas) = await repo.GetTreeAsync(vaultId, ct);
+            var (carpetas, notas) = await repo.GetTreeAsync(vaultId, ct);
             var (aristasVault, titulosPorId, contenidos) =
-                await BuildVaultGraphAsync(notas, vaultId, blobs, ct);
+                await BuildVaultGraphAsync(notas, carpetas, vaultId, blobs, ct);
 
             // Etiquetas por nota, para colorear nodos por etiqueta (HU-30). Son
             // las de `tags:` del frontmatter MÁS los `#tag` del cuerpo, sin
@@ -189,9 +189,9 @@ public static partial class SearchEndpoints
 
             // Escaneo del vault para construir el grafo de enlaces. En modo
             // cloudflare esto se materializará en una tabla de links en D1.
-            var (_, notas) = await repo.GetTreeAsync(vaultId, ct);
+            var (carpetas, notas) = await repo.GetTreeAsync(vaultId, ct);
             var (aristasVault, titulosPorId, contenidos) =
-                await BuildVaultGraphAsync(notas, vaultId, blobs, ct);
+                await BuildVaultGraphAsync(notas, carpetas, vaultId, blobs, ct);
 
             // Adyacencia completa del vault (para tamaños de nodo, CA3)
             var conexionesTotales = ContarConexiones(aristasVault);
@@ -260,20 +260,19 @@ public static partial class SearchEndpoints
         Dictionary<string, string> Titulos,
         Dictionary<string, string> Contenidos)> BuildVaultGraphAsync(
         IReadOnlyList<System.Text.Json.JsonElement> notas,
+        IReadOnlyList<System.Text.Json.JsonElement> carpetas,
         string vaultId,
         IBlobStorage blobs,
         CancellationToken ct)
     {
-        // Títulos duplicados son posibles (p. ej. varias "Sin título"): se
-        // resuelve el wikilink a la primera nota con ese título.
-        var porTitulo = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        // Títulos duplicados son posibles (p. ej. varias "Sin título"): el
+        // enlace se resuelve con la MISMA regla que el clic del editor —pista de
+        // carpeta, sin extensión, empate a la ruta más corta— (`FUN-M-40`, D8).
+        var resolutor = new ResolutorWikilinks(notas, carpetas);
         var titulosPorId = new Dictionary<string, string>();
         foreach (var n in notas)
         {
-            var nid = n.GetString("id");
-            var titulo = n.GetString("titulo");
-            porTitulo.TryAdd(titulo, nid);
-            titulosPorId[nid] = titulo;
+            titulosPorId[n.GetString("id")] = n.GetString("titulo");
         }
 
         // Lectura de blobs EN PARALELO con concurrencia acotada: el escaneo del
@@ -306,16 +305,14 @@ public static partial class SearchEndpoints
             // sintaxis no es una arista del grafo.
             foreach (Match m in WikilinkRegex().Matches(SinCodigo.Aplicar(contenido)))
             {
-                // [[destino|alias]] y [[Carpeta/destino]]: el enlace apunta al
-                // título (parte antes del `|`, último segmento de la ruta). La
-                // barra puede venir escapada si el enlace vive en una tabla
-                // (`DEF-045`), y ahí también separa el alias.
+                // [[destino|alias]] y [[Carpeta/destino]]: el destino es la
+                // parte antes del `|`, CON su ruta, que es la pista para elegir
+                // entre homónimas. La barra puede venir escapada si el enlace
+                // vive en una tabla (`DEF-045`), y ahí también separa el alias.
                 var inner = m.Groups[1].Value;
                 var alias = SeparadorAliasRegex().Match(inner);
                 if (alias.Success) inner = inner[..alias.Index];
-                var slash = inner.LastIndexOf('/');
-                var destino = (slash >= 0 ? inner[(slash + 1)..] : inner).Trim();
-                if (porTitulo.TryGetValue(destino, out var destinoId) && destinoId != notaId)
+                if (resolutor.Resolver(inner.Trim()) is { } destinoId && destinoId != notaId)
                 {
                     aristas.Add((notaId, destinoId));
                 }
