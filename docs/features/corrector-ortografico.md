@@ -66,6 +66,60 @@ editores abiertos se refrescan al instante (`refrescarCorrector`).
 - Que el menú contextual nativo esté habilitado en la app **empaquetada**, no solo en
   desarrollo.
 
+## 5. Lo que mostró la app: el sistema no revisa el texto existente
+
+Probado el 2026-09-27, apenas implementado: **solo se marca lo que se tipea**. Al abrir una
+nota no se subraya nada hasta editar cada renglón. Se reprodujo en Edge (el motor de
+WebView2) con CodeMirror **y con un `textarea` común**: el texto que ya estaba no se revisa
+nunca, ni con un clic sobre el párrafo, ni esperando, ni alternando `spellcheck`. Edge y
+WebView2 usan el corrector de Windows, y ese camino solo revisa lo que se escribe. Coincide
+con [electron #53608](https://github.com/electron/electron/issues/53608). Forzarlo exigiría
+reescribir cada renglón, lo que marcaría la nota como modificada: descartado.
+
+**Obsidian** no tiene el problema porque su corrector es el de Chromium que trae Electron,
+con **diccionarios Hunspell** que la app elige (`session.setSpellCheckerLanguages`) y un
+diccionario personal. WebView2 no ofrece esas APIs. El equivalente para Mycelium es un motor
+propio con diccionarios Hunspell.
+
+## 6. La investigación del motor propio (2026-09-27)
+
+Medida por un subagente fuera del repo, con los diccionarios reales, en Node y en Edge
+headless (scripts en `%TEMP%\corrector-investigacion`). **No** se probó dentro de la app.
+
+| Motor | Carga `es` | Memoria | Revisión | `suggest` | Peso (brotli) | Estado |
+|---|---|---|---|---|---|---|
+| **spellbook → WASM** (Rust, MPL-2.0) | 55–90 ms | 6,6 MB | 5.000 palabras en ~25 ms | 23–35 ms | 80 KB | **recomendado**; activo, «alfa» |
+| hunspell-asm | 128 ms | ~18 MB | similar | 19 ms | 220 KB | abandonado |
+| nspell | ~1 s | 49 MB | rápida | 7 ms | 6 KB | no carga el italiano |
+| typo-js | 1,35 s | 62 MB | rápida | **804 ms** | 7 KB | descartado |
+
+**Diccionarios** (wooorm/dictionaries, `.aff` + `.dic`):
+
+| Diccionario | Licencia | gzip |
+|---|---|---|
+| `es` (España) · `es-AR` y otras variantes | GPL-3+ **o** LGPL-3+ **o** MPL-1.1+ | ~228 KB |
+| `en` (EE. UU.) | MIT/BSD | ~190 KB |
+| `it` | **solo GPL-3**: riesgo legal a revisar | ~351 KB |
+
+- **Calidad**: con `es` detectó 20/20 errores típicos. Con el de España se marca el voseo
+  («tenés», «vení»); con `es-AR`, solo «podés». Faltan «vámonos», «pónganselo»,
+  anglicismos y nombres propios: el **diccionario personal** pasa a ser necesario.
+- **Mycelium no tiene archivo LICENSE** (`Cargo.toml`: `license = ""`).
+- **Diseño decidido por el usuario**: los diccionarios **no** van en el instalador; se suben
+  a R2 junto a los instaladores, con un manifiesto (`id`, versión, URL, `sha256`, licencia,
+  fuente), y el usuario elige cuáles descargar en Configuración. Se sirven en gzip
+  (`DecompressionStream`; Edge no descomprime brotli), se escriben en `.part` y se activan
+  tras verificar el hash. Desktop los guarda en la carpeta local de datos de la app; web, en
+  la Cache API, con CORS en R2.
+- **Arquitectura recomendada**: el mismo motor WASM en un *worker* para las dos versiones;
+  Rust en desktop solo para descargar y verificar. Un `ViewPlugin` revisa lo visible con
+  debounce, reutilizando las exclusiones de `ortografia.ts`, con caché de palabras,
+  subrayado propio y menú propio (sugerencias, «Agregar al diccionario», «Ignorar»).
+- **Tamaño**: L en total (compartido M, desktop S–M, web S, servidor S).
+
+**Pendiente de decisión del usuario**: seguir con el motor propio; variantes regionales del
+español; si el italiano entra ahora o tras revisar su licencia.
+
 ## Relacionadas
 
 - [[BACKLOG]] — `FUN-L-12`.
