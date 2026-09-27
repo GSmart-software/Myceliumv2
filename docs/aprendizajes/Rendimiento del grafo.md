@@ -347,6 +347,22 @@ toca el indexador. El 6 queda como red si hiciera falta. Medir antes y después 
 vault de prueba de `DEF-105`/`DEF-108` (3.340 notas), que es el tamaño que el reporte
 describe.
 
+> [!success] Cerrado y confirmado por el usuario el 2026-09-27
+> Siete partes en dos días ([[grafo-indice-y-motor]]): A tabla de enlaces · B Barnes-Hut y
+> worker · C ciclo libre · D curvas siempre y cámara sin repintar · E **calcular primero,
+> revelar después** · F arrastre local (revertida) · G fuerzas como `d3-force`. Lo que
+> enseñó, para la próxima vez:
+> - **Medir en headless sin GPU engaña con el canvas**: B y C dieron cifras buenas y la app
+>   iba peor. Lo que sí vale del banco es la cuenta de frames largos y el JS por frame; los
+>   fps absolutos solo los dice F12 en la app.
+> - **El giro decisivo lo dio el usuario**: «que los nodos aparezcan ya ubicados» (E). Optimizar
+>   el movimiento (C, D) era optimizar algo que no debía mostrarse.
+> - **El estilo manda sobre el ahorro**: rectas en movimiento y disposiciones nuevas se
+>   rechazaron por estética aunque midieran bien; los nodos lisos se aceptaron.
+> - **Una parte, una rama, un merge** hizo barato probar y revertir (F).
+> - **Los detalles que quedan los ve solo el usuario en la app**: el flujo con techo bajo
+>   (`DEF-115`), el revelado que repintaba por frame, la energía cortada al soltar.
+
 > [!success] Plan implementado en desktop el 2026-09-26 (`FUN-L-25`, [[grafo-indice-y-motor]])
 > Las propuestas 1 (capa estática), 2 (flujo acotado, guiones conservados), 3 (Barnes-Hut),
 > 4 (tabla de enlaces) y 5 (un solo consumidor: `conexiones()` es barato y todos leen la

@@ -8,8 +8,9 @@
 > publica con `npm run publicar` cuando las confirme; hasta entonces este documento es el
 > borrador de la nota de release.
 
-Dos funcionalidades nuevas: el **calendario con recordatorios** (`FUN-L-22`) y las
-**disposiciones del grafo** (`FUN-L-23`). Con ellas viajan absorbidos los arreglos del
+Una funcionalidad nueva, el **calendario con recordatorios** (`FUN-L-22`), y una
+reconstrucción del **grafo** para vaults grandes (`FUN-L-25`, que cierra `DEF-109`). Las
+disposiciones del grafo (`FUN-L-23`) entraron y se retiraron el 2026-09-27 sin publicarse. Con ellas viajan absorbidos los arreglos del
 índice que salieron del incidente de un vault de 11.780 notas (`DEF-105` a `DEF-108`) y
 otros cuatro defectos cerrados después de la `2.1.0` (`DEF-089`, `DEF-102`, `DEF-103`,
 `DEF-104`), más la fórmula a medio margen (`FUN-S-22`).
@@ -40,6 +41,10 @@ funcionalidades no suma dos incrementos: el salto lo decide el cambio más signi
   lo que se crea desde fuera de la app aparece aunque la escritura no pare, el índice se
   achica al borrar notas, y reconstruirlo ya no pierde tu tema, tus snippets ni la
   papelera.
+- **El grafo aguanta vaults grandes.** Con más de mil notas el grafo abría a tirones y se
+  congelaba al alejar el zoom. Ahora aparece ya ubicado, con un fundido desde el centro, se
+  mueve suave, agrupa las notas relacionadas y no recalcula nada mientras está quieto. Los
+  nodos pasan a ser discos lisos, sin brillo.
 - **Código es código.** Un `[[enlace]]` o un `#tag` escrito dentro de un bloque de código
   ya no cuenta como enlace ni como etiqueta, ni en el grafo ni en el editor.
 <!-- notas-release:fin -->
@@ -49,7 +54,8 @@ funcionalidades no suma dos incrementos: el salto lo decide el cambio más signi
 | Qué | ID | Dónde |
 |---|---|---|
 | Calendario con recordatorios que avisan | `FUN-L-22` | desktop · [[calendario-recordatorios]] (web reflejada, sin publicar) |
-| Disposiciones del grafo elegibles por vault | `FUN-L-23` | desktop · [[grafo-disposiciones]] (web pendiente) |
+| El grafo aguanta vaults grandes: índice de enlaces, worker, precálculo y revelado, fuerzas como d3 | `FUN-L-25` · `DEF-109` | desktop · [[grafo-indice-y-motor]] (web pendiente) |
+| ~~Disposiciones del grafo elegibles por vault~~ (retirada el 2026-09-27) | `FUN-L-23` | — |
 | La tabla de búsqueda se escribe por rowid y lo borrado se limpia por conjuntos | `DEF-105` | desktop |
 | Lo creado desde fuera aparece aunque la escritura no pare | `DEF-106` | desktop |
 | Apariencia, snippets y papelera viven en `.mycelium`, no solo en el índice | `DEF-107` | desktop |
