@@ -130,6 +130,50 @@ async function renderNoteHtml(notaId: string): Promise<string> {
   }
 }
 
+/** `url(...)` relativa: no `data:`, ni absoluta, ni de protocolo relativo, ni un `#id`. */
+const URL_RELATIVA = /url\((['"]?)(?!data:|https?:|\/\/|#)([^'")]+)\1\)/g;
+
+/**
+ * Todo el CSS de la ventana, regla por regla (`DEF-116`). Una hoja de otro
+ * origen no deja leer sus reglas y se saltea.
+ *
+ * El backend imprime la página en otro lugar, así que las `url(...)` relativas
+ * —las fuentes, alguna imagen— se vuelven absolutas contra esta página; si no,
+ * no las encontraría.
+ */
+function cssDeLaVentana(): string {
+  const partes: string[] = [];
+  for (const hoja of Array.from(document.styleSheets)) {
+    let reglas: CSSRuleList;
+    try {
+      reglas = hoja.cssRules;
+    } catch {
+      // esperado: una hoja de otro origen no expone `cssRules`.
+      continue;
+    }
+    for (const regla of Array.from(reglas)) partes.push(regla.cssText);
+  }
+  return partes
+    .join("\n")
+    .replace(URL_RELATIVA, (_m, q: string, ruta: string) => `url(${q}${new URL(ruta, location.href).href}${q})`);
+}
+
+/**
+ * Las variables de las tipografías. Las define `next/font` en una clase del
+ * `<html>`, que el documento del backend no tiene: sin esto, el PDF caería a
+ * las fuentes por defecto.
+ */
+function variablesDeFuentes(): string {
+  const estilo = getComputedStyle(document.documentElement);
+  const decl: string[] = [];
+  for (const prop of Array.from(estilo)) {
+    if (prop.startsWith("--") && prop.includes("font")) {
+      decl.push(`${prop}: ${estilo.getPropertyValue(prop)};`);
+    }
+  }
+  return decl.length ? `html { ${decl.join(" ")} }` : "";
+}
+
 /** Exporta la nota como PDF con el tema aplicado, vía backend (HU-10). */
 export async function exportNotePdf(
   notaId: string,
@@ -155,7 +199,11 @@ export async function exportNotePdf(
       tema,
       modoOscuro: !opts.fondoBlanco && modoOscuro,
       html,
-      css: buildPrintCss(opts),
+      // Con los estilos de Mycelium va el CSS REAL de la ventana (`DEF-116`), no
+      // la copia reducida `PRINT_CSS`: así el PDF se ve como la vista de lectura.
+      css: opts.estilosMycelium
+        ? [cssDeLaVentana(), variablesDeFuentes(), buildPrintCss(opts, true)].join("\n")
+        : buildPrintCss(opts),
     }),
   });
   if (!res.ok) {
