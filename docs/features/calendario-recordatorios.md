@@ -283,6 +283,30 @@ estaba cerrada, así que no lleva número propio.
 Verificado con Playwright el mismo día: de septiembre de 2026 a marzo de 2021 en cinco
 clics, a diciembre de 1998 escribiendo el año, y de vuelta con «Ir a hoy».
 
+## Marcar como completado
+
+Pedido por el usuario el 2026-09-27: poder marcar un recordatorio como completado, y que su
+color se ponga más oscuro. Parte de `FUN-L-22`, sin número propio. En desktop `d8c9ed0`,
+en web `0030a69` (los componentes y el modelo son idénticos en las dos).
+
+- **Es por ocurrencia**: en uno que se repite, completar el del lunes no completa el del
+  martes. Se guarda en `ocurrencias[clave].completada`.
+- **Dónde se marca**: una casilla a la izquierda de cada ítem de la lista, y el botón
+  «Marcar como completado» en el detalle, que marca la ocurrencia del día desde el que se
+  abrió.
+- **Cómo se ve**: el color del recordatorio **se oscurece** —mezclado con negro, para que se
+  lea apagado en claro y en oscuro— en el chip, la lista, el punto del mes compacto (si todo
+  lo de ese color ese día está completado) y el borde del detalle. Para no depender solo del
+  color, el chip lleva un ✓ y el título va **tachado y apagado**.
+- **No es «Listo»**: «Listo» descarta un aviso; completado es un estado visible. Una
+  ocurrencia completada **tampoco avisa**. «Listo» y «Posponer» ya no borran la marca al
+  reemplazar el estado de aviso.
+- **Se conserva**: la limpieza de estados de más de 31 días no la tira. Lo completado es
+  historia y se ve en el calendario aunque sea de hace un año.
+
+Seis tests nuevos (29 en total). **Sin probar en la app**: la de desarrollo abierta era de
+otra sesión.
+
 ## Cómo quedó en web
 
 Reflejado a `web-cloud` el 2026-09-25 (merge `07a7727`, rama `feat/calendario-web`),
