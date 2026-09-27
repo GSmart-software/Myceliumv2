@@ -1054,6 +1054,160 @@ final acomoda lo poco que cambió.
 4. Con caché: revelado inmediato, sin precálculo perceptible.
 5. Panear: sin repintar; zoom: nítido siempre.
 
+## Cómo quedó · Parte E
+
+Implementada el 2026-09-27 en `feat/grafo-parte-e-desktop`, un commit por cambio (E1–E6)
+más uno de rendimiento de la residual. **Sin confirmar en la app**: lo medido es con el
+componente real en Chromium headless, que rasteriza por software (ver el aviso de la
+Parte D).
+
+### Archivos
+
+| Archivo | Qué |
+|---|---|
+| `frontend/components/graph/cicloFisica.ts` | `precalcular(c, alpha)` (objetivo 0: termina aunque la simulación sea continua) y `residual(c, alpha)` (fija la energía —también la baja— con el objetivo de siempre). La condición de asentado pasa a ser `objetivo === 0 && alpha < ALPHA_MIN`: el objetivo 0 con simulación continua solo existe durante el precálculo. El algoritmo no cambió. |
+| `frontend/components/graph/sim.worker.ts` | Mensajes `precalcular` (corre a ciegas: no publica nada hasta asentarse), `residual`, `ritmo` (`libre`/`pedido`) y `paso` (un paso y su publicación, siempre con respuesta). Con ritmo `pedido` el bucle libre no corre. |
+| `frontend/components/graph/motorFisica.ts` | `precalcular`, `residual`, `ritmo`; `avanzar()` con el worker pide un paso por frame (el siguiente recién cuando llegó la respuesta del anterior). Respaldo en el hilo principal: 12 ms de física por frame a ciegas, un paso por frame con ritmo `pedido`. Si el worker cae a mitad de un precálculo, el respaldo lo sigue a ciegas. |
+| `frontend/components/graph/revelado.ts` | **Nuevo**, puro: `suavizar` (cúbica de salida), `progresoRevelado` (600 ms), `radioMaximo`, `anillosNiebla` (disco opaco + coronas de opacidad decreciente). |
+| `frontend/components/graph/MiniGraph.tsx` | Fases `precalculo` → `revelado` → `vivo`; `prepararCapas` sacado del reposo; `componerConNiebla`/`pasoRevelado`; la residual al terminar el revelado, con caché y al soltar; sin presupuesto adaptativo fuera de la construcción temporal; la rueda sin gesto; consola; `RESIDUAL_MIN_PX`. |
+| `frontend/scripts/test-revelado.mjs` | **Nuevo**, 6 tests del revelado. |
+| `frontend/scripts/test-ciclo.mjs` | +3 tests: precálculo con y sin simulación continua, `residual`, y el movimiento de la residual tras el precálculo. |
+
+### Los seis cambios
+
+1. **Precálculo a ciegas.** Sin ninguna posición en caché, `motor.precalcular(1)`: el
+   worker corre libre hasta converger sin publicar y el hilo principal no pide frames
+   (el aviso de `alAsentar` lo despierta). Con caché —aunque sea parcial— no hay
+   precálculo: se muestra enseguida y la residual retoca (0,05) o integra los nodos
+   nuevos (0,3). Mientras se precalcula no se pueden apuntar ni arrastrar nodos (sí
+   panear y hacer zoom), y si se desmonta a mitad no se guarda la siembra como caché.
+2. **Revelado con niebla.** Primer frame: las capas del reposo se pintan una vez (el único
+   dibujo caro); recién después arranca el reloj de 600 ms. Cada frame copia las capas
+   recortadas a un disco que crece desde el origen del mundo (el centro de la gravedad)
+   con seis anillos de opacidad decreciente como borde difuso. **Medido cuál cuesta
+   menos** (1.600 × 900, dpr 1,5, por software, copia incluida): gradiente radial con
+   `destination-in` sobre todo el lienzo 42–86 ms por frame; seis anillos con `clip`
+   21–37 ms; la copia sola 19–27 ms. Se usan anillos. Con movimiento reducido no hay
+   fundido. Oculto o sin tamaño, el revelado espera a verse.
+3. **Física residual.** Al terminar el revelado, `residual(0,05)` con ritmo `pedido`: un
+   paso por frame y cada paso se dibuja. En la residual se dibuja a fidelidad completa
+   (`directo`: curvas, nombres sin pisarse), así los nombres no desaparecen tras el
+   revelado; la reducida (`rapido`) queda para el arrastre y los nodos nuevos (energía
+   > 0,05). La construcción temporal sigue en ritmo libre con el presupuesto de la
+   Parte C.
+4. **Arrastre.** `fijar` sigue subiendo a 0,3, ahora en ritmo `pedido`: un paso por frame,
+   todos dibujados, sin el presupuesto que salteaba lotes. Al soltar, `residual(0,05)`
+   (antes: enfriarse desde 0,3 en 248 pasos con el worker libre).
+5. **Cámara.** El paneo copia la capa (sin cambios). La rueda ya no abre un gesto: cada
+   paso mueve la cámara y el frame siguiente repinta nítido (varios pasos en un frame, un
+   repintado). Se quitaron `RUEDA_REPOSO_MS`, el temporizador y la copia escalada.
+6. **Consola** (solo el grafo global): `grafo: layout calculado en 1.1 s, 300 pasos` y
+   `grafo: revelado`; se conservan `grafo: física en …` y `grafo: asentado en …` (este
+   último cuenta ahora el fin de la residual).
+
+### Lo que se apartó del encargo
+
+- **La residual no repinta pasos de menos de medio píxel** (`RESIDUAL_MIN_PX`). Medido:
+  cada paso de la residual era un repintado completo aunque el grafo se hubiera movido
+  fracciones de píxel. Si ningún nodo se movió medio píxel de pantalla desde el último
+  dibujo, el paso se da pero no se repinta (el dibujo sería idéntico); al asentarse se
+  pinta exacto. A zoom 1 se ahorra ~40 % de los repintados de la residual.
+- **Con caché no hay fundido**, tampoco con caché parcial: el efecto del grafo se vuelve a
+  correr al editar enlaces, al cambiar de tema o al agregar una nota, y con fundido el
+  grafo se «apagaría» y volvería a aparecer cada vez. El fundido queda para el arranque
+  sin caché (la primera apertura tras iniciar la app, y el mini-grafo del panel, que no
+  tiene caché y lo hace en cada nota: < 200 nodos, precálculo de pocos frames en el hilo
+  principal).
+- **La residual tras el precálculo se mueve algo más que «apenas»**: el ciclo de `d3`
+  deja de dar pasos al enfriarse, no en el equilibrio exacto, y lo que falta lo recorre
+  la residual. Réplica con 1.000 nodos: 170 pasos, salto máximo 3,1 px de mundo por paso
+  (a zoom 0,35, un píxel de pantalla por frame), desplazamiento medio 16 px en total
+  (máximo 109 px, un nodo suelto). Sin saltos, pero se nota que se acomoda durante ~3 s
+  a 60 fps.
+- El respaldo sin worker usa 12 ms por frame a ciegas (no los 6 del asentamiento): no
+  hay dibujo que compita.
+
+### Mediciones
+
+Componente real empaquetado con esbuild, grafo de la Tesina (1.306 nodos, 3.275 aristas),
+Chromium headless de Playwright, 1.600 × 900, **dpr 1,5**, con worker. «Forzado» = un
+`getImageData` tras cada frame, que obliga a rasterizar dentro del frame. «Antes» =
+`desktop-tauri` en `d5a016f`.
+
+| Fase | Zoom 0,35 | Zoom 1 |
+|---|---|---|
+| Lienzo vacío (montaje → «layout calculado») | 1,29–1,69 s (layout 1,1–1,2 s, 300 pasos) | 1,37–1,69 s (1,1–1,3 s, 300 pasos) |
+| — frames en el precálculo | 2–3, sin nada que dibujar; 1 tarea larga de 65–87 ms al montar (antes: la misma, 94 ms) | ídem, 76–85 ms |
+| Revelado: duración | 618–634 ms | 646–690 ms |
+| — JS por frame p50 / p95 / máx (forzado) | 7,4 / 23 / 36 ms; 0 frames > 50 ms | 7,9 / 48 / 48 ms; 0 frames > 50 ms de JS; 1 tarea de 169 ms (pintar la capa, una vez) |
+| Residual: frames repintados / pasos | ~84 / 170 | 122 / 170 |
+| — forzado p50 / p95 | 0,3 / 91 ms | 150 / 224 ms |
+| — dura (headless) | 6,6 s | 21–25 s |
+| Con caché: asentado (residual) | 6,3 s en headless (antes 1,1 s con el worker libre) | 21 s (antes 1,6 s) |
+| Paneo: JS / forzado p95 | 0,1 / 25 ms, 60 fps, 0 frames > 50 ms | 0,1 / 20 ms, 60 fps, 0 frames > 50 ms |
+| Rueda, cada paso (forzado) | 95 ms (antes: copia escalada, 17 ms) | 229 ms (antes 17 ms) |
+| Arrastre 4 s: JS p50 / p95 | 5,4 / 11,8 ms (antes 4,4 / 6,2) | 4,1 / 6,6 ms (antes 5,1 / 7,6) |
+| — forzado p50 | 60 ms | 147 ms (Parte D: 141) |
+| — fps en headless | 12–16 | 6–7 (antes 5,6) |
+
+Sin worker (respaldo), zoom 0,35: lienzo vacío 1,69 s (layout en 1,4 s), JS por frame
+del precálculo p50 13,9 / p95 15,4 / máx 18 ms; revelado 638 ms.
+
+Capturas (lienzo leído dentro del frame, sobre el fondo): a mitad del revelado se ve el
+centro nítido y la periferia desvaneciéndose, sin escalones visibles entre anillos; al
+final, el cúmulo completo con discos lisos, curvas y los nombres sin pisarse.
+
+> [!warning] La residual repinta el cúmulo entero en cada paso visible
+> En headless eso cuesta lo que un repintado completo por software (90–220 ms forzado), y
+> por eso la residual dura 6–25 s en el banco en vez de ~3 s: el ritmo `pedido` ata la
+> física a los frames, a propósito (criterio 2). Con GPU el repintado es otro; **si en la
+> app la residual o el arrastre a zoom 1 superan los 50 ms por frame, el perfilador de F12
+> lo dirá**, y las palancas son dibujar la residual en `rapido`, subir `RESIDUAL_MIN_PX`,
+> o el arrastre local de la Parte F (que redibuja solo lo activo).
+
+### Contra los criterios
+
+1. **Lienzo vacío ≤ 2 s y revelado de ~600 ms**: 1,3–1,7 s y 620–690 ms. **Ningún frame
+   > 50 ms**: en el precálculo y el revelado, ninguno de JS (la tarea larga del montaje ya
+   existía; el primer frame del revelado paga el pintado de la capa, una vez). En la
+   residual, en headless sí (rasterizado por software de un repintado completo por paso):
+   a confirmar con GPU.
+2. **Residual muy poca y sin saltos**: un paso por frame, cada paso dibujado (o idéntico a
+   menos de medio píxel); réplica: salto máximo 3,1 px de mundo por paso. Se acomoda
+   visiblemente unos segundos (ver desvíos).
+3. **Arrastre a zoom 1 sin frames salteados**: sí por construcción (un paso por frame,
+   todos dibujados); curvas y discos lisos. Fluidez: 147 ms por frame forzado en headless,
+   igual que la Parte D; a confirmar en la app.
+4. **Con caché, revelado inmediato**: sin precálculo ni fundido; primer frame con el
+   layout.
+5. **Paneo sin repintar, zoom nítido**: paneo 0,1 ms de JS por frame sin repintados; cada
+   paso de rueda repinta nítido (95–229 ms por software).
+
+### Verificación
+
+- `npx tsc --noEmit -p tsconfig.json`: sin errores (en cada commit, y después de `next build`).
+- `node --test scripts/test-*.mjs`: **477 en verde, 7 saltados** (468 de antes + 3 de
+  `test-ciclo.mjs` + 6 de `test-revelado.mjs`).
+- `npx next build`: verde, con `turbopack-worker-*.js` en `out/_next/static/chunks/` y
+  `precalcular` en los chunks del worker.
+
+### Qué confirmar en la app
+
+1. Primera apertura del grafo global tras iniciar la app (sin caché): el lienzo queda
+   vacío ~1,5 s; en F12, `grafo: layout calculado en X s, 300 pasos` y después
+   `grafo: revelado`. Ver si la espera molesta (si molesta, está la variante por tandas).
+2. El fundido: centro primero, borde difuso, sin escalones ni parpadeo; ~0,6 s.
+3. Después del revelado: el grafo se acomoda muy poco durante unos segundos, sin saltos;
+   los nombres no desaparecen. Luego `grafo: asentado en …, 170 pasos`.
+4. Arrastrar (incluido el hub de 320 enlaces) a zoom 1: curvas, discos lisos, cada frame
+   un paso; mirar en el perfilador si los frames pasan de 50 ms. Al soltar, un acomodo
+   corto y suave.
+5. Cerrar y reabrir la pestaña (con caché): aparece enseguida, sin fundido ni espera.
+6. Panear: se desliza sin repintar. Rueda: nítido en cada paso (sin la imagen borrosa).
+7. Con «reducir movimiento» de Windows: sin fundido, aparece de una.
+8. Mini-grafo del panel: al abrir cada nota, un instante vacío y el fundido. Ver si ahí
+   molesta.
+
 ## Parte F · Arrastre local (2026-09-27, aparte de E)
 
 Idea del usuario: al mover un nodo, los nodos que no están cerca ni conectados no deberían
