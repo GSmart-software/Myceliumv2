@@ -529,6 +529,14 @@ entre ramas):
   - Al reflejar, comprobar con `npx next build` que sale `turbopack-worker-*.js` y que el
     host de web (Cloudflare Pages) sirve el bootstrap y los chunks del mismo origen: el
     worker los carga con `importScripts`. Si falla, el grafo cae solo al hilo principal.
+- **Ciclo de asentamiento (`FUN-L-25` · Parte C, 2026-09-26)**: worker libre, ciclo de
+  `d3-force`, siembra en filotaxis y dibujo a fidelidad reducida mientras el cúmulo se
+  mueve. Mismo frontend compartido que la Parte B y **se refleja junto con ella** (la C
+  reescribe `motorFisica.ts` y `sim.worker.ts`: reflejar la B sola no tiene sentido).
+  Detalle en [[grafo-indice-y-motor]] § Cómo quedó · Parte C.
+  - **Se traen enteros**: `components/graph/MiniGraph.tsx`, `fisica.ts`,
+    `motorFisica.ts`, `sim.worker.ts`, el nuevo `components/graph/cicloFisica.ts`, y
+    `scripts/test-fisica.mjs` y el nuevo `scripts/test-ciclo.mjs`.
 
 ### Artefactos solo-web (no existen en `desktop-tauri`)
 

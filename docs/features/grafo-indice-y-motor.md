@@ -543,6 +543,221 @@ el ciclo.
 6. **Ningún frame de más de 50 ms** mientras el grafo se mueve o se arrastra, con el
    grafo real de la Tesina a DPR 1,5.
 
+## Cómo quedó · Parte C
+
+Implementada el 2026-09-26 en `feat/grafo-asentamiento-desktop`: los cinco cambios de
+arriba más cuatro que sumó el orquestador tras la prueba del usuario con la Tesina («los
+nodos tardan mucho en reubicarse, con tirones muy grandes; mover un nodo genera un bajo
+rendimiento gigantesco»): **fidelidad reducida mientras se mueve**, **presupuesto de frame
+adaptativo**, **buffers en ping-pong** y **medir con el grafo real de la Tesina**.
+**Sin confirmar en la app**: lo medido es con réplicas en Node y con el componente real en
+Chromium headless, no en WebView2.
+
+### Archivos
+
+| Archivo | Qué |
+|---|---|
+| `frontend/components/graph/fisica.ts` | Constantes del ciclo de `d3-force` (`ALPHA_MIN`, `ALPHA_DECAY`, `enfriar(alpha, objetivo)`), y en `ConstantesFisica` tres campos: `ganancia` (12), `rozamiento` (0,4, el `velocityDecay`) y `velocidadMax` (`k`). En `paso`, la **inercia de los hubs** (ver abajo). Las fuerzas, Barnes-Hut y su orden no cambiaron. |
+| `frontend/components/graph/cicloFisica.ts` | **Nuevo.** El ciclo, puro: `crearCiclo`, `calentar`, `fijar`/`soltar` (arrastre con `alphaObjetivo` 0,3), `colocarEn`, `avanzarCiclo(presupuesto)` y `sembrarFilotaxis`. Lo usan el worker, el respaldo del hilo principal y los tests. |
+| `frontend/components/graph/sim.worker.ts` | Reescrito: corre **libre** (tandas de 8 ms cediendo con `MessageChannel`), publica como mucho cada 16 ms en **dos buffers en ping-pong**, lleva `alpha` y publica la última posición con `asentado: true`. Protocolo nuevo: `iniciar`, `correr`, `parar`, `fijar`, `soltar`, `colocar`, `activos`, `devolver`. |
+| `frontend/components/graph/motorFisica.ts` | Reescrito: `correr`/`fijar`/`soltar`/`colocar`/`activos`/`avanzar`/`tomar`, `corriendo`, `alpha` y el aviso `alAsentar`. Respaldo en el hilo principal con 6 ms de física por frame. `colocar`/`fijar` llevan un número de secuencia: lo que el hilo principal movió no lo pisa una publicación vieja. |
+| `frontend/components/graph/MiniGraph.tsx` | Solo el cúmulo (y lo que comparte el sustrato): la siembra, el motor nuevo, los nombres, el dibujo en tres modos (`rapido`, `directo`, `reposo`), el presupuesto adaptativo y la consola. |
+| `frontend/scripts/test-fisica.mjs` | Ajustado: constantes nuevas, el decaimiento, y el test «número por número» contra el `simulate()` viejo ahora pasa las constantes de antes explícitas. 11 tests. |
+| `frontend/scripts/test-ciclo.mjs` | **Nuevo.** 8 tests del ciclo y la siembra (ver Verificación). |
+
+### El ciclo (cambios 1 y 2)
+
+- **Worker libre.** El hilo principal ya no pide pasos: el worker los da solo y avisa al
+  asentarse. Era la causa de los decenas de segundos: un paso por frame, y con frames lentos
+  (rasterizado) pocos pasos por segundo. Los 300 pasos de la Tesina son **0,9 s** de
+  física (3 ms por paso en Node).
+- **Decaimiento de `d3`**: `alpha += (objetivo − alpha)·(1 − 0,001^(1/300))`; asentado al
+  bajar de 0,001. Desde 1 son 300 pasos; desde la caché (0,05) 170; desde 0,3 (nodos nuevos,
+  al soltar un arrastre) 248. `IDLE_GRACE_MS` 5.000 → 1.000.
+- **`resize` ya no da energía.** Antes `alpha = max(alpha, 0,3)` en cada `resize`, y montar
+  el componente dispara uno: **con caché el grafo re-simulaba desde 0,3** (460 pasos) cada vez
+  que se abría la pestaña. Por eso la Parte B medía 38 s «con caché». El tamaño del lienzo no
+  cambia el layout.
+- **Ganancia 12.** Con 300 pasos en vez de ~1.000 (700 hasta `REST` más la gracia) y el
+  rozamiento de `d3` (se pierde el 40 % de la velocidad por paso, no el 15 %), el grafo no
+  llegaba a expandirse: −11 % de radio con ganancia 2. Multiplicar TODAS las fuerzas por
+  igual no mueve el equilibrio (fuerza nula = reposo), solo acelera el camino. Medido en la
+  réplica (siembra en filotaxis, ciclo nuevo, contra el ciclo de antes con su siembra; radio
+  RMS del cúmulo asentado):
+
+  | Grafo | Radio antes | Ganancia 2 | 6 | 10 | **12** | 14 | Arista media antes → 12 |
+  |---|---|---|---|---|---|---|---|
+  | Tesina (1.306, grado máx. 320) | 953 | −10,6 % | −4,2 % | −3,0 % | **−2,3 %** | −1,9 % | 223 → 241 |
+  | Sintético 1.000 | 779 | −13,1 % | −5,2 % | −2,5 % | **−1,8 %** | −0,7 % | 359 → 370 |
+  | Sintético 2.000 | 990 | −12,7 % | −5,2 % | −2,4 % | **−1,8 %** | −1,3 % | 436 → 452 |
+  | Tesina, sustrato | 576 | | | | **−2,2 %** | | 135 → 145 |
+
+  La energía final baja (|v| medio 0,02 → 0,008 px/paso en la Tesina). Desde la caché con
+  alpha 0,05 cada nodo se mueve 7–13 px (la Parte B medía 17–22 px con el ciclo viejo). La
+  correlación de distancias entre pares contra el layout de antes es 0,35, pero entre dos
+  semillas del **mismo** ciclo viejo es 0,5–0,6: el cúmulo tiene muchos mínimos locales, y
+  con el ciclo viejo arrancado desde la filotaxis la correlación con el nuevo sube a 0,8–0,9.
+  Es decir: mismo tipo de layout, distinta disposición concreta según la siembra.
+- **Inercia de los hubs** (desvío: `fisica.ts` cambia algo más que constantes). Con la
+  ganancia, el hub de 320 enlaces de la Tesina **vibraba** de un paso al otro a 80 px (el
+  tope) mientras se arrastraba: sus resortes suman `0,01·320·alpha·ganancia` = 11,5 con
+  alpha 0,3, y con el rozamiento de `d3` el integrador diverge por encima de ~5,3. Cada nodo
+  reparte ahora la fuerza del paso en `m = grado·0,01·ganancia/2,5` pasos (si `m > 1`): no
+  cambia dónde está el equilibrio, solo cómo se llega. Con alpha 0,3 sostenida, velocidad
+  máxima de un nodo: ciclo viejo 14 px/paso; ganancia 10 sin inercia 80 (el hub); con
+  inercia 22. Hay un test que falla sin ella.
+- **Tope de velocidad** en `k` por paso: red de seguridad (sin él, la ganancia 4 ya hacía
+  estallar la Tesina desde la filotaxis: radios de 10¹⁹).
+- **Arrastre**: `fijar` sube `alphaObjetivo` a 0,3 en el worker (no espera a un frame);
+  `soltar` lo baja a 0 y el grafo se asienta en 248 pasos.
+- **Simulación continua** (`graphContinuousSim`): el objetivo no baja de 0,002 (la misma
+  fuerza efectiva que el piso 0,02 de antes) y, ya casi quieto, el worker da un paso cada
+  16 ms en vez de correr libre.
+- **Respaldo en el hilo principal** (sin `Worker`, movimiento reducido, menos de 200 nodos
+  o fallo del worker): los pasos que quepan en 6 ms por frame.
+
+### Siembra (cambio 3)
+
+Filotaxis `k/4·√i` con el ángulo áureo: el nodo central primero (cae en el origen) y
+después por cantidad de enlaces, así los hubs nacen donde la gravedad los terminaría
+llevando. Los nodos sin caché que tienen algún vecino con caché nacen junto a él (±`k/8`).
+El sustrato conserva su propia siembra (`siembraSustrato`, sin tocar).
+
+### El dibujo mientras se mueve (cambios 4 y 6–8)
+
+- **Tres modos** en `draw`: `rapido` (se mueve, 200 nodos o más), `directo` (se mueve en
+  grafos chicos, o simulación continua casi quieta) y `reposo`.
+- **`rapido`**: aristas rectas, sin flujo ni flecha; nodos como discos planos agrupados por
+  color; solo los nombres de los 24 hubs, el apuntado y el centro. Al asentarse, un único
+  repintado a fidelidad completa.
+- **Desvío: un `stroke()` por arista, sin lotes.** El encargo pedía lotes de ~256
+  segmentos. Medido con la Tesina asentada (1.600 × 900 a dpr 1,5, rasterizado forzado con
+  `getImageData`; mediana de 5):
+
+  | Qué | Zoom 0,35 raster / JS | Zoom 1 raster / JS |
+  |---|---|---|
+  | Aristas bézier, un stroke c/u (fidelidad completa) | 53,6 / 3,3 ms | 133 / 3,8 ms |
+  | **Aristas rectas, un stroke c/u** | **35,5 / 1,5 ms** | **128 / 1,8 ms** |
+  | Rectas en lotes de 16 | 45,2 / 1,1 | 149 / 1,0 |
+  | Rectas en lotes de 64 | 58,4 / 0,5 | 161 / 0,5 |
+  | Rectas en lotes de 256 | 75,1 / 0,3 | 195 / 0,6 |
+  | Nodos: sprite con glow (`drawImage`) | 29,1 / 3,1 | 15,6 / 2,7 |
+  | **Nodos: disco, un `fill()` c/u** | **6,1 / 0,5** | **10,2 / 0,7** |
+  | Discos en lotes de 256 | 8,1 / 0,8 | 12,8 / 1,0 |
+
+  Agrupar empeora el rasterizado de forma monótona y ahorra un milisegundo de JS: es el
+  mismo fenómeno que `DEF-109` midió con un único path (68 contra 20 ms). En el banco del
+  componente, pasar de lotes de 256 a un trazo por arista subió el asentamiento a zoom 0,35
+  de 30 a 36 fps y el arrastre de 11 a 15.
+- **Nombres sin pisarse** en reposo (modo «todos», zoom > 0,5): se escriben por
+  importancia (apuntado, centro y después por enlaces) y se salta el que caería encima de
+  uno ya escrito, con una rejilla de 96 px en pantalla (el `ocupados` de `hifas.ts` compara
+  todos contra todos). Los anchos se miden una vez por nodo. Los modos «vecinos» y
+  «apuntado» no cambian.
+- **Presupuesto adaptativo**: si un `draw()` en movimiento pasó de 12 ms, el siguiente lote
+  de posiciones no se pinta (queda sucio para el próximo frame). La física no se entera.
+- **Reposo sin capas cuando no hay flujo** (desvío, no estaba pedido): las capas de la Parte
+  B solo sirven para animar el flujo encima; si el flujo no se puede ver (opción, movimiento
+  reducido, zoom < 0,5 o más de 1.500 aristas a la vista, que ahora se cuentan antes de
+  pintar), el reposo pinta **directo**. Medido: el frame en que el grafo se asienta a zoom 1
+  costaba **256 ms de JS** con capas (162 de ellos copiando la capa de aristas, que obliga a
+  rasterizarla ahí) y ahora 28–41 ms; a zoom 0,35, de 94 a 14 ms.
+- **Ping-pong**: dos `Float32Array` que van y vuelven; si llegan dos publicaciones antes de
+  un frame, la vieja se devuelve sin copiar.
+
+### Consola (cambio 5)
+
+Solo el grafo global (sin nodo central; el del panel se reconstruye con cada nota):
+
+```
+grafo: física en worker, 1306 nodos, 3275 aristas
+grafo: asentado en 1.4 s, 300 pasos
+```
+
+Tras un arrastre, «asentado en…» cuenta desde que se suelta.
+
+### Mediciones
+
+Componente **real** (`MiniGraph.tsx` empaquetado con esbuild, stores sustituidos) con el
+grafo de la Tesina extraído con `docs/design/demos/extraer-vault.mjs` (1.306 nodos, 3.275
+aristas, grado máximo 320, 559 sin enlaces), Chromium headless de Playwright, 1.600 × 900,
+**`deviceScaleFactor` 1,5**. «Antes» = `desktop-tauri` en `4ac1ba9` (Parte B). «JS» = tiempo
+del callback de `requestAnimationFrame` (física local + `draw()`); «huecos» = intervalos
+entre frames de más de 50 ms. Antes no había consola: su asentamiento es cuando el bucle se
+detuvo menos los 5 s de gracia.
+
+| Caso | Antes | Después (worker) |
+|---|---|---|
+| Sin caché, zoom 0,35: asentado | **58 s**, 12 fps | **1,4 s**, 36 fps |
+| — JS p50 / p95 / máx; frames > 50 ms de JS | 7,0 / 9,0 / 87 ms; 1 | 0,1 / 3,4 / 14 ms; 0 |
+| — huecos > 50 ms | 761 de 766 frames | 10 de 85 |
+| Con caché, zoom 0,35: asentado | 38 s | **0,9 s** |
+| Arrastre 4 s, zoom 0,35: JS p50 / p95 / máx | 7,6 / 9,5 / 12 ms, 13 fps | 2,6 / 6,8 / 11 ms, 15 fps |
+| Tras soltar, zoom 0,35: asentado | 42 s | 1,4 s |
+| Sin caché, zoom 1: asentado | **114 s**, 6 fps | **2,0 s**, 19 fps |
+| — JS p50 / p95 / máx; frames > 50 ms de JS | 8,2 / 10,9 / 218 ms; 2 | 0,2 / 5,4 / 41 ms; 0 |
+| Con caché, zoom 1: asentado | 77 s | 1,3 s |
+| Arrastre 4 s, zoom 1: JS p50 / p95 / máx | 9,5 / 10,6 / 12 ms, 6 fps | 2,8 / 5,1 / 6,3 ms, 7 fps |
+| Tras soltar, zoom 1: asentado | 84 s | 1,2 s |
+
+**Respaldo en el hilo principal** (sin `Worker`), zoom 0,35: asentado en 11 s sin caché y
+6,7 s con caché (a ~20 fps de headless, uno o dos pasos por frame); JS p50 / p95 9,9 / 12,6 ms.
+En WebView2 a 60 fps serían ~2,5 s.
+
+Contra los criterios: (1) **< 8 s sin caché y < 1 s con caché**: 1,4–2,0 s y 0,9–1,3 s en
+headless, con la consola diciéndolo. (2) **< 8 ms por frame mientras asienta**: p95 3,4–5,4 ms
+de JS; los nombres completos aparecen al asentarse. (3) **Radio ±5 %**: −1,8 a −2,3 % (tabla
+de la ganancia). (4) **Arrastre sin retraso**: `fijar` llega al worker entre tandas de 8 ms.
+(5) **Parte B**: sin flujo, 0 rAF en reposo (el bucle se detiene 1 s después de asentarse);
+flujo acotado igual. **Ningún frame de más de 50 ms de JS mientras se mueve** (el máximo en
+movimiento es 14 ms); el de 28–41 ms a zoom 1 es el repintado a fidelidad completa, una vez,
+al asentarse.
+
+> [!warning] Los huecos de más de 50 ms que quedan son del rasterizado por software de headless
+> En headless el canvas se rasteriza por CPU: a zoom 1 las 3.275 aristas rectas cuestan
+> 128 ms de rasterizado (tabla de arriba) aunque el JS del frame sea de 3 ms. Eso limita los
+> fps del banco (7 al arrastrar a zoom 1) y no es lo que pasa en WebView2 con GPU. Probar
+> Chromium con GPU (`--use-angle=d3d11`) no dio frames utilizables en headless. **Los fps y
+> los frames largos reales solo se ven en la app** (perfilador de F12).
+
+### Lo que se apartó del encargo
+
+- Inercia de los hubs y tope de velocidad en `fisica.ts` (medido arriba; sin ellos la
+  ganancia no es estable con hubs).
+- Un trazo por arista y un relleno por disco, sin lotes (medido arriba).
+- Reposo directo sin capas cuando el flujo no se puede ver (medido arriba).
+- Fidelidad reducida solo desde 200 nodos: el mini-grafo del panel se asienta en pocos
+  frames y alternar discos y sprites se vería como un parpadeo.
+- En modo `rapido` los nombres son solo hubs/apuntado/centro durante **todo** el
+  movimiento, no solo con `alpha > 0,05` (desde 0,05 hasta asentarse son ~0,5 s).
+- La filotaxis ordena por enlaces (el orden del índice queda para `d3`); la réplica no
+  mostró diferencia de radio entre los dos órdenes y así los hubs nacen al centro.
+
+### Verificación
+
+- `npx tsc --noEmit -p tsconfig.json`: sin errores (también después de `next build`).
+- `node --test scripts/test-*.mjs`: **485 en verde, 7 saltados** (476 de antes + 1 nuevo en `test-fisica.mjs`, el decaimiento, + 8 de `test-ciclo.mjs`: pasos hasta `alphaMin` desde 1, 0,05 y 0,3; `calentar`; arrastre que no se asienta y se asienta al soltar; simulación continua; presupuesto por tanda; filotaxis —radio, ángulo áureo, distancia mínima—; hub de 400 enlaces sin vibrar —falla sin la inercia—; y radio ±5 % contra el ciclo de antes).
+- `npx next build`: verde, con `turbopack-worker-*.js` en `out/_next/static/chunks/` y el ciclo empaquetado en los chunks del worker.
+
+### Qué confirmar en la app (y qué mirar en F12)
+
+1. Abrir el grafo global con la Tesina **sin caché** (primera vez tras reiniciar la app, o
+   cambiando de disposición y volviendo): en la consola, `grafo: física en worker, 1306
+   nodos, 3275 aristas` y, a los pocos segundos, `grafo: asentado en X s, 300 pasos` con
+   **X < 8**. Si dice «hilo principal», el worker no cargó (y el grafo anda igual, más lento).
+2. Cerrar y volver a abrir la pestaña del grafo (con caché): `asentado en` **menos de 1 s**,
+   170 pasos, y el grafo casi no se mueve.
+3. Mientras se asienta, se ven líneas rectas y discos planos, con los nombres de los hubs;
+   al asentarse, un único cambio a curvas, brillo y todos los nombres que entran sin
+   pisarse. Ver si ese cambio molesta.
+4. Arrastrar un nodo (incluido el hub de 320 enlaces): responde sin retraso, el resto se
+   reacomoda sin tirones ni vibración; al soltar, `asentado en ~1 s, 248 pasos`.
+5. Perfilador de F12 (Performance) mientras asienta y mientras se arrastra: ningún frame
+   de más de 50 ms; tareas del hilo principal de pocos milisegundos.
+6. El layout asentado se ve del mismo tipo que antes (mismo tamaño, hubs al centro).
+7. Sustrato: se asienta rápido y se detiene; la construcción temporal crece y se asienta.
+8. Mini-grafo del panel: igual que antes (sin discos planos).
+
 ## Versionado
 
 Es la corrección de `DEF-109` más mejoras internas: **patch**, absorbido por la `2.2.0`
