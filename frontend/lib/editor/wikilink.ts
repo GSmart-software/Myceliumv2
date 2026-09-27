@@ -6,100 +6,19 @@ import type {
 import type { EditorView } from "@codemirror/view";
 import type { TreeCarpeta, TreeNota } from "@/stores/vaultStore";
 import { useVaultStore } from "@/stores/vaultStore";
-import { sinExtensionDeNota } from "@/lib/extensionesDeTipo";
-import { partirWikilink } from "@/lib/wikilinks";
+import { folderSegments, notasPorTitulo, resolveWikilink } from "@/lib/wikilinks";
 
 /**
- * Wikilinks estilo Obsidian: `[[archivo]]`, `[[archivo|alias]]` y
+ * Wikilinks estilo Obsidian en el editor: `[[archivo]]`, `[[archivo|alias]]` y
  * desambiguación por ruta de carpeta `[[Carpeta/Sub/archivo]]`.
  *
- * - `parseWikilinkTarget`: separa destino (antes de `|`) del texto a mostrar.
- * - `resolveWikilink`: resuelve una referencia (con o sin ruta) a una nota.
+ * - `resolveWikilink`: resuelve una referencia (con o sin ruta) a una nota. Vive
+ *   en `lib/wikilinks.ts` desde `FUN-M-40` (D8) —es la MISMA regla que usa el
+ *   grafo— y se reexporta acá para los consumidores de siempre.
+ * - `markMissingWikilinks`: oscurece en un preview los enlaces que no resuelven.
  * - `wikilinkCompletions`: fuente de autocompletado al escribir dentro de `[[`.
  */
-
-/** Segmentos de carpeta (raíz→hoja) que contienen a una nota. */
-export function folderSegments(
-  carpetaId: string | null,
-  carpetas: TreeCarpeta[],
-): string[] {
-  const segs: string[] = [];
-  const seen = new Set<string>();
-  let id = carpetaId;
-  while (id && !seen.has(id)) {
-    seen.add(id);
-    const c = carpetas.find((x) => x.id === id);
-    if (!c) break;
-    segs.unshift(c.nombre);
-    id = c.padreId;
-  }
-  return segs;
-}
-
-/**
- * Separa `destino|alias` → `{ target, label }` (alias opcional).
- *
- * Delega en `lib/wikilinks.ts` para que la barra escapada de las tablas
- * (`[[Destino\|alias]]`, `DEF-045`) se entienda igual acá que en el grafo, la
- * vista en vivo y la de lectura.
- */
-export function parseWikilinkTarget(inner: string): { target: string; label: string } {
-  const { destino, etiqueta } = partirWikilink(inner);
-  return { target: destino, label: etiqueta };
-}
-
-/**
- * Resuelve una referencia de wikilink a una nota. Acepta solo el título
- * (`archivo`) o una ruta parcial (`Carpeta/archivo`) para desambiguar cuando
- * hay varios archivos con el mismo nombre. Ante empate sin pista de ruta,
- * elige el de ruta más corta (más cercano a la raíz), como Obsidian.
- */
-export function resolveWikilink(
-  ref: string,
-  notas: TreeNota[],
-  carpetas: TreeCarpeta[],
-): TreeNota | undefined {
-  const parts = ref
-    .split("/")
-    .map((s) => s.trim())
-    .filter(Boolean);
-  if (parts.length === 0) return undefined;
-
-  const title = parts[parts.length - 1].toLowerCase();
-  const hint = parts.slice(0, -1).map((s) => s.toLowerCase());
-
-  let matches = notas.filter((n) => n.titulo.toLowerCase() === title);
-  // Las referencias a archivos llevan extensión (`archivo.excalidraw`), pero el
-  // título de la nota no la incluye: si no hubo match exacto, se prueba sin la
-  // extensión para que el enlace/embed resuelva y no se estile como inexistente.
-  //
-  // Las extensiones salen de `lib/extensionesDeTipo` y no de una lista escrita
-  // acá: cuando estaban a mano decían solo `excalidraw|md`, así que
-  // `![[diagrama.drawio]]` no resolvía a nada y el embed se dibujaba como
-  // «no existe» aunque el archivo estuviera ahí al lado.
-  if (matches.length === 0) {
-    const stripped = sinExtensionDeNota(title);
-    if (stripped !== title) matches = notas.filter((n) => n.titulo.toLowerCase() === stripped);
-  }
-  if (matches.length === 0) return undefined;
-
-  const byDepth = (a: TreeNota, b: TreeNota) =>
-    folderSegments(a.carpetaId, carpetas).length -
-    folderSegments(b.carpetaId, carpetas).length;
-
-  if (matches.length === 1 || hint.length === 0) {
-    return [...matches].sort(byDepth)[0];
-  }
-
-  // Desambiguar: la ruta de la nota debe terminar con los segmentos de la pista.
-  const matchHint = matches.filter((n) => {
-    const segs = folderSegments(n.carpetaId, carpetas).map((s) => s.toLowerCase());
-    if (hint.length > segs.length) return false;
-    return hint.every((h, i) => segs[segs.length - hint.length + i] === h);
-  });
-  const pool = matchHint.length > 0 ? matchHint : matches;
-  return [...pool].sort(byDepth)[0];
-}
+export { folderSegments, resolveWikilink };
 
 /**
  * Marca los wikilinks de un preview ya renderizado cuyo destino no existe en el
@@ -138,17 +57,13 @@ export function wikilinkCompletions(context: CompletionContext): CompletionResul
 
   const { notas, carpetas } = useVaultStore.getState();
 
-  // Conteo de títulos para detectar ambigüedad.
-  const counts = new Map<string, number>();
-  for (const n of notas) {
-    const k = n.titulo.toLowerCase();
-    counts.set(k, (counts.get(k) ?? 0) + 1);
-  }
+  // Títulos repetidos (ambiguos), del mismo índice que usa `resolveWikilink`.
+  const porTitulo = notasPorTitulo(notas);
 
   const options = notas
     .map((n) => {
       const segs = folderSegments(n.carpetaId, carpetas);
-      const ambiguous = (counts.get(n.titulo.toLowerCase()) ?? 0) > 1;
+      const ambiguous = (porTitulo.get(n.titulo.toLowerCase())?.length ?? 0) > 1;
       const path = segs.length > 0 ? `${segs.join("/")}/${n.titulo}` : n.titulo;
       // Las ambiguas se insertan con ruta para que resuelvan de forma única.
       const insert = ambiguous ? path : n.titulo;
