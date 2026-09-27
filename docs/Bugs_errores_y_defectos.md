@@ -659,6 +659,13 @@ trabajo…» al arrancar y el «Cargando…» del workspace.
 
 Reportado por el usuario el 2026-09-27.
 
+# DEF-115
+**El indicador de dirección «Animado» del grafo no se ve en un vault grande.** Con la
+opción activa, las aristas se dibujan sin el flujo de guiones en movimiento, a cualquier
+zoom, en un vault de más de mil notas; en vaults chicos sí aparece.
+
+Reportado por el usuario el 2026-09-27, probando `FUN-L-25` en la app con la Tesina.
+
 ---
 
 > [!warning] Defectos sin reporte original
