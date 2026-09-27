@@ -1292,6 +1292,50 @@ estables; al soltar, repintado inmediato y acomodo corto; zoom con rueda y redim
 el panel en medio de un arrastre repintan la base sin restos. Para que al soltar todo quede
 como está: `RELAJAR_AL_SOLTAR = false`.
 
+## Parte G · Fuerzas como `d3-force`, para que los grupos se vean (2026-09-27)
+
+Observación del usuario probando E en la app: en Obsidian los nodos «siempre parecieran
+agruparse en conjuntos según cómo están relacionados», y en Mycelium todo se mezcla. Las
+causas están en el modelo de fuerzas, no en el rendimiento:
+
+1. **Resortes sin normalizar**: en `d3-force` la fuerza de un enlace es `1 / min(grado(s),
+   grado(t))`; un hub de 320 enlaces tira de cada vecino con 1/320. En Mycelium todos los
+   resortes tienen la misma fuerza y los hubs apilan a sus vecinos encima.
+2. **Gravedad por nodo** (`n.x · 0,004 · alpha` hacia el origen): aplasta los grupos unos
+   contra otros. `d3` no la tiene; Obsidian usa un centro débil (0,1).
+3. **Proporción repulsión/enlace**: Obsidian repele con 1.000 (`distanceMin 30`) y enlaza a
+   250; Mycelium usa `k = 80` para las dos cosas.
+
+La mezcla no encarece la física (el quadtree es insensible a la forma) pero sí un poco el
+dibujo (aristas largas que cruzan la pantalla).
+
+### Qué cambiar (`fisica.ts`; una rama, un merge, revertible sola)
+1. Fuerza de resorte normalizada por grado como `d3`: `f · 1/min(deg s, deg t)`, con el
+   grado precalculado en `EstadoFisica`.
+2. Sin gravedad por nodo. En su lugar, **recentrado del conjunto** (`forceCenter`: trasladar
+   el centroide al origen tras cada paso) y, si hace falta para que los nodos sueltos no se
+   vayan al infinito, una fuerza de centro **débil** (0,1 como Obsidian, aplicada con `alpha`).
+   El nodo central del mini-grafo conserva su tirón propio.
+3. Repulsión con `distanciaMin` (30 unidades, como Obsidian; evita la explosión entre nodos
+   superpuestos) y las constantes `k`/repulsión/reposo reajustadas para que el cúmulo
+   asentado tenga un radio parecido al actual (±15 %) con las tres pruebas (Tesina,
+   Trabajo y Estudio, este repo).
+4. **Medición de agrupamiento**, antes y después, en Node: (a) distancia media entre nodos
+   conectados dividida por distancia media entre no conectados (más bajo = más agrupado);
+   (b) solapamiento de comunidades: con las carpetas de primer nivel como proxy de
+   comunidad, la fracción de los k vecinos espaciales más cercanos de cada nodo que son de
+   su misma carpeta (más alto = grupos más limpios). Capturas de los tres vaults.
+5. El asentamiento no debe empeorar: mismos ~300 pasos, worker y presupuesto de E intactos.
+
+### Criterios
+1. En la Tesina y en Trabajo y Estudio, la métrica (b) sube y la (a) baja respecto de hoy;
+   el radio queda dentro de ±15 %.
+2. Los hubs dejan de ser el centro de todo: sus vecinos se reparten y los grupos se
+   distinguen a simple vista en las capturas.
+3. Nada de E cambia: precálculo, revelado, residual, arrastre y flujo siguen igual; los
+   tests de `fisica`/`ciclo` se actualizan a las constantes nuevas, no se borran.
+4. La decisión final es visual y del usuario en la app.
+
 ## Versionado
 
 Es la corrección de `DEF-109` más mejoras internas: **patch**, absorbido por la `2.2.0`
