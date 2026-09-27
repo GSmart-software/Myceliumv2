@@ -997,6 +997,91 @@ hubs (cúmulo), hifas curvas sin halo y cuerpos sin brillo (sustrato).
 6. Con el flujo animado (cúmulo, zoom ≥ 0,5): los guiones se detienen durante un gesto y
    vuelven al terminar.
 
+## Parte E · Calcular primero, mostrar después (2026-09-27)
+
+Decisión del usuario tras probar C y D en la app: el movimiento resultante no es fluido y
+«deja una sensación de mal funcionamiento peor del que era antes». Las disposiciones se
+retiraron (`c31b476`) y los nodos son lisos siempre. Para el cúmulo, el usuario propone
+lo que percibe en Obsidian: **los nodos aparecen ya ubicados** donde deben estar, con muy
+poco movimiento, y no surgen de la nada sino con una animación, «como si una niebla se
+desvaneciera desde el centro». Si el lugar se decide antes de dibujar, no hay fase de
+movimiento masivo que renderizar, y ahí estaba el costo.
+
+> [!important] Una parte, una rama, un merge
+> Regla del usuario (2026-09-27): cada parte entra con su propio merge `--no-ff`, para
+> poder revertirla sola con `git revert -m 1 <merge>` si el resultado no gusta. La Parte
+> F (arrastre local) va **aparte** de esta por el mismo motivo.
+
+### Qué cambiar (solo el cúmulo; el motor `fisica.ts`/`cicloFisica.ts`/worker no cambia de algoritmo)
+
+1. **Precálculo a ciegas.** Al construir el grafo sin caché de posiciones, el worker corre
+   a convergencia (`alpha < alphaMin`, hoy ~300 pasos, 1,4 s en la Tesina) **sin que el
+   hilo principal dibuje nada**: el lienzo queda vacío (o con el fondo) y el worker no
+   publica posiciones intermedias, solo el resultado final. Con caché de posiciones el
+   precálculo es el arranque de siempre en 0,05: instantáneo.
+2. **Revelado con niebla.** Con las posiciones finales, se pinta la capa estática completa
+   (curvas, discos lisos, nombres sin pisarse) **una vez**, y se muestra con un fundido
+   radial desde el centro: en cada frame del revelado se copia la capa con una máscara
+   radial que crece (`globalCompositeOperation` con un gradiente radial, o recorte por
+   `clip` de un círculo creciente con borde difuso), unos 600 ms con easing. Un solo
+   dibujo caro; el revelado son copias. Con `prefers-reduced-motion`, sin fundido.
+3. **Física residual suave.** Tras el revelado, el worker sigue con energía baja
+   (`alphaObjetivo 0`, desde `alpha ≈ 0,05`) y el hilo principal dibuja **un lote por
+   frame, sin saltarse ninguno**: si llegan varias posiciones por frame, se dibuja la
+   última pero el worker se acota a **un paso por frame** en esta fase (`paso` por pedido,
+   como en la Parte B). Movimiento apenas perceptible, sin saltos.
+4. **Arrastre suave (global, como hoy).** Al arrastrar: `alphaObjetivo 0,3`, **un paso de
+   física por frame dibujado** (sin presupuesto que saltee frames), curvas siempre, discos
+   lisos. Al soltar, el worker vuelve a residual. La Parte F cambiará esto por el arrastre
+   local; acá se deja global para que E se pueda evaluar sola.
+5. **Cámara**: paneo copiando la capa (queda); **zoom repinta nítido** en cada paso de
+   rueda (se quita la copia escalada borrosa de la Parte D). Decisión del usuario.
+6. **Consola**: «grafo: layout calculado en X s, P pasos» al terminar el precálculo y
+   «grafo: revelado» al terminar el fundido.
+
+### Variante, solo si el usuario la pide después
+Si esperar 1,4 s con el lienzo vacío molesta, los nodos pueden aparecer **por tandas**
+(por grado, los hubs primero) en sus posiciones ya calculadas mientras el worker converge,
+sin dibujar nunca el movimiento: cada tanda se pinta donde el worker la dejó y el fundido
+final acomoda lo poco que cambió.
+
+### Criterios
+1. Tesina sin caché: lienzo vacío ≤ 2 s, después el revelado de ~600 ms; **ningún
+   frame > 50 ms** en ninguna fase (Playwright, DPR 1,5, grafo real).
+2. Después del revelado el grafo se mueve muy poco y sin saltos (posiciones dibujadas a un
+   paso por frame).
+3. Arrastrar a zoom 1: fluido, curvas, discos lisos; sin frames salteados.
+4. Con caché: revelado inmediato, sin precálculo perceptible.
+5. Panear: sin repintar; zoom: nítido siempre.
+
+## Parte F · Arrastre local (2026-09-27, aparte de E)
+
+Idea del usuario: al mover un nodo, los nodos que no están cerca ni conectados no deberían
+recalcularse. Reduce la física (de O(n log n) a O(a log n) con `a` activos) y, sobre
+todo, **el dibujo**: los congelados están en la capa estática y solo se redibujan los
+activos y sus aristas, en un rectángulo sucio.
+
+### Qué cambiar
+1. **Conjunto activo** al iniciar el arrastre: el nodo arrastrado, sus vecinos de grafo a
+   uno y dos saltos, y los nodos a menos de `3·k` de él (consulta al quadtree). Se
+   recalcula si el arrastre se aleja más de `k` del punto donde se calculó.
+2. **Congelados**: posición fija; no reciben fuerzas ni se mueven. El worker recibe la
+   máscara de activos (`activos: Uint8Array`, que ya existe en el protocolo) y solo integra
+   esos; la repulsión de un activo se calcula contra el árbol de todos (log n).
+3. **Dibujo**: copia de la capa estática + redibujo de los activos, de las aristas que
+   tocan un activo (incluidas las que van a un congelado) y de los nombres afectados, en
+   el rectángulo que los envuelve (con margen). Al soltar, un repintado completo de la
+   capa.
+4. **Al soltar**: relajación global corta con energía baja y un paso por frame (la
+   residual de E), para disipar tensiones si el usuario lo prefiere; **configurable en el
+   código** con una constante, por defecto encendida.
+
+### Criterios
+1. Arrastrar el hub de 320 enlaces de la Tesina a zoom 1: hilo principal < 8 ms por frame
+   (Playwright, DPR 1,5); los nodos lejanos no se mueven durante el arrastre.
+2. Al soltar, el repintado completo llega en un frame y la relajación no produce saltos.
+3. Sin arrastre, nada cambia respecto de E.
+
 ## Versionado
 
 Es la corrección de `DEF-109` más mejoras internas: **patch**, absorbido por la `2.2.0`
