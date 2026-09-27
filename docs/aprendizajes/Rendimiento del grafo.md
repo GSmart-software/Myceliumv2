@@ -341,6 +341,14 @@ toca el indexador. El 6 queda como red si hiciera falta. Medir antes y después 
 vault de prueba de `DEF-105`/`DEF-108` (3.340 notas), que es el tamaño que el reporte
 describe.
 
+> [!success] Plan implementado en desktop el 2026-09-26 (`FUN-L-25`, [[grafo-indice-y-motor]])
+> Las propuestas 1 (capa estática), 2 (flujo acotado, guiones conservados), 3 (Barnes-Hut),
+> 4 (tabla de enlaces) y 5 (un solo consumidor: `conexiones()` es barato y todos leen la
+> tabla) están hechas, más la simulación en un worker, que no estaba en la lista y salió
+> del estudio de [[Como construye Obsidian su grafo]]. La 6 (degradación por presupuesto de
+> frame) no hizo falta. Cifras en `bugs-progreso` (`DEF-109`) y en la spec. **Sin confirmar
+> en la app**; queda por decidir el techo de 1.500 aristas visibles para los guiones.
+
 > [!info] Lo que `FUN-L-23` ya aplicó de este plan (2026-09-26)
 > Las tres disposiciones nuevas del grafo ([[grafo-disposiciones]]) se dibujan a una
 > **capa estática** que solo se repinta al cambiar la vista o mover nodos, sin
