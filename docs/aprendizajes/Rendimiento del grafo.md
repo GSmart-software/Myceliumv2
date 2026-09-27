@@ -235,6 +235,12 @@ Dos cosas saltan:
 > arista (y 126 contra 39 con 12.000). Un path enorme con miles de subtrazos que se cruzan
 > obliga al rasterizador a resolver el antialiasing de todo junto. **Descartado.** El
 > camino es reducir *cuántas veces* se dibuja, no fusionar los trazos.
+>
+> **Tampoco en lotes chicos** (Parte C de `FUN-L-25`, 2026-09-26, con la Tesina asentada y
+> rectas en vez de curvas): un stroke por arista 35 ms de rasterizado a zoom 0,35; lotes de
+> 16, 45; de 64, 58; de 256, 75. Empeora de forma monótona, y el JS que ahorra es un
+> milisegundo. Lo mismo con los discos de los nodos. Detalle en
+> [[grafo-indice-y-motor]] § Cómo quedó · Parte C.
 
 Alternativa medida para el flujo: **una partícula por arista** (un sprite de 8 px con
 `drawImage` avanzando por la bézier) cuesta 5 ms donde el dash cuesta 25 (zoom 1, 3.000
