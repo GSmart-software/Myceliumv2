@@ -363,6 +363,21 @@ describe.
 > propuesta **3** (Barnes-Hut) le llegaría sola. El cúmulo en sí sigue como estaba: las
 > propuestas 1 a 6 sobre él siguen pendientes de decisión.
 
+> [!info] La cámara copia, no repinta (`FUN-L-25` · Parte D, 2026-09-27)
+> Panear o girar la rueda repintaba el grafo entero en cada evento (120–250 ms por frame a
+> zoom 1 con la Tesina). Ahora las capas llevan un margen del 25 % y, durante el gesto, el
+> lienzo solo las **copia** desplazadas o escaladas; el repintado llega al terminar el
+> gesto. Tres cosas medidas que conviene recordar:
+> - Copiar una capa ya pintada es barato (≈ 6 ms por 7 Mpx en headless); lo caro es la
+>   **primera** copia tras pintarla, que obliga a rasterizarla. Por eso una capa solo
+>   rinde si se copia más veces de las que se repinta.
+> - Copiar solo el trozo visible (`drawImage` de 9 argumentos) y no la capa entera con su
+>   margen.
+> - Para medir en headless, dibujar directo al lienzo **parece gratis en JS**: el
+>   rasterizado cae fuera del callback. Un `getImageData` de un píxel tras cada frame lo
+>   mete adentro. Con ventana y GPU real no sirve: esa lectura cuesta 50–80 ms.
+> Detalle en [[grafo-indice-y-motor]] § Cómo quedó · Parte D.
+
 > [!important] Qué verificar en la app, no solo con `tsc`
 > Que el flujo se vea igual con zoom ≥ 0,5; que el layout con Barnes-Hut sea
 > indistinguible del actual (mismo vault, misma caché de posiciones); que al guardar una

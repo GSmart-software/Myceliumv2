@@ -808,6 +808,186 @@ prescinde durante el movimiento es el brillo de los nodos y las sombras.
    si no se logra a zoom 1).
 5. Quieto, todo idéntico a hoy: ondulación, brillo, halo, nombres sin pisarse.
 
+## Cómo quedó · Parte D
+
+Implementada el 2026-09-27 en `feat/grafo-curvas-desktop`, un commit por punto (curvas,
+sin brillo en movimiento, repintado acotado del sustrato, cámara). **Sin confirmar en la
+app**: lo medido es con el componente real en Chromium headless, que rasteriza por
+software (ver el aviso de abajo).
+
+### Archivos
+
+| Archivo | Qué |
+|---|---|
+| `frontend/components/graph/hifas.ts` | `hifa(…, rapida)`: 4 segmentos y sin ondular en movimiento (arrays de trabajo reutilizados en vez de cuatro por hifa). `EscenaMicelio.rapido`: sin halo, cuerpos fructíferos como discos planos del mismo color y radio, foco sin `shadowBlur`. `copiarCapa` (copia una capa con margen llevada de la vista con que se pintó a la de ahora, recortada al trozo visible). `dibujarSobrecapa` ya no copia la estática: pinta foco y nombres en su propia capa transparente, con el margen. |
+| `frontend/components/graph/MiniGraph.tsx` | Gestos (`enGesto`, `vistaPintada`, `camaraMovida`, temporizador de rueda de 150 ms), margen de las capas (`MARGEN_CAPA = 0.25`), cúmulo en reposo siempre en capas (una sola si el flujo no se ve), `pintarRapido` con curvas (`controlDe`, el mismo punto de control que el reposo), `tickMicelio` con fidelidad de movimiento y repintado acotado (`posNuevas`, `INTERVALO_SUSTRATO_MS = 33`, presupuesto de 12 ms), `movidoAMano` para el arrastre. |
+
+`fisica.ts`, `cicloFisica.ts`, `motorFisica.ts`, `sim.worker.ts` y `disposiciones.ts` no
+cambiaron.
+
+### Los cinco puntos
+
+1. **Cámara.** Paneo y rueda ya no ensucian nada: el frame copia las capas llevadas a la
+   vista de ahora (desplazadas o escaladas alrededor del puntero; el flujo del cúmulo no
+   se anima durante el gesto). El repintado completo llega al soltar el paneo o 150 ms
+   después del último evento de rueda. Vale para las tres disposiciones de micelio y el
+   cúmulo en reposo; mientras el grafo se mueve, la cámara entra con el próximo
+   repintado, que ya está acotado. En micelio el foco y los nombres pasaron a una
+   sobrecapa propia con la misma vista que la estática, para moverse con ella.
+2. **Curvas siempre.** El modo rápido del cúmulo traza la misma cuadrática que el reposo
+   (sin flujo, flecha ni halo). En micelio las hifas conservan curva y ahusamiento, con 4
+   segmentos y sin ondular en movimiento; 8 y ondulación al detenerse.
+3. **Sin brillo ni sombras en movimiento.** Discos planos del mismo color y radio, sin
+   halo del sustrato, sin `shadowBlur` en el foco ni en las aristas resaltadas. Vuelven
+   en el repintado completo al detenerse (o en grafos de menos de 200 nodos, o con la
+   simulación continua ya casi quieta, igual que el cúmulo).
+4. **Sustrato acotado.** Las posiciones que llegan se marcan y la capa se repinta como
+   mucho cada 33 ms; si el último repintado pasó los 12 ms, el lote siguiente se salta.
+   Entre repintados el hilo principal no dibuja. El nodo arrastrado (cúmulo y sustrato)
+   ya no ensucia la capa en cada `mousemove`: va con el próximo lote, bajo el mismo
+   presupuesto.
+5. **Medición**: abajo.
+
+### El margen: 25 % por lado (decidido midiendo)
+
+Sin margen, un paneo muestra bordes vacíos hasta soltar (y un zoom hacia afuera, un marco
+vacío). Con un 25 % por lado, un paneo de un cuarto de pantalla o 3–4 pasos de rueda hacia
+afuera no dejan hueco. El costo está en el repintado del final del gesto, que pinta un área
+2,25 veces mayor, pero el culling solo cuenta lo que cae adentro: a zoom 0,35 (todo el
+grafo a la vista) no cambia nada, y a zoom 1 el repintado del cúmulo pasó de 130 ms (sin
+margen) a 158 ms (con margen), el de Crecimiento de 126–128 a 136–220 ms (ruidoso), con
+rasterizado por software forzado. Copiar la capa no cuesta más con margen: se copia solo
+el trozo visible. Un +20 % en un repintado que ocurre **una vez por gesto** a cambio de no
+ver bordes vacíos durante el gesto.
+
+Los nombres y el flujo se siguen limitando al lienzo visible (el margen no cambia qué
+nombres ganan su sitio ni el techo de 1.500 aristas del flujo).
+
+### Mediciones
+
+Componente **real** empaquetado con esbuild, grafo de la Tesina (1.306 nodos, 3.275 aristas,
+extraído con `docs/design/demos/extraer-vault.mjs` en la Parte C), Chromium headless de
+Playwright, 1.600 × 900, **dpr 1,5**. «Antes» = `desktop-tauri` en `8f3b87f` (Parte C).
+Cada celda es el costo por frame **con el rasterizado forzado** (un `getImageData` de un
+píxel después de cada callback, que obliga a rasterizar dentro del frame lo que el
+canvas dibujó; sin eso, dibujar directo al lienzo parece gratis en JS y el costo aparece
+como huecos entre frames). p50, y entre paréntesis los frames de más de 50 ms.
+
+| Caso | Anillo antes → después | Crecimiento | Sustrato | Cúmulo |
+|---|---|---|---|---|
+| Paneo, zoom 0,35 | 24 (0) → 31 (0) | 52 (26 de 32) → 31 (0) | 5,4 · p95 58 (28) → p95 35 (0) | p95 71 (27) → p95 18 (0) |
+| Paneo, zoom 1 | 252 (10 de 11) → 31 (0) | 120 (18 de 19) → 31 (0) | p95 135 (16) → p95 33 (0) | p95 129 (16) → p95 18 (0) |
+| Rueda durante el gesto, zoom 0,35 | 30 (5) → 32 (0) | 65 (12) → 32 (0) | 69 (12) → 32 (0) | 74 (12) → 17 (0) |
+| Rueda durante el gesto, zoom 1 | 265 (12) → 33 (0) | 138 (12) → 32 (0) | 173 (12) → 32 (0) | 146 (12) → 17 (0) |
+| Repintado tras la rueda: llega en / cuesta, zoom 0,35 | — → 183 / 40 ms | — → 213 / 61 | — → 201 / 63 | — → 247 / 99 |
+| Idem, zoom 1 | — → 342 / 200 ms | — → 273 / 132 | — → 297 / 147 | — → 321 / 178 |
+
+Sin forzar, el JS del callback durante un paneo o una rueda es **0,1–0,3 ms** en las cuatro
+disposiciones (antes: 20–250 ms en micelio, que repintaba en JS a la capa; 5–10 ms en el
+cúmulo, que dibujaba directo y pagaba el rasterizado fuera del callback). Paneo del cúmulo
+y del sustrato: 60 y 50 frames por segundo sin un solo hueco de más de 50 ms (antes 20 fps
+con 15–16 huecos a zoom 1). En Anillo y Crecimiento el bucle solo corre con cada evento
+del ratón, así que sus fps los pone el ritmo de eventos de Playwright (~20 por segundo),
+no el dibujo.
+
+**Sustrato asentándose sin caché** (asentado según la consola):
+
+| Zoom | Antes | Después |
+|---|---|---|
+| 0,35 | 1,3–1,7 s; p95 65 ms; 21 frames > 50 ms | 1,3 s; p95 47 ms; **3** frames > 50 ms (máx. 80) |
+| 1 | 1,5–1,6 s; p95 164 ms; 11 frames > 50 ms | 1,3–1,4 s; p95 98 ms; 11 frames > 50 ms (máx. 149) |
+
+A zoom 1 cada repintado de movimiento sigue costando 100–150 ms **de rasterizado por
+software** (3.275 polígonos rellenos con alfa a 2.400 × 1.350 más el margen): el acotado
+evita pintar más seguido, no lo abarata. Con GPU ese costo es otro; hay que mirarlo en la
+app.
+
+**Cúmulo en movimiento, curvas contra las rectas de la Parte C** (arrastre de 4 s):
+
+| Zoom | Rectas (antes), forzado | Curvas (después), forzado | JS del callback, antes → después |
+|---|---|---|---|
+| 0,35 | p50 46 ms, 13 de 89 > 50 ms | p50 52 ms, 45 de 76 > 50 ms | 1,8 → 3,4 ms |
+| 1 | p50 104 ms, 41 de 41 > 50 ms | **p50 141 ms**, 32 de 32 > 50 ms | 2,1 → 3,2 ms |
+
+> [!warning] Con curvas, el cúmulo en movimiento supera los 50 ms por frame a zoom 1 (en headless)
+> 141 ms por frame (p50) arrastrando a zoom 1, contra 104 ms de las rectas: las curvas
+> cuestan un **+35 %** de rasterizado por software. Ya con rectas se pasaba de 50 ms. Por
+> decisión del usuario **no se volvió a las rectas**; la cifra queda para decidir con él
+> después de verlo en la app con GPU, donde el rasterizado de trazos es mucho más barato.
+
+**Quieto, antes contra después** (capturas a zoom 1, con y sin un nodo apuntado): Anillo y
+Crecimiento tienen layout determinista y se comparan píxel a píxel: mismas formas, mismos
+nombres en los mismos sitios, mismo foco; difieren solo en el antialiasing (Anillo: el 14 %
+de los píxeles, hasta 61 niveles, todos en los haces de aristas superpuestas; Crecimiento:
+el 1 %, en el borde del texto de las etiquetas, que ahora se escriben sobre una capa
+transparente). Cúmulo y Sustrato no son deterministas entre corridas (dos corridas de
+«antes» ya difieren en el 36–81 % de los píxeles por la posición final), así que se miraron
+a ojo: sprites con brillo, halo, cuerpos fructíferos con brillo, ondulación y nombres sin
+pisarse, como antes. En movimiento: discos planos y aristas curvas con los nombres de los
+hubs (cúmulo), hifas curvas sin halo y cuerpos sin brillo (sustrato).
+
+> [!warning] El banco rasteriza por software: los milisegundos absolutos no son los de la app
+> Chromium headless dibuja el canvas con SwiftShader. Se probó con ventana y la GPU real
+> (AMD, ANGLE D3D11, lo mismo que usa WebView2), pero ahí los eventos del ratón de
+> Playwright llegan a tirones y `getImageData` obliga a leer de la GPU (50–80 ms por
+> lectura), así que no sirvió para medir. La comparación antes/después sí vale; **si los
+> frames quedan por debajo de 16 ms, solo lo dice el perfilador de F12 en la app.**
+
+### Contra los criterios
+
+1. **Paneo sin repintado, frames < 16 ms**: ningún repintado durante el gesto en las cuatro
+   (0,1–0,3 ms de JS por frame); con rasterizado por software forzado, 18 ms (cúmulo) y 31–33
+   ms (micelio, dos capas) por frame, sin frames de más de 50 ms. Por debajo de 16 ms: a
+   confirmar con GPU.
+2. **Rueda sin frames > 50 ms, repintado en < 300 ms**: ningún frame de más de 50 ms durante
+   el gesto. El repintado llega a los 183–247 ms a zoom 0,35 y a los 273–342 ms a zoom 1,
+   donde el repintado mismo cuesta 130–200 ms de rasterizado por software; el propio frame
+   de repintado pasa de 50 ms (una vez, al final del gesto).
+3. **Sustrato < 8 s y sin frames > 50 ms, curvas todo el tiempo**: 1,3–1,4 s; curvas y
+   ahusadas todo el tiempo. Frames de más de 50 ms: de 21 a 3 a zoom 0,35; a zoom 1 siguen 11
+   (el repintado de movimiento a esa escala cuesta 100–150 ms por software).
+4. **Cúmulo con curvas, sin brillo**: sí. A zoom 1 la cifra es 141 ms por frame en headless
+   (ver arriba).
+5. **Quieto idéntico**: sí, salvo antialiasing (ver arriba).
+
+### Lo que se apartó del encargo
+
+- **El cúmulo en reposo siempre en capas.** La Parte C pintaba el reposo sin flujo
+  directo al lienzo; ahora va a una capa con margen y se copia, para que el gesto tenga qué
+  copiar. El costo del frame en que el grafo se asienta es el mismo trabajo (antes el
+  rasterizado caía fuera del callback): 154 ms antes, 176 ms después a zoom 1, forzado.
+- **Foco y nombres del micelio en su propia capa.** Antes se pintaban sobre la copia en
+  cada frame; ahora se repintan solo al cambiar el foco o la estática, y se copian con ella
+  durante el gesto (si no, los nombres desaparecerían mientras se panea).
+- **El nodo arrastrado bajo el presupuesto** (cúmulo y sustrato), no solo las posiciones
+  del motor: antes cada `mousemove` de un arrastre forzaba un repintado.
+- Sin el tope de 30 fps en el cúmulo: el encargo lo pedía para el sustrato; el cúmulo
+  conserva el presupuesto adaptativo de la Parte C.
+
+### Verificación
+
+- `npx tsc --noEmit -p tsconfig.json`: sin errores (en cada commit, y después de `next build`).
+- `node --test scripts/test-*.mjs`: **485 en verde, 7 saltados** (los mismos de antes: la
+  Parte D no agrega módulos puros que testear en Node; lo que cambió es dibujo).
+- `npx next build`: verde, con `turbopack-worker-*.js` en `out/_next/static/chunks/`.
+
+### Qué confirmar en la app
+
+1. **Paneo** en las cuatro disposiciones con la Tesina, a zoom 1: el grafo se desliza sin
+   tirones, sin repintarse; al soltar, un repintado (un instante de trabajo). Si el paneo
+   supera un cuarto de pantalla se ve el borde vacío hasta soltar.
+2. **Rueda**: durante el giro la imagen se escala (algo borrosa) y ~150 ms después de parar
+   se vuelve nítida. Ver si la espera o lo borroso molestan.
+3. **Sustrato asentándose**: hifas curvas y ahusadas todo el tiempo, sin halo ni brillo;
+   al asentarse vuelven la ondulación, el halo y el brillo. En el perfilador de F12, frames
+   de menos de 50 ms.
+4. **Cúmulo arrastrando un nodo a zoom 1**: aristas curvas, discos planos; mirar en F12 si
+   los frames pasan de 50 ms (en headless, 141 ms). Es la cifra para decidir con el usuario.
+5. **Quieto**: todo como antes (ondulación, brillo, halo, nombres sin pisarse, foco con
+   brillo al apuntar).
+6. Con el flujo animado (cúmulo, zoom ≥ 0,5): los guiones se detienen durante un gesto y
+   vuelven al terminar.
+
 ## Versionado
 
 Es la corrección de `DEF-109` más mejoras internas: **patch**, absorbido por la `2.2.0`
