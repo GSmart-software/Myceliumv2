@@ -537,6 +537,12 @@ entre ramas):
   - **Se traen enteros**: `components/graph/MiniGraph.tsx`, `fisica.ts`,
     `motorFisica.ts`, `sim.worker.ts`, el nuevo `components/graph/cicloFisica.ts`, y
     `scripts/test-fisica.mjs` y el nuevo `scripts/test-ciclo.mjs`.
+- **Movimiento sin perder las curvas (`FUN-L-25` · Parte D, 2026-09-27)**: la cámara
+  copia capas con margen en vez de repintar a mitad de gesto, curvas también en
+  movimiento, sin brillo ni sombras mientras se mueve y repintado acotado del sustrato.
+  Solo toca `components/graph/MiniGraph.tsx` y `components/graph/hifas.ts` (frontend
+  compartido): **se refleja junto con B y C**, trayendo los dos enteros. Detalle en
+  [[grafo-indice-y-motor]] § Cómo quedó · Parte D.
 
 ### Artefactos solo-web (no existen en `desktop-tauri`)
 
