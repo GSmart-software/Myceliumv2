@@ -1,7 +1,8 @@
 # Corrector ortográfico (`FUN-L-12` · `EDITOR-CORRECTOR-ORTOGRAFICO`)
 
 Subraya las palabras mal escritas del editor —**también las que ya estaban escritas**—,
-sugiere correcciones con el clic derecho y deja agregar palabras a un diccionario del vault.
+sugiere correcciones con el clic derecho y deja agregar palabras a dos diccionarios propios:
+el del vault y el de Mycelium.
 Motor propio con diccionarios Hunspell que el usuario descarga. **Especificado el
 2026-09-27; implementado en desktop el mismo día, sin confirmar en la app (§ 9).**
 
@@ -22,7 +23,7 @@ Motor propio con diccionarios Hunspell que el usuario descarga. **Especificado e
 | Español | **Uno solo visible**, «Español», que por debajo es la **variante de la región del sistema** (es-AR, es-ES, es-MX…), porque con el de España el voseo sale todo marcado. Sin región conocida o sin variante: es-ES |
 | Diccionarios | **No van en el instalador.** Se publican en R2, junto a los instaladores, y el usuario **elige cuáles descargar** en Configuración |
 | Italiano | Entra ahora, aunque su diccionario es GPL-3 solo (§ 8) |
-| Diccionario personal | **Por vault**: «Agregar al diccionario» guarda en el vault y viaja con él |
+| Diccionarios personales | **Dos** (cambio del 2026-09-27): el **del vault**, que viaja con él, y el **de Mycelium**, que vale para todos los vaults de esta instalación. Así el usuario va corrigiendo los falsos positivos donde corresponde: el nombre de un proyecto en su vault, un anglicismo que usa siempre en Mycelium. Los dos se ven y se editan en Configuración |
 
 ## 2. Qué ve el usuario
 
@@ -32,7 +33,8 @@ Motor propio con diccionarios Hunspell que el usuario descarga. **Especificado e
   se apaga para no tener dos). Aparecen **también en lo ya escrito**: al abrir una nota, lo
   visible se revisa enseguida.
 - **Clic derecho sobre una palabra marcada**: un menú propio con **hasta 5 sugerencias**
-  (elegir una la reemplaza), **«Agregar al diccionario del vault»** e **«Ignorar»** (no la
+  (elegir una la reemplaza), **«Agregar al diccionario del vault»**, **«Agregar al diccionario
+  de Mycelium»** e **«Ignorar»** (no la
   marca más en esta sesión, en ningún editor). Sobre cualquier otra cosa, el menú de
   siempre.
 - **No se corrige lo que no es prosa**: código, URLs, HTML, `[[enlaces]]`, etiquetas,
@@ -55,7 +57,9 @@ Motor propio con diccionarios Hunspell que el usuario descarga. **Especificado e
 - Sin conexión, la lista muestra lo ya descargado y dice que no se pudo consultar el resto.
 - Un enlace **«Licencias de los diccionarios»** con la licencia, la fuente y el autor de
   cada uno (§ 8).
-- El diccionario del vault: cuántas palabras tiene y una forma de **verlas y quitar** una.
+- Los **dos diccionarios personales** —el del vault y el de Mycelium—, cada uno con cuántas
+  palabras tiene y una lista para **verlas y quitar** las que no se quieran. Sin vault
+  abierto, el del vault no se muestra.
 
 ## 3. Arquitectura (compartida por las dos versiones)
 
@@ -72,7 +76,7 @@ CodeMirror ── ViewPlugin ──(palabras únicas no cacheadas)──▶ Work
   regenerarlo, así ni el build de la app ni el de web necesitan la cadena de Rust para WASM.
   La fuente del crate se publica igual (spellbook es MPL-2.0).
 - **Worker**: carga el WASM y los diccionarios activos; una palabra es correcta si lo es en
-  **alguno**, o si está en el diccionario del vault o en «Ignorar». Un solo worker; al cambiar
+  **alguno**, o si está en el diccionario del vault, en el de Mycelium o en «Ignorar». Un solo worker; al cambiar
   los diccionarios activos se recarga.
 - **Qué se revisa**: lo visible (`view.visibleRanges`) con un margen, con **debounce de
   ~300 ms** después de escribir o desplazarse. Se extraen las palabras (letras Unicode, con
@@ -146,6 +150,10 @@ diccionarios/
   activado.
 - **Diccionario del vault**: `.mycelium/diccionario.txt`, una palabra por renglón, por los
   comandos `leer/escribir_estado_vault` (se agrega a su lista cerrada).
+- **Diccionario de Mycelium**: `diccionario-personal.txt` en la carpeta de configuración de
+  la app (`%APPDATA%\com.mycelium.desktop\`, junto a `vaults.json`), **no** junto a los
+  diccionarios descargados: son palabras del usuario y tienen que sobrevivir a que se borre o
+  actualice un diccionario.
 - **Idioma del sistema**: la región del sistema operativo (un comando propio, o
   `Intl.DateTimeFormat().resolvedOptions().locale`, que en la PC del usuario da `es-AR`).
 
@@ -155,6 +163,8 @@ diccionarios/
   por URL versionada.
 - **Diccionario del vault**: en el backend, como los recordatorios —un documento por vault,
   `GET/PUT /vaults/{id}/diccionario`—, con los mismos permisos.
+- **Diccionario de Mycelium**: del **usuario**, en el backend junto a sus preferencias, así lo
+  sigue en cualquier navegador.
 - **Idioma**: `navigator.languages`, con *fallback* a `Intl`.
 
 ## 6. Criterios de aceptación
@@ -168,7 +178,10 @@ diccionarios/
    marcan nunca.
 6. Clic derecho sobre una marca: hasta 5 sugerencias; elegir una reemplaza la palabra.
 7. «Agregar al diccionario del vault» la desmarca en todas las notas de ese vault, persiste
-   al reabrir, y **no** afecta a otro vault.
+   al reabrir, y **no** afecta a otro vault. «Agregar al diccionario de Mycelium» la desmarca
+   en **todos** los vaults y persiste al reabrir la app.
+7b. En Configuración se ven las palabras de los dos diccionarios; quitar una vuelve a
+   marcarla.
 8. «Ignorar» la desmarca hasta cerrar la app.
 9. Descargar muestra el progreso; una descarga cortada no deja un diccionario roto; un
    hash que no coincide se rechaza.
