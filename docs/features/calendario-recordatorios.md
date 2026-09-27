@@ -307,6 +307,18 @@ en web `0030a69` (los componentes y el modelo son idénticos en las dos).
 Seis tests nuevos (29 en total). **Sin probar en la app**: la de desarrollo abierta era de
 otra sesión.
 
+> [!warning] Lo rompió en el formulario, el mismo día (`7935f5d` desktop · `c899a83` web)
+> La casilla de la lista se llamó `.casilla`, pero ese nombre **ya era** el de la etiqueta
+> «Todo el día» del formulario, en el mismo módulo CSS. La segunda definición le cambió el
+> tamaño, el borde y el color: el texto quedaba negro sobre el fondo oscuro, en una columna
+> angosta, con un recuadro de más encima del checkbox. Lo vio el usuario; pasó a llamarse
+> `.casillaCompletar`.
+>
+> **La lección**: `Recordatorios.module.css` es **un solo módulo** para la pestaña, el panel,
+> el modal y la tarjeta. Antes de agregarle una clase, buscar si el nombre ya existe
+> (`grep -n "^.nombre" Recordatorios.module.css`): en un CSS Module dos reglas con el mismo
+> nombre no chocan, se suman, y `tsc` no lo ve.
+
 ## Cómo quedó en web
 
 Reflejado a `web-cloud` el 2026-09-25 (merge `07a7727`, rama `feat/calendario-web`),
