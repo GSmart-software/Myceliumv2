@@ -605,6 +605,22 @@ entre ramas):
     desktop.
   - `DEF-102`/`DEF-089` (código dentro de bloques) ya estaban en web desde el
     2026-09-25 (`18a2c58`, `5ee9fb3`): no se tocaron.
+- **Corrector ortográfico con motor propio (`FUN-L-12`, desktop 2026-09-27, sin reflejar)**.
+  Al reflejarlo a web:
+  - **Compartidos** (traer enteros): `wasm/ortografia/` y `public/ortografia/motor.wasm`,
+    `lib/ortografia/{palabras,idioma,manifiesto,motor,corrector.worker,corrector}.ts`,
+    `lib/editor/ortografia.ts`, `lib/editor/ortografiaExclusiones.ts`,
+    `components/editor/MenuOrtografia.tsx`, `components/settings/DiccionariosCorrector.*`,
+    `scripts/test-ortografia.mjs`, `scripts/wasm-ortografia.mjs`, y lo del corrector en
+    `styles/{tokens,editor}.css` y `EditorSection.tsx`.
+  - **Diverge**: `lib/ortografia/diccionarios.ts` —la única pieza que sabe de dónde salen
+    los bytes—. En desktop, comandos de Rust (`src/diccionarios.rs`, `prefs_vault.rs`); en
+    web, `fetch` a R2 con CORS + Cache API, y el diccionario del vault en el backend
+    (`GET/PUT /vaults/{id}/diccionario`). Misma API exportada; `DESCARGA_CANCELADA`,
+    `escucharProgreso` y `escucharCambios` se implementan con un `AbortController` y
+    eventos locales. `leerLicencia` lee de la Cache API.
+  - **Solo desktop**: `src-tauri/src/diccionarios.rs`, `scripts/publicar-diccionarios.mjs`
+    (publica para las dos: el bucket es el mismo).
 
 ### Artefactos solo-web (no existen en `desktop-tauri`)
 
