@@ -1236,6 +1236,56 @@ activos y sus aristas, en un rectángulo sucio.
 2. Al soltar, el repintado completo llega en un frame y la relajación no produce saltos.
 3. Sin arrastre, nada cambia respecto de E.
 
+## Cómo quedó · Parte F (arrastre local)
+
+Integrada el 2026-09-27 (`d3b7fac`, revertible sola con `git revert -m 1 d3b7fac`). Cuatro
+commits, uno por cambio. `tsc`, 489 tests headless (12 nuevos), `next build` con el
+worker en `out/`.
+
+**Archivos**: `fisica.ts` (campo `moviles`: los congelados no reciben fuerzas ni se
+integran, pero siguen en el quadtree y en los resortes, así siguen empujando y tirando de
+los móviles; su velocidad no se toca para que no salgan disparados al soltar),
+`sim.worker.ts` y `motorFisica.ts` (mensaje `moviles`, `parar()`), `arrastreLocal.ts`
+(nuevo, puro: adyacencia, `conjuntoActivo`, `aristasQueTocan`, `rectSucio`),
+`MiniGraph.tsx` (conjunto activo al empezar y cada `k` de recorrido, base pintada sin los
+activos, modo de dibujo `local` por rectángulo sucio, constantes `RADIO_LOCAL_K = 3`,
+`RECALCULO_LOCAL_K = 1`, `MAX_DIBUJADOS_K = 2`, **`RELAJAR_AL_SOLTAR = true`**).
+
+**Mediciones** (Tesina real, DPR 1,5, zoom 1, 4 s de arrastre; «forzado» = rasterizado
+dentro del frame, por software en headless):
+
+| Nodo arrastrado | JS por frame p50 / p95 | Forzado p50 | Nodos lejanos que se movieron |
+|---|---|---|---|
+| Hub de 320 enlaces, F | 4,0 / 8,4 ms | 111 ms | **0** de 760 (se movieron 545: su conjunto a dos saltos) |
+| Hub, E | 3,1 / 7,1 ms | 116 ms | los 760 |
+| Nodo típico (grado 3–6), F | 4,2 / 7 ms | 85–123 ms | 0 |
+| Nodo del borde (grado 1), F | — | **26 ms** (28 fps) | 0 |
+| Nodo del borde, E | — | 132 ms (7 fps) | — |
+
+Al soltar: primer frame es el repintado completo; la relajación con el hub da un salto
+máximo de 14 px (E: 21). Con `RELAJAR_AL_SOLTAR = false` queda quieto en un frame. Sin
+arrastre, E y F dan lo mismo.
+
+**Hallazgo que acota la ganancia**: el hub no mejora en dibujo porque sus vecinos a dos
+saltos son 544 nodos que tocan 3.135 de las 3.275 aristas: el rectángulo sucio es el
+lienzo entero. Lo mismo le pasa a cualquier vecino de un hub. La ganancia real está en
+los nodos alejados de los hubs (de 132 a 26 ms forzados). **Opción pendiente de decidir**:
+que el segundo salto no atraviese hubs; para un nodo común pasa de 342 a 80 activos.
+
+**Desvíos**: no se reutilizó la máscara `activos` (esa saca nodos del grafo; los congelados
+deben seguir empujando), se usó `moviles`. Una sola capa base con las aristas activas
+dibujadas antes de copiarla (dos capas copiadas en el mismo frame hacían rasterizar en el
+acto: 120–220 ms). Recálculo incremental de la base (repintarla entera cada `k` costaba
+~100 ms). La consulta por distancia es lineal (centésimas de ms; no por frame). Solo en
+grafos de 200 nodos o más y fuera de la construcción temporal.
+
+**Qué confirmar en la app**: arrastrar el hub y un nodo común a zoom 1 (lo lejano quieto,
+el vecindario fluido; frames en F12); al alejar el arrastre, sin tirones ni fantasmas al
+recalcular el conjunto; aristas activas por debajo de los discos congelados y nombres
+estables; al soltar, repintado inmediato y acomodo corto; zoom con rueda y redimensionar
+el panel en medio de un arrastre repintan la base sin restos. Para que al soltar todo quede
+como está: `RELAJAR_AL_SOLTAR = false`.
+
 ## Versionado
 
 Es la corrección de `DEF-109` más mejoras internas: **patch**, absorbido por la `2.2.0`
