@@ -200,6 +200,17 @@ archivos, +1.753 / −818 (los tests nuevos son ~490 de esas líneas). Borrados
    pegadas y un PDF → todo en su sitio, `.obsidian/` fuera; importar otra vez y elegir
    «Reemplazar» → no quedan duplicados.
 
+## Reflejo a web (2026-09-27)
+
+Integrado en `web-cloud` (`46464b6`). **D8 sí**: `lib/wikilinks.ts` y `lib/editor/wikilink.ts`
+idénticos; `test-wikilinks.mjs` sin las dos pruebas del grafo (dependen de
+`lib/enlacesNota.ts`, solo-desktop). **Backend .NET**: `ResolutorWikilinks.cs` porta la regla
+del editor (pista de carpeta, sin extensión, empate a la ruta más corta y después por id) y
+`SearchEndpoints` la usa en el grafo y en las conexiones; `![[x.excalidraw]]` pasa a contar
+como arista en web. La regla vive dos veces (TS y C#). **D6, D7 y D9 no se reflejan**: web
+conserva los diagramas embebidos, la caché IndexedDB y la importación por nota. Detalle en
+[[RAMAS]].
+
 ## Relacionadas
 
 - [[Auditoria de codigo 2026-09-26]] — el plan completo.

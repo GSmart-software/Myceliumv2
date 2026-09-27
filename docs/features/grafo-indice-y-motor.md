@@ -1480,6 +1480,15 @@ si sale con ella. No sube el framework de IA.
   [[Capa de datos del desktop]]: las tablas nuevas. [[RAMAS]]: `MiniGraph.tsx` y el
   worker a reflejar.
 
+## Reflejo a web (2026-09-27)
+
+Integrado en `web-cloud` (`46464b6`). Partes **B a G** enteras: `MiniGraph.tsx` (con
+`DEF-115`), `fisica.ts`, `cicloFisica.ts`, `motorFisica.ts`, `sim.worker.ts`, `revelado.ts`,
+sus tests y `tsconfig.json`. `next build` de web emite el worker en `out/`; en Cloudflare
+Pages carga sus chunks desde el mismo origen. **Parte A no aplica** (el grafo lo arma el
+backend .NET; `GraphDataDto` no cambió). Nada de `FUN-L-23`. También `DEF-111` y el debounce
+de la vista previa de `FUN-M-38`. Detalle en [[RAMAS]].
+
 ## Relacionadas
 
 - [[Rendimiento del grafo]] — `DEF-109`, el diagnóstico y el plan.

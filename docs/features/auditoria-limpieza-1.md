@@ -140,6 +140,16 @@ Eran **idénticos** en `web-cloud` antes de esta tanda:
   título», etc.; «insertar dibujo» desde el editor inserta el embed correcto.
 - Abrir una nota: nada de colaboración en la consola de devtools.
 
+## Reflejo a web (2026-09-27)
+
+Integrado en `web-cloud` (`46464b6`). Se trajeron enteros los archivos idénticos en los que lo
+borrado también estaba muerto en web (`lib/bases.ts`, `lib/canvas.ts`, `viewRegistry.ts`,
+`tokens.css`, cinco `.module.css`, y se borraron los cinco SVG); a mano `hydrated`,
+`deleteCachedNote` y `existeCarpetaEsporas`. **No se reflejó**: el sharing y la
+colaboración (vivos en web), `uiStore`, `next.config.ts`, el `README`, `lib/pestanas.ts`
+(importa módulos solo-desktop; reflejarlo es adaptarlo: pendiente), los 12 smoke tests de
+julio (D5, a decisión para web) ni `TITULO_POR_DEFECTO`. Detalle en [[RAMAS]].
+
 ## Relacionadas
 - [[Auditoria de codigo 2026-09-26]] (plan de tandas y decisiones)
 - [[auditoria-capa-de-datos]] (tanda 3, `FUN-L-24`)
