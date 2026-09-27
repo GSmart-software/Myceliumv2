@@ -518,9 +518,7 @@ entre ramas):
   Barnes-Hut y la física en un Web Worker. Es frontend compartido: **hay que reflejarlo a
   web**, pendiente de que el usuario lo confirme en desktop. Detalle en
   [[grafo-indice-y-motor]] § Cómo quedó · Parte B.
-  - **Se traen enteros**: `components/graph/MiniGraph.tsx` (solo cambió el camino del
-    cúmulo y el `simulate()` del sustrato; si web todavía no tiene `FUN-L-23`, reflejar
-    eso antes o junto) y los tres nuevos, `components/graph/fisica.ts`,
+  - **Se traen enteros**: `components/graph/MiniGraph.tsx` y los tres nuevos, `components/graph/fisica.ts`,
     `components/graph/motorFisica.ts` y `components/graph/sim.worker.ts`, más
     `scripts/test-fisica.mjs`.
   - **`tsconfig.json`**: desktop sumó `out` al `exclude` porque Turbopack copia la fuente
@@ -539,10 +537,16 @@ entre ramas):
     `scripts/test-fisica.mjs` y el nuevo `scripts/test-ciclo.mjs`.
 - **Movimiento sin perder las curvas (`FUN-L-25` · Parte D, 2026-09-27)**: la cámara
   copia capas con margen en vez de repintar a mitad de gesto, curvas también en
-  movimiento, sin brillo ni sombras mientras se mueve y repintado acotado del sustrato.
-  Solo toca `components/graph/MiniGraph.tsx` y `components/graph/hifas.ts` (frontend
-  compartido): **se refleja junto con B y C**, trayendo los dos enteros. Detalle en
-  [[grafo-indice-y-motor]] § Cómo quedó · Parte D.
+  movimiento y sin brillo ni sombras mientras se mueve. Solo toca
+  `components/graph/MiniGraph.tsx` (frontend compartido): **se refleja junto con B y
+  C**, trayéndolo entero. Detalle en [[grafo-indice-y-motor]] § Cómo quedó · Parte D.
+- **Disposiciones del grafo (`FUN-L-23`) retiradas el 2026-09-27**: queda solo el cúmulo,
+  con nodos lisos (sin brillo ni sombra). **No hay nada de ellas que reflejar a web**:
+  `disposiciones.ts`, `hifas.ts`, `scripts/test-disposiciones.mjs`, la clave
+  `disposicionGrafo` y la sección «Disposición» del menú ya no existen en desktop. Al
+  reflejar, `GraphView.tsx`, `GraphOptionsMenu.tsx` (+ `.module.css`),
+  `stores/graphStore.ts` y la parte del grafo de `stores/prefsVaultStore.ts` vuelven a
+  ser los de antes de `FUN-L-23`. Ver [[grafo-disposiciones]].
 
 ### Artefactos solo-web (no existen en `desktop-tauri`)
 

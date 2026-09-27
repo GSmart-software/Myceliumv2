@@ -1,5 +1,9 @@
 # Disposiciones del grafo (`FUN-L-23` · `GRAPH-DISPOSICIONES`)
 
+> [!danger] **Retirada el 2026-09-27** por decisión del usuario
+> No le gustó el resultado en la app; queda solo el cúmulo. Esta spec se conserva como
+> registro.
+
 El grafo global gana **tres disposiciones** además de la actual, y el usuario elige cuál
 usa **cada vault** desde el menú del grafo. Vienen de la exploración de representaciones
 inspiradas en el micelio del 2026-09-25/26 ([[Representaciones de micelio para el grafo]]):

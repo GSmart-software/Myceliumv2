@@ -810,6 +810,15 @@ prescinde durante el movimiento es el brillo de los nodos y las sombras.
 
 ## Cómo quedó · Parte D
 
+> [!warning] Lo referido a micelio quedó sin efecto (2026-09-27)
+> Las disposiciones de [[grafo-disposiciones]] (`FUN-L-23`: anillo, crecimiento y
+> sustrato) se retiraron por decisión del usuario: todo lo de esta parte sobre
+> `hifas.ts`, `tickMicelio`, la sobrecapa y el repintado acotado del sustrato ya no
+> existe. Del cúmulo queda todo (cámara con capas y margen, curvas en movimiento), y
+> además sus nodos pasan a ser **discos lisos siempre**, también en reposo: sin sprite
+> con `shadowBlur`. Es un cambio de estilo deliberado del usuario, no de rendimiento; el
+> brillo de hover de las aristas (`graphHoverGlow`) se conserva.
+
 Implementada el 2026-09-27 en `feat/grafo-curvas-desktop`, un commit por punto (curvas,
 sin brillo en movimiento, repintado acotado del sustrato, cámara). **Sin confirmar en la
 app**: lo medido es con el componente real en Chromium headless, que rasteriza por
