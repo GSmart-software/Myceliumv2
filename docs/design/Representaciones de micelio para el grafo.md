@@ -6,7 +6,8 @@ de la conversación sobre `DEF-109` (el grafo con más de 1.000 notas, ver
 [[Rendimiento del grafo]]): tres de las cuatro ideas prescinden de la física, así que
 además de estética son rendimiento. **Resultado**: el usuario decidió el 2026-09-26 sumar
 tres de ellas a Mycelium, conservando el cúmulo actual → spec en [[grafo-disposiciones]]
-(`FUN-L-23`).
+(`FUN-L-23`). **Retirada el 2026-09-27** por decisión del usuario: no le gustó el
+resultado en la app; queda solo el cúmulo.
 
 ## Las demos
 
