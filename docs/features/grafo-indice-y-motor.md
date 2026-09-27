@@ -507,6 +507,29 @@ el ciclo.
    física en worker/hilo principal, N nodos») y otra al asentarse con el tiempo total,
    para que la comprobación en F12 sea inmediata.
 
+> [!important] Lo que la prueba del usuario agregó (2026-09-26, `tauri dev`, Tesina)
+> «Los nodos tardan mucho en reubicarse, con tirones muy grandes; mover un nodo genera un
+> bajo rendimiento gigantesco; no son solo los nodos, son también las líneas». Además del
+> ciclo, **el dibujo durante el movimiento** es el otro techo: mientras `alpha` es alto,
+> el cúmulo dibuja directo en cada frame las 3.275 curvas bézier con un `stroke()` cada
+> una, los sprites con glow y los nombres, a fidelidad completa y a la DPR real de
+> WebView2 (más píxeles que el headless donde se midió la Parte B).
+
+6. **Fidelidad reducida mientras simula** (o mientras se arrastra): aristas como líneas
+   rectas agrupadas en paths de ~256 segmentos por `stroke()` (un solo path con miles de
+   subtrazos se midió peor; el punto medio son lotes chicos), sin flujo ni flecha; nodos
+   como discos planos sin sprite; nombres solo hubs, hover y centro. Al asentarse, **un**
+   repintado a fidelidad completa en la capa estática.
+7. **Presupuesto de frame adaptativo**: si el último `draw()` superó ~12 ms, se salta el
+   dibujo de la siguiente actualización de posiciones. La física no se frena.
+8. **Sin basura por frame**: dos buffers de posiciones en ping-pong entre el worker y el
+   hilo principal (transferidos), no un `Float32Array` nuevo por mensaje: el GC a 60
+   mensajes/s es una fuente de tirones.
+9. **Medición con el grafo real de la Tesina** (1.306 nodos, 3.275 aristas, grado máximo
+   320; se extrae con `docs/design/demos/extraer-vault.mjs`), en Playwright con
+   `deviceScaleFactor 1.5`: tiempo hasta asentarse, `draw()` p50/p95 simulando y
+   arrastrando, y frames largos (>50 ms), antes y después.
+
 ### Criterios
 
 1. Tesina (1.306 notas, sin caché de posiciones): **asentado en menos de 8 s** en la app,
@@ -517,6 +540,8 @@ el ciclo.
 4. Arrastrar responde sin retraso perceptible (el worker sube `alphaObjetivo`, no espera
    al frame).
 5. Todo lo anterior de la Parte B sigue (0 rAF en reposo sin flujo; flujo acotado).
+6. **Ningún frame de más de 50 ms** mientras el grafo se mueve o se arrastra, con el
+   grafo real de la Tesina a DPR 1,5.
 
 ## Versionado
 
