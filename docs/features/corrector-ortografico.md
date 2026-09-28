@@ -134,7 +134,8 @@ diccionarios/
 - Un script `frontend/scripts/publicar-diccionarios.mjs` arma los archivos y el manifiesto a
   partir de los paquetes `dictionary-*`, con `--simulacro` como `publicar.mjs`. **Subir a
   R2 lo hace el usuario** (credenciales suyas); para desarrollo, la URL del manifiesto se
-  puede apuntar a una carpeta local.
+  puede apuntar a una carpeta local. El paso a paso —subir, actualizar un diccionario,
+  agregar un idioma— está en [[Publicar los diccionarios del corrector]].
 - Web necesita **CORS** en el bucket para el origen de la app web.
 
 ## 5. Notas por versión

@@ -66,6 +66,8 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
 - [[Generar instaladores desktop]] — empaquetado con Tauri.
 - [[Publicar una version]] — bucket, claves de firma y los cinco pasos de una
   publicación, para que la actualización llegue sola (`FUN-L-14`).
+- [[Publicar los diccionarios del corrector]] — subir a R2 los diccionarios de
+  `FUN-L-12`, actualizar uno o agregar un idioma.
 - [[Generar el framework de IA en un vault]] — instalar las instrucciones de IA.
 - [[Rediseñar la UI con impeccable]] — la skill de diseño: dónde está, cómo se
   configura y en qué orden se usa.

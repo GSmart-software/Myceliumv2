@@ -605,6 +605,7 @@ Lo que sigue sin hacer:
 
 - [[autoactualizacion]] — la spec: qué hace la app con todo esto.
 - [[Generar instaladores desktop]] — el empaquetado, que ahora emite también los `.sig`.
+- [[Publicar los diccionarios del corrector]] — lo otro que vive en el bucket, y se sube aparte.
 - [[Versionado del sistema]] — qué número lleva cada release.
 - [[BACKLOG]] — `FUN-L-15`, la automatización de este proceso, ya implementada.
 - [[Mapa de documentacion]] — índice general.
