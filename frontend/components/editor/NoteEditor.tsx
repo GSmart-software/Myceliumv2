@@ -347,17 +347,30 @@ export function NoteEditor({
     if (!dirtyRef.current || syncingRef.current) return;
     syncingRef.current = true;
     setSyncState("syncing");
+    // Lo que se manda, fijado ANTES del await (`DEF-117`): mientras el guardado
+    // viaja se puede seguir escribiendo, y eso nuevo todavía no está en el servidor.
+    const enviado = contentRef.current;
     try {
       const result = await api<{ actualizadoEn: string }>(
         `/notas/${notaId}/contenido`,
         {
           method: "PUT",
           token: useAuthStore.getState().accessToken,
-          body: { contenido: contentRef.current },
+          body: { contenido: enviado },
         },
       );
-      dirtyRef.current = false;
       remoteUpdatedAtRef.current = result.actualizadoEn;
+      // Solo queda «guardado» si no se escribió nada durante el guardado. Antes
+      // se marcaba siempre, y lo tipeado en ese intervalo quedaba como si ya
+      // estuviera en el servidor: si no se volvía a escribir, nunca se enviaba.
+      if (contentRef.current !== enviado) {
+        // Lo de antes quedó guardado, pero lo nuevo no: sigue pendiente y lo
+        // envía el próximo guardado.
+        saveLocal();
+        setSyncState("local");
+        return;
+      }
+      dirtyRef.current = false;
       saveLocal();
       setSyncState("synced");
       // El contenido (y por ende los [[enlaces]]) cambió → refrescar el grafo.
@@ -645,11 +658,33 @@ export function NoteEditor({
     [onDocChanged, openByTitle, noteExists, notaId, instanceId, paneId],
   );
 
+  /**
+   * Pone `content` en el editor cambiando **solo el tramo que difiere**
+   * (`DEF-117`). Reemplazar el documento entero —como se hacía— tira la
+   * selección y el scroll: con cada recarga el cursor saltaba al inicio y lo
+   * siguiente se escribía en otro lugar. Con el cambio acotado, CodeMirror
+   * reubica el cursor por sí mismo y la vista no se mueve.
+   */
   const applyContent = useCallback((content: string) => {
     const view = viewRef.current;
     if (!view) return;
+    const actual = view.state.doc.toString();
+    if (actual === content) return;
+    let desde = 0;
+    const tope = Math.min(actual.length, content.length);
+    while (desde < tope && actual.charCodeAt(desde) === content.charCodeAt(desde)) desde++;
+    let finActual = actual.length;
+    let finNuevo = content.length;
+    while (
+      finActual > desde &&
+      finNuevo > desde &&
+      actual.charCodeAt(finActual - 1) === content.charCodeAt(finNuevo - 1)
+    ) {
+      finActual--;
+      finNuevo--;
+    }
     view.dispatch({
-      changes: { from: 0, to: view.state.doc.length, insert: content },
+      changes: { from: desde, to: finActual, insert: content.slice(desde, finNuevo) },
     });
   }, []);
 
