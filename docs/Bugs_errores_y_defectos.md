@@ -675,6 +675,18 @@ cuatro opciones que agregó `DEF-024`, que en su momento funcionaban.
 Reportado por el usuario el 2026-09-27. Sospecha que se rompió con el rediseño de la UI, sin
 descartar que venga de antes.
 
+# DEF-117
+Mientras se trabaja —escribiendo, moviendo archivos entre carpetas— **se revierten acciones
+solas**:
+
+- un archivo que se movió **vuelve a la carpeta anterior**;
+- **se borran las últimas palabras** que se escribieron;
+- **el scroll salta al inicio** del documento mientras se escribe, y el cursor se reubica, así
+  que lo siguiente se escribe en otro lugar.
+
+Pasa seguido y de forma intermitente. Reportado por el usuario el 2026-09-27; sospecha del
+guardado automático, del indexado o de la memoria del estado de los documentos.
+
 ---
 
 > [!warning] Defectos sin reporte original
