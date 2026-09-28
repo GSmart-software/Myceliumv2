@@ -224,7 +224,7 @@ Edge headless —el motor de WebView2— con Tauri simulado y los diccionarios r
 |---|---|
 | Motor (spellbook → WASM, API C sin wasm-bindgen: cargar varios, revisar, sugerir, agregar) | `frontend/wasm/ortografia/` → `public/ortografia/motor.wasm` (328 KB; 106 KB en gzip). Se regenera con `npm run wasm:ortografia` |
 | Lado JS del motor | `lib/ortografia/motor.ts` |
-| Worker (correcta en **alguno** de los cargados, o en el diccionario del vault / ignoradas) | `lib/ortografia/corrector.worker.ts` |
+| Worker (correcta en **alguno** de los cargados, o en los diccionarios personales / ignoradas) | `lib/ortografia/corrector.worker.ts` |
 | Servicio de la ventana: arranca/apaga el worker, caché, recarga, «Agregar», «Ignorar», propuesta de descarga | `lib/ortografia/corrector.ts` |
 | Palabras, exclusiones, caché, archivo del vault | `lib/ortografia/palabras.ts` (puro) |
 | Idioma y región del sistema, variante | `lib/ortografia/idioma.ts` (puro) |
@@ -235,8 +235,9 @@ Edge headless —el motor de WebView2— con Tauri simulado y los diccionarios r
 | Configuración → Editor | `components/settings/DiccionariosCorrector.tsx` |
 | Descarga, verificación, lectura (Rust) | `src-tauri/src/diccionarios.rs` |
 | Diccionario del vault | `.mycelium/diccionario.txt` (`prefs_vault.rs`, lista `ESTADOS`) |
+| Diccionario de Mycelium | `diccionario-personal.txt` en `app_config_dir` (`%APPDATA%\com.mycelium.desktop\`), comandos `diccionario_personal_leer/escribir` en `diccionarios.rs` |
 | Armar y publicar los diccionarios | `scripts/publicar-diccionarios.mjs` |
-| Tests | `scripts/test-ortografia.mjs` (21) y `cargo test --lib diccionarios` (9) |
+| Tests | `scripts/test-ortografia.mjs` (22; 2 se saltean sin `.diccionarios-fuente`) y `cargo test --lib diccionarios` (12) |
 
 ### Decisiones tomadas al implementar
 
@@ -331,7 +332,40 @@ Ajuste al probar: el menú no separaba las sugerencias de las acciones; ahora ll
 divisoria (`separadorAntes` en `ContextMenu`, `fe4e544`).
 
 **Falta**: la confirmación del usuario, la app **empaquetada**, sin conexión (11), una nota
-larga real (12), las licencias (14) y la subida real a R2. El orden de las sugerencias lo da
+larga real (12), las licencias (14) y la subida real a R2.
+
+### El diccionario de Mycelium (2026-09-27, `feat/corrector-diccionario-mycelium`)
+
+El segundo diccionario personal (§ 1), **sin probar en la app**:
+
+- **Rust** (`diccionarios.rs`): `diccionario_personal_leer` devuelve el texto o `null` si no
+  hay archivo —un archivo **ilegible** es error, no «vacío», para que el próximo «Agregar»
+  no lo pise—; `diccionario_personal_escribir` crea la carpeta si falta, escribe con
+  `escribir_atomico` y emite `diccionario-personal-cambiado` a todas las ventanas.
+- **Mismo formato que el del vault**: `leerDiccionarioPersonal` / `escribirDiccionarioPersonal`
+  en `palabras.ts` (antes `…Vault`).
+- **El worker no cambió**: sigue recibiendo un solo conjunto `personales`, que ahora es
+  vault + Mycelium + ignoradas. Quién guarda dónde lo sabe `corrector.ts`, con una API
+  única para los dos: `palabrasDe`, `agregarA`, `quitarDe` (`"vault" | "mycelium"`) y
+  `suscribirPersonales`.
+- **Se carga al iniciar el corrector**, con o sin vault; si no se puede leer, el corrector
+  arranca igual sin esas palabras.
+- **Otra ventana** que agrega o quita: el evento hace que cada ventana relea solo esas
+  palabras (sin recargar los diccionarios); la que escribió ve que no cambió nada y no
+  vacía el caché dos veces.
+- **Una respuesta vieja no ensucia el caché**: una revisión pedida antes de un
+  «Agregar»/«Quitar» vuelve con el resultado anterior; se descarta por `epocaPersonales`
+  (aparte de `generacion`, que cortaría una carga en curso). Vale también para el del vault.
+- **Menú**: sugerencias, divisoria, «Agregar al diccionario del vault» (deshabilitada sin
+  vault), «Agregar al diccionario de Mycelium», «Ignorar». Un fallo al guardar se avisa.
+- **Configuración**: «Diccionarios personales», una caja por diccionario con su cantidad,
+  dónde se guarda y «Ver y quitar». La lista está en orden alfabético, se desplaza dentro
+  de su caja (12rem) y, desde 12 palabras, tiene un filtro que no distingue tildes ni
+  mayúsculas (`filtrarPalabras`). Sin vault, solo se ve la de Mycelium.
+
+**A probar en la app**: agregar a Mycelium desde un vault y verla desmarcada en otro
+(criterio 7), reabrir la app y que siga, quitarla en Configuración y que se vuelva a marcar
+(7b), con dos ventanas abiertas, y la lista con muchas palabras en modo oscuro. El orden de las sugerencias lo da
 el motor: para «tezto», «texto» sale cuarta, detrás de «teto», «tote» y «testo».
 
 ---
