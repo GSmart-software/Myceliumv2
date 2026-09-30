@@ -6,8 +6,9 @@ Se muestra al pie del drawer de Configuración y sale de una constante compartid
 `frontend/lib/version.ts` → `APP_VERSION`.
 
 > [!info] Estado actual
-> **desktop `2.2.0`** en preparación ([[Version 2.2.0]]: calendario y disposiciones del
-> grafo; la última publicada es [[Version 2.1.0]], del 2026-09-23) · **web `2.1.0`**
+> **desktop `2.2.0`**, publicada el 2026-09-28 ([[Version 2.2.0]]: calendario, corrector
+> ortográfico, abrir otro vault y el grafo para vaults grandes; la anterior es
+> [[Version 2.1.0]], del 2026-09-23) · **web `2.1.0`**
 > ([[Version 2.1.0 de web]]). Las líneas se separaron en el release 1.1.0 porque todo lo
 > que entró es solo-desktop, y saltaron juntas a `2.0.0`; **no comparten numeración**
 > aunque hoy coincidan.

@@ -178,9 +178,10 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
   enlaces en pestaña nueva. Sin publicar.
 - [[Version 2.0.0 de web]] — el rediseño de la interfaz, **reflejado a web** el
   2026-09-22. **Numeración propia**: coincidir con la 2.0.0 de escritorio es casualidad.
-- [[Version 2.2.0]] — **en preparación**, sin publicar: el calendario con recordatorios
-  y las disposiciones del grafo, más los arreglos del índice (`DEF-105` a `DEF-108`).
-- [[Version 2.1.0]] — última **publicada** de desktop (2026-09-23): **draw.io** como tipo
+- [[Version 2.2.0]] — **release actual de desktop**, publicada el 2026-09-28: el
+  calendario con recordatorios, el corrector ortográfico, abrir otro vault desde la barra
+  superior y el grafo para vaults grandes, más los arreglos del índice y hasta `DEF-117`.
+- [[Version 2.1.0]] — la anterior de desktop (2026-09-23): **draw.io** como tipo
   de archivo del vault, los enlaces web abren el navegador y el vídeo de YouTube se ve en
   la nota.
 - [[Version 2.0.0]] — el **rediseño de la interfaz** (marco

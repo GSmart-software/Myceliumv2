@@ -2,11 +2,11 @@
 
 **Solo desktop** (`desktop-tauri`) · 2026-09-27 · sobre [[Version 2.1.0]]
 
-> [!warning] Lista para publicar, sin publicar todavía
-> El número está en los cinco archivos desde `7ef495d`. El usuario dio el visto bueno para
-> publicarla el 2026-09-27. **Antes** de `npm run publicar` hay que subir los diccionarios
-> del corrector (`npm run publicar-diccionarios`): sin ellos, «Descargar» en Configuración →
-> Editor falla, porque el manifiesto de `diccionarios/` todavía no existe en el bucket.
+> [!success] Publicada el 2026-09-28 a las 01:02 (UTC)
+> La publicó el usuario con `npm run publicar`, sobre la compilación del ensayo del
+> 2026-09-27 (la firma del `latest.json` publicado coincide con la de
+> `installers/v2.2.0/`). Los diccionarios del corrector se subieron antes con
+> `npm run publicar-diccionarios` ([[Publicar los diccionarios del corrector]]).
 
 Tres funcionalidades nuevas: el **calendario con recordatorios** (`FUN-L-22`), el
 **corrector ortográfico** con motor propio (`FUN-L-12`) y **abrir otro vault desde la barra
