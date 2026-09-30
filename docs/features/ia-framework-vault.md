@@ -28,7 +28,7 @@ El framework enseña dos **protocolos** y los hace obligatorios:
 Además, el `CLAUDE.md` incluye un **mapa de cuándo usar cada skill/comando**, para
 que la IA sepa qué herramienta corresponde a cada situación.
 
-## Qué genera (v1.4.0)
+## Qué genera (v1.7.0)
 
 | Archivo en el vault | Rol |
 |---|---|
@@ -41,7 +41,9 @@ que la IA sepa qué herramienta corresponde a cada situación.
 | `.claude/commands/vault-vincular.md` | `/vault-vincular <nota>`: refuerza asociaciones (con la razón de cada vínculo) |
 | `.claude/commands/vault-huerfanas.md` | `/vault-huerfanas`: audita salud de la memoria — huérfanas + enlaces rotos (reporta, no aplica solo) |
 | `.claude/commands/vault-nota.md` | `/vault-nota <título>`: crea una nota siguiendo las convenciones (sin dejarla huérfana) |
-| `.claude/mycelium-ia.json` | Marcador de versión del framework |
+| `.claude/skills/mycelium-{drawio,canvas,excalidraw,base,esporas,calendario}/SKILL.md` | **Una skill por herramienta** (desde la 1.7.0, [[ia-skills-herramientas]]): formato, geometría, recetas y cómo modificar sin romper |
+| `.claude/skills/mycelium-{drawio,canvas,excalidraw}/validar-<formato>.mjs` | El **validador** de cada formato, sin dependencias: la IA lo corre con `node` sobre lo que escribió |
+| `.claude/mycelium-ia.json` | Marcador de versión del framework (y huellas de lo generado, `DEF-118`) |
 
 Contenido **verificado contra el código real** de Mycelium: `[[Título|alias]]`,
 `![[embed]]`, `![[X.excalidraw]]`, `#tag`, callouts (10 tipos, plegables `-/+`,
@@ -54,7 +56,7 @@ actualiza ella con grep (`FUN-M-08`).
 
 ## Versionado
 
-- `FRAMEWORK_IA_VERSION` en `frontend/lib/ia/framework.ts` (hoy `1.5.0`),
+- `FRAMEWORK_IA_VERSION` en `frontend/lib/ia/framework.ts` (hoy `1.7.0`),
   independiente de la versión de la app. **Al agregar funciones a Mycelium que la
   IA deba conocer, subir la versión y actualizar los templates.**
   - `1.0.0` — primera versión.
@@ -94,6 +96,33 @@ actualiza ella con grep (`FUN-M-08`).
     repara los enlaces entrantes. Pero solo cuando pasa por la app; un `mv` desde
     la terminal —que es como renombra la IA— no dispara nada, y la regla pasa a
     decir esa diferencia. Ver [[titulo-renombra]].
+  - `1.6.0` — **diagramas de draw.io** (`FUN-L-20`): el vault gana `.drawio`. La IA
+    sabe que existe, que no se indexa y —hasta la 1.7.0— que no se edita a mano.
+  - `1.7.0` — **una skill por herramienta** (`FUN-L-26`, [[ia-skills-herramientas]]):
+    `mycelium-drawio`, `mycelium-canvas`, `mycelium-excalidraw`, `mycelium-base`,
+    `mycelium-esporas` y `mycelium-calendario`. La IA pasa de saber que esos formatos
+    existen a **crearlos y modificarlos** —geometría, flechas enganchadas, texto que
+    entra— y a **consultar el calendario** (solo lectura). Las tres de dibujo llevan su
+    validador (`.claude/skills/<skill>/validar-<formato>.mjs`). Cambios en los
+    templates:
+    - `CLAUDE.md`: `.drawio` y `.excalidraw` pasan de «no editar a mano» a «crear y
+      editar con su skill»; «Tus herramientas aquí» lista las seis; la regla 8 admite
+      **leer** `.mycelium/recordatorios.json` y `.mycelium/preferencias.json` (escribir
+      en `.mycelium/`, nunca); la regla 10 remite a `mycelium-esporas`; «por fuera»
+      nombra el calendario y aclara qué se recarga desde disco (lienzos, diagramas y
+      dibujos incluidos; no con cambios sin guardar ni el modal de Excalidraw).
+    - `mycelium-vault` adelgaza: las secciones de `.base`, `.canvas` y Esporas se
+      reducen a una tabla que remite a cada skill. Se corrigen dos errores: decía que
+      el `.canvas` no aporta aristas al grafo (sí: `[[enlaces]]` de sus tarjetas y
+      notas de sus nodos `file`), y en «Precauciones» y en `mycelium-memoria` que
+      renombrar no repara enlaces (sí, desde la app; un `mv`, no).
+    - `/vault-nota` remite a `mycelium-esporas` y exige expandir las variables con
+      `date`; `/vault-huerfanas` cuenta como enlace entrante la aparición en un lienzo.
+
+    El texto de las skills y los validadores **no vive en `framework.ts`**: lo genera
+    `scripts/generar-skills-ia.mjs` en `lib/ia/skillsGeneradas.ts` a partir de
+    `lib/ia/borradores/` y `scripts/validar-*.mjs` (ver
+    [[Generar el framework de IA en un vault]]).
 - Cada archivo generado lleva el marcador `<!-- mycelium-ia vX -->`; la versión
   instalada vive en `.claude/mycelium-ia.json`.
 - Configuración → Vault muestra instalada vs disponible y ofrece
