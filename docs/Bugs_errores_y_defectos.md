@@ -710,6 +710,16 @@ Detectado el 2026-09-30 en la app, durante la evaluación de `FUN-L-26`: con la 
 estos archivos, un error de sintaxis suyo deja al usuario ante un dibujo «vacío» que puede
 pisar sin darse cuenta.
 
+# DEF-120
+Cuando una **nota y un dibujo tienen el mismo nombre** (`Devoluciones.md` en la raíz y
+`Eval/excalidraw/Devoluciones.excalidraw`), el dibujo **no se puede embeber**:
+`![[Eval/excalidraw/Devoluciones.excalidraw]]` —con la carpeta, para desambiguar— muestra
+«No se pudo cargar el diagrama "Eval/excalidraw/Devoluciones"». Leyendo el código, también
+`[[Pedido]]` podría abrir el dibujo `Pedido.excalidraw` en vez de la nota `Pedido.md` si
+están en la misma carpeta (sin confirmar en la app).
+
+Detectado el 2026-09-30 en la app, durante la evaluación de `FUN-L-26`.
+
 ---
 
 > [!warning] Defectos sin reporte original
