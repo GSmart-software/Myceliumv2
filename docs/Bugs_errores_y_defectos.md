@@ -687,6 +687,16 @@ solas**:
 Pasa seguido y de forma intermitente. Reportado por el usuario el 2026-09-27; sospecha del
 guardado automático, del indexado o de la memoria del estado de los documentos.
 
+# DEF-118
+Al **actualizar las instrucciones de IA** desde Configuración → Vault, un `CLAUDE.md` que
+el usuario había ampliado a mano **se reemplaza entero** por la versión nueva: lo que había
+agregado desaparece del archivo, no se genera la copia `CLAUDE (mycelium-ia vX).md` al lado
+y no aparece aviso de conflicto. En el vault del proyecto, al pasar de la `1.2.0` a la
+`1.6.0`, se perdió toda la sección «Desarrollo del proyecto» del `CLAUDE.md` (quedó solo en
+git).
+
+Reportado por el usuario el 2026-09-30.
+
 ---
 
 > [!warning] Defectos sin reporte original
