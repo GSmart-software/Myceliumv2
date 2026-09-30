@@ -720,6 +720,19 @@ están en la misma carpeta (sin confirmar en la app).
 
 Detectado el 2026-09-30 en la app, durante la evaluación de `FUN-L-26`.
 
+# DEF-121
+Un archivo **escrito desde fuera de la app** se abre **vacío** aunque en disco esté
+completo: `Eval/drawio/Red.drawio` (6 KB, un diagrama válido) muestra la página en blanco,
+también después de recargar la ventana. Una copia idéntica del archivo en otra carpeta se
+ve bien. Como la vista lo trata como un diagrama nuevo, dibujar y guardar encima pisaría el
+contenido real.
+
+En el índice del vault, la nota tiene su fila en `notas` pero **no** en `contenidos`. Es el
+único caso entre los 13 índices de la máquina (los vaults del usuario, sanos). El archivo lo
+escribió una IA desde la terminal mientras la app estaba abierta.
+
+Detectado el 2026-09-30 en la app, durante la evaluación de `FUN-L-26`.
+
 ---
 
 > [!warning] Defectos sin reporte original
