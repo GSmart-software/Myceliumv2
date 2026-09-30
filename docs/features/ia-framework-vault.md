@@ -137,6 +137,7 @@ extensiones futuras (ver BACKLOG `FUN-L-08`/`FUN-L-09`).
 
 ## Relacionadas
 
+- [[ia-skills-herramientas]] — `FUN-L-26`: una skill por herramienta (draw.io, canvas, excalidraw, base, Esporas, calendario) para la `1.7.0`.
 - [[Mycelium como memoria de la IA]] — la decisión de producto que lo motiva.
 - [[Generar el framework de IA en un vault]] — el procedimiento y la política de conflictos.
 - [[terminal-integrada]] — dónde corre el asistente.
