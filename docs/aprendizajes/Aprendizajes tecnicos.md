@@ -62,6 +62,13 @@ y qué principio general dejó.
    imita el diálogo por defecto) y rasterizando con `pdftoppm`: sin la propiedad, blanco y
    negro; con ella, el tema entero. **Todo CSS pensado para imprimir la declara.** En web no
    se veía porque el backend genera el PDF con `PrintBackground = true`.
+8. **Una marca dice quién creó un archivo, no quién lo tocó después.** El framework de IA
+   decidía si podía sobrescribir un archivo por la marca `<!-- mycelium-ia v` de su primera
+   línea; el usuario amplió el `CLAUDE.md` generado sin borrarla, y al actualizar se perdió
+   todo lo agregado, sin copia ni aviso (`DEF-118`). Para sobrescribir hace falta saber que
+   el archivo **sigue igual a lo que se escribió**: se guarda la huella (sha256) de lo
+   generado, y para lo generado antes de guardarla se recalcularon desde git las huellas de
+   cada versión publicada, que reconocen el archivo intacto sin adivinar.
 
 ## Relacionadas
 
