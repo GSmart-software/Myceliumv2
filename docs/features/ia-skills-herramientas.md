@@ -106,9 +106,90 @@ El calendario **no** cambia: es de solo lectura para la IA.
 | C | Evaluación ciega + revisión visual | En serie: una sola app abierta por vez (la máquina se queda sin memoria con dos) |
 | D | Integrar las skills al framework, `1.7.0`, templates de `CLAUDE.md` | Orquestador |
 
+## Cómo quedó
+
+Partes A, B y D integradas en `desktop-tauri` (2026-09-30). **Falta la parte C** (evaluación
+ciega + revisión visual en la app) y la confirmación del usuario.
+
+### Las seis skills (framework `1.7.0`)
+
+| Skill (`.claude/skills/<skill>/SKILL.md`) | Validador que viaja con ella | Cómo lo corre la IA |
+|---|---|---|
+| `mycelium-drawio` | `validar-drawio.mjs` | `node .claude/skills/mycelium-drawio/validar-drawio.mjs [--mapa] archivo.drawio` |
+| `mycelium-canvas` | `validar-canvas.mjs` | `node .claude/skills/mycelium-canvas/validar-canvas.mjs --vault . "Ruta.canvas"` |
+| `mycelium-excalidraw` | `validar-excalidraw.mjs` | `node .claude/skills/mycelium-excalidraw/validar-excalidraw.mjs "Ruta.excalidraw"` |
+| `mycelium-base` | — | Revisión a mano con las tablas de la skill; la app muestra el motivo si no entiende un filtro |
+| `mycelium-esporas` | — | Expande las variables con `date`; no corre scripts |
+| `mycelium-calendario` | — | Un script de Node **dentro de la skill** (heredoc a `node -`), no un archivo aparte |
+
+- Solo viajan los validadores **sin dependencias** (solo `node:*`): los de bases y Esporas
+  (`validar-base.mjs`, `validar-espora.mjs`) transpilan módulos del repo y se quedan en
+  `frontend/scripts/` como herramientas de desarrollo.
+- El borrador de Excalidraw decía `validar.mjs`; se unificó a `validar-<formato>.mjs` en los
+  tres.
+- En el vault, cada `.mjs` lleva en su **primera línea** (en lugar del shebang)
+  `// <!-- mycelium-ia vX --> generado por Mycelium …`: con esa marca `generarFramework` lo
+  reconoce como suyo y lo sobrescribe al actualizar, como al resto de `.claude/`.
+- Probado de punta a punta: framework generado en una carpeta temporal fuera del repo, y
+  los tres validadores corridos **desde ahí** sobre fixtures buenos (exit 0) y malos (exit 1)
+  sin nada del repo.
+
+### El generador
+
+Los borradores (`frontend/lib/ia/borradores/*.md`) y los validadores son la **fuente de
+verdad**. `node scripts/generar-skills-ia.mjs` los lee y escribe
+`frontend/lib/ia/skillsGeneradas.ts` con cada contenido como `JSON.stringify` —nada de
+escapar backticks ni `${…}` a mano—. La marca de versión de los borradores es
+`<!-- mycelium-ia v{{VERSION_IA}} -->`; `framework.ts` reemplaza `{{VERSION_IA}}` por
+`FRAMEWORK_IA_VERSION`. El generador además **rechaza** un validador que importe algo fuera de
+`node:*` y un borrador que mande a correr un `.claude/skills/…/*.mjs` que no se genera.
+`scripts/test-skills-generadas.mjs` falla si `skillsGeneradas.ts` quedó desactualizado.
+
+> [!info] El bundle crece ~216 KB
+> Las skills y los validadores entran al chunk de la app (sin comprimir: el chunk que
+> contiene el framework pasó de 726 KB a 942 KB; el total de `out/_next/static/chunks`, de
+> 13,71 MB a 13,93 MB, +1,6 %). Si molestara, `skillsGeneradas` se puede cargar con
+> `import()` dentro de `generarFramework`.
+
+### Decisiones de la parte A (recarga desde disco)
+
+- El watcher emite `EVENTO_RECARGA` con `detail.rutas` (las rutas que cambiaron); cada vista
+  se recarga solo si la toca (`avisoTocaA`).
+- **draw.io** recarga mandando otra acción `load` al iframe, no `merge`: se pierde el zoom y
+  el deshacer, pero `merge` podía **resucitar** celdas borradas desde fuera.
+- **Excalidraw** solo marca el dibujo como sucio si cambia la suma de versiones de los
+  elementos (`versionDeEscena`): mover la cámara ya no dispara un guardado.
+- El **editor modal** de Excalidraw (el que se abre desde un embed en una nota) **no**
+  recarga: si está abierto, cerrarlo pisa lo escrito desde fuera. La skill y el `CLAUDE.md`
+  se lo advierten a la IA.
+- Ninguna vista recarga con cambios propios sin guardar; el lienzo tampoco con una tarjeta
+  en edición.
+
+### Hallazgos de la parte B que NO se arreglaron
+
+Salieron al leer el código para escribir las skills. Las skills los esquivan (le dicen a la
+IA qué no hacer), pero la app sigue igual. **Pendientes de confirmar en la app en la parte
+C** antes de registrarlos como `DEF-*`:
+
+| Formato | Hallazgo |
+|---|---|
+| Excalidraw | Un `.excalidraw` con **JSON inválido abre vacío y el autoguardado lo pisa** a los ~800 ms: pérdida de datos |
+| Excalidraw | Una flecha **sin `points`** deja el dibujo entero en blanco (Excalidraw no carga ningún elemento) |
+| draw.io | XML **mal formado** abre un diagrama vacío («No es un archivo de diagrama») y **guardar lo pisa** |
+| Canvas | Un nodo `file` a una **imagen o PDF** muestra «La nota … ya no existe» |
+| Canvas | Un **salto de línea simple** en una tarjeta de texto no corta el renglón (render sin `breaks`) |
+| Canvas | `label` y `color` de las **aristas** no se dibujan |
+| Canvas | Abre en **(0, 0)** sin ajustar al contenido: lo que está en negativo queda fuera de vista |
+| Bases | `![[x.base]]` **no dibuja la tabla** embebida |
+| Bases | Varias sintaxis se equivocan **en silencio** (comentario al final de línea, `: ` dentro de una expresión, `sort` en línea, `&&`/`!`): 0 filas o todas, sin error |
+| Esporas | Un **token desconocido sin comillas** en el frontmatter (`autor: {{autor}}`) deja la nota creada **sin propiedades** |
+| Esporas | Las **subcarpetas** de la carpeta de Esporas no se listan |
+| Esporas | La numeración de títulos repetidos empieza en **1** (`Reunión 1`) y la spec dice **2** |
+
 ## Relacionadas
 
 - [[ia-framework-vault]] — el framework: qué genera y cómo se versiona.
+- [[Generar el framework de IA en un vault]] — cómo regenerar las skills tras tocar un borrador.
 - [[calendario-recordatorios]] — el formato de `recordatorios.json`.
 - [[Ver la UI con Playwright]] — cómo se maneja la app real desde un script.
 - [[BACKLOG]] — `FUN-L-26`.

@@ -57,15 +57,33 @@ versión de la app (ver [[Versionado del sistema]]).
 
 Historial: `1.0.0` inicial · `1.1.0` agrega `.mycignore` y la política de conflictos ·
 `1.2.0` reenfoca todo a **memoria** (protocolos de recuperación y consolidación, skill
-`mycelium-memoria`, comandos `/vault-buscar` y `/vault-recordar`).
+`mycelium-memoria`, comandos `/vault-buscar` y `/vault-recordar`) · … · `1.7.0` una
+skill por herramienta con sus validadores. El historial completo está en
+[[ia-framework-vault]].
+
+> [!important] Las skills por herramienta NO se editan en `framework.ts`
+> Desde la `1.7.0` (`FUN-L-26`) las seis skills de herramientas (`mycelium-drawio`,
+> `-canvas`, `-excalidraw`, `-base`, `-esporas`, `-calendario`) se escriben en
+> `frontend/lib/ia/borradores/<skill>.md`, y los validadores que viajan con ellas son
+> `frontend/scripts/validar-{drawio,canvas,excalidraw}.mjs`. Después de tocar cualquiera:
+>
+> ```sh
+> cd frontend && node scripts/generar-skills-ia.mjs
+> ```
+>
+> Eso regenera `lib/ia/skillsGeneradas.ts`; `scripts/test-skills-generadas.mjs` falla si
+> alguien se olvidó. Un validador que viaja **no puede importar nada** fuera de `node:*`
+> (en el vault no hay `node_modules`): el generador lo rechaza. Ver
+> [[ia-skills-herramientas]].
 
 ## Verificar el markdown generado
 
 Los templates son *template literals* con backticks y escapes (`\[\[` para los grep de
 backlinks, `\|` en tablas): conviene **renderizarlos** antes de dar por bueno un
-cambio. Truco usado: un script Node que recorta el módulo desde `FRAMEWORK_IA_VERSION`
-hasta el cierre de `archivosFramework()`, quita `export`/líneas `type`, evalúa con
-`new Function` y escribe los archivos a disco para inspeccionarlos.
+cambio. Lo más simple hoy es lo que hace `scripts/test-framework-ia.mjs`: transpilar
+`framework.ts` con `typescript`, cambiar `invoke` por un disco en memoria, llamar a
+`generarFramework` y volcar el `Map` a una carpeta temporal (fuera del repo) para
+leer los archivos y correr los validadores desde ahí.
 
 ## Relacionadas
 
