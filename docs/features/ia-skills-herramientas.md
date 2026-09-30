@@ -165,6 +165,31 @@ escapar backticks ni `${…}` a mano—. La marca de versión de los borradores 
 - Ninguna vista recarga con cambios propios sin guardar; el lienzo tampoco con una tarjeta
   en edición.
 
+### Encuadre al abrir (2026-09-30)
+
+Un dibujo o lienzo grande abría mirando a (0, 0) al 100 %: quedaba cortado, y en Excalidraw
+lo de arriba lo tapaba la barra de herramientas. Ahora **al abrir** se encuadra todo lo
+dibujado, con margen y **sin agrandar más allá del 100 %** un dibujo chico. Rama
+`fix/def-119-y-encuadre-desktop`, **sin confirmar en la app**.
+
+- **Excalidraw** (pestaña y modal del embed): `scrollToContent` con `fitToContent` (que ya
+  limita el zoom a 1), `viewportZoomFactor: 0.9` y `canvasOffsets` de 64 px arriba (la barra
+  de herramientas flota sobre esa franja) y 56 px abajo (zoom y deshacer). Se dispara en la
+  primera `onChange` que trae elementos, en el cuadro siguiente (`encuadrarDibujo` en
+  `lib/excalidraw.ts`). Un dibujo en blanco no se encuadra: si no, el primer trazo movería
+  la vista.
+- **Canvas**: `cajaDeNodos` + `encuadrar` (`lib/canvas.ts`, testeados en
+  `scripts/test-canvas.mjs`), en un efecto de layout para que el primer cuadro ya salga
+  encuadrado. Margen 48 px, escala entre 0,2 (el tope de la rueda) y 1.
+- **Solo en la primera apertura**: la recarga desde disco de la parte A conserva la cámara
+  y no re-encuadra. Estas dos vistas se remontan al cambiar de pestaña (`key` de la pestaña
+  en `EditorPane`) y ya perdían la cámara al volver; ahora al volver se re-encuadran, en vez
+  de volver a (0, 0).
+- **draw.io queda como está.** Su protocolo embebido no tiene una acción de encuadre, y la
+  única vía sería mandar `invokeAction` de «ajustar» después de cada `load` — pero la recarga
+  desde disco también es un `load`, y distinguir la primera apertura desde el `iframe`
+  compartido no es trivial. Además, draw.io ya abre mostrando la página.
+
 ### Hallazgos de la parte B que NO se arreglaron
 
 Salieron al leer el código para escribir las skills. Las skills los esquivan (le dicen a la
@@ -173,13 +198,13 @@ C** antes de registrarlos como `DEF-*`:
 
 | Formato | Hallazgo |
 |---|---|
-| Excalidraw | Un `.excalidraw` con **JSON inválido abre vacío y el autoguardado lo pisa** a los ~800 ms: pérdida de datos |
-| Excalidraw | Una flecha **sin `points`** deja el dibujo entero en blanco (Excalidraw no carga ningún elemento) |
-| draw.io | XML **mal formado** abre un diagrama vacío («No es un archivo de diagrama») y **guardar lo pisa** |
+| Excalidraw | Un `.excalidraw` con **JSON inválido abre vacío y el autoguardado lo pisa** a los ~800 ms: pérdida de datos. → Registrado como `DEF-119`; ahora avisa y no monta el editor |
+| Excalidraw | Una flecha **sin `points`** deja el dibujo entero en blanco (Excalidraw no carga ningún elemento). → `DEF-119`: `restoreElements` tira y la vista lo muestra como ilegible |
+| draw.io | XML **mal formado** abre un diagrama vacío («No es un archivo de diagrama») y **guardar lo pisa**. → `DEF-119` |
 | Canvas | Un nodo `file` a una **imagen o PDF** muestra «La nota … ya no existe» |
 | Canvas | Un **salto de línea simple** en una tarjeta de texto no corta el renglón (render sin `breaks`) |
 | Canvas | `label` y `color` de las **aristas** no se dibujan |
-| Canvas | Abre en **(0, 0)** sin ajustar al contenido: lo que está en negativo queda fuera de vista |
+| Canvas | Abre en **(0, 0)** sin ajustar al contenido: lo que está en negativo queda fuera de vista. → Resuelto: ver «Encuadre al abrir» |
 | Bases | `![[x.base]]` **no dibuja la tabla** embebida |
 | Bases | Varias sintaxis se equivocan **en silencio** (comentario al final de línea, `: ` dentro de una expresión, `sort` en línea, `&&`/`!`): 0 filas o todas, sin error |
 | Esporas | Un **token desconocido sin comillas** en el frontmatter (`autor: {{autor}}`) deja la nota creada **sin propiedades** |
