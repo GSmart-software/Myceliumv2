@@ -697,6 +697,19 @@ git).
 
 Reportado por el usuario el 2026-09-30.
 
+# DEF-119
+Un **dibujo o diagrama que no se puede leer** (JSON de Excalidraw o XML de draw.io mal
+formado) se abre como si estuviera vacío, y lo que se haga encima **reemplaza el archivo
+original**:
+
+- un `.excalidraw` ilegible abre un lienzo en blanco **sin ningún aviso**;
+- un `.drawio` ilegible muestra «No es un archivo de diagrama», pero después deja editar y
+  guardar sobre el mismo archivo.
+
+Detectado el 2026-09-30 en la app, durante la evaluación de `FUN-L-26`: con la IA editando
+estos archivos, un error de sintaxis suyo deja al usuario ante un dibujo «vacío» que puede
+pisar sin darse cuenta.
+
 ---
 
 > [!warning] Defectos sin reporte original
