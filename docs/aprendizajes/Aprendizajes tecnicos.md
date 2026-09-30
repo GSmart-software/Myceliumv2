@@ -69,6 +69,21 @@ y qué principio general dejó.
    el archivo **sigue igual a lo que se escribió**: se guarda la huella (sha256) de lo
    generado, y para lo generado antes de guardarla se recalcularon desde git las huellas de
    cada versión publicada, que reconocen el archivo intacto sin adivinar.
+9. **«No lo entiendo» no es «no tiene nada».** Los dibujos (`.excalidraw`) y diagramas
+   (`.drawio`) que no se podían leer se abrían **vacíos**, y lo primero que se dibujaba
+   encima se guardaba sobre el original (`DEF-119`). El error venía de un atajo razonable:
+   un archivo recién creado tiene 0 bytes y se abre en blanco, así que el `catch` del
+   parseo caía en la misma escena vacía — y en draw.io, lo que ni parecía XML se cambiaba
+   por un diagrama nuevo. Con una IA escribiendo esos archivos, un error de sintaxis suyo
+   dejaba al usuario ante un lienzo en blanco listo para pisar el trabajo. Son **tres**
+   estados, no dos: vacío (editor en blanco), legible (editor) e ilegible (aviso **sin
+   editor**, para que nada pueda guardarse encima; `lib/archivosIlegibles.ts`). Y ojo con
+   las librerías que «toleran» basura: `restoreElements` de Excalidraw descarta en
+   silencio los elementos de tipo desconocido (se perderían al guardar) y **tira** con una
+   flecha sin `points`; draw.io embebido no avisa por el protocolo cuando un `load` falla
+   —muestra su diálogo, emite `load` igual y deja editar el vacío—, así que el XML se
+   revisa con `DOMParser` **antes** de mandárselo. Todo parseo que alimente un editor con
+   autoguardado distingue «vacío» de «ilegible».
 
 ## Relacionadas
 
