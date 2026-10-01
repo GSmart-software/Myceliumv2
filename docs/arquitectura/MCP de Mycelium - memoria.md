@@ -2,6 +2,12 @@
 
 **Planificación** · 2026-09-23 · `FUN-L-09` `IA-MCP-MYCELIUM`
 
+> [!warning] Nota histórica: la búsqueda no entró
+> El 2026-09-25 esta mitad se evaluó y **no entra** al producto: no le ganó a `grep` en
+> exactitud ([[MCP de Mycelium - tesina, protocolo]] § 9). Su código quedó en la historia de
+> `feat/mcp-desktop` (`4d7830b`); del servidor solo sigue el protocolo y la resolución del
+> vault. Lo vigente es [[mcp-control]].
+
 Esta nota decide **cómo el MCP encuentra información en el vault**: el modelo de datos, la
 granularidad, el ranking, las herramientas y su formato de respuesta, cuándo se reindexa y
 dónde corre el servidor. Parte de [[MCP de Mycelium - encuadre]], que fija los hechos y las
