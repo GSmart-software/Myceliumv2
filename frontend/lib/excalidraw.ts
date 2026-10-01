@@ -2,6 +2,7 @@ import { resolveWikilink } from "@/lib/editor/wikilink";
 import { useAuthStore } from "@/stores/authStore";
 import { useVaultStore } from "@/stores/vaultStore";
 import type { TreeNota } from "@/stores/vaultStore";
+import { diagnosticarExcalidraw, motivoDeExcepcion } from "@/lib/archivosIlegibles";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5279";
 
@@ -14,6 +15,60 @@ export type ExcalidrawScene = {
   appState?: Record<string, unknown>;
   files?: Record<string, unknown> | null;
 };
+
+/**
+ * El contenido de un `.excalidraw` no se pudo leer (`DEF-119`). `message` es el
+ * motivo, para mostrarlo tal cual en el aviso.
+ */
+export class DibujoIlegible extends Error {}
+
+/** Escena ya restaurada, lista para `initialData`. */
+export type EscenaLeida = ExcalidrawScene & { files: Record<string, unknown> | null };
+
+/** Lo que resulta de leer el contenido de un `.excalidraw`. */
+export type LecturaEscena = { escena: EscenaLeida } | { ilegible: string };
+
+/**
+ * Lee el contenido de un `.excalidraw` y lo pasa por `restoreElements`: lo mismo
+ * que hace Excalidraw con `initialData`, adelantado para enterarse acá si tira.
+ *
+ * Un archivo **vacío** (recién creado) es un dibujo en blanco. Uno que no se
+ * puede leer **no** lo es (`DEF-119`): antes caía en la misma escena vacía, sin
+ * aviso, y lo primero que se dibujara encima se guardaba sobre el original. El
+ * criterio de forma vive en `diagnosticarExcalidraw`; acá se suma el segundo
+ * filtro, `restoreElements`, que todavía puede tirar con algo que tiene la forma
+ * correcta (una flecha sin `points`).
+ */
+export async function leerEscena(contenido: string): Promise<LecturaEscena> {
+  const diagnostico = diagnosticarExcalidraw(contenido);
+  if (diagnostico.estado === "ilegible") return { ilegible: diagnostico.motivo };
+  if (diagnostico.estado === "vacio") return { escena: { elements: [], files: null } };
+  const crudo = JSON.parse(contenido) as {
+    elements: unknown[];
+    appState?: unknown;
+    files?: unknown;
+  };
+  const { restoreElements } = await import("@excalidraw/excalidraw");
+  let elementos: readonly unknown[];
+  try {
+    elementos = restoreElements(crudo.elements as never, null);
+  } catch (e) {
+    return { ilegible: `Excalidraw no pudo reconstruir el dibujo: ${motivoDeExcepcion(e)}` };
+  }
+  return {
+    escena: {
+      elements: elementos,
+      appState:
+        crudo.appState && typeof crudo.appState === "object"
+          ? (crudo.appState as Record<string, unknown>)
+          : undefined,
+      files:
+        crudo.files && typeof crudo.files === "object"
+          ? (crudo.files as Record<string, unknown>)
+          : null,
+    },
+  };
+}
 
 function authHeaders(): Record<string, string> {
   const token = useAuthStore.getState().accessToken;
@@ -36,6 +91,10 @@ export async function loadDiagram(
  * Carga la escena de un archivo .excalidraw del vault (nota tipo 'excalidraw'),
  * cuyo contenido es el JSON de la escena (igual que cualquier nota). Permite
  * embeber `![[archivo.excalidraw]]` apuntando a un archivo independiente.
+ *
+ * Un archivo vacío —recién creado— es una escena vacía; `null` si no se pudo
+ * pedir al servidor, y tira `DibujoIlegible` si llegó pero no es un dibujo
+ * (`DEF-119`).
  */
 export async function loadNotaScene(notaId: string): Promise<ExcalidrawScene | null> {
   const response = await fetch(`${API_URL}/notas/${notaId}/contenido`, {
@@ -44,17 +103,9 @@ export async function loadNotaScene(notaId: string): Promise<ExcalidrawScene | n
   });
   if (!response.ok) return null;
   const data = (await response.json()) as { contenido?: string };
-  if (!data.contenido) return { elements: [] };
-  try {
-    const parsed = JSON.parse(data.contenido);
-    return {
-      elements: parsed.elements ?? [],
-      appState: parsed.appState,
-      files: parsed.files ?? null,
-    };
-  } catch {
-    return { elements: [] };
-  }
+  const lectura = await leerEscena(data.contenido ?? "");
+  if ("ilegible" in lectura) throw new DibujoIlegible(lectura.ilegible);
+  return lectura.escena;
 }
 
 export async function saveDiagram(
@@ -165,9 +216,15 @@ export async function renderExcalidrawInto(
     } else {
       block.appendChild(await sceneToSvg(scene));
     }
-  } catch {
+  } catch (e) {
     block.classList.add("mic-excalidraw-error");
-    block.textContent = `No se pudo cargar el diagrama "${ref}".`;
+    // Un dibujo ilegible (`DEF-119`) ya NO se muestra como «vacío — clic para
+    // dibujar»: eso invitaba a dibujar encima y pisar el original. Se dice qué
+    // pasa; el clic abre el modal, que tampoco deja editarlo.
+    block.textContent =
+      e instanceof DibujoIlegible
+        ? `No se pudo leer el dibujo "${ref}": ${e.message} El archivo no se modificó.`
+        : `No se pudo cargar el diagrama "${ref}".`;
   }
   return targetNotaId;
 }
