@@ -231,6 +231,24 @@ C** antes de registrarlos como `DEF-*`:
 | Esporas | Las **subcarpetas** de la carpeta de Esporas no se listan |
 | Esporas | La numeración de títulos repetidos empieza en **1** (`Reunión 1`) y la spec dice **2** |
 
+## Pasada final en la app (2026-10-01)
+
+Tres vueltas de corrección de las skills, cada una seguida de una evaluación ciega. En la
+app real, con el framework regenerado:
+
+- **Herramientas que viajan con las skills**: los validadores de draw.io, canvas y
+  Excalidraw, el generador `dibujo.mjs` y `consultar.mjs` del calendario corren desde
+  `.claude/skills/…` del vault sin nada del repo. Los 12 archivos de la segunda evaluación
+  pasan sin errores ni avisos.
+- **Recetas nuevas vistas en la app**: el mapa en peine (el radial de 6×3 abre al 47 % en
+  vez del 34 %) y la red con íconos y etiquetas al costado.
+- **Defectos que salieron de la evaluación**, todos arreglados y comprobados en la app:
+  `DEF-119` (dibujo ilegible), `DEF-120` (embeds de homónimos), `DEF-121` (índice sin
+  contenido: la reparación al abrir rehízo el archivo dañado) y `DEF-122` (enlaces de las
+  pestañas restauradas, encontrado en esta pasada).
+
+**Pendiente**: la confirmación del usuario con sus propios pedidos.
+
 ## Relacionadas
 
 - [[ia-framework-vault]] — el framework: qué genera y cómo se versiona.
