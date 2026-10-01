@@ -42,7 +42,7 @@ sin romperlo.
 | `mycelium-excalidraw` | JSON de Excalidraw | flechas **enlazadas** (`startBinding`/`endBinding` y `boundElements` recíprocos), puntos relativos, texto dentro de contenedores (`containerId`), ids y `seed` |
 | `mycelium-base` | YAML | filtros, orden, columnas y vistas que Mycelium soporta; sale de `mycelium-vault` |
 | `mycelium-esporas` | Notas plantilla | variables, dónde viven, cómo crear una; sale de `mycelium-vault` |
-| `mycelium-calendario` | `.mycelium/recordatorios.json` | **leer**: ocurrencias, repeticiones, completados; nunca escribir |
+| `mycelium-calendario` | `.mycelium/recordatorios.json` | **leer** (preferible con `mycelium_recordatorios`; si no, su script): ocurrencias, repeticiones, completados. **Modificar**, solo con las herramientas `mycelium_recordatorio_*` ([[mcp-control]], Parte 2); el archivo, nunca |
 
 `mycelium-vault` queda como referencia de la sintaxis de notas y remite a cada skill;
 `CLAUDE.md` las lista en «Tus herramientas aquí» y actualiza la tabla de «Qué puede haber
@@ -68,7 +68,9 @@ la IA: el usuario tiene que cerrarlos y reabrirlos, y si guarda antes, pisa lo d
 - El framework dice hoy «Mycelium detecta tus cambios en disco y refresca la UI solo»:
   después de esto, será cierto también para estos formatos.
 
-El calendario **no** cambia: es de solo lectura para la IA.
+El calendario **no** se recarga desde disco porque la IA no lo escribe: desde la Parte 2 de
+[[mcp-control]] (2026-10-01) lo modifica **por MCP**, y la app lo cambia en su store como si
+lo hubiera hecho el usuario.
 
 ## Cómo se prueba
 

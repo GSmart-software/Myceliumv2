@@ -325,6 +325,127 @@ sequenceDiagram
 - El **registro de actividad** (§ 2.3) entra en la Parte 2, con la primera herramienta
   que escribe.
 
+## Cómo quedó — Parte 2 (calendario y registro de actividad, 2026-10-01)
+
+Rama `feat/mcp-calendario-desktop`, desde la integración de las partes 0 y 1. Entran las
+cinco herramientas del calendario, el **registro de actividad** en el rail y lo que aprende
+la IA (framework sin cambiar de versión: sigue en `1.7.0`).
+
+### Dónde está cada cosa
+
+| Pieza | Archivo |
+|---|---|
+| Las cinco herramientas: esquema y redacción de las respuestas | `src-tauri/crates/mycelium-mcp/src/herramientas.rs` |
+| Validar argumentos, colores por nombre, ocurrencias de un rango, próxima ocurrencia, texto del efecto, qué se guarda para deshacer (puro) | `frontend/lib/mcpCalendarioLogica.ts` |
+| Las operaciones sobre `recordatoriosStore` y el Deshacer | `frontend/lib/mcpCalendario.ts` |
+| Lo que se agregó al modelo del calendario: `fijarCompletada`, `ocurrenciasDe`, `restaurarRecordatorio`, `normalizarTitulo` | `frontend/lib/recordatorios.ts` · `stores/recordatoriosStore.ts` (`fijarCompletada`, `restaurar`) |
+| El registro: formato del renglón, lectura tolerante, tope, cruce de los deshacer, qué se registra, estado del canal (puro) | `frontend/lib/actividadIa.ts` |
+| El registro: estado, persistencia y estado del canal | `frontend/stores/actividadIaStore.ts` (lo carga y vacía `vaultSessionStore`) |
+| El panel | `components/actividad/ActividadPanel.tsx` + `.module.css`; sección `actividad` en `panelLayoutStore`, `Rail.tsx` y `LeftPanel.tsx` |
+| Qué se registra de cada pedido | `contestar` y `registrar` en `lib/mcpControl.ts` |
+| `actividad.jsonl` en la lista cerrada | `ESTADOS` de `src-tauri/src/prefs_vault.rs` (con test) |
+| Pruebas | `cargo test -p mycelium-vault -p mycelium-mcp` (unitarias del servidor y la punta a punta con un calendario en memoria) · `cargo test --lib prefs_vault` · `node --test scripts/test-mcp-calendario.mjs` (19) · `test-framework-ia.mjs` |
+
+### Decisiones
+
+- **La validación es de la app, no del servidor.** Fechas, horas, colores y repeticiones
+  los valida `lib/mcpCalendarioLogica.ts` con las reglas de `lib/recordatorios.ts`; el
+  servidor solo comprueba que los argumentos sean un objeto. Así las reglas están una sola
+  vez, y lo que falla queda en el registro de actividad. El costo: con Mycelium cerrado, un
+  argumento malo contesta `APP_CERRADA`, no `INVALIDO` (no se puede hacer nada igual).
+- **El efecto lo redacta la app** («Creé «Revisar conclusiones» para el sábado 3 de octubre
+  a las 10:00, color Hifa. Va a avisar.»): es el mismo texto que va al registro. El servidor
+  le agrega el id; el listado sí lo arma el servidor, con los datos estructurados.
+- **«Va a avisar»** se calcula, no se promete: uno de todo el día para hoy creado hoy no
+  avisa hoy (`vigenteDesde`, [[calendario-recordatorios]]) y la respuesta lo dice, igual
+  que una fecha que ya pasó.
+- **`INVALIDO` siempre con el campo** (`` `fecha`: «2026-02-30» no existe en el
+  calendario.``) y en `datos.campo`. Un campo desconocido también es `INVALIDO`: un typo no
+  pasa en silencio. `completar` en un día en que el recordatorio no ocurre dice las
+  ocurrencias vecinas.
+- **`NO_ENCONTRADO` con candidatas por título**, con su id (`Médico — id …`): el agente a
+  veces manda el título en vez del id.
+- **`OCUPADA` mientras carga el calendario**: los recordatorios se cargan sin esperar al
+  abrir el vault, y contestar con un calendario vacío que no es el real sería peor.
+- **Archivo dañado**: si `recordatorios.json` no se pudo leer, la app no lo sobrescribe
+  (`bloqueado`); las herramientas que escriben contestan `INVALIDO` diciendo que el usuario
+  tiene que arreglarlo, en vez de cambiar algo que no se guardaría. No hay un código mejor
+  en la lista cerrada del § 3.1.
+- **Borrar no pregunta**: deja **Deshacer** en el registro, que restaura con el mismo id y
+  el estado de sus ocurrencias. Restaurar fija `vigenteDesde` a ese momento: no avisa lo que
+  venció mientras no estaba.
+- **Deshacer**: crear → borrar; borrar → restaurar; editar → los valores anteriores (pasa
+  por `guardar`, que renueva `vigenteDesde` si cambia cuándo ocurre); completar → el estado
+  anterior (sin Deshacer si no cambió nada). No se puede si lo creado ya no existe o lo
+  borrado ya volvió: se avisa y no se toca nada.
+
+### El registro de actividad
+
+- **Ítem «Actividad de la IA»** (ícono de robot) en el grupo de arriba del rail, después del
+  Calendario. Arriba, el **estado del canal**: *Control apagado* (con **Encender**, que hace
+  lo mismo que el interruptor de Configuración, y un botón a Configuración), *Control
+  encendido* (esperando a Claude Code), *Conectado* («Claude Code habló hace 2 minutos») o
+  *El canal no se abrió* (con el error y **Reintentar**). «Conectado» no es un estado del
+  pipe —el servidor abre una conexión por pedido—: es que hubo un pedido en los últimos
+  10 minutos.
+- **Cada entrada**: la operación, la hora, el efecto, **Ir** (abre la nota, el grafo o el
+  calendario en el día del recordatorio, resaltado) y **Deshacer** donde aplica. Lo que
+  falló o rechazó el usuario lleva un borde rojo y el código; lo deshecho, borde punteado y
+  tachado, sin `opacity` ([[DESIGN_SYSTEM]] § Atenuado).
+- **Qué se registra**: todo lo que pasa por el canal **salvo `estado`** (es la primera llamada
+  de cada sesión y no cambia nada) y **salvo leer el calendario cuando sale bien** (por lo
+  mismo); sus fallos sí. `abrir` se registra sin Deshacer.
+- **El archivo** `.mycelium/actividad.jsonl`: un JSON por renglón con `v`, `id`, `momento`
+  (ISO, UTC), `op`, `resultado` (`hecho`·`fallo`·`rechazado`), `efecto`, y según el caso
+  `codigo`, `objetivo` y `deshacer`. **Append-only en el contenido**: ninguna entrada se
+  cambia; deshacer agrega una entrada `deshacer` con `ref` a la original, y al leer se
+  cruzan. **Tope de 500 renglones**, recortado al escribir. Se escribe entero y atómico
+  por `escribir_estado_vault` (la lista cerrada de `prefs_vault.rs` no tiene un «agregar
+  al final», y con 500 renglones no hace falta). Un renglón que no se entiende se ignora.
+- **Es de este vault**: se carga al abrirlo y se vacía al salir, como el calendario.
+
+### Cómo probarlo en la app
+
+1. `cd frontend && npx tauri dev`, abrir un vault, y en Configuración → Vault encender
+   «Dejar que la IA controle Mycelium» (o desde el panel nuevo: ícono de robot del rail →
+   **Encender**). El panel pasa a «Control encendido».
+2. Regenerar las instrucciones IA (mismo bloque de Configuración): el `CLAUDE.md` trae las
+   cinco herramientas en «Operar Mycelium» y la skill `mycelium-calendario` dice «leer por
+   MCP, modificar solo por MCP».
+3. Sesión **nueva** de Claude Code en el vault. `/mcp` → `mycelium` con **siete**
+   herramientas. Al primer pedido el panel pasa a «Conectado».
+4. «Recordame revisar las conclusiones el viernes a las 10, en Coral» → la IA contesta con
+   el efecto; el recordatorio aparece en el calendario (pestaña y panel) con ese color, y
+   en el registro: «Crear recordatorio» con **Ir** y **Deshacer**. Para ver el aviso, crear
+   uno para dentro de dos minutos: tiene que salir la tarjeta (y la notificación de Windows
+   con la ventana minimizada).
+5. «¿Qué tengo esta semana?» → la IA usa `mycelium_recordatorios` (no el script) y cita
+   las ocurrencias con su hora; no aparece en el registro.
+6. «Cambialo a las 11» / «marcá como hecho el de hoy» / «borralo» → cada uno en el
+   registro con su efecto. **Deshacer** en el borrado → vuelve al calendario con el mismo
+   color, y si tenía ocurrencias completadas, completadas. La entrada queda tachada,
+   «Deshecho a las …».
+7. Errores: «el 30 de febrero» → la IA recibe `INVALIDO` y lo corrige o pregunta; el
+   registro lo muestra con borde rojo. Un color que no existe → la lista de la paleta.
+8. Apagar el control → el panel muestra «Control apagado» con **Encender**; pedirle a la IA
+   que agende algo → contesta que no puede (`MCP_DESACTIVADO`) y **no** escribe
+   `.mycelium/recordatorios.json` (comprobar que el archivo no cambió).
+9. Cerrar y reabrir el vault: el registro sigue ahí (`.mycelium/actividad.jsonl`). Romper
+   un renglón del archivo a mano → los demás siguen apareciendo.
+
+### Límites y lo que queda abierto
+
+- **Sin probar en la app** por quien lo implementó: verificación de tipos, lint, tests de
+  Rust (incluida la punta a punta del binario real contra un calendario falso por el pipe)
+  y 19 tests de la lógica en Node. Lo visible lo confirma el usuario con los pasos de
+  arriba.
+- **Deshacer no mira lo que pasó después**: deshacer una edición después de otra edición
+  vuelve a los valores de **antes de la primera** que se deshace, pisando la segunda. Es lo
+  que hace un Deshacer por entrada; un historial con dependencias no se justificó.
+- **«Ir» a una nota renombrada** avisa que ya no existe (el registro guarda la ruta).
+- **Abierta**: si el registro debería mostrar también lo que hace el usuario en el
+  calendario (hoy solo lo de la IA, como pide § 8.1).
+
 ## Relacionadas
 
 - [[Skill o MCP, segun quien sabe hacerlo]] — por qué esto va por MCP y lo demás por skill.

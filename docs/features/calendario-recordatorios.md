@@ -350,8 +350,33 @@ Verificado: `dotnet build`, `npm ci`, `tsc`, `next build` y los 14 scripts de te
 endpoints, contra el backend local con curl (200, 400, 401, 403 y 413 donde corresponde). **Sin
 probar en el navegador** todavía.
 
+## La IA lo modifica por MCP (desktop, 2026-10-01)
+
+Con la Parte 2 de [[mcp-control]] (`FUN-L-09`), Claude Code **lee y modifica** el
+calendario con cinco herramientas del MCP de control: `mycelium_recordatorios` (las
+ocurrencias de un rango), `mycelium_recordatorio_crear`, `_editar`, `_completar` y
+`_borrar`. Reemplaza el «solo lectura» de la skill `mycelium-calendario`
+([[Skill o MCP, segun quien sabe hacerlo]]): leer, preferible por MCP; modificar, **solo**
+por MCP; escribir `recordatorios.json` a mano, nunca.
+
+- **Mismas reglas que la UI**: las herramientas no tocan el archivo, llaman a
+  `recordatoriosStore` (`guardar`, `eliminar`, y dos nuevas: `fijarCompletada` y
+  `restaurar`). Lo que crea la IA fija `vigenteDesde`, se guarda, aparece en la grilla y
+  avisa a su hora como lo creado desde el formulario. El título se normaliza con
+  `normalizarTitulo` (`lib/recordatorios.ts`), que ahora usa también el formulario.
+- **Colores por nombre** (Hifa…Bruma, sin distinguir mayúsculas ni tildes), sacados de
+  `COLORES`.
+- **Borrar no pregunta** por MCP, a diferencia del botón Eliminar: queda en el **registro de
+  actividad** del rail con **Deshacer**, que lo restaura con el mismo id y el estado de sus
+  ocurrencias (completadas incluidas).
+- Con el archivo **dañado** (`bloqueado`), las herramientas que escriben contestan
+  `INVALIDO` en vez de cambiar algo que no se va a guardar.
+
+Detalle, decisiones y cómo probarlo: [[mcp-control]] § «Cómo quedó — Parte 2».
+
 ## Relacionadas
 
+- [[mcp-control]] — el MCP de control: el calendario por MCP y el registro de actividad.
 - [[BACKLOG]] — `FUN-L-22`, y `FUN-M-07` (nota diaria), que es otra cosa.
 - [[avisos-y-confirmaciones]] — los avisos efímeros y `DialogoConfirmar`.
 - [[preferencias-por-vault]] — `.mycelium/` como el lugar de lo que es del vault.
