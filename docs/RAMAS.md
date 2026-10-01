@@ -127,6 +127,37 @@ entre ramas):
     de Excalidraw, a mano. En web no hay recarga desde disco, así que no hace falta
     omitir el re-encuadre en ella.
 
+- **Corrector ortográfico con motor propio (`FUN-L-12`)**, 2026-09-30, rama
+  `feat/corrector-web`. Reemplaza al corrector del navegador (`7b419c4`). Reflejo de los
+  commits de desktop `2357359`, `fea8b6c`, `ffc87f2`, `fe4e544`, `71e20ad`, `a769d3e`
+  (`a7e6eb6` y `740fc90` son Rust/operación: no se reflejan; la descarga la hace el
+  navegador).
+  - **Idénticos a desktop** (traídos enteros): `public/ortografia/motor.wasm`,
+    `wasm/ortografia/*`, `scripts/wasm-ortografia.mjs`, `lib/ortografia/{motor,
+    corrector.worker,corrector,palabras,manifiesto}.ts`, `lib/editor/ortografia.ts`,
+    `lib/editor/ortografiaExclusiones.ts`, `components/editor/MenuOrtografia.tsx`,
+    `DiccionariosCorrector.module.css`, `ContextMenu.tsx` (+ CSS, `separadorAntes`) y
+    `styles/tokens.css`. `scripts/test-ortografia.mjs` solo difiere en un comentario.
+  - **Divergen**: `lib/ortografia/diccionarios.ts` (la capa de datos: `fetch` a R2 →
+    `DecompressionStream('gzip')` → `sha256` con `crypto.subtle` → **Cache API** por URL
+    versionada, con un registro sintético por variante escrito al final; configuración en
+    `localStorage` (`mycelium:corrector`); avisos entre pestañas por `BroadcastChannel`;
+    personales al backend), `lib/ortografia/idioma.ts` (primero `navigator.languages`,
+    `Intl` de *fallback*) y los textos de `DiccionariosCorrector.tsx` (dónde se guarda
+    cada cosa). `EditorSection.tsx`, `NoteEditor.tsx`, `preferencesStore.ts`,
+    `editor.css` y `.gitignore` recibieron el cambio con parche de tres vías.
+  - **Backend**: tablas `diccionario_vault` y `diccionario_usuario` (texto, una palabra
+    por renglón) y `Features/Vaults/DiccionarioEndpoints.cs`: `GET/PUT
+    /vaults/{id}/diccionario` (mismos permisos que los recordatorios) y `GET/PUT
+    /auth/diccionario` (del usuario). En producción hay que volver a ejecutar
+    `backend/migrations/d1/schema.sql` (es idempotente).
+  - **WASM en el export**: `next build` copia `public/ortografia/motor.wasm` a
+    `out/ortografia/motor.wasm` (328 KB); el worker lo pide por `fetch` y lo instancia
+    desde los bytes, así que no depende del `Content-Type` del servidor. El worker es un
+    chunk de Turbopack como el del grafo.
+  - **R2 necesita CORS** para el origen de la web (GET del manifiesto, los `.gz` y las
+    licencias); sin eso, Configuración dice que no pudo consultar la lista.
+
 ### Artefactos solo-web (no existen en `desktop-tauri`)
 
 `desktop-tauri` se limpió de todo lo ajeno al escritorio; esto vive **solo en
