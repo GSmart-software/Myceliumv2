@@ -247,7 +247,10 @@ app real, con el framework regenerado:
   contenido: la reparación al abrir rehízo el archivo dañado) y `DEF-122` (enlaces de las
   pestañas restauradas, encontrado en esta pasada).
 
-**Pendiente**: la confirmación del usuario con sus propios pedidos.
+> [!success] Finalizada el 2026-10-01
+> El usuario la dio por terminada sin probarla él mismo: «confío en tu trabajo, podemos dar
+> FUN-L-26 como finalizada». Sale con la próxima versión de desktop, que por ahora no se
+> publica (el usuario trabaja en otra cosa en paralelo). Framework de IA `1.7.0`.
 
 ## Relacionadas
 
