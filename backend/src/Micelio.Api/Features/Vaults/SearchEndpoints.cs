@@ -266,8 +266,10 @@ public static partial class SearchEndpoints
         CancellationToken ct)
     {
         // Títulos duplicados son posibles (p. ej. varias "Sin título"): el
-        // enlace se resuelve con la MISMA regla que el clic del editor —pista de
-        // carpeta, sin extensión, empate a la ruta más corta— (`FUN-M-40`, D8).
+        // enlace se resuelve con la MISMA regla que el clic del editor —tipo por
+        // la extensión, pista de carpeta, la nota markdown antes que sus
+        // homónimas, empate a la ruta más corta— (`FUN-M-40`, D8; `DEF-120`).
+        // `GetTreeAsync` trae el `tipo` de cada nota, que es lo que lo permite.
         var resolutor = new ResolutorWikilinks(notas, carpetas);
         var titulosPorId = new Dictionary<string, string>();
         foreach (var n in notas)
