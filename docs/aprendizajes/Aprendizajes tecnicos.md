@@ -98,6 +98,31 @@ y qué principio general dejó.
     archivos de ese tipo, sin extensión gana el `.md` (como Obsidian), y una pista que no
     calza no resuelve. **Un filtro aplicado al resultado de otro que ya eligió no corrige la
     elección: la descarta.**
+11. **La marca de «hecho» se escribe al final.** Un `.drawio` escrito por una IA desde la
+    terminal se abría en blanco, también tras recargar (`DEF-121`): su fila de `notas`
+    estaba, la de `contenidos` y la de búsqueda no. El indexador escribe cada tanda en
+    varias sentencias **sueltas** —el pool de `tauri-plugin-sql` no garantiza que un
+    `BEGIN … COMMIT` caiga en una sola conexión, ver [[Rendimiento de la apertura del vault]]—
+    y la primera era la de `notas`, **con el `mtime` del archivo**, que es justo lo que el
+    indexado incremental compara para saltear una nota. La secuencia: el watcher ve el
+    archivo nuevo → `INSERT INTO notas` con `mtime` al día → algo corta la tanda antes de
+    `INSERT INTO contenidos` (una sentencia que falla con el índice ocupado —el log de esa
+    sesión tiene un `INSERT` de una sola fila tardando 1,5 s—, o la ventana que se recarga
+    a mitad del indexado) → todo indexado posterior ve el `mtime` igual y no la relee
+    **nunca más**; `getContenido` devolvía `""` y la vista lo tomaba por un diagrama nuevo.
+    No fue la huella de `FUN-M-38` ni una ráfaga borrar+crear: la nota nunca pasó por
+    `putContenido` (su `creado_en` = `actualizado_en`, el del indexado) y la limpieza
+    habría borrado también la fila de `notas`. El arreglo tiene tres capas: la fila de
+    `notas` entra con `mtime` 0 (o el viejo) y el `mtime` real y las huellas van en la
+    **última** sentencia de la tanda; cada indexado relee además las notas sin
+    `contenidos` o sin fila de búsqueda aunque el `mtime` coincida (repara los índices ya
+    dañados); y `getContenido`, si falta la fila, lee el disco y la repone en vez de
+    devolver vacío. Mirar el índice real dejó otro hallazgo: en un vault del usuario, 32
+    notas tenían su fila de búsqueda sin anotar en `fts_filas` y 5 anotaciones apuntaban a
+    filas que ya no existían — lo que deja alternar la 2.1.0 y una versión de desarrollo
+    sobre el mismo índice; la reparación las limpia (`ftsBorrarHuerfanas`) antes de
+    reescribirlas. **Sin transacción, cada sentencia tiene que dejar el índice en un
+    estado del que el siguiente indexado sepa salir; y «la fila no está» no es «vacío».**
 
 ## Relacionadas
 
