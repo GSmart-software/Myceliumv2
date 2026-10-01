@@ -100,6 +100,32 @@ entre ramas):
     desktop.
   - `DEF-102`/`DEF-089` (código dentro de bloques) ya estaban en web desde el
     2026-09-25 (`18a2c58`, `5ee9fb3`): no se tocaron.
+- **Reflejo a web del 2026-09-30** (`DEF-120`, `DEF-119`, encuadre de `FUN-L-26`), rama
+  `fix/reflejo-def119-def120-web`.
+  - **`DEF-120`** (web `2c3142e`, desktop `50696cf`): el tipo de archivo y la carpeta
+    deciden el destino de un enlace. `lib/wikilinks.ts` sigue **idéntico** a desktop
+    (traído con parche, aplicó limpio). `lib/extensionesDeTipo.ts` recibe
+    `tipoDeExtension` a mano (web no tiene el tipo `drawio`). `lib/excalidraw.ts`:
+    `resolveExcalidrawTarget` le devuelve la extensión al ref. `scripts/test-wikilinks.mjs`
+    trae los casos de homónimos de distinto tipo **sin** `.drawio` y sin la prueba de la
+    tabla `enlaces` (solo-desktop). **Backend**: `ResolutorWikilinks.cs` guarda el `tipo`
+    de cada nota (`GetTreeAsync` ya lo traía) y aplica las **mismas cinco reglas** que el
+    cliente; `SearchEndpoints` no cambió de lógica. El backend no tiene proyecto de tests:
+    se verificó con un programa de prueba descartable con los mismos casos.
+    `lib/db/enlacesIndice.ts` y `test-enlaces-nota.mjs` no existen en web.
+  - **`DEF-119`** (web `7e01a53`, desktop `139f4b6`), **solo Excalidraw** (draw.io es
+    solo-desktop). Nuevos: `lib/archivosIlegibles.ts` y su test **sin la mitad de draw.io**,
+    `components/editor/ArchivoIlegible.tsx` (+ CSS). El aviso de web **diverge**: recibe el
+    `nombre` (en web el id es un UUID, no una ruta) y solo tiene «Reintentar» —no hay visor
+    de texto (`FUN-L-11`) ni watcher que lo recupere solo—. `ExcalidrawFileEditor.tsx` y
+    `ExcalidrawModal.tsx` se adaptaron a mano: un dibujo ilegible o un fallo al pedir el
+    contenido no monta el editor ni guarda; el modal conserva el diagrama legado bajo la
+    nota (`notaId`+`diagId`), que sigue como estaba.
+  - **Encuadre al abrir (`FUN-L-26`)** (web `463b2d2`, desktop `4e61ac4`): `lib/canvas.ts`,
+    `scripts/test-canvas.mjs` y `CanvasView.tsx` con parche de tres vías, limpio;
+    `encuadrarDibujo`/`hayAlgoDibujado` en `lib/excalidraw.ts` y su uso en las dos vistas
+    de Excalidraw, a mano. En web no hay recarga desde disco, así que no hace falta
+    omitir el re-encuadre en ella.
 
 ### Artefactos solo-web (no existen en `desktop-tauri`)
 
