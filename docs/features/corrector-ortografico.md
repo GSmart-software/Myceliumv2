@@ -160,6 +160,16 @@ diccionarios/
 
 ### Web
 
+> [!info] Reflejado a web el 2026-09-30 (`8a4c2d1`, `bc9d5f2`; merge `79f8b8d`), sin probar en la app
+> Motor, worker, menú y Configuración son idénticos a desktop. Diverge `lib/ortografia/diccionarios.ts`:
+> el navegador baja de R2, descomprime con `DecompressionStream`, verifica el sha256 y guarda en
+> la Cache API (`mycelium-diccionarios-v1`) con un registro que se escribe al final; la
+> configuración va a `localStorage` y las pestañas se avisan por `BroadcastChannel`. Backend:
+> tablas `diccionario_vault` y `diccionario_usuario` (D1) y `GET/PUT /vaults/{id}/diccionario` y
+> `/auth/diccionario`. **Falta, del lado del usuario**: aplicar el esquema en D1 de producción
+> (`wrangler d1 execute micelio-prod --remote --file=backend/migrations/d1/schema.sql`) y la
+> política de **CORS** del bucket de R2 para el origen de la app web (`GET`/`HEAD`).
+
 - La descarga la hace el navegador (`fetch` a R2, con CORS) y los guarda en la **Cache API**
   por URL versionada.
 - **Diccionario del vault**: en el backend, como los recordatorios —un documento por vault,
