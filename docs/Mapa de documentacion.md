@@ -55,6 +55,8 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
   modo de desktop; el modo sin carpeta era inalcanzable y costaba una rama por función.
 - [[Los temas los define Mycelium, no el usuario]] — por qué no hay creador de temas, y
   qué queda aprendido para los estilos que sí se agreguen.
+- [[Skill o MCP, segun quien sabe hacerlo]] — 2026-10-01: lo que es contenido va por skill;
+  lo que tiene reglas o estado de la app (calendario, diccionario, renombrar), por MCP.
 
 ## Procesos
 
@@ -117,6 +119,8 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
   línea en la consola de F12, por una fachada única con tres niveles (`FUN-L-21`).
 - [[calendario-recordatorios]] — un calendario de recordatorios que avisan, del vault y sin
   archivos (`FUN-L-22`).
+- [[mcp-control]] — el MCP de control: la IA abre cosas en pantalla, maneja el calendario,
+  renombra sin romper enlaces y usa la papelera y el diccionario (`FUN-L-09`).
 - [[corrector-ortografico]] — el corrector del sistema en el editor, con el código y los enlaces
   excluidos (`FUN-L-12`).
 - [[auditoria-rendimiento-1]] — tanda 1 de la auditoría: guardar sin reindexar, indexado

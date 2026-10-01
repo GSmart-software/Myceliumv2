@@ -21,8 +21,8 @@ editar a mano», y el calendario no aparece.
 |---|---|
 | Formato | **Una skill por herramienta**, cada una con el formato, la geometría y recetas |
 | Herramientas | `.drawio`, `.canvas`, `.base`, `.excalidraw`, Esporas y el calendario |
-| Calendario | **Solo lectura**: la IA consulta qué hay agendado; no crea ni edita recordatorios |
-| Diccionarios del corrector | Fuera de alcance |
+| Calendario | ~~**Solo lectura**: la IA consulta qué hay agendado; no crea ni edita recordatorios~~ → **reemplazada el 2026-10-01**: lo lee (preferible por MCP) y lo **modifica solo por MCP** ([[Skill o MCP, segun quien sabe hacerlo]]) |
+| Diccionarios del corrector | ~~Fuera de alcance~~ → **reemplazada el 2026-10-01**: el del vault, **por MCP** |
 | Cómo se prueba | **Evaluación ciega**: un agente que solo lee la skill genera archivos reales a partir de pedidos; se abren en Mycelium con Playwright, se capturan y se verifican flechas, superposiciones y texto; la skill se corrige hasta que salgan bien. El usuario confirma al final con sus propios pedidos |
 
 ## Las skills
@@ -51,6 +51,9 @@ en el vault»: `.drawio` y `.excalidraw` pasan a **editables con su skill**.
 > [!important] Excepción a «No toques `.mycelium/`»
 > El calendario vive en `.mycelium/recordatorios.json`. La regla dura se amplía: **leer**
 > ese archivo está permitido; escribir en `.mycelium/`, no.
+>
+> Desde el 2026-10-01 hay un camino para **modificarlo**: las herramientas del MCP
+> ([[mcp-control]]). Escribir el archivo a mano sigue prohibido.
 
 ## Lo que la app tiene que hacer
 
