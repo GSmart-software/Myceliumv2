@@ -439,12 +439,176 @@ la IA (framework sin cambiar de versión: sigue en `1.7.0`).
   Rust (incluida la punta a punta del binario real contra un calendario falso por el pipe)
   y 19 tests de la lógica en Node. Lo visible lo confirma el usuario con los pasos de
   arriba.
-- **Deshacer no mira lo que pasó después**: deshacer una edición después de otra edición
-  vuelve a los valores de **antes de la primera** que se deshace, pisando la segunda. Es lo
-  que hace un Deshacer por entrada; un historial con dependencias no se justificó.
+- ~~**Deshacer no mira lo que pasó después**~~ — **corregido en la Parte 3**: deshacer una
+  edición después de otra edición volvía a los valores de antes de la primera y pisaba la
+  segunda. Ahora cada deshacer guarda también cómo lo dejó la operación y solo se aplica si
+  sigue así; si no, el botón queda deshabilitado con el motivo («cambió después»). Ver
+  «Cómo quedó — Parte 3».
 - **«Ir» a una nota renombrada** avisa que ya no existe (el registro guarda la ruta).
 - **Abierta**: si el registro debería mostrar también lo que hace el usuario en el
   calendario (hoy solo lo de la IA, como pide § 8.1).
+
+## Cómo quedó — Parte 3 (archivos, confirmación y hook, 2026-10-01)
+
+Rama `feat/mcp-archivos-desktop`, desde la integración de las partes 0–2 (`cef65a3`).
+Entran `mycelium_renombrar`, `mycelium_mover`, `mycelium_borrar` y `mycelium_papelera`,
+la **confirmación por alcance**, el **hook** de `mv`/`rm` y, en un commit aparte, la
+corrección del Deshacer de la Parte 2. El framework sigue en `1.7.0`.
+
+### Dónde está cada cosa
+
+| Pieza | Archivo |
+|---|---|
+| Las cuatro herramientas: esquema, la espera de una confirmación (`pedir_con_permiso`) y la redacción | `src-tauri/crates/mycelium-mcp/src/herramientas.rs` |
+| Los plazos de la confirmación (`ESPERA_CONFIRMACION`, `INTERVALO_CONFIRMACION`) | `src-tauri/crates/mycelium-vault/src/canal.rs` |
+| Validar argumentos y nombres, resolver nota o carpeta, el destino, el alcance (`UMBRAL_CONFIRMAR = 5`), la pregunta, el efecto, qué se guarda para deshacer y si todavía se puede, la papelera (puro) | `frontend/lib/mcpArchivosLogica.ts` |
+| Las operaciones sobre `vaultStore` y la papelera, el Deshacer | `frontend/lib/mcpArchivos.ts` |
+| La reparación de enlaces, **compartida con la UI** | `frontend/lib/repararEnlaces.ts` · `reescribirEnlacesMovidos` en `lib/enlaces.ts` · `retroenlaces` en `lib/db/grafo.ts` · `vaultStore.renameNota/renameCarpeta/moveNota/moveCarpeta` |
+| Las confirmaciones de la IA: pedir, consultar, retirar | «Confirmaciones» en `frontend/lib/mcpControl.ts` · `confirmarIa`/`retirarConfirmacion` en `lib/confirmar.ts` · la cola en `stores/confirmarStore.ts` · el rótulo en `components/workspace/DialogoConfirmar.tsx` |
+| El Deshacer del registro, para calendario y archivos | `frontend/lib/deshacerIa.ts` · `components/actividad/ActividadPanel.tsx` |
+| El hook: el script (fuente de verdad), su fusión con `settings.json`, la instalación | `frontend/scripts/hook-mv-rm.mjs` (viaja como `HOOK_MV_RM` por `scripts/generar-skills-ia.mjs`) · `lib/ia/hookMvRm.ts` · `asegurarHook`/`quitarHook`/`asegurarIntegracion` en `lib/mcpControl.ts` · `mcp_config_borrar` (lista cerrada) en `src-tauri/src/control.rs` · preferencia `settingsCreado` |
+| Lo que aprende la IA | Regla dura 2, «Operar Mycelium» y las precauciones de las skills en `lib/ia/framework.ts` |
+| Pruebas | `cargo test -p mycelium-vault -p mycelium-mcp` (`tests_archivos` y `los_archivos_de_punta_a_punta`) · `cargo test --lib control` · `node --test scripts/test-mcp-archivos.mjs` (18) · `test-enlaces.mjs` · `test-framework-ia.mjs` · `test-mcp-calendario.mjs` |
+
+### Decisiones
+
+- **El mismo código que la UI, y la UI mejoró de paso.** Renombrar y mover pasan por
+  `vaultStore`, y la reparación se separó a `lib/repararEnlaces.ts`. Al hacerlo apareció
+  que la app solo reparaba los enlaces **por título** al renombrar una nota: los que
+  llevan pista de carpeta (`[[Proyectos/Plan]]`) quedaban rotos al renombrar, al mover y
+  al renombrar o mover una carpeta. Ahora se reparan en todos esos casos, también cuando
+  los hace el usuario ([[titulo-renombra]] § 6.1). Un enlace por título no se toca al
+  mover: sigue resolviendo.
+- **Objetivo**: una nota por ruta o título, con la resolución de `mycelium_abrir`
+  (`AMBIGUO` con las rutas). Una carpeta por ruta o por nombre si es la única; con `/` al
+  final se fuerza carpeta; una nota y una carpeta homónimas son `AMBIGUO`. El grafo, el
+  calendario y los archivos que no se indexan (PDF, imágenes) son `INVALIDO`: no tienen
+  enlaces que reparar y la papelera de Mycelium es de notas.
+- **Nombre**: lo valida `motivoNombreInvalido`, el mismo del título editable (rechaza, no
+  corrige). La extensión de la nota escrita en el nombre se quita (`Plan 2026.md` →
+  `Plan 2026`). Mismo nombre → `INVALIDO` («ya se llama así»). Destino ocupado (sin
+  distinguir mayúsculas) → `INVALIDO` con la ruta: renombrar no pisa ni numera.
+- **Mover no crea carpetas**: el destino tiene que existir, o `NO_ENCONTRADO` con las
+  parecidas. Crearla sobre la marcha convertiría un typo en una carpeta nueva con la nota
+  perdida adentro.
+- **`CAMBIOS_SIN_GUARDAR`** si la nota, cualquier nota de la carpeta o cualquiera de las
+  que habría que reescribir tiene un borrador (`syncStore`: `local`, `syncing`, `error`).
+  Mycelium guarda solo en segundos; la IA espera y repite.
+- **El alcance se mide en seco** con el mismo código que repara (`repararEntrantes` con
+  `simular`): cuántas notas **cambiarían de verdad**, no cuántas enlazan.
+- **Una confirmación de punta a punta.** Una persona tarda más que los 10 s del canal, así
+  que la operación **no espera dentro del pedido**: la app muestra la pregunta y contesta
+  enseguida `{esperando_confirmacion: {id}}`; el servidor consulta `confirmacion({id})`
+  cada 500 ms (cada consulta contesta al instante) y, a los **2 minutos**, pide
+  `confirmacion_retirar`: la pregunta sale de la pantalla y cuenta como «no» —`RECHAZADO`,
+  «no contestó»—. Para el agente es **una sola llamada**. Alternativas descartadas: un
+  plazo más largo del canal para ciertas operaciones (dejaría el turno de la ventana
+  tomado mientras el usuario piensa: ni `mycelium_estado` contestaría) o una herramienta
+  aparte para consultar (el agente tendría que acordarse de llamarla).
+- **La operación confirmada se registra cuando el usuario contesta** (hecha, fallida o
+  rechazada), no al preguntar. Al aceptar, la operación **se vuelve a validar** desde cero
+  (el vault puede haber cambiado mientras esperaba) pero no vuelve a preguntar.
+- **La cola de confirmaciones.** Se comprobó lo que señalaba el diseño: `confirmarStore`
+  resolvía con `false` la pregunta pendiente al llegar otra. Ahora es una cola: entre
+  preguntas del usuario sigue igual (la nueva reemplaza a la anterior), una de la IA se
+  encola **detrás** de las del usuario y nunca las cancela, y si el usuario provoca una
+  con la de la IA en pantalla, la suya pasa adelante ([[avisos-y-confirmaciones]]). Sin
+  interfaz montada, la IA recibe `RECHAZADO` enseguida: ante la duda, no se hace.
+- **Borrar una nota no pregunta**: cierra sus pestañas (y su historial, como el
+  explorador), la manda a la papelera y muestra el mismo aviso con **Deshacer** que el
+  explorador («Claude Code mandó «X» a la papelera»). **Borrar una carpeta pregunta
+  siempre**, con cuántas notas manda a la papelera.
+- **Restaurar en su lugar**: si la carpeta de una nota ya no existe (se borró la carpeta
+  entera), se **recrea** antes de restaurar; sin eso `recuperarNota` la deja en la raíz.
+  El `id` de `mycelium_papelera` es la ruta original de la nota; la ruta de una carpeta
+  borrada restaura todas sus notas. Si el lugar está ocupado, `INVALIDO`.
+- **Deshacer** (registro de actividad): renombrar → renombrar de vuelta, reparando otra
+  vez; mover → mover de vuelta; borrar → restaurar de la papelera (recreando carpetas);
+  restaurar una nota → mandarla otra vez a la papelera. Restaurar una carpeta no tiene
+  Deshacer. «Ir» abre la nota, despliega la carpeta en el explorador o abre la papelera.
+- **El defecto del Deshacer de la Parte 2** (commit aparte). Causa raíz: lo guardado para
+  deshacer era solo el estado de **antes**, y `puedeDeshacer` solo miraba que el objeto
+  existiera. Ahora cada deshacer guarda **cómo lo dejó** la operación (`despues` en crear
+  y editar; lo que fijó un completar; la ruta en que quedó un archivo) y solo se aplica si
+  sigue así. Si no, el botón queda **deshabilitado** con «No se puede deshacer: cambió
+  después» (también como texto bajo la entrada). Para el calendario se comparan los campos
+  que cambia el usuario, no `vigenteDesde`. Los renglones viejos, sin `despues`, se
+  deshacen como antes. No lleva `DEF-*`: la Parte 2 no está consolidada.
+- **El hook**: `PreToolUse` con `matcher` `Bash|PowerShell` y `node
+  "$CLAUDE_PROJECT_DIR/.claude/hooks/mycelium-mv-rm.mjs"`. Si un comando hace `mv`, `rm`,
+  `git mv`/`git rm` o sus pares de PowerShell sobre **notas o carpetas del vault**
+  (no lo que empieza con punto, ni `node_modules`, ni lo que no se indexa) y el control
+  está encendido (lo lee de `preferencias.json` en cada llamada), contesta `deny` con el
+  motivo: qué herramienta usar. **No es un bloqueo duro**: si el MCP no está o no
+  responde, la IA repite el comando con `MYCELIUM_SIN_MCP=1` delante y pasa —y entonces
+  los enlaces los arregla ella—. Un bloqueo sin salida dejaría a la IA sin forma de mover
+  nada con la app cerrada.
+- **El hook se instala como el `.mcp.json`**: solo con el control encendido (al
+  encenderlo, al abrir el vault y al regenerar el framework), y se quita al apagarlo. En
+  `.claude/settings.json` se **fusiona**: se agrega o reemplaza solo nuestra entrada
+  (reconocida por la ruta del script), sin tocar los permisos ni los hooks del usuario;
+  un archivo que no es JSON no se toca y se avisa. El archivo se borra al apagar solo si
+  quedó vacío **y** lo había creado Mycelium (`settingsCreado`). El script lleva la marca
+  `<!-- mycelium-ia v…` y se reescribe; si en su ruta hay un archivo del usuario, no se
+  pisa ni se registra el hook. `mcp_config_borrar` pasó a una **lista cerrada** de tres
+  archivos.
+
+### Cómo probarlo en la app
+
+1. `cd frontend && npx tauri dev`, abrir un vault con el control encendido (o encenderlo:
+   Configuración → Vault). Comprobar que aparecen `.claude/hooks/mycelium-mv-rm.mjs` y
+   `.claude/settings.json` con la entrada `PreToolUse` (si ya había un `settings.json`
+   con otras cosas, siguen ahí). Regenerar las instrucciones IA: la regla dura 2 dice
+   «Para renombrar o mover, usá la herramienta».
+2. Sesión **nueva** de Claude Code en el vault: `/mcp` → `mycelium` con **once**
+   herramientas.
+3. Una nota `Plan` enlazada desde dos o tres notas (una con `[[Carpeta/Plan]]`):
+   «renombrá Plan a Plan 2026» → no pregunta; la respuesta dice en qué notas reparó los
+   enlaces; abrirlas: los enlaces andan (también el de pista). En el registro de actividad:
+   «Renombrar» con **Ir** y **Deshacer**.
+4. **Deshacer** → vuelve a llamarse `Plan` y los enlaces otra vez a `Plan`. Renombrarla a
+   mano después de una operación de la IA → el Deshacer de esa entrada queda
+   deshabilitado, «cambió después».
+5. Una nota enlazada desde **seis o más** notas: «renombrala» → aparece el diálogo
+   «Lo pide Claude Code… reescribe enlaces en N notas: …», con el foco en Cancelar.
+   **Cancelar** → la IA recibe `RECHAZADO` y no insiste; el registro lo muestra en rojo.
+   Repetir y **Renombrar** → se hace. Dejarlo sin contestar 2 minutos → la pregunta
+   desaparece y la IA recibe `RECHAZADO` («no contestó»).
+6. Con una pregunta de la IA en pantalla, borrar una carpeta desde el explorador → la
+   pregunta del usuario pasa adelante; al contestarla, vuelve la de la IA. (Al revés:
+   con la del usuario en pantalla, la de la IA espera.)
+7. «Mové Plan a Archivo» (carpeta existente) → se mueve, `[[Carpeta/Plan]]` pasa a
+   `[[Archivo/Plan]]`. A una carpeta que no existe → `NO_ENCONTRADO` con las parecidas.
+8. «Borrá Plan» → se cierra su pestaña, aviso «Claude Code mandó «Plan» a la papelera»
+   con Deshacer, y la IA dice con qué id se restaura. «Borrá la carpeta X» → pregunta
+   siempre. «¿Qué hay en la papelera?» / «restaurá la carpeta X» → vuelve con sus
+   carpetas.
+9. Escribir en una nota y, enseguida, pedir que la renombre → `CAMBIOS_SIN_GUARDAR`.
+10. Pedirle a la IA que haga `mv` de una nota por terminal → el hook la frena y le dice qué
+    herramienta usar. Cerrar Mycelium y pedir lo mismo → las herramientas contestan
+    `APP_CERRADA`, la IA repite con `MYCELIUM_SIN_MCP=1 mv …` y arregla los enlaces ella.
+11. Apagar el control → desaparece la entrada del hook de `settings.json` (el archivo
+    entero si lo había creado Mycelium) y el script.
+
+### Límites y lo que queda abierto
+
+- **Sin probar en la app** por quien lo implementó: tipos, lint, tests de Rust (la punta a
+  punta del binario real con un vault falso que acepta una confirmación y rechaza otra, y
+  la espera que vence y retira) y tests de Node (lógica pura, la cola de confirmaciones,
+  el hook y su fusión). El hook se corrió como proceso con un JSON de Claude Code de
+  mentira. Lo visible lo confirma el usuario con los pasos de arriba.
+- **El hook depende de `node`** en el `PATH` de la sesión de Claude Code (como los
+  validadores de las skills). Sin `node`, el hook falla como «error no bloqueante» y el
+  comando pasa. Y su análisis del comando es simple a propósito —no es un shell—: una
+  variable o una sustitución (`mv $X …`) no se ve.
+- **El contador por sesión** del diseño de septiembre (§ 3.3: pasadas `M` escrituras sin
+  intervención, preguntar) **no entró**: el umbral por alcance cubre el caso de un
+  renombrado masivo, y el registro deja ver y deshacer lo demás. El umbral (5) y la
+  espera (2 min) son fijos, no preferencias.
+- **Los lienzos**: una tarjeta de nota de un `.canvas` guarda la ruta del archivo, no un
+  `[[enlace]]`; mover la nota no la actualiza (tampoco desde la UI). Igual que antes.
+- **Restaurar una carpeta** no tiene Deshacer en el registro, y las subcarpetas vacías de
+  una carpeta borrada no vuelven (la papelera guarda notas).
 
 ## Relacionadas
 
@@ -452,3 +616,5 @@ la IA (framework sin cambiar de versión: sigue en `1.7.0`).
 - [[MCP de Mycelium - control]] — el diseño completo de septiembre (canal, seguridad, errores).
 - [[calendario-recordatorios]] · [[corrector-ortografico]] · [[ia-skills-herramientas]] ·
   [[ia-framework-vault]].
+- [[titulo-renombra]] — la reparación de enlaces que comparten la UI y `mycelium_renombrar`.
+- [[avisos-y-confirmaciones]] — la cola de confirmaciones que pide la Parte 3.

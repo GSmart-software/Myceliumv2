@@ -27,6 +27,16 @@ Ahora:
 > diálogos de Tauri: deja la pregunta en `confirmarStore` y espera la respuesta. Si no hay
 > interfaz montada devuelve `false` — ante la duda, no se ejecuta lo destructivo.
 
+> [!important] Desde el MCP de control, una **cola** (`FUN-L-09`, 2026-10-01)
+> Hasta la Parte 3 había una sola pregunta pendiente y **una nueva cancelaba la anterior**
+> (su acción destructiva no se ejecutaba). Con la IA preguntando eso dejaba sin hacer el
+> borrado del usuario sin explicación. Ahora `confirmarStore` es una cola: entre preguntas
+> del usuario la nueva sigue reemplazando a la anterior, pero una pregunta **de la IA**
+> (`confirmarIa`) se encola **detrás** de las del usuario, nunca las cancela, y si el
+> usuario provoca una mientras la de la IA está en pantalla, la suya pasa adelante. El
+> diálogo rotula las de la IA («Lo pide Claude Code») y se vuelve a montar con el foco en
+> «Cancelar» para cada pregunta. Detalle en [[mcp-control]] § «Cómo quedó — Parte 3».
+
 ## Avisos
 
 `avisar(texto, { etiqueta, hacer })` (en `stores/avisosStore.ts`) pone una tarjeta abajo a
@@ -70,4 +80,5 @@ la pregunta la dibuja Mycelium en las dos y el archivo es uno solo. Ver [[RAMAS]
 
 ## Relacionadas
 
-[[Rediseñar la UI con impeccable]] · [[marco-de-ventana]] · [[configuracion]] · [[BACKLOG]]
+[[Rediseñar la UI con impeccable]] · [[marco-de-ventana]] · [[configuracion]] · [[BACKLOG]] ·
+[[mcp-control]]
