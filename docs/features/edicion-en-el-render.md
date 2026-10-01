@@ -10,11 +10,11 @@ columnas— sin pasar por la vista en crudo.
 > puro y el comportamiento es idéntico.
 >
 > - **Parte 1 (propiedades, `FUN-M-19`): confirmada en la app** por el usuario el 2026-08-16.
->   Reflejo a `web-cloud` pendiente.
-> - **Parte 2 (tablas, `FUN-L-19`): implementada en `desktop-tauri`** el 2026-08-16,
->   **sin confirmar en la app**. `scripts/test-tablas.mjs` (30 tests), `tsc` y `next build`
->   en verde; el comportamiento lo confirma el usuario con la lista del § 7. Reflejo a
->   `web-cloud` pendiente.
+>   Reflejada a `web-cloud` el 2026-08-17 (`06219cf`).
+> - **Parte 2 (tablas, `FUN-L-19`): implementada en `desktop-tauri`** el 2026-08-16
+>   (`scripts/test-tablas.mjs`, 30 tests, `tsc` y `next build` en verde) y **confirmada en la
+>   app** por el usuario el 2026-08-17. Reflejada a `web-cloud` el 2026-08-17 (`06219cf`),
+>   junto con la parte 1.
 >
 > Las dos salen juntas en la **[[Version 1.6.2]]**, y como **patch**: el usuario las
 > clasificó como ajuste de algo que ya existía, no como funcionalidad nueva.

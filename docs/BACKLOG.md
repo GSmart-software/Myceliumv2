@@ -27,8 +27,19 @@ y **priorizar** qué implementar antes.
   - **XL** — muy grande: rearquitectura o dependencia de infraestructura (nube).
 - **Aplica**: `ambas` · `web` · `desktop` (las dos versiones divergen en la capa de
   datos; ver `RAMAS.md`).
-- **Estado**: ⬜ pendiente · 🟡 implementado con errores/ajustes · 🟢 implementado ·
-  🔵 diferido (referenciado por una HU, fuera del alcance actual).
+- **Estado** (va pegado al ID; una fila sin marca está pendiente):
+  - ⬜ pendiente.
+  - 🛠️ implementado, **sin confirmar** por el usuario en la app.
+  - 🟢 implementado y **confirmado** por el usuario en la app.
+  - 🟡 implementado **con errores** o ajustes pendientes (se lista en la §2).
+  - 🔵 diferido (referenciado por una HU, fuera del alcance actual; §3).
+  - ⛔ **retirada**: se decidió no hacerla o se quitó del código. Se conserva la fila con su
+    motivo y el ID **no se reutiliza**.
+  - 🌐 (se suma a otra marca) **reflejado a web**.
+- **Dónde está cada cosa**: la §1 es el **inventario** completo, pendiente o hecho, con su
+  marca. La §5 detalla las **ideas originales** —qué es y para qué—; el detalle de **lo
+  construido** está en la spec de cada una, en `docs/features/`. La §4 es un registro
+  histórico de lo que ya estaba hecho antes de que existiera este backlog.
 
 ### Relación tamaño ↔ versión (SemVer, guía)
 
@@ -52,7 +63,10 @@ y **priorizar** qué implementar antes.
 
 ---
 
-## 1. Pendientes (backlog priorizable)
+## 1. Inventario
+
+Todas las funcionalidades con ID, pendientes o hechas; la marca junto al ID dice en qué
+estado está cada una (ver «Cómo leerlo»).
 
 ### 1.1 Rápidas — tamaño S
 
@@ -60,7 +74,7 @@ y **priorizar** qué implementar antes.
 |---|---|---|---|---|
 | `FUN-S-01` | `EDITOR-CHECKBOX-ESTILOS` | Estilos de checkbox según el símbolo: `x`=X, `-`=tachado, `*`=estrella, `+`=check | ambas | C-M-06 |
 | `FUN-S-02` 🟢🌐 | `EDITOR-TAB-WIDTH` | Cuánto sangra un nivel de indentación: **al leer** cambia listas y tabuladores de todos los documentos al instante (CSS), **al escribir** es lo que inserta <kbd>Tab</kbd>. Valor libre 1–16, por defecto 4. **Confirmada en desktop** el 2026-08-03 tras rehacerla por `DEF-049`/`DEF-050`, y **reflejada en web** el 2026-08-08. Continuación: `FUN-M-18` (reindentar), para que el cambio se vea también en la vista en vivo | ambas | C-M-10 |
-| `FUN-S-03` 🛠️ | `EXPLORER-EXTENSIONES` | Mostrar la extensión de **todos** los archivos —el enunciado original decía «no-markdown», pero dejar sin extensión justo al tipo más común la hace parecer una omisión en vez de la norma—, **y listar los que Mycelium no indexa** (PDF, imágenes, código, texto): hasta ahora ni aparecían, así que el vault se veía más vacío de lo que está. **Implementado en desktop** el 2026-08-18 (sin confirmar). Se listan aparte de `store.notas` a propósito: meterlos ahí los metería en el autocompletado de `[[`, en la búsqueda y en el grafo. La extensión va **pegada al nombre** (`nota.md`), no en un elemento aparte: se lee como un solo texto. **Abrirlos ya es posible** desde `FUN-L-11` (2026-08-22): el clic abre el visor. **Confirmado en la app** el 2026-09-03 y **reflejado a web** el mismo día, a medias por naturaleza: la extensión sí, listar lo no indexado no (en web no hay carpeta que recorrer) | ambas | C-M-12 |
+| `FUN-S-03` 🟢🌐 | `EXPLORER-EXTENSIONES` | Mostrar la extensión de **todos** los archivos —el enunciado original decía «no-markdown», pero dejar sin extensión justo al tipo más común la hace parecer una omisión en vez de la norma—, **y listar los que Mycelium no indexa** (PDF, imágenes, código, texto): hasta ahora ni aparecían, así que el vault se veía más vacío de lo que está. **Implementado en desktop** el 2026-08-18 (sin confirmar). Se listan aparte de `store.notas` a propósito: meterlos ahí los metería en el autocompletado de `[[`, en la búsqueda y en el grafo. La extensión va **pegada al nombre** (`nota.md`), no en un elemento aparte: se lee como un solo texto. **Abrirlos ya es posible** desde `FUN-L-11` (2026-08-22): el clic abre el visor. **Confirmado en la app** el 2026-09-03 y **reflejado a web** el mismo día (`ec7d01e`), a medias por naturaleza: la extensión sí, listar lo no indexado no (en web no hay carpeta que recorrer) | ambas | C-M-12 |
 | `FUN-S-04` | `TRASH-MULTISELECT` | Seleccionar varios archivos para borrar en la papelera | ambas | C-M-14 |
 | `FUN-S-05` | `VAULT-EJEMPLO-DEFAULT` | Al crear un vault nuevo, generar un archivo de ejemplo por defecto | ambas | C-G-02 |
 | `FUN-S-08` | `NOTE-CSSCLASSES` | Aplicar a la nota las clases CSS que declare su propiedad `cssclasses`: hoy se parsea e indexa pero **no tiene comportamiento**. Continuación de `FUN-M-04` | ambas | — |
@@ -73,12 +87,14 @@ y **priorizar** qué implementar antes.
 | `FUN-S-13` | `TABS-HISTORIAL-RUEDA` | Clic con la **rueda** en las flechas de atrás/adelante: abre en una **pestaña nueva** el documento anterior o siguiente del historial, en vez de navegar en la actual. Misma convención que la rueda sobre un archivo del explorador | ambas | — |
 | `FUN-S-12` 🟢 | `TERMINAL-COLOR-POR-CONSOLA` | Asignar un **color a cada consola**, reflejado en su pestaña, que se **atenúa cuando no tiene el foco**. Permite distinguirlas de un vistazo sin perder cuál se está viendo. **Implementado y confirmado en la app** el 2026-09-05, junto con `FUN-S-11`. La marca es una **barra** en el borde de la pestaña y no solo el ícono, porque el ícono se puede apagar y el color no puede depender de otra preferencia para existir. La lista de seis colores es cerrada y **no sigue al tema** —si lo hiciera, la consola «verde» sería otra en Cantarela—, y sus valores están medidos: peor caso 3.79:1 sobre los ocho fondos posibles. Spec en [[marcas-en-las-pestanas]] | desktop | — |
 | `FUN-S-18` | `EMBED-SIN-EXTENSION` | Que un embed **resuelva por título**, como ya hacen los `[[enlaces]]`: hoy `![[Mi diagrama]]` queda escrito tal cual y hay que poner `![[Mi diagrama.excalidraw]]` o `![[Mi diagrama.drawio]]`. El reconocedor exige la extensión porque **decide por ella** qué dibuja; resolver primero el destino y mirar después su tipo es lo que falta. Salió de probar `FUN-L-20` el 2026-09-23: el usuario escribió la forma de Obsidian y no pasó nada | ambas | — |
-| `FUN-S-19` | `EMBED-CANVAS` | Que `![[lienzo.canvas]]` **muestre el lienzo** dentro de la nota, como ya hace `![[dibujo.excalidraw]]`. Hoy no dibuja nada: los embeds de canvas **nunca se implementaron** —la spec de `FUN-L-18` no los prometía— y el texto queda escrito tal cual. Se descubrió el 2026-09-23, probando `FUN-L-20`, al comparar los tres tipos: el de Excalidraw anda y los otros dos no | ambas | — |
-| `FUN-S-20` 🟢 | `LINK-EXTERNO-NAVEGADOR` | Que un enlace a una página web **abra el navegador predeterminado** en vez de navegar la ventana de la app. Corrige `DEF-101`, que hoy se lleva Mycelium entero con un clic. La trampa está en **dónde**: los clics en enlaces se atienden en cinco sitios —vista de lectura, edición en vivo, widget de tablas, widget de propiedades y canvas—, así que va en un helper único; más `on_navigation` en Rust como red de seguridad, para que ningún camino olvidado pueda secuestrar la ventana. Necesita `tauri-plugin-opener` y su permiso —los **dos**: `allow-open-url` habilita el comando con el alcance vacío, los esquemas los trae `allow-default-urls`—. **Implementado en desktop y confirmado en la app** el 2026-09-23. Corrige `DEF-101`. Spec en [[enlaces-externos]] | ambas (difiere) | — |
-| `FUN-S-21` 🟢 | `EMBED-VIDEO` | Pegar el enlace de un video de YouTube como embed —`![](https://youtu.be/…)`— y que se **renderice el reproductor** dentro de la nota, como en Obsidian. Va por `youtube-nocookie.com` (mismo reproductor, sin cookies de seguimiento antes del play) y **en los dos caminos**: `lib/markdown.ts` para lectura y un widget en `lib/editor/livePreview.ts` para la edición en vivo, o se ve al leer y desaparece al editar (la lección de `FUN-L-20`). Sin conexión tiene que degradar con dignidad: un recuadro con el enlace, no un hueco. Vimeo entró, que salía casi gratis al hacer genérica la detección. **Implementado en desktop y confirmado en la app** el 2026-09-23. El `sandbox` necesita `allow-same-origin` —sin él el reproductor queda **negro**, medido— y eso no le da acceso a la app: el iframe conserva su propio origen. Spec en [[video-embebido]] | ambas | — |
-| `FUN-S-22` 🟢🌐 | `HOJA-MAS-ANCHA` | Que la nota **aproveche más el ancho** del panel: los márgenes vacíos a los costados de la hoja, **a la mitad** de lo que son hoy, en los dos lados. Hoy la hoja mide 42rem fijos y todo lo que sobra del panel se reparte en márgenes, así que en una pantalla ancha el texto ocupa una franja angosta en el medio. Toca una decisión de [[DESIGN]] —la medida de lectura—, que se actualiza junto con el cambio. Pedido por el usuario el 2026-09-25. **Implementado en desktop y confirmado en la app** el mismo día: la hoja mide `(panel + 42rem) / 2`, con tope en `--mic-ancho-hoja-max: 72rem`. **Reflejada en web** el 2026-09-25 (`5ee9fb3`) | ambas | — |
+| `FUN-S-19` | `EMBED-CANVAS` | Que `![[lienzo.canvas]]` **muestre el lienzo** dentro de la nota, como ya hace `![[dibujo.excalidraw]]`. Hoy no dibuja nada: los embeds de canvas **nunca se implementaron** —la spec de `FUN-L-18` no los prometía— y el texto queda escrito tal cual. Se descubrió el 2026-09-23, probando `FUN-L-20`, al comparar los tres tipos: el de Excalidraw anda y los otros dos no. **Hoy solo falta el canvas**: el embed de draw.io se resolvió en `516306d` (2026-09-23) | ambas | — |
+| `FUN-S-20` 🟢🌐 | `LINK-EXTERNO-NAVEGADOR` | Que un enlace a una página web **abra el navegador predeterminado** en vez de navegar la ventana de la app. Corrige `DEF-101`, que hoy se lleva Mycelium entero con un clic. La trampa está en **dónde**: los clics en enlaces se atienden en cinco sitios —vista de lectura, edición en vivo, widget de tablas, widget de propiedades y canvas—, así que va en un helper único; más `on_navigation` en Rust como red de seguridad, para que ningún camino olvidado pueda secuestrar la ventana. Necesita `tauri-plugin-opener` y su permiso —los **dos**: `allow-open-url` habilita el comando con el alcance vacío, los esquemas los trae `allow-default-urls`—. **Implementado en desktop y confirmado en la app** el 2026-09-23. Corrige `DEF-101`. Salió en [[Version 2.1.0]]; **reflejada en web 2.1.0** (`a83267d`). Spec en [[enlaces-externos]] | ambas (difiere) | — |
+| `FUN-S-21` 🟢🌐 | `EMBED-VIDEO` | Pegar el enlace de un video de YouTube como embed —`![](https://youtu.be/…)`— y que se **renderice el reproductor** dentro de la nota, como en Obsidian. Va por `youtube-nocookie.com` (mismo reproductor, sin cookies de seguimiento antes del play) y **en los dos caminos**: `lib/markdown.ts` para lectura y un widget en `lib/editor/livePreview.ts` para la edición en vivo, o se ve al leer y desaparece al editar (la lección de `FUN-L-20`). Sin conexión tiene que degradar con dignidad: un recuadro con el enlace, no un hueco. Vimeo entró, que salía casi gratis al hacer genérica la detección. **Implementado en desktop y confirmado en la app** el 2026-09-23. El `sandbox` necesita `allow-same-origin` —sin él el reproductor queda **negro**, medido— y eso no le da acceso a la app: el iframe conserva su propio origen. Salió en [[Version 2.1.0]]; **reflejada en web 2.1.0** (`7ac7616`). Spec en [[video-embebido]] | ambas | — |
+| `FUN-S-22` 🟢🌐 | `HOJA-MAS-ANCHA` | Que la nota **aproveche más el ancho** del panel: los márgenes vacíos a los costados de la hoja, **a la mitad** de lo que son hoy, en los dos lados. Hoy la hoja mide 42rem fijos y todo lo que sobra del panel se reparte en márgenes, así que en una pantalla ancha el texto ocupa una franja angosta en el medio. Toca una decisión de [[DESIGN]] —la medida de lectura—, que se actualiza junto con el cambio. Pedido por el usuario el 2026-09-25. **Implementado en desktop y confirmado en la app** el mismo día: la hoja mide `(panel + 42rem) / 2`, con tope en `--mic-ancho-hoja-max: 72rem`. **Reflejada en web** el 2026-09-25 (`5ee9fb3`). Salió en [[Version 2.2.0]] | ambas | — |
 | `FUN-S-23` | `REINDEXAR-VAULT` | Un botón en Configuración → Vault para **reconstruir el índice** desde cero, con aviso. Hoy la única vía es encontrar `index-<hash>.db` en el app-data y apartarlo a mano, que no es descubrible. Estaba bloqueado por `DEF-107`, **ya resuelto**: los snippets, la apariencia y la papelera viven en `.mycelium/` y vuelven solos. Falta una pieza: al salir de un vault la app **no cierra el índice**, así que el botón tiene que cerrarlo antes de borrarlo. Salió del incidente de `DEF-105` el 2026-09-25 | desktop | — |
-| `FUN-S-24` 🛠️ | `ABRIR-OTRO-VAULT` | Abrir **otro vault desde el que está abierto**, sin «Salir del vault» y sin lanzar el ejecutable de nuevo. Hoy, para tener dos vaults a la vez, hay que salir del actual, abrir el segundo «en ventana nueva» desde el selector y volver a abrir el primero. Va en la barra superior, junto al nombre del vault: la lista de vaults, cada uno con **abrir en una ventana nueva** —el que ya está abierto en otra ventana, la trae al frente (`FUN-L-16`)— y **«Abrir carpeta…»** para uno que todavía no está en la lista. Pedido por el usuario el 2026-09-27. **Implementada en desktop el mismo día, sin confirmar en la app** (`13ed398`): `MenuVaults` en la barra superior | desktop | — |
+| `FUN-S-24` 🛠️ | `ABRIR-OTRO-VAULT` | Abrir **otro vault desde el que está abierto**, sin «Salir del vault» y sin lanzar el ejecutable de nuevo. Hoy, para tener dos vaults a la vez, hay que salir del actual, abrir el segundo «en ventana nueva» desde el selector y volver a abrir el primero. Va en la barra superior, junto al nombre del vault: la lista de vaults, cada uno con **abrir en una ventana nueva** —el que ya está abierto en otra ventana, la trae al frente (`FUN-L-16`)— y **«Abrir carpeta…»** para uno que todavía no está en la lista. Pedido por el usuario el 2026-09-27. **Implementada en desktop el mismo día, sin confirmar en la app** (`13ed398`): `MenuVaults` en la barra superior. Salió en [[Version 2.2.0]] | desktop | — |
+| `FUN-S-16` 🟢🌐 | `BASES-FILTRO-BUSCADOR` | Buscador dentro del desplegable que elige **por qué campo** filtrar en un archivo tabla. Hoy es una lista sin más, y con muchas propiedades en el vault encontrar la que se busca cuesta. Hay dónde copiar: `SugerenciasClave` de la pestaña PROPIEDADES (`DEF-077`) ya resuelve el mismo problema —input que filtra, flechas para moverse, Enter para elegir, Escape para cerrar, `position: fixed` para no quedar recortado—. **Implementado en desktop y confirmado en la app** el 2026-09-05, junto con `FUN-M-27` y en el mismo componente nuevo (`FiltrosBuilder.tsx`), y **reflejado a web** el mismo día. Va en un **portal colgado del `body`**: un `position: fixed` no escapa de la composición de un ancestro con `opacity`, y por eso se veía translúcido (ver [[DESIGN_SYSTEM]] § Estados visuales comunes). Spec en [[bases-tabla]] | ambas | — |
+
 ### 1.2 Intermedias — tamaño M
 
 | ID | Nombre | Descripción | Aplica | Orig. |
@@ -89,35 +105,35 @@ y **priorizar** qué implementar antes.
 | `FUN-M-04` 🟢🌐 | `METADATA-YAML` | Manejar metadatos YAML (frontmatter `---`) de las notas como **propiedades** consultables (prerequisito de `FUN-L-03`). **Confirmado en desktop** el 2026-08-02 y **reflejado en web** el 2026-08-08, con el índice reimplementado en el backend .NET ([[Version 1.1.0 de web]]); spec en `docs/features/metadata-yaml.md`. Salió en [[Version 1.2.0]] | ambas | C-I-07a |
 | `FUN-M-11` 🛠️ | `VAULT-MYCIGNORE` | `.mycignore` por vault (estilo `.gitignore`) para decidir qué archivos/carpetas ignora Mycelium; por defecto `.*/` + carpetas de build. **Implementado en desktop** (sin confirmar); parte **web** pendiente (otra semántica). Spec en `docs/features/mycignore.md` | ambas | — |
 | `FUN-M-12` 🛠️ | `VAULT-INDEX-PERF` | Rendimiento de la apertura del vault: default de `.mycignore` con `node_modules/`/`target/`/`dist/`/`out/`, metadatos sin contenido + `leer_archivos` en tandas, carpetas incrementales, WAL y progreso visible. **Implementado en desktop** (sin confirmar); spec en `docs/features/rendimiento-apertura-vault.md`. Salió en [[Version 1.1.1]] | desktop | — |
-| `FUN-M-13` | `VAULT-INDEX-UN-RECORRIDO` | Fusionar `listar_archivos_meta` y `listar_directorios` en un solo comando que devuelva `{archivos, directorios}`: hoy el vault se recorre **dos veces** por apertura. Continuación de `FUN-M-12` | desktop | — |
-| `FUN-M-14` | `VAULT-WATCH-REINDEX-DIRIGIDO` | El watcher emite `vault-cambios` **con las rutas afectadas** y `lib/vaultWatch.ts` las descarta: reindexa el vault entero ante cualquier cambio. Usar esas rutas para reindexar solo lo tocado. Continuación de `FUN-M-12` | desktop | — |
+| `FUN-M-13` 🛠️ | `VAULT-INDEX-UN-RECORRIDO` | Fusionar `listar_archivos_meta` y `listar_directorios` en un solo comando que devuelva `{archivos, directorios}`: el vault se recorría **dos veces** por apertura. Continuación de `FUN-M-12`. **Absorbida por `FUN-M-38`** (`cc7fea4`, 2026-09-26): un solo walker, `recorrer_vault`, para el índice, el explorador y el watcher. Salió en [[Version 2.2.0]] | desktop | — |
+| `FUN-M-14` | `VAULT-WATCH-REINDEX-DIRIGIDO` | El watcher emite `vault-cambios` **con las rutas afectadas** y `lib/vaultWatch.ts` las descarta: reindexa el vault entero ante cualquier cambio. Usar esas rutas para reindexar solo lo tocado. Continuación de `FUN-M-12`. **Parte hecha en `FUN-M-38`** (`d3c94be`): las escrituras propias de la app ya no reindexan. Falta el reindexado dirigido para los cambios externos | desktop | — |
 | `FUN-M-15` | `LINKS-POR-ALIAS` | Resolver `[[enlaces]]` por la propiedad `aliases` de la nota destino: hoy se parsea e indexa pero **no tiene comportamiento**. Toca la resolución de wikilinks, el autocompletado y el grafo. Continuación de `FUN-M-04` | ambas | — |
 | `FUN-M-16` 🟢 | `UPDATER-SELECCION-VERSION` | Elegir e instalar **cualquier versión publicada**, incluida una anterior, desde un modo avanzado oculto (siete clics en el número de versión). Deja la app fijada en esa versión. Herramienta de desarrollo, no para el usuario normal. **Confirmado en desktop** el 2026-08-18, con el bloque **L** por fin cerrado de punta a punta. Estuvo dos semanas sin poder probarse: su diálogo de confirmación estuvo roto hasta `DEF-051` (2026-08-03) y después no hubo publicaciones nuevas contra las que elegir, hasta la 1.6.2. Spec en `docs/features/autoactualizacion.md` § 4.3 | desktop | — |
 | `FUN-M-18` | `EDITOR-REINDENTAR` | Reindentar las notas al ancho de tabulación configurado, para que el cambio se vea también en la vista en vivo y no solo al leer. Es una **edición masiva del vault**: reutiliza el respaldo, el manifiesto y el deshacer de `FUN-M-17`. Continuación de `FUN-S-02` | ambas | — |
-| `FUN-M-35` 🟢 | `UX-AJUSTES-LEGIBLES` | El resto de la crítica de Configuración: **un solo interruptor** para los doce ajustes de sí o no (había dos formas y tres tratamientos de foco), el **buscador entiende sinónimos** («ignorar», «plantillas», «powershell», «sangría»…) y deja de ofrecer lo que solo existe en modo avanzado, el texto de los snippets **dice la verdad de desktop** (no hay cuenta ni sincronización), el modo avanzado **se alcanza con el teclado**, la marca del salto tiene **color propio** (`--mic-marca`) en vez del del foco, los nombres de grupo **sobreviven** a la ventana angosta, las listas respetan el tope de ancho y **`Ctrl+,`** abre Configuración. **Implementado en desktop (2.0.0)**, **reflejado a web el 2026-09-22**, verificado en la app. Spec en [[configuracion]] | ambas | — |
-| `FUN-M-34` 🟢 | `UX-AJUSTES-SIN-PERDER-TRABAJO` | Lo que salió de la crítica de Configuración (19/40): el **borrador del `.mycignore` deja de morir** al cambiar de categoría o al cerrar (vive en `stores/borradoresStore.ts` y cerrar con algo escrito **pregunta**), la carpeta de **Esporas valida mientras se escribe** en vez de al salir del campo, **borrar un snippet de CSS pregunta y se puede deshacer**, y lo que termina bien o mal **se cuenta con un aviso** y no solo con un párrafo a 900px de scroll. Incluye los tres arreglos chicos del cascarón: el botón de enlaces a la izquierda de la barra de estado, `DEF-096` y `DEF-097`. **Implementado en desktop (2.0.0)**, **reflejado a web el 2026-09-22**, verificado en la app. Spec en [[configuracion]] | ambas | — |
-| `FUN-M-33` 🟢 | `UX-AVISOS-Y-DESHACER` | Lo que salió de la crítica del cascarón (25/40): **borrar una nota avisa y se puede deshacer** (va a la papelera con un aviso flotante y «Deshacer»), la **pregunta de confirmación la dibuja Mycelium** en vez del diálogo de Windows (foco inicial en «Cancelar», verbo concreto en el botón), la **paleta abre con las notas recientes** en vez del vault alfabético, **`Ctrl+Tab`** cicla pestañas y el disparador de la paleta deja de enseñar la tecla equivocada. **Implementado en desktop (2.0.0)**, **reflejado a web el 2026-09-22**, verificado en la app. Spec en [[avisos-y-confirmaciones]] | ambas | — |
-| `FUN-M-32` 🟢 | `UI-CONFIGURACION` | **Configuración** deja de ser un panel de 440px que entra desde la derecha y pasa a una **ventana centrada** (980×700) con las categorías a la izquierda —Aspecto, Trabajo, Vault, Sistema— y un **buscador de ajustes** que salta al ajuste y lo señala. Las opciones son las mismas; lo que cambia es dónde viven y cuánto sitio tienen. Los controles se acotan para que un desplegable no mida 700px. **Implementado en desktop (2.0.0)**, **reflejado a web el 2026-09-22** y **confirmado en la app**. Spec en [[configuracion]] | ambas | — |
-| `FUN-M-31` 🟢 | `UI-MARCO-VENTANA` | **Marco propio**: la ventana deja la barra de título de Windows (`decorations: false`) y los botones de minimizar, maximizar y cerrar pasan a la barra superior de la app, como en VS Code y Obsidian; el fondo libre de esa barra arrastra la ventana y ocho franjas de 6px reponen el redimensionado, que Windows deja de atender sin decoración. Incluye el **ícono de la aplicación**: el isotipo sobre Esporo reemplaza al de Tauri en la barra de tareas, el alt-tab y el instalador. Incluye el **menú de anclaje de Windows 11**, que se repone subclaseando la ventana desde Rust (`marco.rs`). **Implementado en `experimento/ui-impeccable` el 2026-09-19**, sin confirmar en la app. Spec en [[marco-de-ventana]] | desktop | — |
-| `FUN-M-30` 🟢 | `UI-ATMOSFERAS` | Tercer eje del estilo, al lado de Tema y Modo: la **Atmósfera** decide cómo se reparten los colores del tema en fondos, marco, títulos y bordes. Cuatro —**Abisal** (la de siempre), **Niebla**, **Bosque**, **Papel**— y **una por modo**, con Niebla en oscuro y Bosque en claro por defecto. Se elige en Configuración → Apariencia (muestras pintadas con cada combinación) o desde la paleta. Nació de la exploración de color del rediseño; nombres elegidos por el usuario. **Implementado en desktop (2.0.0)**, **reflejado a web el 2026-09-22**, sin confirmar en la app. Spec en [[atmosferas]] | ambas | — |
+| `FUN-M-35` 🟢🌐 | `UX-AJUSTES-LEGIBLES` | El resto de la crítica de Configuración: **un solo interruptor** para los doce ajustes de sí o no (había dos formas y tres tratamientos de foco), el **buscador entiende sinónimos** («ignorar», «plantillas», «powershell», «sangría»…) y deja de ofrecer lo que solo existe en modo avanzado, el texto de los snippets **dice la verdad de desktop** (no hay cuenta ni sincronización), el modo avanzado **se alcanza con el teclado**, la marca del salto tiene **color propio** (`--mic-marca`) en vez del del foco, los nombres de grupo **sobreviven** a la ventana angosta, las listas respetan el tope de ancho y **`Ctrl+,`** abre Configuración. **Implementado en desktop (2.0.0)**, **reflejado a web el 2026-09-22** (`f0468f0`), verificado en la app. Spec en [[configuracion]] | ambas | — |
+| `FUN-M-34` 🟢🌐 | `UX-AJUSTES-SIN-PERDER-TRABAJO` | Lo que salió de la crítica de Configuración (19/40): el **borrador del `.mycignore` deja de morir** al cambiar de categoría o al cerrar (vive en `stores/borradoresStore.ts` y cerrar con algo escrito **pregunta**), la carpeta de **Esporas valida mientras se escribe** en vez de al salir del campo, **borrar un snippet de CSS pregunta y se puede deshacer**, y lo que termina bien o mal **se cuenta con un aviso** y no solo con un párrafo a 900px de scroll. Incluye los tres arreglos chicos del cascarón: el botón de enlaces a la izquierda de la barra de estado, `DEF-096` y `DEF-097`. **Implementado en desktop (2.0.0)**, **reflejado a web el 2026-09-22** (`f0468f0`), verificado en la app. Spec en [[configuracion]] | ambas | — |
+| `FUN-M-33` 🟢🌐 | `UX-AVISOS-Y-DESHACER` | Lo que salió de la crítica del cascarón (25/40): **borrar una nota avisa y se puede deshacer** (va a la papelera con un aviso flotante y «Deshacer»), la **pregunta de confirmación la dibuja Mycelium** en vez del diálogo de Windows (foco inicial en «Cancelar», verbo concreto en el botón), la **paleta abre con las notas recientes** en vez del vault alfabético, **`Ctrl+Tab`** cicla pestañas y el disparador de la paleta deja de enseñar la tecla equivocada. **Implementado en desktop (2.0.0)**, **reflejado a web el 2026-09-22** (`f0468f0`), verificado en la app. Spec en [[avisos-y-confirmaciones]] | ambas | — |
+| `FUN-M-32` 🟢🌐 | `UI-CONFIGURACION` | **Configuración** deja de ser un panel de 440px que entra desde la derecha y pasa a una **ventana centrada** (980×700) con las categorías a la izquierda —Aspecto, Trabajo, Vault, Sistema— y un **buscador de ajustes** que salta al ajuste y lo señala. Las opciones son las mismas; lo que cambia es dónde viven y cuánto sitio tienen. Los controles se acotan para que un desplegable no mida 700px. **Implementado en desktop (2.0.0)**, **reflejado a web el 2026-09-22** (`f0468f0`) y **confirmado en la app**. Spec en [[configuracion]] | ambas | — |
+| `FUN-M-31` 🛠️ | `UI-MARCO-VENTANA` | **Marco propio**: la ventana deja la barra de título de Windows (`decorations: false`) y los botones de minimizar, maximizar y cerrar pasan a la barra superior de la app, como en VS Code y Obsidian; el fondo libre de esa barra arrastra la ventana y ocho franjas de 6px reponen el redimensionado, que Windows deja de atender sin decoración. Incluye el **ícono de la aplicación**: el isotipo sobre Esporo reemplaza al de Tauri en la barra de tareas, el alt-tab y el instalador. Incluye el **menú de anclaje de Windows 11**, que se repone subclaseando la ventana desde Rust (`marco.rs`). **Implementado en desktop (2.0.0)**, sin confirmar en la app: nació en `experimento/ui-impeccable` el 2026-09-19 y se integró con `e2d1866`. Spec en [[marco-de-ventana]] | desktop | — |
+| `FUN-M-30` 🟢🌐 | `UI-ATMOSFERAS` | Tercer eje del estilo, al lado de Tema y Modo: la **Atmósfera** decide cómo se reparten los colores del tema en fondos, marco, títulos y bordes. Cuatro —**Abisal** (la de siempre), **Niebla**, **Bosque**, **Papel**— y **una por modo**, con Niebla en oscuro y Bosque en claro por defecto. Se elige en Configuración → Apariencia (muestras pintadas con cada combinación) o desde la paleta. Nació de la exploración de color del rediseño; nombres elegidos por el usuario. **Implementado en desktop (2.0.0)**, **reflejado a web el 2026-09-22** (`f0468f0`), sin confirmar en la app. Spec en [[atmosferas]] | ambas | — |
 | `FUN-M-20` 🟢🌐 | `SEARCH-MODOS-Y-ARBOL` | Ampliar la búsqueda del vault: elegir si busca por **nombre de archivo**, por **contenido** o por los dos, y poder ver los resultados **como árbol** de carpetas además de como lista —agrupando los que comparten carpeta, al estilo de VS Code—. **Implementado en desktop y confirmado en la app** el 2026-09-05, y **reflejado a web** el mismo día, con la parte del backend .NET escrita aparte: allá la consulta FTS la arma el servidor. El modo se resuelve **dentro** de la consulta —`notas_fts` ya tiene título y cuerpo en columnas separadas— y el filtro se aplica a cada término, no a la consulta entera. El control es un **botón que cicla** y no un desplegable: son tres opciones y una es la de siempre. Spec en [[busqueda-modos-y-arbol]] | ambas | — |
 | `FUN-M-21` 🟢🌐 | `GRAPH-NOMBRES-SEGUN-FOCO` | Tres modos para los nombres del grafo: **todos**, **solo el nodo apuntado y sus vecinos**, o **solo el apuntado**. Con mucha densidad de nodos, todos los nombres a la vez entorpecen la vista. La elección **persiste por vault**. **Implementado en desktop y confirmado en la app** el 2026-09-05: el control va en el menú del grafo —es una opción de esa vista— y «vecino» es cualquiera con el que el foco conecte, en las dos direcciones. Sobre [[preferencias-por-vault]]; **reflejado a web** el 2026-09-05 con `FUN-M-29` | ambas | — |
 | `FUN-M-26` 🟢 | `FILES-EDITAR-TEXTO` | Editar dentro de Mycelium los archivos de texto y código que hoy solo se leen (`FUN-L-11`). **Solo lectura por defecto**: se entra a editar con un botón, y «Abrir con el sistema» se queda. Guardado explícito, escritura atómica y detección de conflicto — estos archivos no tienen papelera, historial ni respaldo, así que un guardado equivocado no se deshace. **Un archivo truncado no se edita nunca**: guardar el fragmento borraría el resto. **Implementado y confirmado en la app** el 2026-09-03, sobre el binario de release. Spec en [[otros-tipos-de-archivo]] § 7 | desktop | — |
 | `FUN-M-29` 🟢 | `PREFS-VAULT-WEB` | Llevar a web las **preferencias por vault**, y con ellas `FUN-M-28` y `FUN-M-21`, que ya están hechas en desktop y esperan solo esto. **No es un reflejo**: en desktop viven en `.mycelium/preferencias.json` dentro de la carpeta, y en web no hay carpeta —ni existe `vaultSessionStore`, que es quien las carga al abrir el vault—. Hay que **decidir dónde viven y quién las carga**, y la decisión es de producto antes que técnica: `localStorage` por `vaultId` no necesita backend pero los ajustes quedan en ese navegador, mientras que un endpoint `.NET` conserva lo que motivó el diseño —que viajen con el vault— y cuesta más. **Hecho el 2026-09-05**, decidido por el usuario: `localStorage` por `vaultId`, asumiendo que los ajustes **quedan en ese navegador** — un endpoint `.NET` conservaría que viajen con el vault pero cuesta backend, migración y una llamada de red en el arranque por unos ajustes de aspecto. Lo que se conservó igual en las dos ramas es la **superficie** del store, y eso es lo que mantiene compartidos a sus cinco consumidores. Con él viajaron `FUN-M-28`, `FUN-M-21` y `FUN-M-25`. Ver [[preferencias-por-vault]] y [[RAMAS]] | web | — |
 | `FUN-M-28` 🟢🌐 | `EDITOR-NUMEROS-DE-LINEA` | Ver el **número de línea** al costado de una nota markdown. **Apagado por defecto**, activable en Configuración y **por vault**. Era `M` por dónde guardarlo, y esa fue la mitad del trabajo: se creó el almacén ([[preferencias-por-vault]]). **Implementado en desktop y confirmado en la app** el 2026-09-05, **solo en las vistas de edición**: en lectura un párrafo de varias líneas se reajusta al ancho y se vuelve un bloque, así que la línea 4 no existe como posición y no hay dónde ponerla. **Reflejado a web** el 2026-09-05 con `FUN-M-29`. Spec y lo que costó, en [[numeros-de-linea]] | ambas | — |
-| `FUN-S-16` 🟢🌐 | `BASES-FILTRO-BUSCADOR` | Buscador dentro del desplegable que elige **por qué campo** filtrar en un archivo tabla. Hoy es una lista sin más, y con muchas propiedades en el vault encontrar la que se busca cuesta. Hay dónde copiar: `SugerenciasClave` de la pestaña PROPIEDADES (`DEF-077`) ya resuelve el mismo problema —input que filtra, flechas para moverse, Enter para elegir, Escape para cerrar, `position: fixed` para no quedar recortado—. **Implementado en desktop y confirmado en la app** el 2026-09-05, junto con `FUN-M-27` y en el mismo componente nuevo (`FiltrosBuilder.tsx`), y **reflejado a web** el mismo día. Va en un **portal colgado del `body`**: un `position: fixed` no escapa de la composición de un ancestro con `opacity`, y por eso se veía translúcido (ver [[DESIGN_SYSTEM]] § Estados visuales comunes). Spec en [[bases-tabla]] | ambas | — |
 | `FUN-M-27` 🟢🌐 | `BASES-FILTROS-LOGICOS` | El constructor de filtros de un archivo tabla solo arma una lista plana unida toda por `y` o toda por `o`. No se puede **negar** una condición ni **agrupar** («A y (B o C)»), así que casos como «los que NO empiezan por X» no se pueden expresar. **El motor ya sabe hacerlo**: `Filtro` tiene `and`/`or`/`not` y `evaluar` los resuelve — lo que falta es la interfaz, y por eso el trabajo es de UI y de ida y vuelta con el YAML, no de evaluación. **Implementado en desktop y confirmado en la app** el 2026-09-05: la lista plana se reemplazó por un **árbol** (`NodoFiltro`) con `arbolDeFiltro`/`filtroDeArbol`, y la UI es recursiva como el dato. Un `not` de un solo hijo se colapsa en una **marca** de esa condición, porque «no es activo» es una condición y no dos. La guarda que traía `condicionesPlanas` **se conservó**, ahora en `arbolDeFiltro`: lo que no se sabe representar sigue devolviendo `null` en vez de convertirse a medias — solo se movió la línea, ya que los anidamientos y el `not` pasaron a ser representables. Fue junto con `DEF-080` y `FUN-S-16`, y se **reflejó a web** el mismo día: los cinco archivos son compartidos y se traen enteros, porque el filtrado no baja a SQL ni al backend. Spec en [[bases-tabla]] | ambas | — |
 | `FUN-M-25` 🟢🌐 | `BASES-ANCHO-COLUMNAS` | Ajustar el **ancho de cada columna** de un archivo tabla arrastrando su borde. Es M y no S por **dónde se guarda**: el `.base` es formato de Obsidian y meterle una clave nuestra rompería la interoperabilidad, así que hay que decidir entre guardarlo aparte (local, por vault) o no persistirlo. **Implementado en desktop y confirmado en la app** el 2026-09-05, y **reflejado a web** el mismo día. Va a [[preferencias-por-vault]], que se creó para esto. La decisión arrastró `FUN-M-29`: guardar los anchos sin portar el almacén habría metido un import solo-desktop en `BaseView.tsx`, uno de los últimos componentes grandes que quedan compartidos enteros. Spec en [[bases-tabla]] | ambas | — |
 | `FUN-M-24` 🟢🌐 | `EDITOR-TITULO-RENOMBRA` | El **título del documento** que se muestra arriba de la nota pasa a ser **editable**, y escribir en él **renombra el archivo** — como en Obsidian. Hoy es de solo lectura y renombrar obliga a ir al explorador. El riesgo que tenía —renombrar rompía los `[[enlaces]]`— **ya no existe**: `FUN-M-08` se implementó y confirmó el 2026-09-03, así que el renombrado los repara solo. **Implementado en desktop y confirmado en la app** el 2026-09-05, y **reflejado a web** el mismo día. Solo en las vistas de **edición**: en lectura el título sigue siendo texto, porque una vista de solo lectura con un elemento editable no se lee como una excepción sino como que no se sabe qué se puede tocar. Un nombre inválido se **rechaza** con el motivo en vez de corregirse en silencio —al revés que al importar, donde el nombre ya viene dado— y salir del campo **descarta**. No quedó más simple: al implementarla salió `DEF-084`, que era el riesgo del bloqueo por otra puerta. Spec en [[titulo-renombra]] | ambas | — |
 | `FUN-M-23` | `MERMAID-VISOR` | Visor propio para los diagramas Mermaid en la vista de lectura: al hacer clic se abre una ventana interna donde el diagrama se maneja como una imagen —**zoom** y **desplazamiento**—, porque hoy uno grande no se puede leer. **Segunda fase, si la primera sale bien**: sobre esa ventana, un **dibujo efímero** con unos pocos colores (se borra al cerrar, no se guarda nada) y un **puntero láser** para señalar sin dibujar. Pensado para explicar un diagrama a alguien | ambas | — |
 | `FUN-M-22` | `EXPORT-FEEDBACK-DESCARGA` | Avisar de la exportación: una tarjeta abajo a la derecha que indica que se está descargando, permanece 10-15 s al terminar —con cierre manual— y ofrece **abrir la carpeta** donde quedó el archivo. Hoy exportar no da ninguna señal | ambas (difiere) | — |
 | `FUN-M-19` 🟢🌐 | `EDITOR-PROPIEDADES-EN-SITIO` | El bloque de propiedades **deja de abrirse en crudo** al entrar el cursor: sigue renderizado y se edita ahí — cambiar un valor, renombrar una clave, **agregar y quitar** propiedades — sin ir a la vista raw, más «editar como texto» por bloque. Invierte el «widget de solo lectura» de `FUN-M-04`, cuyo motor (`ponerPropiedad`, `quitarPropiedad`, `renombrarPropiedad`) ya está hecho y probado. **Confirmado en desktop** por el usuario el 2026-08-16 y **reflejado en web** el 2026-08-17, junto con `FUN-L-19` porque tocan los mismos archivos compartidos. Primera mitad de [[edicion-en-el-render]]; la segunda es `FUN-L-19` | ambas | — |
-| `FUN-M-17` 🟡 | `VAULT-RELINKEADO` | Adoptar un vault que viene de otro proyecto: **la IA descubre** cómo se referencian sus documentos (`` `HU-009` ``, el nombre suelto, `[texto](otra.md)`) y lo registra en un léxico persistente; **el script aplica** esas formas y las convierte en `[[wikilinks]]`. La auditoría **no modifica documentos**; el enlazado sí, con respaldo y deshacer. Es el **caso de entrada** de Mycelium sobre un proyecto existente. **Su núcleo ya está hecho** (`lib/enlaces.ts`, 41 tests), porque lo necesitaba `FUN-L-17`; lo que falta son los dos comandos de la IA. Spec en [[auditoria-y-relinkeado]] | ambas | — |
-
+| `FUN-M-17` 🛠️ | `VAULT-RELINKEADO` | Adoptar un vault que viene de otro proyecto: **la IA descubre** cómo se referencian sus documentos (`` `HU-009` ``, el nombre suelto, `[texto](otra.md)`) y lo registra en un léxico persistente; **el script aplica** esas formas y las convierte en `[[wikilinks]]`. La auditoría **no modifica documentos**; el enlazado sí, con respaldo y deshacer. Es el **caso de entrada** de Mycelium sobre un proyecto existente. **Parcial**: el núcleo está hecho en `FUN-L-17` (`lib/enlaces.ts`, 41 tests); faltan los dos comandos de la IA. Spec en [[auditoria-y-relinkeado]] | ambas | — |
 | `FUN-M-37` | `EMBED-NOTA` | **Embeber una nota dentro de otra** (transclusión), como en Obsidian: `![[nota]]` muestra su contenido en el lugar. Hoy esa sintaxis **cuenta como enlace en el grafo pero no dibuja nada**, así que el usuario que la escribe no ve ni un error. Es `M` porque renderizar markdown dentro de markdown trae lo suyo: ciclos (A embebe B que embebe A), profundidad, qué pasa con el frontmatter de la nota embebida y si se puede editar ahí o solo leer. Misma tanda que `FUN-S-18`, de probar `FUN-L-20` | ambas | — |
-| `FUN-M-38` | `AUDITORIA-RENDIMIENTO-1` | **Tanda 1 de la [[Auditoria de codigo 2026-09-26]]**: ocho arreglos de rendimiento sin decisión pendiente: el guardado no dispara un reindexado (`putContenido` guarda el `mtime` y el watcher ignora lo que la app acaba de escribir; amplía `FUN-M-14`), búsqueda con mínimo de dos caracteres y cancelación (cierra `DEF-111`), indexado con inserciones multi-fila por tanda (Tesina: 13.496 → 36 statements), un solo recorrido de disco para índice, explorador y watcher (amplía `FUN-M-13`), resolución de wikilinks con un mapa por título, no reescribir FTS ni propiedades si el texto indexable no cambió, `mycignore` precompilado y `renderNota` con debounce adaptativo. Aprobada por el usuario el 2026-09-26. **Implementada e integrada el mismo día** (`ccdb44b`), medida con réplica headless sobre los tres vaults: indexado frío de la Tesina 13.684 → 67 sentencias, guardado sin cambio indexable 12 → 3, `resolveWikilink` 279 → 1,6 µs, `mycignore` 13,8 → 0,3 ms; el índice resultante es idéntico fila por fila. El agente corrigió además tres regresiones que traía el primer intento (cuentas de conexiones, renombrar con una nota abierta, adjuntos al mover carpetas). `tsc`, `cargo test` (49) y 424 tests headless en verde. **Sin confirmar en la app** (8 puntos en [[auditoria-rendimiento-1]]). Cierra `DEF-111` | desktop | — |
-| `FUN-M-39` | `AUDITORIA-LIMPIEZA-1` | **Tanda 2 de la [[Auditoria de codigo 2026-09-26]]**: borrar lo confirmado muerto (dependencias `codemirror`, `highlight.js`, `deploy:pages`; permisos de Tauri redundantes; 12 exports, tipos `Row*`, CSS y assets sin uso; los 12 smoke tests de julio anteriores al rediseño), **quitar de desktop compartir y colaboración** (decisión D2 del usuario, 2026-09-26: no está decidido que exista; si se decide, se reescribe) con sus cuatro dependencias `yjs`, y cuatro simplificaciones chicas (tipo de pestaña en un solo sitio, constantes duplicadas, `pendingMoves`, comentarios que describen un estado que ya no existe). Lo muerto en archivos idénticos a web se limpia también allá al reflejar (D4). **Implementada e integrada el 2026-09-26** (`882eb46`): 23 archivos borrados, 6 dependencias, 5 permisos, −2.310 líneas; `tsc`, `cargo`, 18 tests headless y `next build` en verde. **Sin confirmar en la app** (lista en [[auditoria-limpieza-1]]). **Reflejada a web** el 2026-09-27 (`46464b6`) en lo que aplica: archivos idénticos con lo borrado muerto también allá; el sharing queda vivo en web; `lib/pestanas.ts` pendiente de adaptar | ambas (difiere) | — |
-| `FUN-M-40` | `AUDITORIA-EDITOR-ENLACES` | **Tanda 4 de la [[Auditoria de codigo 2026-09-26]]** (decisiones D6–D9, aprobadas el 2026-09-26): el Excalidraw soltado sobre el editor pasa a ser un archivo del vault con migración de los embebidos (cierra `DEF-112`); sin caché IndexedDB ni estados «offline»/conflicto en desktop (cierra `DEF-113`); un solo resolutor de `[[wikilink]]` para editor, grafo y conexiones (antes de `FUN-M-15`); importar carpeta con un comando Rust que copia adjuntos y respeta `.mycignore`. Spec en [[auditoria-editor-y-enlaces]]. **Implementada e integrada el 2026-09-26** (`dc83afa`): un solo resolutor de wikilinks (`lib/wikilinks.ts`) para editor, grafo y canvas; el dibujo soltado es archivo del vault con migración reanudable de los embebidos (`DEF-112`); sin IndexedDB ni estados offline/conflicto, y la pestaña recuerda si salió con cambios (`DEF-113`); importar carpeta o zip copia el árbol desde Rust con adjuntos, respetando `.mycignore`, y «reemplazar» reemplaza. De paso: exportar un dibujo a PNG/SVG y la exportación del vault guardaban mal los dibujos de archivo. 55 tests Rust, 458 headless, `next build`. **Sin confirmar en la app** (6 puntos en la spec). **Web**: D8 **reflejado** el 2026-09-27 (`46464b6`), y el backend .NET resuelve ahora con la misma regla (`ResolutorWikilinks.cs`); D6/D7/D9 no aplican | desktop (D8 se refleja) | — |
+| `FUN-M-38` 🛠️ | `AUDITORIA-RENDIMIENTO-1` | **Tanda 1 de la [[Auditoria de codigo 2026-09-26]]**: ocho arreglos de rendimiento sin decisión pendiente: el guardado no dispara un reindexado (`putContenido` guarda el `mtime` y el watcher ignora lo que la app acaba de escribir; amplía `FUN-M-14`), búsqueda con mínimo de dos caracteres y cancelación (cierra `DEF-111`), indexado con inserciones multi-fila por tanda (Tesina: 13.496 → 36 statements), un solo recorrido de disco para índice, explorador y watcher (amplía `FUN-M-13`), resolución de wikilinks con un mapa por título, no reescribir FTS ni propiedades si el texto indexable no cambió, `mycignore` precompilado y `renderNota` con debounce adaptativo. Aprobada por el usuario el 2026-09-26. **Implementada e integrada el mismo día** (`ccdb44b`), medida con réplica headless sobre los tres vaults: indexado frío de la Tesina 13.684 → 67 sentencias, guardado sin cambio indexable 12 → 3, `resolveWikilink` 279 → 1,6 µs, `mycignore` 13,8 → 0,3 ms; el índice resultante es idéntico fila por fila. El agente corrigió además tres regresiones que traía el primer intento (cuentas de conexiones, renombrar con una nota abierta, adjuntos al mover carpetas). `tsc`, `cargo test` (49) y 424 tests headless en verde. **Sin confirmar en la app** (8 puntos en [[auditoria-rendimiento-1]]). Cierra `DEF-111`. Salió en [[Version 2.2.0]] | desktop (búsqueda reflejada a web, `17008d5`) | — |
+| `FUN-M-39` 🛠️🌐 | `AUDITORIA-LIMPIEZA-1` | **Tanda 2 de la [[Auditoria de codigo 2026-09-26]]**: borrar lo confirmado muerto (dependencias `codemirror`, `highlight.js`, `deploy:pages`; permisos de Tauri redundantes; 12 exports, tipos `Row*`, CSS y assets sin uso; los 12 smoke tests de julio anteriores al rediseño), **quitar de desktop compartir y colaboración** (decisión D2 del usuario, 2026-09-26: no está decidido que exista; si se decide, se reescribe) con sus cuatro dependencias `yjs`, y cuatro simplificaciones chicas (tipo de pestaña en un solo sitio, constantes duplicadas, `pendingMoves`, comentarios que describen un estado que ya no existe). Lo muerto en archivos idénticos a web se limpia también allá al reflejar (D4). **Implementada e integrada el 2026-09-26** (`882eb46`): 23 archivos borrados, 6 dependencias, 5 permisos, −2.310 líneas; `tsc`, `cargo`, 18 tests headless y `next build` en verde. **Sin confirmar en la app** (lista en [[auditoria-limpieza-1]]). **Reflejada a web** el 2026-09-27 (`46464b6`) en lo que aplica: archivos idénticos con lo borrado muerto también allá; el sharing queda vivo en web; `lib/pestanas.ts` pendiente de adaptar. Salió en [[Version 2.2.0]] | ambas (difiere) | — |
+| `FUN-M-40` 🛠️ | `AUDITORIA-EDITOR-ENLACES` | **Tanda 4 de la [[Auditoria de codigo 2026-09-26]]** (decisiones D6–D9, aprobadas el 2026-09-26): el Excalidraw soltado sobre el editor pasa a ser un archivo del vault con migración de los embebidos (cierra `DEF-112`); sin caché IndexedDB ni estados «offline»/conflicto en desktop (cierra `DEF-113`); un solo resolutor de `[[wikilink]]` para editor, grafo y conexiones (antes de `FUN-M-15`); importar carpeta con un comando Rust que copia adjuntos y respeta `.mycignore`. Spec en [[auditoria-editor-y-enlaces]]. **Implementada e integrada el 2026-09-26** (`dc83afa`): un solo resolutor de wikilinks (`lib/wikilinks.ts`) para editor, grafo y canvas; el dibujo soltado es archivo del vault con migración reanudable de los embebidos (`DEF-112`); sin IndexedDB ni estados offline/conflicto, y la pestaña recuerda si salió con cambios (`DEF-113`); importar carpeta o zip copia el árbol desde Rust con adjuntos, respetando `.mycignore`, y «reemplazar» reemplaza. De paso: exportar un dibujo a PNG/SVG y la exportación del vault guardaban mal los dibujos de archivo. 55 tests Rust, 458 headless, `next build`. **Sin confirmar en la app** (6 puntos en la spec). **Web**: D8 **reflejado** el 2026-09-27 (`46464b6`), y el backend .NET resuelve ahora con la misma regla (`ResolutorWikilinks.cs`); D6/D7/D9 no aplican. Salió en [[Version 2.2.0]] | desktop (D8 se refleja) | — |
+| `FUN-M-08` 🟢🌐 | `LINKS-REESCRITURA-RENOMBRAR` | Reescribir los `[[enlaces]]` que apuntan al título viejo al renombrar una nota. **Implementado el 2026-08-18**: núcleo puro `reescribirEnlaces` en `lib/enlaces.ts` con 10 tests, conectado a `renameNota` del store. Va por `api()`, así que el código es **el mismo en las dos versiones**. Solo recorre las notas que ya enlazaban, no el vault entero. **Confirmado en la app** y **reflejado a web** el 2026-09-03 (`1134b91`). Estaba en las diferidas de la §3 (venía de la HU-23) y pasó al inventario al hacerse | ambas | HU-23 |
+
 ### 1.3 Grandes — tamaño L
 
 | ID | Nombre | Descripción | Aplica | Orig. |
@@ -125,27 +141,26 @@ y **priorizar** qué implementar antes.
 | `FUN-L-01` | `MACROS-HOTKEYS` | Configurar acciones de Mycelium por macros/atajos (escribir, crear con plantilla, abrir, etc.) | ambas | C-I-05 |
 | `FUN-L-02` | `SHARING-PUBLICOS-GLOBALES` | Carpeta "Estado Mycelium" con 3 archivos públicos (Ayudas / Bugs / Ideas): editables por autorizados, visibles por todos | web | C-I-06 |
 | `FUN-L-03` 🛠️ | `FILES-BASES-TABLA` | Archivo `.base` (formato de Obsidian) que agrega notas por sus propiedades y las muestra en una tabla, con filtros y columnas configurables. Solo lectura. **Implementado en las dos ramas** el 2026-08-08 (sin confirmar); sale en la [[Version 1.6.0]]; spec en [[bases-tabla]] | ambas | C-I-07b |
-| `FUN-L-04` | `VAULT-MULTIPLE` | Un usuario con varios vaults, seleccionables en Configuración → Vault | ambas | C-G-01 |
+| `FUN-L-04` | `VAULT-MULTIPLE` | Un usuario con varios vaults, seleccionables y alternables. **Solo falta web**: desktop ya lo cubre con la lista y selección de vaults en carpeta, el estado por vault (`DEF-044`), las ventanas múltiples (`FUN-L-16`) y abrir otro vault desde la barra superior (`FUN-S-24`) | ambas (falta web) | C-G-01 |
 | `FUN-L-19` 🟢🌐 | `EDITOR-TABLAS-EN-SITIO` | Las tablas **dejan de abrirse en crudo** al entrar el cursor: siguen renderizadas y se editan ahí — escribir en una celda, insertar, eliminar y mover filas y columnas, y alinear — sin ir a la vista raw. Necesita `lib/tablas.ts`, un módulo **puro** de parseo y reescritura que hoy no existe (y que debe manejar el `|` escapado dentro de una celda, que es lo mismo que rompe `DEF-045`). **Confirmado en desktop** el 2026-08-17 y **reflejado en web** el mismo día. Segunda mitad de [[edicion-en-el-render]]; la primera es `FUN-M-19` | ambas | — |
 | `FUN-L-07` 🟢 | `TERMINAL-INTEGRADA` | Consola nativa integrada (estilo VS Code): abre en la raíz del vault (o en la carpeta elegida), como pestaña normal del workspace (dividir, varias instancias). **Confirmada en desktop** por el usuario en lo esencial, tras varias iteraciones (panel de consolas, shells de fondo, renombrar, selector de shell, tema reactivo); spec en `docs/features/terminal-integrada.md` | desktop | — |
-| `FUN-L-08` 🛠️ | `IA-FRAMEWORK-VAULT` | Framework IA versionado generado en el vault (CLAUDE.md + 2 skills + 6 comandos en `.claude/`) para que Claude Code use el vault como **memoria**: recuperar antes de responder y consolidar lo que valga recordar, navegando por vínculos. Botón opt‑in en Configuración → Vault. **Implementada** (sin confirmar); spec en `docs/features/ia-framework-vault.md` | desktop | — |
+| `FUN-L-08` 🛠️ | `IA-FRAMEWORK-VAULT` | Framework IA versionado generado en el vault (CLAUDE.md + **8 skills** —desde la `1.7.0` del framework, con `FUN-L-26`— + 6 comandos en `.claude/`) para que Claude Code use el vault como **memoria**: recuperar antes de responder y consolidar lo que valga recordar, navegando por vínculos. Botón opt‑in en Configuración → Vault. **Implementada** (sin confirmar explícitamente). El framework salió en [[Version 1.1.0]]; spec en `docs/features/ia-framework-vault.md` | desktop | — |
 | `FUN-L-09` | `IA-MCP-MYCELIUM` | Servidor MCP de Mycelium: exponer a la IA el índice del vault (búsqueda, backlinks, grafo, metadatos) como herramientas estructuradas, en vez de grep sobre archivos | desktop | — |
 | `FUN-L-10` | `VAULT-INDEX-EN-RUST` | Mover el indexado entero a Rust: el walker lee y escribe el índice en el mismo proceso, en **una** transacción, sin pasar contenido por IPC. Resuelve de raíz lo que `FUN-M-12` mitigó desde el frontend (incluido el `BEGIN`/`COMMIT` que el pool de `tauri-plugin-sql` impide). Continuación de `FUN-M-12` | desktop | — |
 | `FUN-L-11` 🟢 | `FILES-OTROS-TIPOS` | **Abrir** los archivos que no son notas —texto, código, PDF e imágenes— en un visor propio, como una pestaña más. La mitad de *aparecer en el explorador* ya la resolvió `FUN-S-03`. **Solo-desktop**: en web esos archivos no existen en ninguna parte. Dejó de ser de solo lectura con `FUN-M-26`. **Implementado en desktop** el 2026-08-22 y **confirmado en la app** el 2026-09-03: pestaña `archivo:<ruta>` por centinela, texto por un comando propio que corta por tamaño y detecta lo que no decodifica, PDF/imagen por el protocolo `asset:` acotado a la carpeta del vault. Spec en [[otros-tipos-de-archivo]] | desktop | — |
-| `FUN-L-12` 🛠️ | `EDITOR-CORRECTOR-ORTOGRAFICO` | Corrector ortográfico con **motor propio**: `spellbook` en WebAssembly dentro de un *worker*, diccionarios Hunspell de **español, inglés e italiano** que el usuario elige **descargar desde R2** (no van en el instalador), el español en la variante de la región del sistema, subrayado y menú propios, y diccionario personal por vault. Primero se probó el corrector del sistema, pero Edge/WebView2 solo revisa lo que se tipea. Especificado el 2026-09-27. **Implementado en desktop el mismo día, sin confirmar en la app** (rama `feat/corrector-desktop`); web reflejado el 2026-09-30 (merge `79f8b8d`), sin probar en la app; falta CORS en R2 y el esquema en D1. Los diccionarios todavía **no están subidos a R2**. Spec en [[corrector-ortografico]] § 9 | ambas | — |
+| `FUN-L-12` 🛠️🌐 | `EDITOR-CORRECTOR-ORTOGRAFICO` | Corrector ortográfico con **motor propio**: `spellbook` en WebAssembly dentro de un *worker*, diccionarios Hunspell de **español, inglés e italiano** que el usuario elige **descargar desde R2** (no van en el instalador), el español en la variante de la región del sistema, subrayado y menú propios, y diccionario personal por vault y el de Mycelium. Primero se probó el corrector del sistema, pero Edge/WebView2 solo revisa lo que se tipea. Especificado el 2026-09-27. **Implementado en desktop el mismo día, sin confirmar en la app** (rama `feat/corrector-desktop`). **Salió en [[Version 2.2.0]]** (desktop); los diccionarios se publicaron en R2 antes del release. **Web reflejado** el 2026-09-30 (merge `79f8b8d`), sin publicar ni probar en la app; falta CORS en R2 y el esquema en D1. Spec en [[corrector-ortografico]] § 9 | ambas | — |
 | `FUN-L-13` | `UI-IDIOMAS` | La interfaz en varios idiomas (español, inglés, italiano) y preparada para agregar más. Hoy todos los textos están escritos en español dentro de los componentes | ambas | — |
 | `FUN-L-14` 🟢 | `UPDATER-AUTOACTUALIZACION` | Mycelium comprueba una vez al día si hay versión nueva, muestra su changelog y ofrece instalarla con un clic. Nunca obliga ni bloquea. `tauri-plugin-updater` + instaladores firmados en Cloudflare R2. **Confirmada de punta a punta** el 2026-08-03: bucket y claves en marcha, la 1.4.0 y la 1.5.0 publicadas en R2, y el usuario comprobó en la app que una instalación **detecta y aplica** la versión posterior. Ya no hacen falta instalaciones manuales. Spec en `docs/features/autoactualizacion.md`. Salió en [[Version 1.4.0]] | desktop | — |
 | `FUN-L-16` 🛠️ | `VAULT-VENTANAS-MULTIPLES` | Tener **varios vaults abiertos a la vez**, cada uno en su propia ventana y sin límite de cuántos. Hoy abrir uno cierra el anterior. Continuación natural de `FUN-L-04`, y comparte raíz con `DEF-044`. **Implementada en desktop** el 2026-08-13 (sin confirmar); sale en la [[Version 1.6.1]]. Spec en [[ventanas-multiples]] | desktop | — |
 | `FUN-L-18` 🛠️🌐 | `FILES-CANVAS` | Tipo de archivo **canvas** (`.canvas`, formato JSON Canvas de Obsidian): lienzo infinito con texto suelto, tarjetas de markdown y tarjetas que **son** notas del vault, unidas por flechas. Los `[[enlaces]]` de las tarjetas funcionan y cuentan en el grafo; las flechas son solo disposición visual. Spec en [[canvas]]. **Implementado en las dos ramas** el 2026-08-08 (sin confirmar); sale en la [[Version 1.6.0]]; construido sin librería de nodos, ver [[canvas]] § 9. | ambas | — |
-| `FUN-L-17` 🛠️ | `VAULT-RELINKEADO-UI` | La auditoría y conversión de `FUN-M-17` como **pantalla de la app**, consumiendo el mismo núcleo. Sirve a quien nunca usa la IA y hoy no tiene ninguna salida. **Implementada en desktop** el 2026-08-08 (sin confirmar), y con ella el **núcleo de `FUN-M-17`**, que no existía: `lib/enlaces.ts`. Sale en la [[Version 1.6.0]]. Ver [[auditoria-y-relinkeado]] § 17 | ambas | — |
+| `FUN-L-17` 🛠️ | `VAULT-RELINKEADO-UI` | La auditoría y conversión de `FUN-M-17` como **pantalla de la app**, consumiendo el mismo núcleo. Sirve a quien nunca usa la IA y hoy no tiene ninguna salida. **Implementada en desktop** el 2026-08-08 (sin confirmar), y con ella el **núcleo de `FUN-M-17`**, que no existía: `lib/enlaces.ts`. Salió en [[Version 1.6.0]]. Ver [[auditoria-y-relinkeado]] § 17 | ambas (web pendiente, no es reflejo) | — |
 | `FUN-L-15` 🟢 | `RELEASE-SCRIPT-PUBLICACION` | Un `npm run publicar` que compruebe, compile, firme, suba a R2 con `wrangler`, escriba los tres manifiestos y **verifique lo publicado**, en vez de hacer esos cuatro pasos a mano. Tiene modo `--simulacro`. **Script local, no CI**: usar el workflow obligaría a alinear `origin` y a poner la clave de firma como secreto de GitHub. **Confirmado**: publicó la 1.5.0 de verdad el 2026-08-03. El proceso, en [[Publicar una version]] § 2 | desktop | — |
 | `FUN-L-20` 🟢 | `FILES-DRAWIO` | Integrar **draw.io** como un tipo de archivo más del vault, igual que Excalidraw: crear, abrir y editar un diagrama dentro de Mycelium, guardado en la carpeta del vault. No compite con Excalidraw —aquel es trazo a mano, este es figura y conector que se engancha— ni con el canvas. El trabajo real no es el editor sino **cómo se embebe**: draw.io no publica un componente React, se integra como su aplicación web en modo embebido (`iframe` + `postMessage`), así que hay que decidir entre apuntar al sitio público (no funciona sin conexión) o **empaquetar la webapp** en el instalador. **Decidido por el usuario el 2026-09-23**: webapp **empaquetada y recortada** y **solo desktop**. **Implementado y confirmado en la app** el 2026-09-23, con el instalador en **40,3 MB** —por encima de los 30-35 estimados, aceptado por el usuario: el sobrecosto son las bibliotecas de formas, que son el motivo de traer draw.io—. La webapp no entra a git: la baja `scripts/preparar-drawio.mjs`, que ahora corre dentro de `npm run build`. Spec en [[drawio]] | desktop | — |
 | `FUN-L-21` | `DIAGNOSTICO-FALLOS` | Que **ningún fallo pase en silencio**: todo lo que sale mal, en el frontend o en Rust, deja una línea en la consola de F12 con el área, la operación y el error original. Para depurar y para usuarios experimentados. No es sembrar `console.error`: es una **fachada única** (`lib/fallos.ts`) con **tres niveles** —fallo, degradado, esperado—, destinos intercambiables, redes globales para lo que escapa de todo `catch`, `tauri-plugin-log` hacia la webview también en release, y un **chequeo automático** que impide volver a escribir un `catch {}` vacío. Medido el 2026-09-25: de 100 `catch`, **6** registran algo; 24 están vacíos y 40 siguen de largo en silencio. Pedido por el usuario el 2026-09-25. Spec en [[registro-de-fallos]] | ambas (difiere) | — |
-| `FUN-L-22` 🛠️ | `CALENDARIO-RECORDATORIOS` | Un **calendario** con **recordatorios**: título, detalle en markdown con `[[enlaces]]`, color de una paleta fija, fecha con hora o sin ella, y repetición diaria, semanal, mensual o anual. **Avisa** con una tarjeta propia en la app y una notificación de Windows si la ventana no está al frente; lo vencido con la app cerrada se avisa al abrir. Se abre como pestaña (grilla del mes + lista escondible) o como panel lateral (mes compacto + lista). Los recordatorios son **del vault** y viven en `.mycelium/recordatorios.json`: no son archivos, así que no aparecen en el explorador, la búsqueda ni el grafo. No es la nota diaria (`FUN-M-07`). Pedido por el usuario el 2026-09-25. **Implementado en desktop el 2026-09-25, sin confirmar en la app**. Spec en [[calendario-recordatorios]]. **Reflejada en web** el 2026-09-25 (`07a7727`), con guardado en el backend .NET y avisos del navegador | ambas (difiere) | — |
-| `FUN-L-23` ⛔ | `GRAPH-DISPOSICIONES` | **Retirada el 2026-09-27** por decisión del usuario tras probarla en la app: «no me está gustando para nada el resultado; las disposiciones las vamos a quitar, solamente nos vamos a quedar con cúmulo». Se retira del código (queda solo el cúmulo) y la spec [[grafo-disposiciones]] se conserva como registro. Lo que sigue en esta fila es lo que fue:  Tres **disposiciones** más para el grafo global, elegibles **por vault** desde el menú del grafo, además del cúmulo de fuerzas actual: **Anillo de colonias** (las notas en un anillo agrupadas por carpeta, los enlaces curvados por el borde o por el centro según crucen o no), **Crecimiento** (cada nota brota junto a las que ya enlazaba, en orden de creación; sin física y estable al agregar notas) y **Sustrato** (la simulación del cúmulo dibujada como micelio: hifas ahusadas, esporas, cuerpos fructíferos en los hubs y un halo en las zonas densas). Salen de la exploración de [[Representaciones de micelio para el grafo]] sobre tres vaults; el «Rizoma radial» se descartó porque presupone una nota raíz. Las tres nuevas se dibujan a una capa estática (sin redibujo en reposo). Decidido por el usuario el 2026-09-26. Spec en [[grafo-disposiciones]] | ambas | — |
-| `FUN-L-24` | `AUDITORIA-CAPA-DATOS` | **Tanda 3 de la [[Auditoria de codigo 2026-09-26]]**: retirar el modo SQLite clásico (decisión D1, [[El modo SQLite clasico queda muerto]]: ~20 ramas `getVaultActual() === null`, `mycelium.db`, `001_init.sql`), retirar la identidad interna heredada de web (`authStore` como fachada de constantes, sin `ensureSeed` ni `/auth/*` ni tablas `usuarios/vaults/membresias`), y un solo mecanismo de preferencias por vault (decisión D3: tema, tipografía y atmósfera son por vault; `apariencia.json` se funde en `preferencias.json`, un solo par de comandos Rust para `.mycelium/`). Spec en [[auditoria-capa-de-datos]]. **Implementada e integrada el 2026-09-26** (`4a0c82a`): −794 líneas netas, 6 archivos y 2 comandos menos, `getVaultActual()` lanza sin vault, `authStore` es una fachada de constantes, la apariencia vive en `preferencias.json` y los snippets en `snippets.json`, con migración desde `apariencia.json` **y desde el índice viejo** (quien viene de la 2.1.0 no pierde tema ni snippets; por eso no se dropean las tablas). 51 tests Rust, 440 headless (16 nuevos), `next build` y cuatro índices reales abriendo sin error. **Sin confirmar en la app** (6 puntos en la spec) | desktop | — |
-| `FUN-L-25` ✅ | `GRAFO-INDICE-Y-MOTOR` | **Confirmada por el usuario en la app el 2026-09-27**, tras siete partes (A–G) y una revertida (F); el detalle de cada una y lo que se descartó está en [[grafo-indice-y-motor]]. **Web: reflejadas B–G** el 2026-09-27 (`46464b6`); la parte A no aplica. Lo que sigue en esta fila es la historia:  La implementación del plan de `DEF-109` en el orden que confirmó [[Como construye Obsidian su grafo]]: **tabla de enlaces** (y de etiquetas) en el índice, escrita por el indexador y el guardado y resuelta con el resolutor único, con re-resolución dirigida al renombrar; el grafo y las conexiones pasan a `SELECT` sin leer contenido. Y el **motor del cúmulo**: capa estática con reposo real, flujo animado acotado por zoom y cantidad (se conservan los guiones), Barnes-Hut con repulsión acotada, y la simulación en un Web Worker. **2026-09-27, cambio de rumbo tras probar las Partes C y D en la app**: el usuario rechaza el movimiento resultante («es horrible que no sea fluido; deja una sensación de mal funcionamiento peor del que era antes»). Decisiones: el cúmulo vuelve al movimiento de la Parte B (un paso de física por frame, deslizamiento suave, aunque tarde más en asentarse), conservando Barnes-Hut, worker, capa estática en reposo, flujo acotado y curvas; **nodos lisos siempre**, sin brillo ni sombra; el paneo sigue copiando la capa, el zoom vuelve a repintar nítido. Aprobada por el usuario el 2026-09-26 e **implementada el mismo día en dos partes en paralelo** (A: `d519d8c`; B: merge posterior): grafo de la Tesina 1.648 → 25 ms, arrastre a 2.000 nodos 42 → 7 ms de hilo principal, 0 rAF en reposo. Desvíos: la capa offscreen solo en reposo (durante la simulación copiar la capa costaba más que dibujar), `distanciaMax` implementada pero apagada (achica el cúmulo un 30 % y ahorra solo un 10 %), worker solo desde 200 nodos, techo de 1.500 aristas visibles para los guiones (**a decidir** si es bajo: a 2.000 notas se cruza ya con zoom 1). `tsc`, 55 tests Rust, 476 headless y `next build` con el worker en `out/`. Cierra `DEF-109` y `DEF-110`. **Sin confirmar en la app** (listas en la spec). Spec en [[grafo-indice-y-motor]] | desktop (A) · ambas (B) | — |
-| `FUN-L-26` ✅ | `IA-SKILLS-HERRAMIENTAS` | **Finalizada el 2026-10-01** por decisión del usuario («confío en tu trabajo, podemos dar FUN-L-26 como finalizada»), tras tres vueltas de corrección con evaluación ciega y la pasada final en la app; sale en la próxima versión de desktop (todavía sin publicar). Que la IA del vault **sepa usar** cada herramienta, no solo que exista: una skill por formato —`.drawio`, `.canvas`, `.excalidraw`, `.base`, Esporas y el calendario (solo lectura)— con el formato que Mycelium dibuja, la geometría (coordenadas, flechas enganchadas, sin superposiciones, texto que entre) y recetas probadas; la app recarga desde disco las pestañas de canvas, draw.io y excalidraw. Se prueba con validadores estáticos y evaluación ciega (agentes que solo leen la skill) revisada en la app real. Framework de IA `1.7.0`. Pedida por el usuario el 2026-09-30; spec en [[ia-skills-herramientas]] | desktop | — |
+| `FUN-L-22` 🛠️🌐 | `CALENDARIO-RECORDATORIOS` | Un **calendario** con **recordatorios**: título, detalle en markdown con `[[enlaces]]`, color de una paleta fija, fecha con hora o sin ella, y repetición diaria, semanal, mensual o anual. **Avisa** con una tarjeta propia en la app y una notificación de Windows si la ventana no está al frente; lo vencido con la app cerrada se avisa al abrir. Se abre como pestaña (grilla del mes + lista escondible) o como panel lateral (mes compacto + lista). Los recordatorios son **del vault** y viven en `.mycelium/recordatorios.json`: no son archivos, así que no aparecen en el explorador, la búsqueda ni el grafo. No es la nota diaria (`FUN-M-07`). Pedido por el usuario el 2026-09-25. **Implementado en desktop el 2026-09-25, sin confirmar en la app**; incluye el selector de mes y año y marcar como completado. **Salió en [[Version 2.2.0]]**. Spec en [[calendario-recordatorios]]. **Reflejada en web** el 2026-09-25 (`07a7727`), con guardado en el backend .NET y avisos del navegador | ambas (difiere) | — |
+| `FUN-L-24` 🛠️ | `AUDITORIA-CAPA-DATOS` | **Tanda 3 de la [[Auditoria de codigo 2026-09-26]]**: retirar el modo SQLite clásico (decisión D1, [[El modo SQLite clasico queda muerto]]: ~20 ramas `getVaultActual() === null`, `mycelium.db`, `001_init.sql`), retirar la identidad interna heredada de web (`authStore` como fachada de constantes, sin `ensureSeed` ni `/auth/*` ni tablas `usuarios/vaults/membresias`), y un solo mecanismo de preferencias por vault (decisión D3: tema, tipografía y atmósfera son por vault; `apariencia.json` se funde en `preferencias.json`, un solo par de comandos Rust para `.mycelium/`). Spec en [[auditoria-capa-de-datos]]. **Implementada e integrada el 2026-09-26** (`4a0c82a`): −794 líneas netas, 6 archivos y 2 comandos menos, `getVaultActual()` lanza sin vault, `authStore` es una fachada de constantes, la apariencia vive en `preferencias.json` y los snippets en `snippets.json`, con migración desde `apariencia.json` **y desde el índice viejo** (quien viene de la 2.1.0 no pierde tema ni snippets; por eso no se dropean las tablas). 51 tests Rust, 440 headless (16 nuevos), `next build` y cuatro índices reales abriendo sin error. **Sin confirmar en la app** (6 puntos en la spec). Salió en [[Version 2.2.0]] | desktop | — |
+| `FUN-L-25` 🟢 | `GRAFO-INDICE-Y-MOTOR` | **Confirmada por el usuario en la app el 2026-09-27**, tras siete partes (A–G) y una revertida (F). **Salió en [[Version 2.2.0]]**. **Web: reflejadas B–G** el 2026-09-27 (`46464b6`); la parte A no aplica. La implementación del plan de `DEF-109` en el orden que confirmó [[Como construye Obsidian su grafo]]: **tabla de enlaces** (y de etiquetas) en el índice, escrita por el indexador y el guardado y resuelta con el resolutor único, con re-resolución dirigida al renombrar —el grafo y las conexiones pasan a `SELECT` sin leer contenido—; y el **motor del cúmulo**: Barnes-Hut con repulsión acotada, simulación en un Web Worker, capa estática en reposo y flujo animado acotado por zoom y cantidad. Tras probar las partes C y D el usuario rechazó el movimiento resultante (2026-09-27) y el cúmulo volvió al de la parte B —un paso de física por frame, deslizamiento suave—, con nodos lisos siempre. Medido: grafo de la Tesina 1.648 → 25 ms, arrastre a 2.000 nodos 42 → 7 ms de hilo principal, 0 rAF en reposo. Cierra `DEF-109` y `DEF-110`. La historia completa de cada parte, los desvíos y lo que se descartó, en la spec [[grafo-indice-y-motor]] | desktop (A) · ambas (B) | — |
+| `FUN-L-26` 🟢 | `IA-SKILLS-HERRAMIENTAS` | **Finalizada el 2026-10-01** por decisión del usuario («confío en tu trabajo, podemos dar FUN-L-26 como finalizada»), tras tres vueltas de corrección con evaluación ciega y la pasada final en la app; sale en la próxima versión de desktop (todavía sin publicar). Que la IA del vault **sepa usar** cada herramienta, no solo que exista: una skill por formato —`.drawio`, `.canvas`, `.excalidraw`, `.base`, Esporas y el calendario (solo lectura)— con el formato que Mycelium dibuja, la geometría (coordenadas, flechas enganchadas, sin superposiciones, texto que entre) y recetas probadas; la app recarga desde disco las pestañas de canvas, draw.io y excalidraw, y abre un dibujo o un lienzo encuadrado en su contenido —esto último también llegó a web (`463b2d2`)—. Se prueba con validadores estáticos y evaluación ciega (agentes que solo leen la skill) revisada en la app real. Framework de IA `1.7.0`. Pedida por el usuario el 2026-09-30; spec en [[ia-skills-herramientas]] | desktop | — |
 
 ### 1.4 Muy grandes — tamaño XL
 
@@ -153,10 +168,23 @@ y **priorizar** qué implementar antes.
 |---|---|---|---|---|
 | `FUN-XL-01` | `STORAGE-LOCAL-FIRST-NUBE` | Almacenamiento local con guardado a la nube **a conciencia** (nunca automático); compartidos sí se sincronizan solos. Reduce servidor/costos | desktop | C-G-03 |
 
-> **`FUN-L-04` (`VAULT-MULTIPLE`)**: en **desktop** ya existe la base (lista/selección de
-> vaults en carpeta, entrar/salir de vault — ver `docs/features/vault-en-carpeta.md`);
-> falta revisar/completar la experiencia y llevarlo a **web**. Reclasificar a `FUN-M` si en
-> desktop ya está cubierto.
+> **`FUN-L-04` (`VAULT-MULTIPLE`): solo falta web.** En **desktop** está cubierta: lista y
+> selección de vaults en carpeta y entrar/salir de un vault (ver
+> `docs/features/vault-en-carpeta.md`), estado por vault (`DEF-044`), varios vaults abiertos
+> a la vez, cada uno en su ventana (`FUN-L-16`), y abrir otro vault desde la barra superior
+> (`FUN-S-24`). Lo que queda es llevarlo a **web**, donde hay que decidir cómo se modela
+> «varios vaults» por cuenta.
+
+### 1.5 Retiradas ⛔
+
+Ideas que se decidió no hacer, o que se hicieron y se quitaron del código. Se conservan con
+su motivo para que la próxima idea parecida no vuelva a discutirse de cero; **sus IDs no se
+reutilizan**.
+
+| ID | Nombre | Descripción | Aplica | Orig. |
+|---|---|---|---|---|
+| `FUN-L-23` ⛔ | `GRAPH-DISPOSICIONES` | **Retirada el 2026-09-27** (`d972c4d`) por decisión del usuario tras probarla en la app: «no me está gustando para nada el resultado; las disposiciones las vamos a quitar, solamente nos vamos a quedar con cúmulo». Se retira del código (queda solo el cúmulo) y la spec [[grafo-disposiciones]] se conserva como registro. Lo que sigue en esta fila es lo que fue: Tres **disposiciones** más para el grafo global, elegibles **por vault** desde el menú del grafo, además del cúmulo de fuerzas actual: **Anillo de colonias** (las notas en un anillo agrupadas por carpeta, los enlaces curvados por el borde o por el centro según crucen o no), **Crecimiento** (cada nota brota junto a las que ya enlazaba, en orden de creación; sin física y estable al agregar notas) y **Sustrato** (la simulación del cúmulo dibujada como micelio: hifas ahusadas, esporas, cuerpos fructíferos en los hubs y un halo en las zonas densas). Salen de la exploración de [[Representaciones de micelio para el grafo]] sobre tres vaults; el «Rizoma radial» se descartó porque presupone una nota raíz. Las tres nuevas se dibujan a una capa estática (sin redibujo en reposo). Decidido por el usuario el 2026-09-26. Spec en [[grafo-disposiciones]] | ambas | — |
+| `FUN-M-36` ⛔ | `THEME-PERSONALIZADO` | **Descartada el 2026-09-23** por decisión del usuario, el mismo día que registró la idea (`cbd574b`): demasiada personalización puede arruinar el producto, y quien quiera tocar colores ya tiene los snippets de CSS. Los estilos nuevos se siguen agregando, pero hechos y medidos acá, como las cuatro atmósferas. El criterio: **lo que Mycelium ofrece, Mycelium lo garantiza**. La spec se convirtió en la decisión [[Los temas los define Mycelium, no el usuario]], que conserva lo aprendido. Lo que fue: que el usuario **cree sus propios temas** —un nombre y los colores de identidad, principal y secundario, con el resto de la paleta **derivada por fórmula**, como ya hacen las [[atmosferas]]—, en Apariencia bajo «Temas personalizados». Era `M` porque el tema es una **unión cerrada de dos literales** repetida en siete sitios —incluido el CSS del PDF— y pasaba a ser un dato; el riesgo era el **contraste** (los temas actuales están medidos ≥4,5:1 en los 16 combos) | ambas | — |
 
 ---
 
@@ -179,7 +207,6 @@ en `FUTURE_IMPLEMENTATIONS.md`, hoy consolidadas aquí). Varias son **solo web**
 | `FUN-M-05` | `TAGS-PANEL` | Panel de tags del rail (listado, conteo, filtrado por tag); hoy es placeholder | ambas | HU-28 |
 | `FUN-M-06` | `TAGS-GRAFO-NODOS` | Mostrar tags como nodos en el mini‑grafo y el grafo global | ambas | HU-30 |
 | `FUN-M-07` | `DAILY-NOTE` | Nota diaria (crear/abrir la del día con plantilla); ícono del rail es placeholder | ambas | HU-28 |
-| `FUN-M-08` 🛠️ | `LINKS-REESCRITURA-RENOMBRAR` | Reescribir los `[[enlaces]]` que apuntan al título viejo al renombrar una nota. **Implementado el 2026-08-18** (sin confirmar): núcleo puro `reescribirEnlaces` en `lib/enlaces.ts` con 10 tests, conectado a `renameNota` del store. Va por `api()`, así que el código es **el mismo en las dos versiones**. Solo recorre las notas que ya enlazaban, no el vault entero. **Confirmado en la app** y **reflejado a web** el 2026-09-03 | ambas | HU-23 |
 | `FUN-M-09` | `EXPORT-ZIP-SERVIDOR` | Exportar ZIP de vaults ≥ 200 MB en el servidor con progreso (hoy 100% cliente) | web | HU-09 |
 | `FUN-M-10` | `AUTH-OAUTH-GITHUB` | Login con GitHub (requiere registrar OAuth App + credenciales) | web | HU-32 |
 | `FUN-S-07` | `COLLAB-PRESENCIA-AJUSTES` | Afinar timeout de cursor (5 s) y agrupado "+N más" (8 cursores) | web | HU-06 |
@@ -190,7 +217,11 @@ en `FUTURE_IMPLEMENTATIONS.md`, hoy consolidadas aquí). Varias son **solo web**
 
 ---
 
-## 4. Implementadas (registro) 🟢
+## 4. Implementadas (registro histórico) 🟢
+
+> [!info] Registro histórico
+> Esta tabla son los ítems que **ya estaban hechos antes de que existiera este backlog**, y
+> no crece más. Lo implementado después lleva su ID y su marca en el inventario de la §1.
 
 De `Ideas Mycelium.md` → "Completados", más dos que el antiguo
 `FUTURE_IMPLEMENTATIONS.md` listaba como pendientes pero **ya están hechas** (ver §6).
@@ -219,7 +250,7 @@ Ampliación de **qué es** y **para qué** de cada funcionalidad, según la inte
 actual (nivel de idea/objetivo, **no** de diseño de implementación). Pensado para
 revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 
-### Pendientes — tamaño S
+### Tamaño S
 
 #### `FUN-S-01` · `EDITOR-CHECKBOX-ESTILOS` (C-M-06)
 - **Qué es**: en listas de tareas, el símbolo que va dentro de `[ ]` determina un
@@ -254,14 +285,21 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   en la vista en vivo y no solo en lectura.
 - Causas raíz en [[Aprendizajes tecnicos]]; trazabilidad en [[bugs-progreso]].
 
-#### `FUN-S-03` · `EXPLORER-EXTENSIONES` (C-M-12)
-- **Qué es**: mostrar en el árbol del explorador la extensión de los archivos que **no**
-  son markdown (`.excalidraw`, `.png`, `.pdf`, …) para poder identificarlos; los `.md`
-  pueden seguir mostrándose sin extensión por ser el caso dominante.
+#### `FUN-S-03` · `EXPLORER-EXTENSIONES` (C-M-12) — 🟢🌐 ambas
+- **Qué es**: mostrar en el árbol del explorador la extensión de los archivos para poder
+  identificarlos (`.excalidraw`, `.png`, `.pdf`, …).
 - **Objetivo**: que el usuario distinga de un vistazo el tipo de archivo cuando maneja
-  algo distinto a notas (hoy todos se ven igual).
-- **A definir**: si los `.md` también pueden mostrar extensión (opción); combinación con
-  íconos por tipo.
+  algo distinto a notas (antes todos se veían igual).
+- **Decidido al implementarla**: la extensión se muestra en **todos** los archivos, `.md`
+  incluidos. El enunciado original dejaba los `.md` sin extensión por ser el caso
+  dominante, pero dejar sin extensión justo al tipo más común la hace parecer una omisión
+  en vez de la norma. Va **pegada al nombre** (`nota.md`), no en un elemento aparte. Y el
+  explorador pasó a **listar los archivos que Mycelium no indexa** (PDF, imágenes, código,
+  texto), aparte de `store.notas` para no meterlos en el autocompletado, la búsqueda ni el
+  grafo.
+- **Estado**: implementada en desktop el 2026-08-18, **confirmada en la app** el
+  2026-09-03 y **reflejada a web** el mismo día (`ec7d01e`), a medias por naturaleza: la
+  extensión sí, listar lo no indexado no (en web no hay carpeta que recorrer).
 
 #### `FUN-S-04` · `TRASH-MULTISELECT` (C-M-14)
 - **Qué es**: en la papelera, seleccionar varios archivos a la vez (checkboxes o
@@ -327,6 +365,8 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 - **De dónde sale**: de la misma prueba de `FUN-L-20` (2026-09-23). Comparando los tres
   tipos quedó a la vista que **solo Excalidraw** tiene embed: el usuario lo reportó como si
   los otros estuvieran rotos, y en el caso del canvas nunca estuvieron hechos.
+- **Hoy solo falta el canvas**: el embed de draw.io, que tampoco se dibujaba mientras se
+  editaba, se resolvió en `516306d` (2026-09-23).
 - **Lo que hay que decidir**: si el embed es una **vista previa** que al hacer clic abre la
   pestaña —lo que se eligió para draw.io, y lo barato— o un lienzo navegable dentro de la
   nota.
@@ -343,6 +383,8 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   enlaces que abren el navegador en una vista y rompen la app en otra.
 - **La red de seguridad**: `on_navigation` en Rust, para que un camino no cubierto no pueda
   sacar a la app de su propia página.
+- **Estado**: 🟢🌐 implementada y confirmada en desktop el 2026-09-23; salió en
+  [[Version 2.1.0]], y **reflejada en web 2.1.0** (`a83267d`). Spec en [[enlaces-externos]].
 
 #### `FUN-S-21` · `EMBED-VIDEO` (—)
 - **Qué es**: `![](https://www.youtube.com/watch?v=…)` muestra el reproductor en la nota.
@@ -354,6 +396,8 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   empaquetar draw.io para no depender de la red. Ahí se trataba de que *la app* funcione sin
   conexión; acá la conexión la pide **el usuario**, explícitamente, al pegar un video.
 - **Sin conexión**: un recuadro con el enlace y el motivo, nunca un hueco en blanco.
+- **Estado**: 🟢🌐 implementada y confirmada en desktop el 2026-09-23; salió en
+  [[Version 2.1.0]], y **reflejada en web 2.1.0** (`7ac7616`). Spec en [[video-embebido]].
 
 #### `FUN-S-22` · `HOJA-MAS-ANCHA` (—)
 - **Qué es**: reducir a la mitad los márgenes vacíos a izquierda y derecha de la nota.
@@ -373,9 +417,10 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 - **Cómo quedó** (2026-09-25, confirmado en la app): tope de **72rem**. En vivo, el margen
   de `.cm-scroller` es `max(1.25rem, (panel − 42rem) / 4, (panel − 72rem) / 2)`; en lectura,
   el `max-width` de la hoja devuelve el relleno de `.mic-preview` para medir igual. El tope
-  es un token: cambiarlo es una línea en `styles/tokens.css`.
+  es un token: cambiarlo es una línea en `styles/tokens.css`. Reflejada en web el mismo día
+  (`5ee9fb3`). **Salió en [[Version 2.2.0]]**.
 
-### Pendientes — tamaño M
+### Tamaño M
 
 #### `FUN-M-01` · `TRASH-PREVIEW` (C-M-13)
 - **Qué es**: poder ver el contenido de un archivo que está en la papelera (en solo
@@ -470,14 +515,15 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 - **Continuaciones**: `FUN-M-13` (un solo recorrido), `FUN-M-14` (reindex dirigido por
   el watcher) y `FUN-L-10` (indexado en Rust).
 
-#### `FUN-M-13` · `VAULT-INDEX-UN-RECORRIDO` (—)
-- **Qué es**: `indexarVault` llama a `listar_archivos_meta` y a `listar_directorios`,
-  que recorren **el mismo árbol dos veces** (4020 directorios × 2 en el vault medido).
+#### `FUN-M-13` · `VAULT-INDEX-UN-RECORRIDO` (—) — 🛠️ desktop
+- **Qué es**: `indexarVault` llamaba a `listar_archivos_meta` y a `listar_directorios`,
+  que recorrían **el mismo árbol dos veces** (4020 directorios × 2 en el vault medido).
   Fusionarlos en un comando que devuelva `{archivos, directorios}` de una pasada.
 - **Objetivo**: la mitad del trabajo de disco por apertura. Quedó fuera de `FUN-M-12`
   por esfuerzo: cambia la firma de dos comandos y su llamador.
-- **A definir**: si el comando nuevo reemplaza a los dos o convive con ellos (el watcher
-  y otras rutas también los usan).
+- **Absorbida por `FUN-M-38`** (`cc7fea4`, 2026-09-26): un solo walker, `recorrer_vault`,
+  para el índice, el explorador y el watcher —lo que contestó también la duda de si el
+  comando nuevo convivía con los dos viejos—. Salió en [[Version 2.2.0]].
 
 #### `FUN-M-14` · `VAULT-WATCH-REINDEX-DIRIGIDO` (—)
 - **Qué es**: el watcher nativo emite `vault-cambios` **con las rutas afectadas**, pero
@@ -486,6 +532,9 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   cada una paga el recorrido completo.
 - **Objetivo**: reindexar solo lo que cambió. Probablemente buena parte de la lentitud
   percibida *después* de abrir viene de acá; `FUN-M-12` lo alivió pero no lo resolvió.
+- **Parte hecha en `FUN-M-38`** (`d3c94be`, 2026-09-26): las escrituras propias de la app
+  ya no reindexan (el guardado registra el `mtime` y el watcher ignora lo que la app acaba
+  de escribir). **Falta** el reindexado dirigido para los cambios externos.
 - **A definir**: cómo se agrupan las ráfagas y qué hacer con renombres/borrados de
   carpetas enteras (donde el reindex completo es más simple).
 
@@ -505,10 +554,10 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 - **A definir**: qué gana si un alias colisiona con el título real de otra nota, y si el
   autocompletado ofrece el alias o el título.
 
-#### `FUN-M-19` 🟢 · `EDITOR-PROPIEDADES-EN-SITIO` (—)
-- **Estado**: implementado en `desktop-tauri` el 2026-08-16, **sin confirmar en la app**;
-  `tsc` y `scripts/test-frontmatter.mjs` (41 tests) en verde. Reflejo a web pendiente. Cómo
-  quedó y qué falta probar a mano: [[edicion-en-el-render]] §§ 4 y 7.
+#### `FUN-M-19` 🟢🌐 · `EDITOR-PROPIEDADES-EN-SITIO` (—)
+- **Estado**: implementado en `desktop-tauri` el 2026-08-16 y **confirmado en la app** por
+  el usuario ese mismo día; **reflejado a web** el 2026-08-17 (`06219cf`), junto con
+  `FUN-L-19`. Salió en [[Version 1.6.2]]. Cómo quedó: [[edicion-en-el-render]] §§ 4 y 7.
 - **Qué es**: que el bloque de propiedades **no se abra en crudo** al entrar el cursor. Sigue
   renderizado y se edita ahí: cambiar un valor con el control de su tipo, renombrar una
   clave, **agregar** y **quitar** propiedades.
@@ -521,8 +570,21 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 - **Invierte una decisión de `FUN-M-04`**: el widget era de solo lectura a propósito. El
   motivo escrito (`DEF-031`/`DEF-037`) es más amplio que la causa real de aquellos, que fue
   el `margin` en un widget de bloque, no la interactividad. Ver [[edicion-en-el-render]] § 2.
-- **A definir**: nada bloqueante. La única decisión de diseño —despachar el rango del bloque
-  y no el documento entero— está resuelta en la spec.
+- **Resuelto en la spec**: la única decisión de diseño —despachar el rango del bloque y no
+  el documento entero—.
+
+#### `FUN-M-08` · `LINKS-REESCRITURA-RENOMBRAR` (HU-23) — 🟢🌐 ambas
+- **Qué es**: al renombrar una nota, actualizar automáticamente todos los `[[enlaces]]`
+  que apuntaban a su título anterior para que sigan apuntando a ella.
+- **Objetivo**: evitar enlaces rotos al reorganizar el vault; antes, renombrar dejaba los
+  enlaces viejos colgando.
+- **De dónde viene**: estaba entre las diferidas de la HU-23 (§3) y pasó al inventario al
+  hacerse.
+- **Estado**: implementado el 2026-08-18 —núcleo puro `reescribirEnlaces` en
+  `lib/enlaces.ts` con 10 tests, conectado a `renameNota` del store, y solo recorre las notas
+  que ya enlazaban—; **confirmado en la app y reflejado a web** el 2026-09-03 (`1134b91`).
+  Va por `api()`, así que el código es **el mismo en las dos versiones**. Lo que costó después, al llevar el renombrado al título, está en
+  `FUN-M-24` (`DEF-084`).
 
 #### `FUN-M-24` · `EDITOR-TITULO-RENOMBRA` (—)
 - **Qué es**: el título que se muestra arriba de la nota deja de ser un adorno de solo
@@ -568,18 +630,18 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   muestra el frontmatter de la embebida, si se puede embeber un trozo (`![[nota#título]]`) y
   si desde el embed se edita o solo se lee.
 
-### Pendientes — tamaño L
+### Tamaño L
 
-#### `FUN-L-23` · `GRAPH-DISPOSICIONES` (—)
-- **Estado**: especificada el 2026-09-26 e **implementada en desktop el mismo día**
-  (rama `feat/grafo-disposiciones-desktop`, integrada con `--no-ff`). `tsc` en verde y
-  17 tests headless del módulo puro (`frontend/scripts/test-disposiciones.mjs`: colonias,
-  orden de creación, estabilidad del crecimiento al agregar notas, 3.000 notas en menos
-  de un segundo). **Sin confirmar en la app**: el menú, la persistencia de la preferencia
-  y los cuatro dibujos los confirma el usuario (lista en [[grafo-disposiciones]] § «Cómo
-  quedó»). Playwright no se pudo automatizar: necesita la app corriendo con IPC. **Web:
-  pendiente** de reflejar tras la confirmación. Sale en la `2.2.0`, junto con el
-  calendario.
+#### `FUN-L-23` ⛔ · `GRAPH-DISPOSICIONES` (—)
+- **Estado**: ⛔ **retirada el 2026-09-27** (`d972c4d`) por decisión del usuario tras
+  probarla en la app: «no me está gustando para nada el resultado; las disposiciones las
+  vamos a quitar, solamente nos vamos a quedar con cúmulo». Se quitó del código y queda solo
+  el cúmulo; nunca se reflejó a web ni salió en un release. El ID no se reutiliza. Lo que
+  sigue es la idea tal como se planteó.
+- **Historia**: especificada el 2026-09-26 e implementada en desktop el mismo día (rama
+  `feat/grafo-disposiciones-desktop`), con 17 tests headless del módulo puro
+  (`frontend/scripts/test-disposiciones.mjs`). La spec [[grafo-disposiciones]] se conserva
+  como registro.
 - **Qué es**: que el usuario elija, por vault, cómo se dispone el grafo global: el cúmulo
   de siempre, un anillo por carpetas, un crecimiento cronológico sin física, o el cúmulo con
   piel de micelio.
@@ -598,7 +660,7 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   que hereda sus mejoras; la capa estática de las disposiciones nuevas es la misma idea que
   la propuesta 1 del segundo análisis de [[Rendimiento del grafo]].
 
-#### `FUN-L-22` 🛠️ · `CALENDARIO-RECORDATORIOS` (—)
+#### `FUN-L-22` 🛠️🌐 · `CALENDARIO-RECORDATORIOS` (—)
 - **Estado**: especificada el 2026-09-25 e **implementada en desktop el mismo día**
   (rama `feat/calendario-desktop`, integrada en `32f277d`). **Verificada con Playwright** el
   mismo día: crear con color y enlace, que no aparezca en el explorador, la búsqueda ni los
@@ -607,7 +669,8 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   por hoy), los colores en claro y el aislamiento entre vaults. **Falta** que el usuario lo
   confirme, y el criterio 8 —la notificación de Windows— con la app instalada: en desarrollo
   el toast sale a nombre de PowerShell. Spec completa en
-  [[calendario-recordatorios]], con lo que quedó en su § «Cómo quedó».
+  [[calendario-recordatorios]], con lo que quedó en su § «Cómo quedó». **Salió en
+  [[Version 2.2.0]]**; incluye el selector de mes y año y marcar como completado.
 - **Qué es**: un calendario de recordatorios que avisa, dentro de Mycelium.
 - **Decisiones del usuario** (2026-09-25): los recordatorios son **de cada vault**; el
   aviso va **en la app y en Windows**; los colores son una **paleta fija**; **solo desktop**
@@ -633,12 +696,13 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 - **Lo que la hace durar**: el chequeo de `scripts/check-fallos.mjs`. Sin él, el próximo
   `catch {}` vuelve a entrar sin que nadie lo note.
 
-#### `FUN-L-19` 🟢 · `EDITOR-TABLAS-EN-SITIO` (—)
-- **Estado**: implementado en `desktop-tauri` el 2026-08-16, **sin confirmar en la app**;
-  `scripts/test-tablas.mjs` (30 tests), `tsc` y `next build` en verde. Reflejo a web
-  pendiente. Cómo quedó y qué falta probar a mano: [[edicion-en-el-render]] §§ 5 y 7.
-- **Qué es**: lo mismo que `FUN-M-19` pero para las tablas, que es donde más molesta: hoy la
-  tabla desaparece justo cuando hay que mirarla. Escribir en una celda con la tabla a la
+#### `FUN-L-19` 🟢🌐 · `EDITOR-TABLAS-EN-SITIO` (—)
+- **Estado**: implementado en `desktop-tauri` el 2026-08-16 (`scripts/test-tablas.mjs`, 30
+  tests, `tsc` y `next build` en verde) y **confirmado en la app** por el usuario el
+  2026-08-17; **reflejado a web** el mismo día (`06219cf`), junto con `FUN-M-19`. Salió en
+  [[Version 1.6.2]]. Cómo quedó: [[edicion-en-el-render]] §§ 5 y 7.
+- **Qué es**: lo mismo que `FUN-M-19` pero para las tablas, que es donde más molestaba: la
+  tabla desaparecía justo cuando había que mirarla. Escribir en una celda con la tabla a la
   vista, insertar/eliminar/mover filas y columnas y alinear, sin ir a la vista raw.
 - **Por qué es L y la otra M**: no hay motor. Hace falta `lib/tablas.ts`, **puro y sin
   imports** (patrón de `frontmatter.ts`, `bases.ts`, `canvas.ts`, `enlaces.ts`), con parseo,
@@ -704,13 +768,16 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 - **Continuaciones naturales**: `groupBy` y `summaries`, la vista de tarjetas, y editar en
   la celda.
 
-#### `FUN-L-04` · `VAULT-MULTIPLE` (C-G-01)
-- **Qué es**: que un usuario tenga varios vaults y pueda alternar entre ellos desde
-  Configuración → Vault (lista de vaults, abrir/cerrar, marcar uno por defecto).
+#### `FUN-L-04` · `VAULT-MULTIPLE` (C-G-01) — solo falta web
+- **Qué es**: que un usuario tenga varios vaults y pueda alternar entre ellos (lista de
+  vaults, abrir/cerrar, elegir cuál).
 - **Objetivo**: separar contextos (trabajo, personal, proyectos) sin mezclar notas ni
   grafos.
-- **Nota**: en **desktop** ya hay base (vaults en carpeta, entrar/salir; ver
-  `docs/features/vault-en-carpeta.md`); falta pulir y llevarlo a **web**.
+- **Desktop ya lo cubre**: lista y selección de vaults en carpeta, entrar y salir (ver
+  `docs/features/vault-en-carpeta.md`); el estado por vault, que dejó de ser global con
+  `DEF-044`; varios vaults abiertos a la vez, cada uno en su ventana (`FUN-L-16`); y abrir
+  otro vault desde la barra superior sin salir del actual (`FUN-S-24`). Lo que queda es
+  **web**.
 - **A definir**: en web, cómo se modela "varios vaults" por cuenta; límite; si se puede
   mover contenido entre vaults.
 
@@ -768,9 +835,11 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 
 #### `FUN-L-08` · `IA-FRAMEWORK-VAULT` (—) — 🛠️
 - **Qué es**: un conjunto **versionado** de instrucciones para asistentes de IA por
-  terminal (Claude Code) que se genera DENTRO del vault: `CLAUDE.md`, dos skills
+  terminal (Claude Code) que se genera DENTRO del vault: `CLAUDE.md`, skills
   (`mycelium-vault` = sintaxis y exploración; `mycelium-memoria` = técnicas de
-  recuperación y consolidación) y seis comandos (`/vault-buscar`, `/vault-recordar`,
+  recuperación y consolidación; desde la `1.7.0` del framework, con `FUN-L-26`, son **8**:
+  se suma una por herramienta —`.drawio`, `.canvas`, `.excalidraw`, `.base`, Esporas y el
+  calendario—) y seis comandos (`/vault-buscar`, `/vault-recordar`,
   `/vault-mapa`, `/vault-vincular`, `/vault-huerfanas`, `/vault-nota`). Botón
   **opt‑in** en Configuración → Vault que genera/actualiza (muestra versión instalada
   vs disponible); `FRAMEWORK_IA_VERSION` evoluciona junto con Mycelium.
@@ -786,6 +855,8 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   convenciones que el usuario ve en la app.
 - **Alcance actual** (definido): la IA **entiende**, no controla. Solo desktop
   (vault en carpeta). Spec: `docs/features/ia-framework-vault.md`.
+- **Estado**: 🛠️ implementada, sin confirmación explícita del usuario. El framework salió
+  en [[Version 1.1.0]]; su versión propia (`FRAMEWORK_IA_VERSION`) evoluciona aparte.
 - **Futuras extensiones del framework** (ideas):
   - Aviso automático al abrir un vault con framework desactualizado ("hay v1.1").
   - Comandos adicionales: `/vault-resumen` (responder con evidencia citando
@@ -835,9 +906,12 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   convive con el esquema que hoy declara `lib/db/indexer.ts`, y cómo reporta progreso al
   frontend (eventos Tauri).
 
-#### `FUN-L-11` · `FILES-OTROS-TIPOS` (—)
+#### `FUN-L-11` · `FILES-OTROS-TIPOS` (—) — 🟢 desktop
+- **Estado**: implementada en desktop el 2026-08-22 y **confirmada en la app** el
+  2026-09-03. Solo-desktop: en web esos archivos no existen en ninguna parte. Dejó de ser de
+  solo lectura con `FUN-M-26`. Spec en [[otros-tipos-de-archivo]].
 - **Qué es**: que Mycelium deje de ignorar los archivos que no son `.md` ni
-  `.excalidraw`. Hoy un PDF, un archivo de código o un `.txt` que estén en la carpeta del
+  `.excalidraw`. Antes un PDF, un archivo de código o un `.txt` que estén en la carpeta del
   vault **no aparecen en el explorador** y no hay forma de verlos. Deberían listarse y
   abrirse en un visor propio, como una pestaña más del área de trabajo.
 - **Objetivo**: que el vault sea la carpeta de trabajo completa y no haya que salir a otro
@@ -854,9 +928,12 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   - **Abrirlos abre una pestaña igual**, y esa pestaña dice que el documento no se puede
     visualizar. Ni un error, ni un clic que no hace nada.
   - **`.mycignore` sigue mandando.** Ver el callout de abajo.
-- **A definir**: qué tipos tienen visor propio en la primera versión; si los PDF se
-  muestran embebidos o se delegan al sistema operativo; y qué se hace con un binario muy
-  grande (abrirlo o avisar antes).
+- **Resuelto al implementarla** (2026-08-22): tienen visor propio el **texto y el código**,
+  los **PDF** y las **imágenes**, en una pestaña `archivo:<ruta>`. El PDF y la imagen se
+  muestran **embebidos**, por el protocolo `asset:` acotado a la carpeta del vault, y
+  «Abrir con el sistema» queda como salida. El texto lo lee un comando propio que **corta
+  por tamaño** y detecta lo que no decodifica, así que un archivo muy grande se abre
+  truncado en vez de colgar la app. Detalle en [[otros-tipos-de-archivo]].
 - **Relación**: `FUN-S-09` (resaltado de sintaxis) depende de esta; `FUN-S-03` (mostrar la
   extensión) se vuelve prácticamente necesaria en cuanto el explorador lista PDF, código y
   texto plano; `FUN-L-05` (adjuntos en la importación) toca el mismo terreno desde el otro
@@ -869,11 +946,15 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 > segunda gana siempre. Es una tentación real al implementar esto ("ya que soportamos PDF,
 > indexémoslos todos"): no. Ver [[mycignore]].
 
-#### `FUN-L-12` · `EDITOR-CORRECTOR-ORTOGRAFICO` (—)
-- **Estado (2026-09-27)**: 🛠️ **motor propio implementado en desktop, sin confirmar en la app**
-  (qué quedó y cómo probarlo: [[corrector-ortografico]] § 9); web pendiente. Primero se
-  implementó con el corrector del sistema (desktop `85ee186`, web `7b419c4`), pero Edge/WebView2
-  solo revisa lo que se tipea: el texto existente nunca se marca. Decisiones y arquitectura en
+#### `FUN-L-12` 🛠️🌐 · `EDITOR-CORRECTOR-ORTOGRAFICO` (—)
+- **Estado**: 🛠️ **motor propio implementado en desktop el 2026-09-27, sin confirmar en la
+  app** (qué quedó y cómo probarlo: [[corrector-ortografico]] § 9). **Salió en
+  [[Version 2.2.0]]** (desktop); los diccionarios se publicaron en R2 antes del release, con
+  `npm run publicar-diccionarios` ([[Publicar los diccionarios del corrector]]). **Web
+  reflejado** el 2026-09-30 (merge `79f8b8d`), sin publicar ni probar en la app; falta la
+  política de CORS en R2 y el esquema en D1. Primero se implementó con el corrector del
+  sistema (desktop `85ee186`, web `7b419c4`), pero Edge/WebView2 solo revisa lo que se
+  tipea: el texto existente nunca se marca. Decisiones y arquitectura en
   [[corrector-ortografico]].
 - **Qué es**: subrayar las palabras mal escritas mientras se escribe, con la posibilidad
   de activarlo o desactivarlo en Configuración. Debe admitir **varios idiomas a la vez**
@@ -881,11 +962,12 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   sumar idiomas después, no solo español.
 - **Objetivo**: escribir en el vault sin errores tipográficos, y sin que un vault
   bilingüe se llene de subrayados falsos.
-- **A definir**: de dónde salen los diccionarios y con qué motor (un Hunspell en Rust del
-  lado desktop, o algo en JS que sirva también a web); cómo se descargan/empaquetan sin
-  inflar el instalador; si hay diccionario personal del usuario ("añadir palabra"); si
-  ofrece sugerencias al hacer clic derecho o solo marca; y qué pasa con el código, las
-  URLs y los `[[enlaces]]`, que no deben corregirse.
+- **Resuelto al especificarla** (2026-09-27, detalle en [[corrector-ortografico]]): motor
+  `spellbook` en WebAssembly dentro de un *worker*, que sirve a las dos ramas; diccionarios
+  Hunspell de español, inglés e italiano que **no van en el instalador**: el usuario elige
+  cuáles **descargar desde R2**; **diccionario personal** del vault y el de Mycelium
+  («agregar palabra»); **sugerencias** en un menú propio al hacer clic derecho; y el código,
+  las URLs y los `[[enlaces]]` quedan excluidos de la corrección.
 - **Ojo con el rendimiento**: es análisis sobre el texto en vivo dentro de CodeMirror.
   Vale la advertencia de [[CodeMirror y la vista en vivo]] sobre decorar documentos largos.
 
@@ -926,9 +1008,9 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   [[Publicar una version]] § 1.
 - **Se arrancó con la URL `r2.dev`**, sin dominio propio: no bloqueaba y se puede migrar
   después (ver la spec).
-- **Lo único que queda abierto es operativo, no de código**: la **copia de seguridad de la
-  clave privada** fuera de la máquina. Si se pierde, nadie puede volver a actualizarse — y
-  además `tauri build` ya no compila sin ella.
+- **Clave respaldada fuera de la máquina el 2026-08-08**: era lo único que quedaba abierto,
+  y era operativo, no de código. Si la clave privada se pierde, nadie puede volver a
+  actualizarse — y además `tauri build` ya no compila sin ella.
 - **Confirmado** el 2026-08-18, incluido el modo avanzado de `FUN-M-16`.
 
 #### `FUN-L-16` · `VAULT-VENTANAS-MULTIPLES` (—) — 🛠️ desktop
@@ -997,7 +1079,7 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 > nadie compila. Ninguna de las dos cosas es un problema hoy: solo se distribuye Windows y
 > la compilación local ya es la que se viene usando.
 
-#### `FUN-L-18` · `FILES-CANVAS` (—) — 🛠️ desktop
+#### `FUN-L-18` · `FILES-CANVAS` (—) — 🛠️ ambas
 - **Qué es**: un tipo de archivo nuevo, el **canvas** (`.canvas`), para disponer notas y
   textos en un lienzo infinito y conectarlos con flechas. Tres elementos: texto suelto,
   tarjetas de markdown y tarjetas que **son** una nota del vault (contenido en vivo).
@@ -1011,9 +1093,14 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   interoperabilidad — mismo criterio que `FUN-M-04`. Tarjetas de texto **y** de nota. Las
   **flechas NO cuentan** como conexión del grafo: una arista se crea de una sola manera, con
   un `[[enlace]]`.
-- **A definir**: si se usa una librería de nodos y aristas (React Flow es la candidata) o se
-  construye a mano — lo primero lo mantiene en `L`, lo segundo lo lleva a `XL` sin aportar
-  nada distintivo. Y confirmar si una tarjeta de nota cuenta como arista (ver la spec § 5).
+- **Estado**: **implementado en desktop** el 2026-08-08, **sin confirmar**, y en web
+  (`0a0b331`). Salió en [[Version 1.6.0]]. Se cambió la recomendación de la spec y se
+  construyó **sin librería de nodos** —React Flow era la candidata—: `MiniGraph.tsx` ya
+  tenía pan/zoom/arrastre propios, y el proyecto viene evitando dependencias. El parser
+  **conserva lo que no entiende** —`link`, `group`, `subpath`, colores— para no borrarle
+  trabajo a quien traiga un canvas de Obsidian. Ver [[canvas]] § 9.
+- **Resuelto al implementarlo**: la tarjeta de nota **sí** cuenta como arista del grafo, por
+  coherencia con los embeds; las flechas siguen sin contar (ver [[canvas]] § 9).
 - Spec completa en [[canvas]].
 
 #### `FUN-L-20` · `FILES-DRAWIO` (—)
@@ -1035,15 +1122,12 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   conexión, justo donde se pierde trabajo si falla. Se paga en tamaño: el `draw.war` de la
   release fijada `v31.4.6` son 51,3 MB (Apache-2.0) y el instalador pasa de 10,2 MB a unos
   30-35 MB. La webapp no entra a git: la baja un script en el build.
+- **Estado**: 🟢 implementada y confirmada el 2026-09-23; salió en [[Version 2.1.0]]. El
+  instalador quedó en 40,3 MB, por encima de lo estimado, y el usuario lo aceptó.
 - Spec completa en [[drawio]].
 
-### Pendientes — tamaño XL
+### Tamaño XL
 
-- **Implementado en desktop** el 2026-08-08, **sin confirmar**. Se cambió la
-  recomendación de la spec y se construyó **sin librería de nodos** (`MiniGraph.tsx` ya
-  tenía pan/zoom/arrastre propios, y el proyecto viene evitando dependencias). El parser
-  **conserva lo que no entiende** —`link`, `group`, `subpath`, colores— para no borrarle
-  trabajo a quien traiga un canvas de Obsidian. Ver [[canvas]] § 9.
 #### `FUN-XL-01` · `STORAGE-LOCAL-FIRST-NUBE` (C-G-03)
 - **Qué es**: rearquitectura del almacenamiento en **desktop** hacia un modelo
   *local‑first*: los markdowns y archivos viven en local y hay un botón para **guardar
@@ -1098,14 +1182,6 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   — que es exactamente lo que hace falta para nombrar la nota del día y rellenarla. Lo que
   queda es la preferencia de qué Espora usar, la carpeta destino y el formato del nombre.
 - **A definir**: formato de nombre/fecha, carpeta destino y plantilla por defecto.
-
-#### `FUN-M-08` · `LINKS-REESCRITURA-RENOMBRAR` (HU-23)
-- **Qué es**: al renombrar una nota, actualizar automáticamente todos los `[[enlaces]]`
-  que apuntaban a su título anterior para que sigan apuntando a ella.
-- **Objetivo**: evitar enlaces rotos al reorganizar el vault; hoy renombrar deja los
-  enlaces viejos colgando.
-- **A definir**: alcance (títulos, alias, embeds `![[ ]]`); si es automático o pide
-  confirmación mostrando cuántos enlaces cambiarían.
 
 #### `FUN-M-09` · `EXPORT-ZIP-SERVIDOR` (HU-09)
 - **Qué es**: para vaults muy grandes (≈ ≥ 200 MB), delegar la generación del ZIP al
@@ -1183,9 +1259,9 @@ tocar los mismos archivos dos veces y probar lo mismo dos veces.
 > Y no se agrupa por agrupar: lo que no tiene parentesco real **va solo**, aunque sea
 > pequeño. Un release de una sola unidad es perfectamente válido.
 
-> [!important] Decidido el 2026-09-04: qué entra en el próximo release
+> [!success] Decidido el 2026-09-04 y ya salió: [[Version 1.7.0]] (desktop) y web `1.3.0`
 > Doce funcionalidades elegidas por el usuario, más `FUN-S-17`, que se sumó el 2026-09-05
-> sobre la marcha (ver la tabla). **Todas juntas son UN minor**
+> sobre la marcha (ver la tabla). **Todas juntas fueron UN minor**
 > —desktop `1.7.0`, web `1.3.0`—: el tamaño del salto lo decide el cambio más
 > significativo, nunca cuántos cambios lleva (ver [[Versionado del sistema]]). Los bloques
 > de abajo siguen siendo candidatos independientes; esta tanda los atraviesa.
@@ -1221,6 +1297,13 @@ feedback antes y volver a tocarlo después sería hacerlo dos veces — y al rev
 indexado sin rehacer la pantalla dejaría el defecto vivo.
 Ver [[Rendimiento de la apertura del vault]].
 
+> [!info] Estado del bloque (2026-10-01)
+> `DEF-042` ✅ (pantalla de carga propia, 2026-08-13). `FUN-M-13` quedó **absorbida por
+> `FUN-M-38`** (un solo walker, `cc7fea4`) sin esperar a `FUN-L-10`. `FUN-M-14` está **a
+> medias**: `FUN-M-38` hizo que las escrituras propias no reindexen (`d3c94be`), y falta el
+> reindexado dirigido de los cambios externos. **Queda** `FUN-L-10` y lo que falta de
+> `FUN-M-14`.
+
 #### B · Etiquetas — `FUN-M-05` + `FUN-M-06` · minor · ambas
 Las dos necesitan lo mismo y hoy inexistente: una **agregación de etiquetas del vault**
 (qué etiquetas hay, cuántas notas cada una). Esa es la parte difícil y es compartida; el
@@ -1237,8 +1320,8 @@ renombrar; `FUN-M-15` los resuelve por `aliases`. Separadas, esa capa se toca do
 > [!success] `FUN-M-08` ya está: el camino quedó despejado para `FUN-M-24`
 > Se implementó el 2026-08-18, **antes** que el renombrado desde el título, que es el orden
 > que hacía falta: poner el renombrado donde uno escribe sin pensar habría convertido una
-> molestia conocida —enlaces rotos en silencio— en pérdida de datos cotidiana. Queda por
-> confirmar en la app y por reflejar a web.
+> molestia conocida —enlaces rotos en silencio— en pérdida de datos cotidiana. **Confirmada
+> en la app y reflejada a web el 2026-09-03** (`1134b91`). Del bloque queda `FUN-M-15`.
 
 #### M · Adoptar un vault que ya existía — `FUN-M-15` + `FUN-M-17` + `FUN-S-10` · minor · ambas
 El **caso de entrada** de Mycelium: alguien abre su proyecto de siempre y no tiene ni una
@@ -1347,6 +1430,12 @@ separado significaría tocar la misma capa dos veces.
 `FUN-S-05` (archivo de ejemplo al crear un vault) se suma porque vive en el flujo de
 creación que `FUN-L-04` va a tocar igual; no comparte la raíz de las otras tres.
 
+> [!info] Estado del bloque (2026-10-01)
+> `DEF-044` ✅ (un almacén por vault, 2026-08-13). `FUN-L-16` hecha: salió en
+> [[Version 1.6.1]]. `FUN-S-24` (abrir otro vault desde la barra superior, [[Version 2.2.0]])
+> cubre parte de la experiencia de alternar. **Quedan** `FUN-L-04` —solo su parte web— y
+> `FUN-S-05`.
+
 #### G · Poner la web al día — ✅ hecho el 2026-08-08 · minor · **web**
 Se reflejaron `FUN-M-03` (Esporas), `FUN-M-04` (metadatos YAML), `FUN-S-02` (ancho de
 tabulación), la navegación por pestaña (`DEF-039`/`DEF-040`/`DEF-041`), `DEF-043`,
@@ -1381,6 +1470,11 @@ explorador muestra PDF, código y texto plano —soportados o no—, la extensi�
 un detalle cómodo y pasa a ser la única forma de distinguirlos. Estaba clasificada como
 acompañante suelta y ahora tiene un parentesco real.
 
+> [!success] Bloque cerrado
+> Las tres están hechas y confirmadas en la app: `FUN-S-03` el 2026-09-03 (reflejada a web el
+> mismo día), `FUN-L-11` el 2026-09-03 y `FUN-S-09` el 2026-09-05. `FUN-L-11` y `FUN-S-09`
+> son solo-desktop por naturaleza: en web no hay archivos sueltos que abrir.
+
 #### L · Distribución — `FUN-L-14` + `FUN-M-16` + `FUN-L-15` · minor · desktop
 `FUN-M-16` (elegir versión, incluida una anterior) reutiliza **todo** lo de `FUN-L-14`: el
 mismo bucket, la misma clave, el mismo diálogo de confirmación y el mismo verificador de
@@ -1408,6 +1502,10 @@ vez.
 *Son separables*: si una de las dos se vuelve urgente sola, no hay dependencia técnica
 que lo impida. Lo que se pierde es diseñar dos veces el mismo selector.
 
+> [!info] Estado del bloque (2026-10-01)
+> Se separaron: `FUN-L-12` salió sola en [[Version 2.2.0]] (desktop; web reflejado, sin
+> publicar). **Queda** `FUN-L-13`.
+
 #### I · Colaboración real — `FUN-XL-03` + `FUN-XL-02` + `FUN-L-06` + `FUN-S-07` · major · **web**
 `FUN-XL-03` (D1/R2/Durable Objects) es **prerrequisito duro** de `FUN-XL-02`: sin Durable
 Objects no hay edición simultánea. `FUN-L-06` (historial de quién cambió qué) y
@@ -1416,28 +1514,38 @@ sueltas. Es rearquitectura → **major**.
 
 ### Van solas
 
-No tienen parentesco suficiente con nada: cada una es su propio release.
+No tienen parentesco suficiente con nada: cada una es su propio release. Las marcadas
+**sin agrupar** se sumaron el 2026-10-01 al revisar el backlog: son pendientes que no
+estaban en ningún bloque ni acá, y todavía **no hay una decisión** de con qué van; el
+dígito es el que sugiere la guía «Relación tamaño ↔ versión», no uno acordado.
 
 | ID | Por qué va sola | Dígito |
 |---|---|---|
-| ~~`FUN-L-03` `FILES-BASES-TABLA`~~ | ✅ **Implementada** en las dos ramas el 2026-08-08, sin confirmar. Sigue sin release propio: el usuario pidió más funcionalidades antes de publicar, así que viajará en el minor que salga | minor |
+| ~~`FUN-L-03` `FILES-BASES-TABLA`~~ | ✅ **Implementada** en las dos ramas el 2026-08-08, sin confirmar. Salió en [[Version 1.6.0]], que nadie instaló: se publicó absorbida por la [[Version 1.6.2]] | minor |
 | `FUN-L-09` `IA-MCP-MYCELIUM` | Único pendiente de la línea de IA; `FUN-L-07` y `FUN-L-08` ya salieron | minor |
 | `FUN-L-01` `MACROS-HOTKEYS` | Capa transversal de comandos: no comparte código con ninguna funcionalidad concreta | minor |
 | `FUN-L-05` `IMPORT-ADJUNTOS` | Subsistema de importación, aislado del resto | minor |
-| `FUN-L-20` `FILES-DRAWIO` | Un tipo de archivo nuevo, con su editor embebido: no comparte código con nada pendiente. Sí comparte **molde** con `FUN-L-18`, pero aquella ya está hecha | minor |
+| ~~`FUN-L-20` `FILES-DRAWIO`~~ | ✅ **Implementada y confirmada** el 2026-09-23; salió en [[Version 2.1.0]]. Un tipo de archivo nuevo, con su editor embebido: no comparte código con nada pendiente. Sí comparte **molde** con `FUN-L-18`, pero aquella ya está hecha | minor |
 | `FUN-M-02` `GRAPH-BUSCADOR-FILTRO` | Solo toca el grafo (ver la alternativa del bloque B) | minor |
 | `FUN-M-07` `DAILY-NOTE` | Ya tiene todo lo que necesitaba: `FUN-M-03` le dio plantillas y sustitución de variables | minor |
 | `FUN-S-18` + `FUN-S-19` + `FUN-M-37` `EMBED-*` | Las tres tocan el mismo reconocedor de `![[…]]`; se hacen juntas o cada una rehace a la anterior | minor |
-| `FUN-S-20` `LINK-EXTERNO-NAVEGADOR` | Corrige `DEF-101`, que es grave y barato: no espera a nada ni comparte código con lo demás | patch |
+| ~~`FUN-S-20` `LINK-EXTERNO-NAVEGADOR`~~ | ✅ **Implementada y confirmada** el 2026-09-23; salió en [[Version 2.1.0]], también en web. Corrige `DEF-101`, que es grave y barato: no espera a nada ni comparte código con lo demás | patch |
 | `FUN-M-09` `EXPORT-ZIP-SERVIDOR` (web) | Exportación en servidor; independiente de identidad y de colaboración | minor |
 | `FUN-XL-01` `STORAGE-LOCAL-FIRST-NUBE` | Rearquitectura de almacenamiento del desktop. Necesita que exista infraestructura de nube, pero es trabajo aparte del bloque I | major |
+| `FUN-S-13` `TABS-HISTORIAL-RUEDA` | **Sin agrupar**. Toca solo las flechas de historial de las pestañas | minor |
+| `FUN-S-23` `REINDEXAR-VAULT` | **Sin agrupar**. Roza el bloque A (índice del vault), pero no comparte su código: es un botón en Configuración → Vault que cierra y borra el índice | minor |
+| `FUN-M-18` `EDITOR-REINDENTAR` | **Sin agrupar**. Es continuación de `FUN-S-02` y reutiliza el respaldo, el manifiesto y el deshacer de `FUN-M-17`, así que conviene hacerla **después** de completar esa | minor |
+| `FUN-M-22` `EXPORT-FEEDBACK-DESCARGA` | **Sin agrupar**. Solo toca la exportación | minor |
+| `FUN-M-23` `MERMAID-VISOR` | **Sin agrupar**. Solo toca la vista de lectura de los diagramas Mermaid | minor |
+| `FUN-L-21` `DIAGNOSTICO-FALLOS` | **Sin agrupar**. Recorre todo el proyecto (frontend y Rust), así que no comparte código con una funcionalidad concreta sino con todas | a decidir: el usuario común no ve nada nuevo (patch), pero gana un registro para usuarios experimentados |
 
 ### Las dos que pueden viajar de acompañantes
 
-*(`FUN-S-02` salió sola en la [[Version 1.5.0]], sin acompañar a ningún bloque: se
-implementó para tener una segunda versión con la que verificar la autoactualización.)*
+> [!info] Hoy queda una sola: `FUN-S-08`
+> `FUN-S-02` **ya salió**, sola, en la [[Version 1.5.0]], sin acompañar a ningún bloque: se
+> implementó para tener una segunda versión con la que verificar la autoactualización.
 
-`FUN-S-02` (ancho de tabulación) y `FUN-S-08` (`cssclasses`) no tienen parentesco con nada,
+`FUN-S-02` (ancho de tabulación) y `FUN-S-08` (`cssclasses`) no tenían parentesco con nada,
 pero son **de un archivo y un rato**. Forzarles un bloque sería agrupar por agrupar; darles
 un release propio a cada una es correcto pero desproporcionado. Lo natural es que **se
 sumen a cualquier release que ya esté saliendo**: las dos aportan capacidad nueva (minor),
@@ -1447,7 +1555,11 @@ así que quedan absorbidas por cualquier bloque de su tamaño o mayor.
 visor, ver la extensión dejó de ser un extra.)*
 
 > [!note] Lo que no entra en esta agrupación
-> **Defectos**: quedan **cinco abiertos** (2026-08-03). `DEF-047` (menú contextual fuera de
+> **Actualización del 2026-10-01**: los cinco defectos que siguen están **resueltos** (✅
+> en [[bugs-progreso]]): `DEF-042` y `DEF-044` el 2026-08-13, `DEF-047` y `DEF-048` el
+> 2026-08-13, y `DEF-045` el 2026-09-03. Se conserva el texto original como registro.
+>
+> **Defectos**: quedaban **cinco abiertos** (2026-08-03). `DEF-047` (menú contextual fuera de
 > pantalla) y `DEF-048` (falta margen inferior) son visuales y sueltos — dos correcciones
 > pequeñas que caben en cualquier release. Otros dos están en un bloque: `DEF-042` en el A y
 > `DEF-044` en el F, porque comparten trabajo con las funcionalidades de esos bloques.

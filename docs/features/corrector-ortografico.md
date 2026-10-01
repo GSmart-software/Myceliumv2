@@ -292,8 +292,9 @@ Edge headless —el motor de WebView2— con Tauri simulado y los diccionarios r
 3. Configuración → Editor: descargar Español (y Inglés), abrir una nota con errores.
 
 Para publicarlos de verdad: el mismo script **sin** `--simulacro` (necesita `wrangler`
-autenticado). **Todavía no se subió nada a R2**: sin eso, la app instalada muestra «No se
-pudo consultar la lista de diccionarios».
+autenticado). **Ya se subieron a R2** con `npm run publicar-diccionarios`, antes de la
+[[Version 2.2.0]] (ver [[Publicar los diccionarios del corrector]]); sin ellos, la app
+instalada mostraría «No se pudo consultar la lista de diccionarios».
 
 ### Qué cubren los tests y qué falta probar en la app
 
@@ -313,7 +314,8 @@ pudo consultar la lista de diccionarios».
 ### Lo que no se hizo
 
 - Web (otra rama).
-- Subir los diccionarios a R2 (lo hace el usuario con sus credenciales).
+- ~~Subir los diccionarios a R2 (lo hace el usuario con sus credenciales).~~ Hecho antes de
+  la [[Version 2.2.0]].
 - El `LICENSE.txt` de cada diccionario lleva autor, fuente, licencia, las URLs del texto
   completo de cada licencia y el aviso que trae el paquete, pero **no el texto completo
   de la GPL/LGPL/MPL** (los paquetes no lo incluyen). Revisarlo junto con la advertencia
