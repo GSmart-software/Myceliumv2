@@ -190,6 +190,26 @@ dibujado, con margen y **sin agrandar más allá del 100 %** un dibujo chico. Ra
   desde disco también es un `load`, y distinguir la primera apertura desde el `iframe`
   compartido no es trivial. Además, draw.io ya abre mostrando la página.
 
+### Canvas tras la segunda evaluación ciega (2026-09-30)
+
+Todo pasaba el validador, pero el mapa radial de 6 ramas × 3 ideas medía ~2420 × 1590 y,
+con el encuadre al abrir, se veía al ~44 % (ilegible). Cambios en `mycelium-canvas`:
+
+- **Tamaño máximo ~1800 × 1200** en los dos ejes (abre al ~59 % en ~1150 × 800 de lienzo),
+  con la fórmula del encuadre y qué hacer si se pasa.
+- El radial queda **solo para ramas**; con ideas por rama, **mapa en peine** (ramas en dos
+  columnas a los costados del centro, ideas apiladas hacia afuera): el 6 × 3 mide
+  1760 × 1190. Un segundo anillo radial nunca entraba (medido de 3 a 8 ramas × 1–3 ideas).
+- Notas relacionadas: salientes incluyendo las **propiedades** (`proyecto: "[[X]]"`),
+  hermanas y dos saltos en una segunda columna colgada de la vecina, y no inventar si la
+  nota casi no tiene enlaces. Flujo: **rama que se reúne** (codo `bottom → right`).
+  Tablero: estado fuera de la paleta sin color, compactar el origen, orden de las movidas,
+  respetar medidas existentes. Scripts de modificación **no idempotentes**. Lienzo
+  huérfano: enlazarlo desde la nota natural, o ofrecerlo.
+- Validador: aviso `TITULO_ANGOSTO` (título `# …` que no cubre la fila de grupos que
+  encabeza). Fixtures nuevos `bueno-mapa-peine` y `bueno-flujo-reunion`; `bueno-mapa-radial`
+  pasó a ser solo ramas.
+
 ### Hallazgos de la parte B que NO se arreglaron
 
 Salieron al leer el código para escribir las skills. Las skills los esquivan (le dicen a la
