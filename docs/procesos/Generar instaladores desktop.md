@@ -37,8 +37,17 @@ cd frontend
 CARGO_BUILD_JOBS=2 npx tauri build
 ```
 
-Qué hace: corre `next build` (config `output: "export"` → `out/`), compila Rust en
-release y empaqueta desde `frontendDist: "../out"`. Con `bundle.targets: "all"`, en
+Qué hace: compila el servidor MCP de control y lo deja como sidecar
+(`npm run preparar-mcp`, ver abajo), corre `next build` (config `output: "export"` →
+`out/`), compila Rust en release y empaqueta desde `frontendDist: "../out"`.
+
+> [!info] El servidor MCP viaja en el instalador (desde `FUN-L-09`, Parte 1)
+> `bundle.externalBin` incluye `binaries/mycelium-mcp`: Tauri exige
+> `src-tauri/binaries/mycelium-mcp-<target-triple>.exe` al compilar y lo instala junto a
+> `Mycelium.exe` como `mycelium-mcp.exe`. Lo prepara `npm run preparar-mcp`, que es el
+> primer paso del `beforeBuildCommand`: no hay que hacer nada a mano. Un `cargo build
+> --release` suelto sin ese paso **se corta** a propósito (`build.rs`): un instalador
+> con el MCP vacío sería peor que no compilar. Ver [[mcp-control]]. Con `bundle.targets: "all"`, en
 Windows genera **MSI** (WiX) y **NSIS**.
 
 > [!warning] `CARGO_BUILD_JOBS=2` no es opcional aquí

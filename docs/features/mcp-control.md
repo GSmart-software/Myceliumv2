@@ -168,6 +168,163 @@ una en la app.
 | **3. Archivos** | `feat/mcp-archivos-desktop` | Renombrar, mover, borrar, papelera, la confirmación por alcance, el hook de `mv`/`rm` | Renombrar una nota enlazada y ver los enlaces intactos |
 | **4. Diccionario** | `feat/mcp-diccionario-desktop` | `mycelium_diccionario` | «Agregá al diccionario los términos de esta nota» |
 
+## Cómo quedó — Parte 1 (canal y mostrar, 2026-10-01)
+
+Rama `feat/mcp-canal-desktop`. Entra el canal en las dos puntas, el interruptor, el
+sidecar, `mycelium_estado`, `mycelium_abrir`, el `.mcp.json` y la sección «Operar
+Mycelium» del `CLAUDE.md` generado.
+
+### Dónde está cada cosa
+
+| Pieza | Archivo |
+|---|---|
+| Lo que comparten las dos puntas: nombre del canal, forma de pedidos y respuestas, códigos de error, plazos | `src-tauri/crates/mycelium-vault/src/canal.rs` |
+| Si el control está encendido, leído del disco | `src-tauri/crates/mycelium-vault/src/preferencias.rs` |
+| La escucha en la app: pipe con descriptor de seguridad, puente al frontend, comandos | `src-tauri/src/control.rs` |
+| El cliente del pipe en el servidor, con plazos | `src-tauri/crates/mycelium-mcp/src/canal.rs` |
+| Las dos herramientas: esquema, validación y redacción de las respuestas | `src-tauri/crates/mycelium-mcp/src/herramientas.rs` |
+| Las operaciones en la app (`estado`, `abrir`), el interruptor y el `.mcp.json` | `frontend/lib/mcpControl.ts` |
+| La lógica pura: resolver el objetivo, el salto, las candidatas | `frontend/lib/mcpControlLogica.ts` |
+| Fusionar y quitar nuestra entrada del `.mcp.json` | `frontend/lib/ia/mcpJson.ts` |
+| El interruptor | `components/settings/VaultSection.tsx` (preferencia `controlIa` de `stores/prefsVaultStore.ts`) |
+| El sidecar | `bundle.externalBin` en `tauri.conf.json` · `scripts/preparar-mcp.mjs` · `src-tauri/build.rs` |
+| Pruebas | `cargo test -p mycelium-vault -p mycelium-mcp` (incluye `tests/punta_a_punta.rs`) · `cargo test --lib control` · `node --test scripts/test-mcp-control.mjs` |
+
+### Cómo viaja un pedido
+
+```mermaid
+sequenceDiagram
+  participant CC as Claude Code
+  participant S as mycelium-mcp
+  participant R as Mycelium · Rust (control.rs)
+  participant W as Mycelium · ventana (mcpControl.ts)
+  CC->>S: tools/call mycelium_abrir
+  S->>R: una línea JSON {id, op, args, vault} por el pipe del vault
+  R->>W: evento mcp-pedido (solo a esa ventana)
+  W->>R: mcp_responder(id, {ok, resultado})
+  R->>S: una línea JSON {id, ok, resultado}
+  S->>CC: «Abrí «Plan» en el panel 1, en segundo plano…»
+```
+
+### Decisiones
+
+- **El nombre del canal se calcula en las dos puntas con la misma función**
+  (`nombre_canal`, en el crate compartido) y sobre **la cadena registrada** en
+  `vaults.json`: la app resuelve su ruta contra el registro antes de hashearla, igual
+  que el servidor. Si una hasheara otra escritura de la misma carpeta, nunca se
+  encontrarían.
+- **Un pedido por conexión** del lado del servidor (la app acepta varios por
+  conexión): atiende una llamada a la vez y reconectar cuesta microsegundos.
+- **Un pedido a la vez por ventana** del lado de la app (un `Mutex` por escucha): un
+  agente que abre seis notas en paralelo no deja el `tabsStore` en un estado que nadie
+  diseñó.
+- **Plazos**: la app contesta `OCUPADA` si su ventana no responde en 10 s; el servidor
+  corta a los 13 s por si la app misma no contesta. La lectura del pipe en Windows no
+  admite plazo, así que se hace en un hilo: si vence, el hilo queda colgado hasta que la
+  app conteste o cierre (caso raro, documentado en `canal.rs`). Mientras el vault se
+  abre, `OCUPADA` trae la etapa de la pantalla de carga y `reintentar_en_ms`.
+- **`APP_CERRADA` vs `MCP_DESACTIVADO`**: con el control apagado no hay pipe, así que
+  «nadie escucha» no distingue los dos casos. Los distingue la preferencia del disco
+  (`controlIa`): encendida → la app está cerrada; apagada → el control está apagado, y
+  el mensaje dice dónde se enciende. `mycelium_estado` no falla en ninguno de los dos:
+  informa `app: cerrada` o `app: sin canal · control: apagado`.
+- **El pedido declara su vault** y la app lo compara (`misma_ruta`): protege de un pipe
+  viejo o de un cliente apuntado a otro vault. El frontend vuelve a comparar antes de
+  atender, y Rust emite el evento con `emit_to` a la etiqueta de la ventana.
+- **`AMBIGUO` donde un enlace elegiría**: el título se resuelve con las reglas de los
+  wikilinks (`candidatosWikilinkEnIndice`, que se separó de `resolveWikilinkEnIndice`
+  sin cambiar lo que resuelve un enlace), pero con dos candidatas se contesta con las
+  rutas en vez de elegir la más cercana a la raíz.
+- **`NO_ENCONTRADO` con candidatas** por parecido de título (distancia de edición sin
+  tildes ni mayúsculas, más contener o estar contenido), hasta cinco.
+- **`grafo` y `calendario` son palabras reservadas**: una nota que se llame así se abre
+  por su ruta (`grafo.md`). También se aceptan los archivos que no se indexan (PDF,
+  imágenes) por su ruta, y `Nota#Sección` como en un enlace.
+- **`ir_a` se resuelve contra el archivo antes de abrir**: un encabezado que no existe es
+  `NO_ENCONTRADO` con la lista de encabezados, y no se abre la pestaña para nada.
+  Encabezado y texto se convierten en una **línea**, que el editor recibe por el mismo
+  mecanismo que la búsqueda global (`lib/editor/pendingMatch.ts`, que ahora acepta
+  `{ linea }`). La app **no tenía** salto a `[[nota#encabezado]]`: esto es nuevo.
+- **El foco**: con `foco: false` (el defecto) la pestaña se abre con
+  `openNoteBackground` y, si la nota ya estaba a la vista, **no se le mueve el cursor al
+  usuario**: el salto queda pendiente para cuando la mire, o se avisa que no se hizo.
+  Con `foco: true` se activa y se pone en la URL, como un clic (la URL es la fuente de
+  navegación: el workspace registra su `router.replace` con `registrarNavegadorMcp`).
+- **`revelar`**: la app no tenía «revelar en el explorador»; se hace lo mínimo —abrir el
+  panel del explorador y desplegar las carpetas de la nota—.
+- **`sin_guardar`** sale del estado de guardado por nota (`syncStore`: `local`,
+  `syncing` o `error`), el mismo que pinta el punto de la pestaña. Los dibujos solo pasan
+  por `syncing`, así que casi nunca figuran sin guardar.
+- **El `.mcp.json` se fusiona**: se agrega o reemplaza solo `mcpServers.mycelium`,
+  conservando el orden y las demás claves; un archivo que no es JSON no se toca y se
+  dice. Al apagar se quita solo esa entrada, y el archivo se borra únicamente si quedó
+  vacío **y** lo había creado Mycelium (`mcpJsonCreado` en las preferencias). Al abrir
+  un vault con el control encendido se refresca la ruta del binario (cambia entre la app
+  instalada y la de desarrollo). La entrada es `command` + `args: []` +
+  `env.MYCELIUM_VAULT`.
+- **Sidecar**: `bundle.externalBin: ["binaries/mycelium-mcp"]`. `npm run preparar-mcp`
+  compila el servidor (release; con `--dev`, debug) y lo copia a
+  `src-tauri/binaries/mycelium-mcp-<target-triple>.exe` (fuera de git); corre solo en
+  `beforeBuildCommand` y `beforeDevCommand`. Como `tauri-build` exige el archivo hasta
+  para un `cargo check`, `build.rs` lo suple en debug (con el binario ya compilado, o un
+  marcador vacío que la app reconoce y no ofrece) y en release **corta** con la
+  instrucción: un instalador con un MCP vacío sería peor que no compilar. La ruta la da
+  `mcp_ruta_binario`: junto al ejecutable, instalado y en desarrollo.
+- **Seguridad del pipe**: DACL explícito y protegido (`D:P(A;;GA;;;<SID del usuario>)`),
+  `PIPE_REJECT_REMOTE_CLIENTS` y `first_pipe_instance` en la primera instancia (si otro
+  proceso ya tiene el nombre, la app no lo comparte). Un test crea el pipe, entra como el
+  usuario y comprueba que no admite otra «primera» instancia. **El límite**: cualquier
+  proceso del mismo usuario puede hablarle; es la misma confianza que ya tiene para
+  escribir el vault. No hay *token* (el de [[MCP de Mycelium - control]] § 3.4 no entró
+  en este recorte).
+- **El framework sigue en `1.7.0`** (sin publicar): «Operar Mycelium» es una tabla
+  `Querés… | Herramienta` para que las partes 2–4 agreguen filas ([[ia-framework-vault]]).
+
+### Cómo probarlo en la app
+
+1. `cd frontend && npx tauri dev` (corre solo `npm run preparar-mcp -- --dev`) y abrir
+   Mycelium con un vault.
+2. Configuración → Vault → «Asistente IA (Claude Code)» → encender **«Dejar que la IA
+   controle Mycelium»**. Aparece el aviso «Control encendido…» y, en la raíz del vault,
+   un `.mcp.json` con `mcpServers.mycelium` apuntando a `target\debug\mycelium-mcp.exe`
+   (o al `mycelium-mcp.exe` junto a `Mycelium.exe`, en la instalada). Si ya había un
+   `.mcp.json` con otros servidores, siguen ahí.
+3. Regenerar las instrucciones IA desde el mismo bloque: el `CLAUDE.md` trae «Operar
+   Mycelium».
+4. Abrir una sesión **nueva** de Claude Code en el vault (la terminal integrada sirve) y
+   aprobar el servidor `mycelium` cuando lo pregunte. `/mcp` lo muestra conectado, con
+   dos herramientas.
+5. «¿Qué tengo abierto?» → lista las pestañas por panel, la visible y las que tienen
+   cambios sin guardar (escribí algo en una nota y preguntá enseguida).
+6. «Abrime la nota X» → se abre **en segundo plano**: aparece la pestaña, no cambia la
+   que estás mirando. «Mostrame X ahora» o «llevame al encabezado Y de X» → la activa y
+   el cursor queda en ese encabezado.
+7. «Mostrame el grafo» / «el calendario» → se abren como pestaña.
+8. Un título repetido → la IA cuenta que hay dos y con qué rutas; uno mal escrito → te
+   ofrece los parecidos.
+9. Apagar el interruptor → la IA recibe `MCP_DESACTIVADO` diciendo dónde se enciende, y
+   la entrada `mycelium` desaparece del `.mcp.json` (el archivo entero, si lo había
+   creado Mycelium). Cerrar Mycelium con el control encendido → `mycelium_estado`
+   contesta `app: cerrada`, y `mycelium_abrir`, `APP_CERRADA`.
+10. Con dos vaults en dos ventanas, cada sesión de Claude Code opera solo la ventana de
+    su vault.
+
+### Límites y lo que queda abierto
+
+- **Sin probar en la app** por quien lo implementó: la verificación fue de tipos, tests
+  de Rust (incluida una punta a punta con el binario real contra una app falsa en un pipe
+  de verdad) y tests de la lógica en Node. Lo visible lo confirma el usuario con los pasos
+  de arriba.
+- **Unix**: el socket compila con la misma forma, pero no se probó.
+- **Recompilar con una sesión abierta**: en desarrollo el `.mcp.json` apunta a
+  `target/debug/mycelium-mcp.exe`; si una sesión de Claude Code lo tiene corriendo,
+  Windows no deja reemplazarlo y la compilación falla. Cerrar la sesión antes de
+  recompilar.
+- **El salto en modo lectura**: como el de la búsqueda global, mueve el cursor del
+  editor; con la nota en modo lectura no se ve el desplazamiento.
+- El **registro de actividad** (§ 2.3) entra en la Parte 2, con la primera herramienta
+  que escribe.
+
 ## Relacionadas
 
 - [[Skill o MCP, segun quien sabe hacerlo]] — por qué esto va por MCP y lo demás por skill.

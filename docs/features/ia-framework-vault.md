@@ -32,7 +32,7 @@ que la IA sepa qué herramienta corresponde a cada situación.
 
 | Archivo en el vault | Rol |
 |---|---|
-| `CLAUDE.md` | Eje de memoria: obligaciones (recuperar/consolidar), anatomía de la memoria (nota/enlace/tag/carpeta/grafo/MOC), los dos protocolos, **tabla de herramientas y cuándo usarlas**, reglas duras, y qué es Mycelium por fuera (conocer, no controlar) |
+| `CLAUDE.md` | Eje de memoria: obligaciones (recuperar/consolidar), anatomía de la memoria (nota/enlace/tag/carpeta/grafo/MOC), los dos protocolos, **tabla de herramientas y cuándo usarlas**, reglas duras, **«Operar Mycelium»** (las herramientas `mycelium_*` del MCP de control y la línea divisoria, [[mcp-control]]) y qué es Mycelium por fuera |
 | `.claude/skills/mycelium-vault/SKILL.md` | Referencia **técnica**: sintaxis verificada (wikilinks/alias/embeds/tags/callouts/Mermaid/KaTeX), estructura, recetas de `grep` para recorrer el vault (backlinks, salientes, tags), `.mycignore`, precauciones |
 | `.claude/skills/mycelium-memoria/SKILL.md` | **Técnicas de memoria**: recuperación en cinco movimientos, señales de que falta recuperar más, cuándo crear vs ampliar (tabla de decisión), cómo redactar para recuperación futura, mantenimiento (huérfanas, enlaces rotos, hubs) y antipatrones |
 | `.claude/commands/vault-buscar.md` | `/vault-buscar <pregunta>`: responde con evidencia del vault y citas (solo lee) |
@@ -44,6 +44,7 @@ que la IA sepa qué herramienta corresponde a cada situación.
 | `.claude/skills/mycelium-{drawio,canvas,excalidraw,base,esporas,calendario}/SKILL.md` | **Una skill por herramienta** (desde la 1.7.0, [[ia-skills-herramientas]]): formato, geometría, recetas y cómo modificar sin romper |
 | `.claude/skills/mycelium-{drawio,canvas,excalidraw}/validar-<formato>.mjs` | El **validador** de cada formato, sin dependencias: la IA lo corre con `node` sobre lo que escribió |
 | `.claude/mycelium-ia.json` | Marcador de versión del framework (y huellas de lo generado, `DEF-118`) |
+| `.mcp.json` | **No es un template**: el servidor MCP de control (`mycelium`), con la ruta del binario instalado y `MYCELIUM_VAULT`. Solo si el control está encendido; se **fusiona** con el del usuario ([[mcp-control]] § «Cómo quedó — Parte 1») |
 
 Contenido **verificado contra el código real** de Mycelium: `[[Título|alias]]`,
 `![[embed]]`, `![[X.excalidraw]]`, `#tag`, callouts (10 tipos, plegables `-/+`,
@@ -119,6 +120,15 @@ actualiza ella con grep (`FUN-M-08`).
     - `/vault-nota` remite a `mycelium-esporas` y exige expandir las variables con
       `date`; `/vault-huerfanas` cuenta como enlace entrante la aparición en un lienzo.
 
+    La misma `1.7.0` —todavía sin publicar— suma el **MCP de control** (`FUN-L-09`,
+    [[mcp-control]]) por partes, **sin subir la versión**. Parte 1: la sección
+    «Operar Mycelium» del `CLAUDE.md` (la línea divisoria: el contenido se lee y
+    escribe en los archivos; mostrar y saber qué está abierto pasa por
+    `mycelium_estado`/`mycelium_abrir`), con una tabla a la que las partes 2–4
+    agregan filas; «Tus herramientas aquí» la nombra y «por fuera» deja de decir que
+    la IA no controla la app. Al generar con el control encendido se escribe además
+    el `.mcp.json`.
+
     El texto de las skills y los validadores **no vive en `framework.ts`**: lo genera
     `scripts/generar-skills-ia.mjs` en `lib/ia/skillsGeneradas.ts` a partir de
     `lib/ia/borradores/` y `scripts/validar-*.mjs` (ver
@@ -161,12 +171,16 @@ disco); en SQLite clásico se muestra el motivo.
 ## Alcance actual (definido)
 
 La IA **entiende** Mycelium (documentos, vínculos, extensiones, metadatos y
-funciones) pero **no lo controla**. Control de la app, MCP y demás quedan como
-extensiones futuras (ver BACKLOG `FUN-L-08`/`FUN-L-09`).
+funciones). **Controlarlo** es opt-in y va por el MCP de control (`FUN-L-09`,
+[[mcp-control]]): con «Dejar que la IA controle Mycelium» encendido en
+Configuración → Vault, la IA puede mostrar notas, el grafo o el calendario y saber
+qué está abierto (Parte 1); renombrar, mover, borrar, el calendario y el
+diccionario llegan en las partes siguientes.
 
 ## Relacionadas
 
 - [[ia-skills-herramientas]] — `FUN-L-26`: una skill por herramienta (draw.io, canvas, excalidraw, base, Esporas, calendario) para la `1.7.0`.
+- [[mcp-control]] — `FUN-L-09`: el MCP de control; su Parte 1 agrega «Operar Mycelium» y el `.mcp.json`.
 - [[Mycelium como memoria de la IA]] — la decisión de producto que lo motiva.
 - [[Generar el framework de IA en un vault]] — el procedimiento y la política de conflictos.
 - [[terminal-integrada]] — dónde corre el asistente.
