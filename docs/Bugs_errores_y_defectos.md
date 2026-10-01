@@ -733,6 +733,13 @@ escribió una IA desde la terminal mientras la app estaba abierta.
 
 Detectado el 2026-09-30 en la app, durante la evaluación de `FUN-L-26`.
 
+# DEF-122
+Al abrir la app con una nota ya abierta (las pestañas que se restauran), **todos sus
+`[[enlaces]]` se ven como inexistentes**, aunque las notas existan. Si se cierra la pestaña
+y se vuelve a abrir la nota, se ven bien.
+
+Detectado el 2026-10-01 en la app, durante la pasada final de `FUN-L-26`.
+
 ---
 
 > [!warning] Defectos sin reporte original
