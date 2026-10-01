@@ -4,10 +4,13 @@ import dynamic from "next/dynamic";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   DibujoIlegible,
+  encuadrarDibujo,
+  hayAlgoDibujado,
   loadDiagram,
   loadNotaScene,
   saveDiagram,
   saveNotaScene,
+  type ApiEncuadre,
   type ExcalidrawScene,
 } from "@/lib/excalidraw";
 import { useVaultStore } from "@/stores/vaultStore";
@@ -22,7 +25,7 @@ const Excalidraw = dynamic(
 type ExcalidrawApi = {
   getSceneElements: () => readonly unknown[];
   getFiles: () => Record<string, unknown>;
-};
+} & ApiEncuadre;
 
 /**
  * Editor Excalidraw en modal (HU-16 CA3/CA5): se abre al crear o al clicar un
@@ -52,6 +55,8 @@ export function ExcalidrawModal({
   );
 
   const [ilegible, setIlegible] = useState<string | null>(null);
+  /** Encuadrar lo dibujado al abrir (`FUN-L-26`), como la pestaña. */
+  const encuadrePendienteRef = useRef(false);
 
   const cargar = useCallback(
     (vigente: () => boolean) => {
@@ -61,7 +66,9 @@ export function ExcalidrawModal({
             ? loadDiagram(notaId, diagId)
             : Promise.resolve<ExcalidrawScene | null>({ elements: [] });
         void load.then((scene) => {
-          if (vigente()) setInitialScene(scene ?? { elements: [] });
+          if (!vigente()) return;
+          encuadrePendienteRef.current = hayAlgoDibujado(scene?.elements ?? []);
+          setInitialScene(scene ?? { elements: [] });
         });
         return;
       }
@@ -75,6 +82,7 @@ export function ExcalidrawModal({
             return;
           }
           setIlegible(null);
+          encuadrePendienteRef.current = hayAlgoDibujado(scene.elements);
           setInitialScene(scene);
         },
         (e: unknown) => {
@@ -139,6 +147,16 @@ export function ExcalidrawModal({
                 initialData={{
                   elements: (initialScene?.elements ?? []) as never,
                   files: (initialScene?.files ?? null) as never,
+                }}
+                onChange={(elementos) => {
+                  if (
+                    encuadrePendienteRef.current &&
+                    apiRef.current &&
+                    hayAlgoDibujado(elementos)
+                  ) {
+                    encuadrePendienteRef.current = false;
+                    encuadrarDibujo(apiRef.current);
+                  }
                 }}
               />
             )

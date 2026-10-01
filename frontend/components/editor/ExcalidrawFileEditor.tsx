@@ -4,7 +4,13 @@ import dynamic from "next/dynamic";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "@/lib/api";
 import { motivoDeExcepcion } from "@/lib/archivosIlegibles";
-import { leerEscena, type EscenaLeida } from "@/lib/excalidraw";
+import {
+  encuadrarDibujo,
+  hayAlgoDibujado,
+  leerEscena,
+  type ApiEncuadre,
+  type EscenaLeida,
+} from "@/lib/excalidraw";
 import { useAuthStore } from "@/stores/authStore";
 import { useSyncStore } from "@/stores/syncStore";
 import { useVaultStore } from "@/stores/vaultStore";
@@ -19,7 +25,7 @@ const Excalidraw = dynamic(
 type ExcalidrawApi = {
   getSceneElements: () => readonly unknown[];
   getFiles: () => Record<string, unknown>;
-};
+} & ApiEncuadre;
 
 /**
  * Qué muestra la vista. `ilegible` (`DEF-119`) NO monta Excalidraw: sin editor
@@ -47,6 +53,13 @@ export function ExcalidrawFileEditor({ notaId }: { notaId: string }) {
   /** Espejo de `estado.tipo === "ilegible"` para el guardado, que corre fuera del render. */
   const ilegibleRef = useRef(false);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /**
+   * Falta encuadrar el dibujo recién montado (`FUN-L-26`). Solo al montar
+   * Excalidraw —la primera apertura, o al reintentar un archivo ilegible ya
+   * corregido—. Y solo si hay algo dibujado: un dibujo en blanco no tiene qué
+   * encuadrar, y encuadrar su primer trazo movería la vista mientras se dibuja.
+   */
+  const encuadrePendienteRef = useRef(false);
   const titulo = useVaultStore((s) => s.notas.find((n) => n.id === notaId)?.titulo);
   const dark =
     typeof document !== "undefined" && document.documentElement.dataset.dark === "true";
@@ -57,6 +70,7 @@ export function ExcalidrawFileEditor({ notaId }: { notaId: string }) {
    */
   const mostrarAviso = useCallback((motivo: string) => {
     ilegibleRef.current = true;
+    encuadrePendienteRef.current = false;
     apiRef.current = null;
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = null;
@@ -89,6 +103,7 @@ export function ExcalidrawFileEditor({ notaId }: { notaId: string }) {
         return;
       }
       ilegibleRef.current = false;
+      encuadrePendienteRef.current = hayAlgoDibujado(lectura.escena.elements);
       setEstado({ tipo: "lista", escena: lectura.escena });
       setMontaje((m) => m + 1);
     },
@@ -125,7 +140,14 @@ export function ExcalidrawFileEditor({ notaId }: { notaId: string }) {
       .catch(() => useSyncStore.getState().setSyncState(notaId, "error"));
   };
 
-  const onChange = () => {
+  const onChange = (elementos: readonly unknown[]) => {
+    // La primera `onChange` con la escena cargada: es cuando ya se puede
+    // encuadrar. Alguna anterior puede llegar todavía sin elementos, antes de
+    // que Excalidraw termine de leer `initialData`.
+    if (encuadrePendienteRef.current && apiRef.current && hayAlgoDibujado(elementos)) {
+      encuadrePendienteRef.current = false;
+      encuadrarDibujo(apiRef.current);
+    }
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(save, 800); // autoguardado (HU-04)
   };
