@@ -25,7 +25,7 @@ seguir como panel lateral reorganizado.
 |---|---|
 | **Aspecto** | Apariencia (tema, modo, atmósferas) · Tipografía · Snippets CSS |
 | **Trabajo** | Editor · Grafo · Consolas |
-| **Vault** | Vault (Esporas, referencias, exportar, importar, IA, `.mycignore`) |
+| **Vault** | Vault (Esporas, referencias, exportar, importar, IA y el control de la IA, `.mycignore`) |
 | **Sistema** | Actualizaciones |
 
 Cada categoría abre con su nombre y una línea que dice qué se decide ahí. Las secciones
@@ -168,6 +168,18 @@ Ancho de tabulación; el salto marca la fila (`--mic-marca` = `#19e6ff` contra `
 = `#3dffc4`); el pie es un `<button>`; el engranaje dice «Configuración (Ctrl+,)». La
 ventana angosta queda sin comprobar en vivo: exige achicar la ventana real del usuario.
 
+## El control de la IA (`FUN-L-09`, 2026-10-01)
+
+En **Vault → «Asistente IA (Claude Code)»**, debajo del generador del framework, un
+interruptor más: **«Dejar que la IA controle Mycelium»**. Es una preferencia **del
+vault** (`controlIa` en `.mycelium/preferencias.json`) y viene **apagada**. Encenderla
+abre en caliente el canal del MCP de control de esa ventana y registra el servidor en
+el `.mcp.json` del vault; apagarla cierra el canal y quita solo esa entrada. La línea
+de ayuda dice lo que concede (mostrar notas, el grafo o el calendario; saber qué está
+abierto) y lo que **no** impide: que la IA lea o escriba los archivos. Usa el
+`Interruptor` común y entra en el buscador por «mcp», «control», «servidor». Detalle
+en [[mcp-control]] § «Cómo quedó — Parte 1». Solo desktop.
+
 ## En web
 
 Reflejada el 2026-09-22 ([[Version 2.0.0 de web]]). Tres diferencias, todas por lo que
@@ -183,4 +195,4 @@ existe en cada versión:
 
 ## Relacionadas
 
-[[Rediseñar la UI con impeccable]] · [[avisos-y-confirmaciones]] · [[atmosferas]] · [[DESIGN]] · [[BACKLOG]]
+[[Rediseñar la UI con impeccable]] · [[avisos-y-confirmaciones]] · [[atmosferas]] · [[DESIGN]] · [[BACKLOG]] · [[mcp-control]]

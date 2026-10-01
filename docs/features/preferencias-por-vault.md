@@ -129,6 +129,15 @@ columna invisible sin forma evidente de recuperarla. Por eso `normalizarAnchos`
 descarta todo lo que no sea un número por encima de `ANCHO_MIN`. Ver
 [[bases-tabla]] § La cabecera de la tabla.
 
+### `FUN-L-09` — el control de la IA (solo desktop)
+
+`controlIa` (apagado por defecto) decide si la ventana abre el canal del MCP de
+control para ese vault; `mcpJsonCreado` recuerda si el `.mcp.json` de la raíz lo creó
+Mycelium, para borrarlo al apagar solo si era suyo. Es la **única** preferencia que lee
+alguien fuera de la app: el servidor `mycelium-mcp` la lee del disco para distinguir
+«app cerrada» de «control apagado» (`crates/mycelium-vault/src/preferencias.rs`), así
+que el nombre de la clave es contrato. Ver [[mcp-control]].
+
 ## 6. El porte a web (`FUN-M-29`, 2026-09-05)
 
 En web no hay carpeta, así que **no fue un reflejo**: se decidió dónde viven y
