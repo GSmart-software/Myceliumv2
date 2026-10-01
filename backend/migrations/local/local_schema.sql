@@ -146,3 +146,22 @@ CREATE TABLE IF NOT EXISTS recordatorios_vault (
   datos          TEXT NOT NULL,
   actualizado_en TEXT NOT NULL
 );
+
+-- Diccionarios personales del corrector ortográfico (FUN-L-12). Texto plano,
+-- una palabra por renglón, el mismo formato que en desktop
+-- (`lib/ortografia/palabras.ts`); el servidor no lo interpreta, solo lo guarda.
+-- El DEL VAULT es en desktop `.mycelium/diccionario.txt`: viaja con el vault y
+-- vale para todos los que lo editan. Concurrencia: última escritura gana.
+CREATE TABLE IF NOT EXISTS diccionario_vault (
+  vault_id       TEXT PRIMARY KEY REFERENCES vaults(id) ON DELETE CASCADE,
+  palabras       TEXT NOT NULL,
+  actualizado_en TEXT NOT NULL
+);
+
+-- El DE MYCELIUM es del usuario (en desktop, `diccionario-personal.txt` de la
+-- instalación): vale en todos sus vaults y en cualquier navegador.
+CREATE TABLE IF NOT EXISTS diccionario_usuario (
+  usuario_id     TEXT PRIMARY KEY REFERENCES usuarios(id) ON DELETE CASCADE,
+  palabras       TEXT NOT NULL,
+  actualizado_en TEXT NOT NULL
+);
