@@ -84,6 +84,20 @@ y qué principio general dejó.
    —muestra su diálogo, emite `load` igual y deja editar el vacío—, así que el XML se
    revisa con `DOMParser` **antes** de mandárselo. Todo parseo que alimente un editor con
    autoguardado distingue «vacío» de «ilegible».
+10. **Si el que llama sabe qué tipo quiere, se lo dice al que busca; no filtra después.**
+    Con `Devoluciones.md` en la raíz y el dibujo `Eval/excalidraw/Devoluciones.excalidraw`,
+    el embed del dibujo decía «No se pudo cargar el diagrama» (`DEF-120`). El resolutor de
+    wikilinks (`lib/wikilinks.ts`) agrupaba por título **sin extensión** y elegía entre
+    **todos** los homónimos —nota, dibujo, lienzo— por la ruta más corta; el embed le
+    llegaba ya sin `.excalidraw` (`EXCALIDRAW_RE` la recorta), así que ganaba la nota de la
+    raíz, y recién después `resolveExcalidrawTarget` la descartaba por no ser un dibujo, en
+    vez de elegir **entre** los dibujos. Mismo origen, dos efectos más: `[[Pedido]]` podía
+    abrir `Pedido.excalidraw` (o `.base`, por id) en lugar de `Pedido.md`, y una pista de
+    carpeta que no calzaba caía a todos los candidatos, de modo que `Otra/x` llevaba a la
+    `x` de otra carpeta. Ahora el tipo es parte de la consulta: con extensión solo compiten
+    archivos de ese tipo, sin extensión gana el `.md` (como Obsidian), y una pista que no
+    calza no resuelve. **Un filtro aplicado al resultado de otro que ya eligió no corrige la
+    elección: la descarta.**
 
 ## Relacionadas
 
