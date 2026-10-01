@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "deploy:pages": "next build && npx wrangler pages deploy out --project-name=micelio"
+    "deploy:pages": "next build && npx wrangler pages deploy out --project-name=micelio",
+    "wasm:ortografia": "node scripts/wasm-ortografia.mjs"
   },
   "dependencies": {
     "@codemirror/autocomplete": "^6.20.3",
