@@ -123,6 +123,14 @@ y qué principio general dejó.
     sobre el mismo índice; la reparación las limpia (`ftsBorrarHuerfanas`) antes de
     reescribirlas. **Sin transacción, cada sentencia tiene que dejar el índice en un
     estado del que el siguiente indexado sepa salir; y «la fila no está» no es «vacío».**
+12. **`busy_timeout` no cubre todos los «database is locked» de SQLite.** Con WAL y dos
+    procesos sobre el mismo archivo hay dos que llegan **sin esperar**: el cambio de modo
+    de journal (`PRAGMA journal_mode=WAL`) cuando otro está haciendo lo mismo, y una
+    transacción `DEFERRED` que empieza leyendo y después quiere escribir si otro escribió
+    en el medio (SQLite no espera para no provocar un interbloqueo). Apareció al probar dos
+    servidores MCP arrancando en frío a la vez (`FUN-L-09`). La salida es pedir la
+    escritura al empezar —`BEGIN IMMEDIATE`, ahí sí espera— y reintentar la apertura un
+    rato. Detalle en [[MCP de Mycelium - memoria]] § 13.2.
 
 ## Relacionadas
 

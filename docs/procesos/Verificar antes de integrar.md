@@ -9,12 +9,22 @@ orquestador como los subagentes.
 | Tocaste | Comando | Dónde |
 |---|---|---|
 | Frontend (cualquier versión) | `npx tsc --noEmit -p tsconfig.json` | `frontend/` |
-| Rust / desktop | `cargo check` | `frontend/src-tauri/` |
-| Módulo Rust con tests | `cargo test --lib <modulo>` | `frontend/src-tauri/` |
+| Rust / desktop | `cargo check` (solo la app) · `cargo check --workspace` (todo) | `frontend/src-tauri/` |
+| Módulo Rust con tests | `cargo test --lib <modulo>` (app) | `frontend/src-tauri/` |
+| Servidor MCP (`crates/`) | `cargo test -p mycelium-vault -p mycelium-mcp` | `frontend/src-tauri/` |
 | Backend .NET (solo web) | `dotnet build` | `backend/` |
 | Reflejo a web | `npm ci` + `tsc` + `npx next build` | worktree de `web-cloud` |
 | Módulo con tests headless | `node --test scripts/test-<modulo>.mjs` | `frontend/` |
 | Smoke tests (si aplica) | `node scripts/smoke-*.mjs` | `frontend/` |
+
+> [!info] `src-tauri/` es un workspace desde `FUN-L-09`
+> La app es el paquete raíz; en `crates/` viven `mycelium-mcp` (el servidor del
+> [[mcp-control]]) y `mycelium-vault` (lo que el servidor necesita de los vaults: el
+> registro `vaults.json` y la comparación y el hash de rutas). En la raíz,
+> `cargo check`/`cargo test` tocan **solo la app**, que **no** depende de esos crates;
+> para ellos, `-p` o `--workspace`. La extracción de 2026-09-24 —`.mycignore`, walker y
+> parsers compartidos con la app, y la prueba de equivalencia TS↔Rust— era del MCP de
+> memoria y no entró ([[MCP de Mycelium - memoria]] § 13 queda como registro).
 
 > [!tip] `next build` solo en el reflejo a web
 > En desktop alcanza `tsc` + `cargo check` para el ciclo normal; `next build` se corre

@@ -30,9 +30,10 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
 
 ## Arquitectura en diseño
 
-- [[MCP de Mycelium - plan]] — **la puerta**: el plan integrado del servidor MCP
-  (`FUN-L-09`), con las fronteras resueltas entre las tres partes, el orden de construcción
-  y lo que falta decidir. **Solo planificación.**
+- [[MCP de Mycelium - plan]] — el plan integrado del servidor MCP de septiembre
+  (`FUN-L-09`), con las fronteras entre las tres partes y el orden de construcción.
+  **Histórico**: la mitad de memoria no entró (2026-09-25, [[MCP de Mycelium - tesina, protocolo]]
+  § 9); lo vigente es [[mcp-control]].
 - [[MCP de Mycelium - encuadre]] — los hechos verificados y las restricciones de partida.
 - [[MCP de Mycelium - memoria]] — el modelo de datos, las herramientas de recuperación y por
   qué no hay embeddings.
@@ -40,6 +41,9 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
   permisos.
 - [[MCP de Mycelium - evaluacion]] — cómo se mide con MCP y sin MCP, y qué resultado nos
   haría abandonar el diseño.
+- [[MCP de Mycelium - tesina, protocolo]] — la segunda evaluación, sobre un vault diez veces
+  más grande: cómo se copia, qué se excluye, las clases nuevas, el piloto y **la tanda de
+  decisión** (§ 9: el MCP de memoria no entra).
 - [[Memoria documental para IA - estado del arte]] — qué existe hoy para darle memoria a una
   IA sobre documentación, y por qué casi todo resuelve otro problema.
 - [[MCP de Mycelium - revision critica]] — la revisión adversarial del diseño: qué está mal,
@@ -55,6 +59,8 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
   modo de desktop; el modo sin carpeta era inalcanzable y costaba una rama por función.
 - [[Los temas los define Mycelium, no el usuario]] — por qué no hay creador de temas, y
   qué queda aprendido para los estilos que sí se agreguen.
+- [[Skill o MCP, segun quien sabe hacerlo]] — 2026-10-01: lo que es contenido va por skill;
+  lo que tiene reglas o estado de la app (calendario, diccionario, renombrar), por MCP.
 
 ## Procesos
 
@@ -117,6 +123,8 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
   línea en la consola de F12, por una fachada única con tres niveles (`FUN-L-21`).
 - [[calendario-recordatorios]] — un calendario de recordatorios que avisan, del vault y sin
   archivos (`FUN-L-22`).
+- [[mcp-control]] — el MCP de control: la IA abre cosas en pantalla, maneja el calendario,
+  renombra sin romper enlaces y usa la papelera y el diccionario (`FUN-L-09`).
 - [[corrector-ortografico]] — el corrector del sistema en el editor, con el código y los enlaces
   excluidos (`FUN-L-12`).
 - [[auditoria-rendimiento-1]] — tanda 1 de la auditoría: guardar sin reindexar, indexado

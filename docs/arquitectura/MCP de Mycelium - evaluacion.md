@@ -591,7 +591,12 @@ Los sesgos ordenados por cuánto daño hacen. Cada uno con su contramedida concr
 >
 > Y hay un detalle que la vuelve robusta: **cuando los dos brazos usan el mismo modelo, `K`
 > solo depende de los pesos relativos entre categorías** —la lectura de caché a 0,1× la
-> entrada, la escritura a 1,25×—, no del precio absoluto. Por eso lo que se congela son esos
+> entrada, la escritura a **2×**—, no del precio absoluto.
+>
+> *Corregido al construir el arnés (2026-09-24)*: esta nota decía 1,25× para la escritura,
+> que es el precio del caché de **5 minutos**. **Claude Code escribe con el de 1 hora**, que
+> cuesta 2×; con ese peso el recálculo reproduce la factura exacta. Los precios quedaron
+> congelados en `eval/pesos-costo.json`, con fecha y fuente. Por eso lo que se congela son esos
 > cocientes, que cambian mucho menos que las tarifas. `total_cost_usd` se sigue registrando,
 > como control de que el recálculo no se desvía.
 
@@ -601,8 +606,10 @@ contexto le cuesta aciertos a un brazo, el acierto lo va a mostrar.
 
 ### 9.2 Primero, ¿la comparación es válida?
 
-Antes de leer `Δ` o `K`, cada brazo pasa tres filtros. Si alguno falla, **no hay
-conclusión**: hay una tarea.
+Antes de leer `Δ` o `K`, cada brazo pasa tres filtros. Si falla **uno de los dos
+primeros**, **no hay conclusión**: hay una tarea. Si falla **el de compactación**, la
+conclusión queda a medias: se puede leer la **exactitud** —filas 1 y 2 de la tabla— pero no
+el **costo**, y las filas 3 a 6 quedan sin decidir hasta repetir sin compactación.
 
 | Filtro | Si falla | Qué se hace |
 |---|---|---|
@@ -622,6 +629,16 @@ Se lee **en orden**; la primera fila que se cumple decide.
 | 4 | `K ≤ 0,6` y el `IC` de `K` sin el 1 | Igual de exacto y claramente más barato | **Entra**, con el ahorro como justificación explícita |
 | 5 | `0,6 < K ≤ 1` | Ni más exacto ni lo bastante más barato | **No entra como está.** Se rehace el diseño de las herramientas o se recorta el alcance |
 | 6 | `K > 1` | Cuesta más que `grep` sin acertar más | Falla el objetivo declarado —«rápido y barato»—. **Se rehace** |
+| 7 | **Ninguna de las anteriores** | El ahorro o la mejora no están probados | Se lee como la **fila 5**: no entra como está. En particular, `K ≤ 0,6` con el `IC` de `K` tocando el 1 **no** es un ahorro demostrado |
+
+> [!warning] Corregido el 2026-09-24, antes de cualquier corrida del brazo C
+> La versión de la mañana de esta tabla —reescrita para cerrar un hueco— **abría otro**: un
+> `K ≤ 0,6` cuyo intervalo tocaba el 1 no cumplía la fila 4 ni ninguna otra. Lo encontró el
+> arnés al implementar la regla de forma mecánica, que es exactamente para lo que sirve
+> implementarla. La fila 7 hace la tabla **exhaustiva por construcción**: cualquier
+> resultado cae en alguna fila, y el que no demuestra nada no entra. Solo se habían corrido
+> los brazos ciego y base sobre una pregunta, para probar el arnés: ningún dato del MCP
+> informó el cambio.
 
 > [!info] Por qué el umbral de ahorro es 0,6 y no 0,9
 > Un MCP no es gratis después de construido: suma un binario, un índice y un segundo
@@ -647,11 +664,30 @@ Además, y fuera del orden de la tabla:
 > 6 son alcanzables con datos plausibles. La 6 en particular: un MCP que devuelve notas
 > enteras «por las dudas» cuesta más que un `grep` bien apuntado.
 
-### 9.4 Lo que se completa al congelar
+### 9.4 Lo que la construcción del arnés decidió, y queda aceptado
 
-Dos cosas que son datos del día y no decisiones: la **tabla de pesos** de costo por categoría
-de token, con su fecha y su fuente, y el **commit** del vault que se usa como corpus. Con esas
-dos anotadas, esta sección queda cerrada.
+El arnés encontró puntos donde esta nota no se podía aplicar tal como estaba escrita. Las
+decisiones que tomó quedan como parte de la regla:
+
+- **Las preguntas de ausencia (C5) quedan fuera del filtro de contaminación** (§ 8.2): el
+  brazo ciego siempre «acierta» que algo no está, así que el filtro las sacaba a todas.
+- **El bloqueante de C7** se lee así: «sí cae a `grep`» solo si **nunca** deja de hacerlo;
+  si cae alguna vez, el resultado es «indeterminado» y se revisa a mano.
+- **Los resultados solo se agregan** (§ 10): una corrección es una fila nueva con el mismo
+  `session_id`, y manda la última. Marcar la vieja como descartada sería reescribirla.
+- **La clave admite** grupos de cadenas obligatorias para las enumeraciones, alternativas
+  dentro de `notas_clave` —el vault repite datos en varias notas— y `fuentes_codigo` en las
+  C7, donde no hay nota que los sostenga.
+- **La respuesta Y del ejemplo del § 4** no la puntúa la regla mecánica —no usa ninguna marca
+  del vocabulario de negación—: va al juez. El ejemplo le daba 1 a mano, y eso era la mitad
+  de la lección: una regla mecánica tiene que poder aplicarse sin la intuición de quien la
+  escribió.
+
+### 9.5 Lo que se completa al congelar
+
+Dos cosas que son datos del día y no decisiones, **ya completadas**: la **tabla de pesos**
+(`eval/pesos-costo.json`, precios oficiales consultados el 2026-09-24) y el **commit** del
+corpus (`c0a33b8`, en `eval/config.json`). **La regla queda congelada.**
 
 ---
 
@@ -716,7 +752,423 @@ Reglas de higiene del formato, que son las que evitan el desastre a los tres mes
 
 ---
 
-## 11. Decisiones y preguntas abiertas
+## 11. Resultados de la fase 0: la línea base (2026-09-24)
+
+Tanda `2026-09-24-base`: brazos **ciego** y **base**, modelo chico (Haiku 4.5), las 16
+preguntas de desarrollo × 5 repeticiones. **170 corridas, 10 descartadas** (1 de
+calentamiento, 4 por `is_error`, 5 por no devolver la salida estructurada), **US$ 7,50
+reales** contra US$ 10,48 estimados.
+
+| Brazo | Acierto citado | Costo mediano | Contexto metido (mediana) | Compactó |
+|---|---|---|---|---|
+| Ciego | 8,8 % | US$ 0,0048 | 0 | 0 % |
+| **Base** (`grep` + leer + la skill) | **70,0 %** | **US$ 0,0622** | **14.809 tokens** | **0 %** |
+
+**Lo que decide la fase 0**: el **piso del modelo** (§ 9.2). El brazo base llega a **70 %**,
+por encima del 50 %: **el modelo chico alcanza**. Ninguna pregunta quedó contaminada.
+
+### Por pregunta, en el brazo base
+
+| | Clase | Acierto | Costo med. | Contexto med. |
+|---|---|---|---|---|
+| D01 | C1 hecho puntual | 5/5 | 0,049 | 6.337 |
+| D02 | C1 | 3/5 | 0,033 | 4.674 |
+| D03 | C2 decisión y porqué | 5/5 * | 0,047 | 10.254 |
+| D04 | C2 | 5/5 * | 0,061 | 15.061 |
+| D05 | C3 contradicción resuelta | 3/5 * | 0,086 | 18.950 |
+| D06 | C3 | 4/5 * | 0,042 | 7.727 |
+| D07 | C4 dos saltos | **1/5** | 0,064 | 8.920 |
+| D08 | C4 | 5/5 | 0,079 | 20.075 |
+| D09 | C5 ausencia | 4/5 | 0,145 | 34.669 |
+| D10 | C5 | **2/5** | 0,043 | 2.704 |
+| D11 | C6 enumeración | 5/5 | 0,093 | 27.053 |
+| D12 | C6 | **1/5** | 0,105 | 30.317 |
+| D13 | C7 fuera del índice | 3/5 | 0,158 | 32.258 |
+| D14 | C7 | **0/5** | 0,045 | 8.230 |
+| D15 | C8 vocabulario | 5/5 | 0,042 | 6.654 |
+| D16 | C8 | 5/5 | 0,089 | 17.683 |
+
+\* **Puntaje provisional**: C2 y C3 requieren el juez, que todavía no está implementado. Esas
+cuatro preguntas —un cuarto del conjunto— están puntuadas mecánicamente, así que el 70 %
+puede moverse cuando el juez exista. **Implementarlo es condición para la tanda del MCP.**
+
+> [!success] El juez ya puntuó esas filas (2026-09-24) y el 70 % no se movió
+> `eval/juzgar.mjs`, con **Opus** como juez (más fuerte que Haiku y que Sonnet, los dos
+> modelos que evalúa; con Sonnet, la réplica de reserva se juzgaría a sí misma), ciego al
+> brazo y sin herramientas ni `CLAUDE.md`. Las **40 filas** C2/C3 costaron **US$ 0,53**:
+> 18 correctas, 22 incorrectas, ninguna duda, y **coincidió con la regla mecánica en las
+> 40** — el acierto citado del brazo base sigue en **70,0 %**. Sus veredictos no siguen al
+> largo de la respuesta (r ≈ 0,1 dentro de cada pregunta y brazo).
+>
+> **Pero todavía no tiene derecho a decidir nada**: falta el patrón humano. Son **60
+> respuestas** en [[patron-juez]] (se abre en Mycelium y se marca una casilla por
+> respuesta; la guía está arriba de la planilla), y después `node eval/patron.mjs validar
+> --juzgar --confirmo-costo`. Hasta entonces el informe dice «no puede decidir». Los
+> veredictos del juez quedan en `eval/juicios.jsonl`; las filas nuevas de
+> `resultados.jsonl` conservan el formato de la § 10.
+
+### Lo que dice, antes de que exista el MCP
+
+> [!info] Cuatro lecturas, con la muestra chica que tienen
+> Son 16 preguntas: cada clase tiene **dos**. Nada de esto es concluyente; es a dónde
+> mirar.
+
+- **`grep` falla donde hay que seguir enlaces o juntar todo.** Los peores son D07 —dos
+  saltos por el grafo— y D12 —enumerar todas las versiones instalables—. Es el terreno de
+  `vault_vecinos` (fase 2) y de un ranking que devuelva **todo** lo pertinente, no el
+  terreno de `vault_buscar` sola. **Implica algo sobre el orden**: la fase 1 puede no
+  mostrar su mejor cara en C4, y eso no la condena.
+- **C8 salió perfecta con `grep`.** La clase diseñada para mostrar el desajuste de
+  vocabulario —la que justificaría la búsqueda semántica— la resolvió el modelo chico
+  reformulando él mismo la consulta. Con dos preguntas no se cierra nada, pero **es la
+  primera evidencia contra los embeddings**, y va en la dirección que ya tenía el plan.
+- **C7 es donde menos rinde, y es a propósito**: el dato está en el código o en un tipo de
+  archivo que no se indexa. Ahí el MCP no puede ayudar por diseño; lo que se mide es que el
+  agente **no deje** de caer a `grep`.
+- **Nunca compactó.** La revisión temía que el brazo base se acercara a la ventana del
+  modelo chico por leer notas enteras; en la práctica el contexto mediano fue de 14.809
+  tokens y el máximo de una pregunta, 34.669. El modelo busca con `grep` y lee solo lo que
+  encuentra.
+
+> [!note] Una comprobación de seguridad que conviene repetir en cada tanda
+> D10 pregunta por la contraseña de la clave de firma —la respuesta correcta es «no está»—,
+> y el brazo base tiene `Bash`. Se revisaron **los comandos** de sus corridas, sin mirar
+> salidas: ninguno leyó variables de entorno ni archivos de clave; solo buscaron las
+> palabras dentro de los `.md` del corpus. Las respuestas equivocadas lo son por otra razón.
+
+---
+
+## 12. Resultado de la fase 1: el MCP empeora la recuperación (2026-09-24)
+
+Tanda `2026-09-24-mcp-fase1`: brazo **MCP** —`vault_buscar` y `vault_leer`, servidor en
+`c487c58`—, Haiku 4.5, las mismas 16 preguntas × 5. 81 corridas, US$ 3,16, más US$ 0,28 del
+juez. Se compara contra la línea base del § 11.
+
+| | Acierto citado | Costo mediano | Contexto metido |
+|---|---|---|---|
+| Base (`grep`) | **70,0 %** | US$ 0,062 | 14.809 tokens |
+| **MCP** | **47,5 %** | **US$ 0,035** | **5.533 tokens** |
+
+**La regla (§ 9), aplicada por el informe sin intervención:** los cuatro filtros de validez
+pasan —la adopción del MCP fue del **97,5 %**: el agente sí usó las herramientas—. Después:
+
+- **`Δ = −22,5 pts`**, IC 95 % **[−42,5, −2,5]**: el intervalo no toca el cero.
+- `K = 0,53`, IC [0,34, 0,69]: cuesta la mitad.
+- **Decide la fila 1: el MCP empeora la recuperación. Se abandona o se rehace de cero, y se
+  investiga por qué.**
+
+> [!danger] Más barato y más rápido, y peor
+> Es exactamente el caso que la § 9 pone primero por una razón: **barato y rápido no vale
+> nada si está mal**, y un error de recuperación no se nota —la respuesta suena igual de
+> segura—. El MCP metió **un tercio** del contexto de `grep` y costó **la mitad**. Y acertó
+> **veintidós puntos menos**.
+>
+> Vale anotar también cómo engañaba la impresión: una consulta de prueba por stdio, hecha a
+> mano antes de la tanda, devolvió la respuesta correcta en 467 tokens y parecía un éxito.
+> Una consulta no es una medición.
+
+### Por clase, dónde gana y dónde pierde
+
+| Clase | Δ (MCP − base) | Lectura |
+|---|---|---|
+| C1 hecho puntual | **+20** | Donde el MCP brilla: una búsqueda, una sección, la respuesta |
+| C3 contradicción resuelta | +10 | |
+| C5 ausencia | 0 | |
+| C2 decisión y porqué | **−60** | El porqué no está en la sección que responde el qué |
+| C4 dos saltos | −40 | Esperable: los vecinos del grafo son la fase 2 |
+| C6 enumeración | −40 | Enumerar exige juntar **todo**; la búsqueda devuelve lo mejor |
+| C7 fuera del índice | −30 | El agente dejó `grep`: cayó a él en **solo el 10 %** de estas corridas |
+| C8 vocabulario | −40 | `grep` con el modelo reformulando llegó al 100 % |
+
+### Lo que la tanda no puede decir, y no cambia la decisión
+
+- **El juez no está validado** todavía —el patrón humano no se puntuó—, así que formalmente
+  no puede decidir. Pero cambió **una sola fila** (D05, del MCP, de 0 a 1): sin el juez el
+  Δ sería **−23,7**. La decisión no depende de él.
+- **Los brazos no corrieron intercalados** (§ 7): base y MCP son tandas de horas distintas.
+  Un Δ de −22,5 con el intervalo lejos del cero no es algo que explique una deriva del
+  servicio a lo largo de la tarde.
+- **Son 16 preguntas**, dos por clase: el intervalo es ancho. Lo que está firme es la
+  dirección, no el tamaño exacto.
+- **El bloqueante de C7 no se pudo aplicar mecánicamente**: la regla no dice cuánta caída a
+  `grep` alcanza. Queda como hallazgo, y apunta en la misma dirección que todo lo demás.
+
+### Lo que sigue, según la propia regla
+
+«Se investiga por qué» **antes** de rehacer: leer las transcripciones de las corridas que
+fallaron —el costo es cero, no hay que correr nada— y ver qué hizo el agente distinto de lo
+que hacía con `grep`. El reparto por clase ya sugiere dónde mirar: el agente **lee menos y
+para antes** —un tercio del contexto—, confía en la primera búsqueda donde con `grep`
+reformulaba, y abandona `grep` justo donde era imprescindible.
+
+---
+
+## 13. Resultado de la fase 1b: mejora mucho, y todavía no alcanza (2026-09-24)
+
+La fase 1 rehecha según [[MCP de Mycelium - diagnostico fase 1]] —búsqueda que premia cubrir
+términos, lectura de la nota entera hasta 20 KB, instrucciones en las herramientas—, servidor
+`9d58453`. Tanda `2026-09-24-mcp-fase1b`: 81 corridas, US$ 3,36, más US$ 0,28 del juez.
+
+| | Acierto citado | Dato correcto | Costo mediano | Contexto |
+|---|---|---|---|---|
+| Base (`grep`) | 70,0 % | 63 / 80 | US$ 0,062 | 14.809 |
+| MCP fase 1 | 47,5 % | — | US$ 0,035 | 5.533 |
+| **MCP fase 1b** | **60,0 %** | **60 / 80** | **US$ 0,033** | **5.940** |
+
+**La regla**: filtros de validez, todos pasan (adopción 95 %). `Δ = −10,0` pts, IC
+[−25,0, +3,8]; `K = 0,52`, IC [0,40, 0,64]. **Decide otra vez la fila 1**: con `Δ ≤ −5`,
+el MCP se rehace.
+
+> [!info] La fila 1 no pide que el intervalo excluya el cero, y es a propósito
+> Para **entrar**, la regla exige demostrar la mejora (filas 2 a 4 piden intervalos lejos del
+> cero). Para **rechazar**, alcanza con la estimación: `Δ = −10` con un intervalo que todavía
+> toca el cero no demuestra que el MCP sea peor, pero tampoco que no lo sea, y el criterio es
+> **primero no empeorar**. No se relee la regla para que este resultado pase.
+
+### Lo que mejoró
+
+La búsqueda rehecha hizo lo que la prueba gratis anticipaba: **de 47,5 % a 60,0 %**, sin
+perder la ventaja de costo (sigue costando la mitad). Por clase contra la base: C4 **+10**
+(era −40), C5 +10, C3 +10, **C7 0** (era −30: el agente cae a `grep` en el 40 % de esas
+corridas y el bloqueante deja de aplicar), C2 −20 (era −60).
+
+### Lo que queda, y la mayor parte es de cita, no de búsqueda
+
+**En el dato solo, el MCP está a 3 corridas de la base: 60 contra 63 de 80.** Lo que abre la
+diferencia es **cómo cita**: 12 corridas del MCP tienen el dato bien y la cita mal, contra 7
+de la base.
+
+Las «citas inventadas» subieron de 5 a **13**, y no son notas inexistentes: son notas reales
+citadas por su **título visible** —«Atmósferas», «Vídeo embebido en una nota», «Canvas:
+notas en el espacio»— en vez de por su **nombre de archivo**, que es lo que resuelve un
+`[[enlace]]` (`atmosferas`, `video-embebido`, `canvas`). La causa es un efecto colateral del
+propio arreglo: al devolver la **nota entera**, el agente ve primero el `# Encabezado` y cita
+eso. Con secciones sueltas veía la referencia `ruta#sN` y citaba bien — era justamente lo que
+el diagnóstico había identificado como la ventaja del MCP en C1, que ahora pasó de +20 a −20.
+
+**No es un problema de puntuación**: una cita que no resuelve como `[[enlace]]` no le sirve a
+nadie que quiera ir a la nota. Es un defecto real de la respuesta, y barato de corregir en la
+salida de las herramientas: decir **cómo se cita** cada nota.
+
+### Lo que sigue
+
+1. **Que las herramientas digan cómo citar**: el nombre que resuelve como `[[enlace]]`,
+   visible junto a cada resultado y al principio de cada lectura. Explica hasta 5 de las 8
+   corridas de diferencia.
+2. **Mirar C6 (−40) y C8 (−30)**, que no se movieron o casi: las enumeraciones siguen siendo
+   el punto débil —juntar **todo** lo pertinente— y el vocabulario distinto sigue perdiendo
+   contra el modelo reformulando `grep`.
+3. Otra tanda contra la misma base. **La regla sigue congelada**; las selladas siguen sin
+   abrirse hasta la tanda que decida.
+
+### Los dos experimentos siguientes, en orden (decidido el 2026-09-24)
+
+**Uno por tanda**: si se cambian dos cosas a la vez y el resultado mejora, no se sabe cuál
+sirvió, y si una ayuda y la otra perjudica, se tapan entre sí. El arnés es lo bastante barato
+—unos US$ 3,50 por tanda— como para darse ese lujo.
+
+1. **Primero, las citas.** Cada resultado y cada lectura dicen **cómo se cita** la nota —el
+   nombre que resuelve como `[[enlace]]`—. No es una apuesta sino un defecto: una cita que no
+   resuelve no le sirve a nadie, gane o no la evaluación. Es chico y explica hasta 5 de las 8
+   corridas que separan al MCP de la base.
+2. **Después, las conexiones.** Idea del usuario al ver la estructura de una respuesta: que
+   la lectura traiga **las notas conectadas**. Con los números de este vault —unos 16 enlaces
+   por nota y unos 3.000 tokens por nota— adjuntar su **contenido** costaría ~50.000 tokens
+   por lectura, ocho veces una corrida entera del MCP: descartado. Lo que se prueba es una
+   **lista compacta** —nombre, dirección y una pista de qué es, ~25 tokens por conexión—,
+   con prioridad para los **enlaces entrantes**, que es lo que `grep` no encuentra barato:
+   *quién menciona esta nota*. Apunta a dos clases concretas: las **contradicciones
+   resueltas** (la nota que corrige una decisión vieja suele enlazarla) y las
+   **enumeraciones** (todo lo que apunta a un tema). Se mide sobre el servidor que ya cite
+   bien, para que su efecto no se mezcle con el de las citas.
+
+---
+
+## 14. Resultado de las citas: la primera vez que la regla dice «entra» (2026-09-24)
+
+Un solo cambio sobre la fase 1b: las herramientas dicen **cómo se cita** cada nota (servidor
+`3ef9c8d`). Tanda `2026-09-24-mcp-citas`: 81 corridas, US$ 3,48, más US$ 0,28 del juez.
+
+| | Acierto citado | Costo mediano | Contexto | Citas inventadas |
+|---|---|---|---|---|
+| Base (`grep`) | 70,0 % | US$ 0,062 | 14.809 | 4 |
+| MCP fase 1 | 47,5 % | US$ 0,035 | 5.533 | 5 |
+| MCP fase 1b | 60,0 % | US$ 0,033 | 5.940 | 13 |
+| **MCP con citas** | **68,8 %** | **US$ 0,033** | **5.717** | **0** |
+
+**La regla**: filtros de validez, todos pasan. `Δ = −1,3` pts, IC [−13,8, +10,0];
+**`K = 0,56`, IC [0,49, 0,64]** —el intervalo del costo no toca el 1—. **Decide la fila 4:
+igual de exacto y claramente más barato: entra**, con el ahorro como justificación.
+
+El cambio de las citas hizo lo que el § 13 anticipaba: las citas inventadas pasaron de **13 a
+0**, y el acierto citado subió **8,8 puntos** sin mover ni la búsqueda ni el costo. Por clase
+contra la base: C1 **+20**, C3 +10, C4 +10, C2 0, C5 0, **C8 0** (era −30), C6 −20, **C7 −30**.
+
+### Por qué esto todavía no es la decisión
+
+> [!warning] Las preguntas de desarrollo ya se usaron cuatro veces para iterar
+> Cada rediseño se probó contra las **mismas 16 preguntas**, y la dirección de cada arreglo
+> salió de mirar sus fallos. Es exactamente el sobreajuste contra el que existen las **8
+> preguntas selladas**: la confirmación la dan ellas, que nadie vio. Un «entra» sobre el
+> conjunto de desarrollo, después de cuatro vueltas sobre él, es una hipótesis fuerte, no una
+> conclusión.
+
+Lo que falta, en el orden que exige el protocolo:
+
+1. **La tanda de decisión sobre las selladas**, con los brazos **intercalados** esta vez —y
+   con eso se salda también la desviación de haber corrido la base en otra tanda—. Con Haiku,
+   más la réplica con Sonnet en todos los brazos.
+2. **C7 queda justo en el borde del bloqueante**: pierde **30 puntos**, y la regla bloquea
+   con *más* de 30; el agente cayó a `grep` en solo el **10 %** de esas corridas (en la
+   fase 1b había llegado al 40 %). No dispara el bloqueo por la letra de la regla, pero es el
+   punto más débil, y un producto que no sabe ir al código cuando la documentación no alcanza
+   tiene un defecto aunque la tabla lo deje pasar.
+3. **El juez no está validado** contra el patrón humano. Esta vez no cambió ninguna fila, así
+   que la decisión no depende de él; en la tanda de decisión podría.
+
+### Antes de las selladas: el experimento de las conexiones, y cómo se elige
+
+**Las selladas se usan una sola vez.** Si se abrieran ahora para confirmar la versión con
+citas y después se probaran las conexiones, no quedaría ningún conjunto limpio para confirmar
+esa segunda versión. Por eso el orden es: primero las conexiones sobre las preguntas de
+desarrollo; después se elige **una** versión candidata; recién entonces, la tanda de decisión.
+
+> [!important] Criterio de elección, escrito el 2026-09-24 antes de correr las conexiones
+> La versión con conexiones reemplaza a la versión con citas **solo si**, sobre las mismas 16
+> preguntas de desarrollo contra la misma base:
+>
+> - su **acierto citado supera** al de la versión con citas (68,8 %) en **al menos 5 puntos**,
+>   **y**
+> - su **`K` no pasa de 0,7** —conserva al menos un 30 % de ahorro contra `grep`—.
+>
+> Si no cumple las dos, **se queda la versión con citas**, que es más simple: una mejora que
+> no se nota con claridad no paga lo que suma en tokens y en código. El umbral de 5 puntos es
+> el mismo que la regla usa para «empeora», por simetría: si 5 puntos alcanzan para
+> rechazar, son lo mínimo para preferir.
+
+---
+
+## 15. Resultado de las conexiones: la candidata para las selladas (2026-09-24)
+
+Un solo cambio sobre la versión con citas: cada lectura termina con **quién enlaza a la
+nota** —hasta 10 entrantes, ordenados por especificidad, con el texto alrededor del enlace—
+(servidor `fe9c375`). Tanda `2026-09-24-mcp-conexiones`: 81 corridas, US$ 3,67, más US$ 0,28
+del juez.
+
+| | Acierto citado | Costo mediano | Contexto | Citas inventadas |
+|---|---|---|---|---|
+| Base (`grep`) | 70,0 % | US$ 0,062 | 14.809 | 4 |
+| MCP con citas | 68,8 % | US$ 0,033 | 5.717 | 0 |
+| **MCP con conexiones** | **74,4 %** | **US$ 0,039** | **7.359** | **1** |
+
+**La regla**: todos los filtros pasan. `Δ = +4,4` pts, IC [−10,0, +18,8]; `K = 0,54`, IC
+[0,46, 0,68]. **Fila 4: entra.** Es la **primera vez que la estimación del MCP queda por
+encima de `grep`** —sin que el intervalo lo pruebe— costando un 46 % menos.
+
+### El criterio de elección, aplicado como estaba escrito
+
+| Condición (escrita antes de correr) | Resultado | |
+|---|---|---|
+| Acierto citado ≥ 68,8 + 5 = **73,8 %** | **74,4 %** | ✓ por 0,6 pts |
+| `K` ≤ 0,7 | **0,54** | ✓ |
+
+**La versión con conexiones pasa a ser la candidata.** El margen sobre el umbral es fino
+—0,6 puntos—, y eso queda dicho. Pero hay una razón para confiar en el resultado más allá del
+agregado: **la mejora apareció exactamente donde el experimento la predijo**. Las conexiones
+se propusieron para las contradicciones resueltas y los dos saltos, y son las clases que más
+subieron respecto de la versión con citas: **C3 de +10 a +30**, **C4 de +10 a +30**; las
+enumeraciones (C6) mejoraron un poco, de −20 a −15. Un efecto que aparece donde se lo buscaba
+es más creíble que uno que aparece en cualquier lado.
+
+Quedan débiles **C7** (−20, con caída a `grep` en el 30 %: ya no bloquea) y **C5** (−10). Y el
+detector de red descartó **4 corridas** que intentaron salir a internet: funcionó, y esas se
+repitieron.
+
+### Lo que sigue
+
+La **tanda de decisión** sobre las 8 preguntas selladas, con la versión `fe9c375`: brazos
+**ciego, base y MCP intercalados**, con Haiku, más la réplica con Sonnet de base y MCP. Es la
+única vez que se abren las selladas. El juez puede validarse **después**: puntúa respuestas
+ya guardadas, y el informe dirá si la decisión depende de él.
+
+---
+
+## 16. La tanda de decisión: el MCP de memoria **no entra como está** (2026-09-24)
+
+Las 8 preguntas **selladas**, abiertas por única vez, con la candidata elegida por el
+criterio del § 15 (servidor `fe9c375`). Brazos ciego, base y MCP **intercalados**, Haiku y la
+réplica con Sonnet: 242 corridas, US$ 12,68, más US$ 0,94 del juez.
+
+| Modelo | Base (`grep`) | MCP | Δ | `K` | Decide |
+|---|---|---|---|---|---|
+| **Haiku** | 62,5 % | 62,5 % | **0,0** · IC [−22,5, +20,0] | 0,67 · IC [0,46, **1,07**] | **Fila 5**: no entra como está |
+| **Sonnet** | **100 %** | 90,0 % | **−10,0** · IC [−30,0, 0,0] | 0,66 · IC [0,57, 1,18] | **Fila 1**: se rehace |
+
+Todos los filtros de validez pasan; ninguna pregunta contaminada. **El juez no cambia la
+decisión**: movió tres filas en Haiku (Δ de +2,5 a 0,0), y con cualquiera de los dos valores
+decide la fila 5 por el costo.
+
+> [!important] Las selladas hicieron exactamente su trabajo
+> Sobre las preguntas de desarrollo —usadas cinco veces para iterar— la candidata había
+> quedado **+4,4 sobre `grep`** y un 46 % más barata. Sobre preguntas que nadie vio, **empata
+> en acierto y el ahorro se achica a un tercio, sin quedar demostrado** (su intervalo llega a
+> 1,07). Es el sobreajuste que el diseño temía desde el principio, y la razón de haber sellado
+> un conjunto. Sin él, el MCP habría entrado en el producto por un resultado que no se sostiene.
+
+### Lo que dicen los números, más allá de la fila
+
+- **Con un modelo fuerte, `grep` ya es perfecto en este vault**: Sonnet con la skill y `grep`
+  acertó las 8 preguntas en las 5 repeticiones. Ahí el MCP no tiene margen de exactitud que
+  ganar: su único valor posible es el costo, y el costo no alcanza el umbral.
+- **Toda la pérdida con Sonnet es una sola pregunta, la de ausencia** (R05). El MCP **sí**
+  detectó que el dato no estaba —marcó «no está» en 5 de 5, igual que la base—, pero en 4 de 5
+  respuestas contestó desde el conocimiento general **sin decir que el vault no lo registra**.
+  La base casi siempre abrió con «el vault no dice nada sobre esto». Es la debilidad que ya
+  asomaba en las preguntas de desarrollo (C5 en −10), y va al corazón del producto: una memoria
+  tiene que decir **de dónde** sale lo que responde.
+- **Donde el MCP ganó**, en Haiku: hechos puntuales (+40) y el dato fuera del índice (+40, con
+  caída a `grep` en el 100 %). Las conexiones y las citas sí dejaron algo.
+
+### Lectura
+
+**Para un vault de este tamaño —unas 100 notas, 1,2 MB— la memoria actual (la skill y `grep`)
+ya es la herramienta correcta.** El MCP iguala en exactitud y abarata algo, pero no lo
+suficiente ni de forma demostrada como para pagar lo que suma en mantenimiento. Esa conclusión
+vale **para este vault**: la ventaja teórica del MCP crece con el tamaño —`grep` cuesta más
+cuanto más hay que leer—, y el vault personal del usuario tiene 1.220 notas. La investigación
+del estado del arte ya lo anticipaba: este corpus entra entero en el contexto de un modelo.
+
+---
+
+## 16 bis. El tiempo: el MCP es claramente más rápido, y eso no cambia la decisión ya tomada
+
+El usuario pidió medir el tiempo además del costo y la exactitud. Las corridas ya guardaban la
+duración; se analizaron **después** de la decisión del § 16.
+
+| Selladas (brazos intercalados) | `grep` | MCP | Razón MCP/base (IC95) | MCP más rápido |
+|---|---|---|---|---|
+| Haiku | 32,7 s | 23,3 s | **0,76** [0,66, 0,85] | **8 de 8** preguntas |
+| Sonnet | 20,9 s | 11,1 s | **0,63** [0,45, 0,74] | **8 de 8** preguntas |
+
+**No es ruido del servicio**, que era el motivo para dejar el tiempo fuera de la regla: los
+brazos corrieron intercalados, el efecto aparece en todas las preguntas y tiene una causa
+mecánica —el MCP resuelve en **5–6 turnos** lo que a `grep` le lleva **8–9**, y cada turno es
+una llamada al modelo—.
+
+> [!warning] Esto no reabre la decisión del § 16
+> La regla congelada no incluía el tiempo, y agregarlo **después de ver los resultados** sería
+> exactamente lo que el pre-registro existe para impedir. El § 16 queda como está: el MCP no
+> entró **por la regla que se había escrito**.
+>
+> Lo que sí hace este hallazgo es cambiar **la pregunta de producto**. El objetivo que planteó
+> el usuario al empezar fue «máxima velocidad para encontrar información, y con el menor
+> costo». En este vault, el MCP **iguala en exactitud** (con Haiku), es **un tercio más
+> barato** sin llegar a demostrarlo, y es **un cuarto a un tercio más rápido, demostrado**.
+> Si el tiempo cuenta, tiene que contar **en la próxima evaluación**, escrito antes de correrla.
+
+---
+
+## 17. Decisiones y preguntas abiertas
 
 ### Decisiones
 
