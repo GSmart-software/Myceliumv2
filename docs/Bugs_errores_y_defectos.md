@@ -740,6 +740,23 @@ y se vuelve a abrir la nota, se ven bien.
 
 Detectado el 2026-10-01 en la app, durante la pasada final de `FUN-L-26`.
 
+# DEF-123
+La **plantilla de snippets** (la que se descarga o con la que nace un snippet nuevo en
+Configuración → Apariencia) **está desactualizada**: describe la interfaz de junio de 2026.
+Usa 18 de las 98 variables de diseño que existen hoy y no menciona nada de lo que llegó
+después —las atmósferas y la paleta del rediseño 2.0.0, la tarjeta de propiedades, las
+tablas `.base`, los lienzos, el calendario, draw.io—, así que quien la sigue no encuentra
+cómo estilar buena parte de la app.
+
+Reportado por el usuario el 2026-10-03.
+
+# DEF-124
+En una ventana abierta para **otro vault** (desde «abrir otro vault» de la barra superior),
+**no se pueden arrastrar las pestañas** para dividir la pantalla: con las notas A y B
+abiertas, ni A ni B se dejan llevar a un costado. En la ventana principal sí funciona.
+
+Reportado por el usuario el 2026-10-03.
+
 ---
 
 > [!warning] Defectos sin reporte original
