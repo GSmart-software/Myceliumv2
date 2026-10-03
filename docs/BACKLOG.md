@@ -145,7 +145,7 @@ estado está cada una (ver «Cómo leerlo»).
 | `FUN-L-19` 🟢🌐 | `EDITOR-TABLAS-EN-SITIO` | Las tablas **dejan de abrirse en crudo** al entrar el cursor: siguen renderizadas y se editan ahí — escribir en una celda, insertar, eliminar y mover filas y columnas, y alinear — sin ir a la vista raw. Necesita `lib/tablas.ts`, un módulo **puro** de parseo y reescritura que hoy no existe (y que debe manejar el `|` escapado dentro de una celda, que es lo mismo que rompe `DEF-045`). **Confirmado en desktop** el 2026-08-17 y **reflejado en web** el mismo día. Segunda mitad de [[edicion-en-el-render]]; la primera es `FUN-M-19` | ambas | — |
 | `FUN-L-07` 🟢 | `TERMINAL-INTEGRADA` | Consola nativa integrada (estilo VS Code): abre en la raíz del vault (o en la carpeta elegida), como pestaña normal del workspace (dividir, varias instancias). **Confirmada en desktop** por el usuario en lo esencial, tras varias iteraciones (panel de consolas, shells de fondo, renombrar, selector de shell, tema reactivo); spec en `docs/features/terminal-integrada.md` | desktop | — |
 | `FUN-L-08` 🛠️ | `IA-FRAMEWORK-VAULT` | Framework IA versionado generado en el vault (CLAUDE.md + **8 skills** —desde la `1.7.0` del framework, con `FUN-L-26`— + 6 comandos en `.claude/`) para que Claude Code use el vault como **memoria**: recuperar antes de responder y consolidar lo que valga recordar, navegando por vínculos. Botón opt‑in en Configuración → Vault. **Implementada** (sin confirmar explícitamente). El framework salió en [[Version 1.1.0]]; spec en `docs/features/ia-framework-vault.md` | desktop | — |
-| `FUN-L-09` 🛠️ | `IA-MCP-MYCELIUM` | Servidor MCP de **control** de Mycelium: la IA muestra cosas en pantalla, modifica el calendario y el diccionario del vault, renombra y mueve sin romper enlaces y usa la papelera. La mitad de búsqueda se evaluó y **no entra** ([[mcp-control]]). **Las cuatro partes implementadas** en `feat/mcp-control-desktop` (2026-10-03), pendientes de prueba del usuario en la app | desktop | — |
+| `FUN-L-09` 🛠️ | `IA-MCP-MYCELIUM` | Servidor MCP de **control** de Mycelium: la IA muestra cosas en pantalla, modifica el calendario y el diccionario del vault, renombra y mueve sin romper enlaces y usa la papelera. La mitad de búsqueda se evaluó y **no entra** ([[mcp-control]]). **Las cuatro partes integradas en `desktop-tauri`** el 2026-10-03 (merge `bb35fa9`), pendientes de confirmación del usuario en la app; sin publicar | desktop | — |
 | `FUN-L-10` | `VAULT-INDEX-EN-RUST` | Mover el indexado entero a Rust: el walker lee y escribe el índice en el mismo proceso, en **una** transacción, sin pasar contenido por IPC. Resuelve de raíz lo que `FUN-M-12` mitigó desde el frontend (incluido el `BEGIN`/`COMMIT` que el pool de `tauri-plugin-sql` impide). Continuación de `FUN-M-12` | desktop | — |
 | `FUN-L-11` 🟢 | `FILES-OTROS-TIPOS` | **Abrir** los archivos que no son notas —texto, código, PDF e imágenes— en un visor propio, como una pestaña más. La mitad de *aparecer en el explorador* ya la resolvió `FUN-S-03`. **Solo-desktop**: en web esos archivos no existen en ninguna parte. Dejó de ser de solo lectura con `FUN-M-26`. **Implementado en desktop** el 2026-08-22 y **confirmado en la app** el 2026-09-03: pestaña `archivo:<ruta>` por centinela, texto por un comando propio que corta por tamaño y detecta lo que no decodifica, PDF/imagen por el protocolo `asset:` acotado a la carpeta del vault. Spec en [[otros-tipos-de-archivo]] | desktop | — |
 | `FUN-L-12` 🛠️🌐 | `EDITOR-CORRECTOR-ORTOGRAFICO` | Corrector ortográfico con **motor propio**: `spellbook` en WebAssembly dentro de un *worker*, diccionarios Hunspell de **español, inglés e italiano** que el usuario elige **descargar desde R2** (no van en el instalador), el español en la variante de la región del sistema, subrayado y menú propios, y diccionario personal por vault y el de Mycelium. Primero se probó el corrector del sistema, pero Edge/WebView2 solo revisa lo que se tipea. Especificado el 2026-09-27. **Implementado en desktop el mismo día, sin confirmar en la app** (rama `feat/corrector-desktop`). **Salió en [[Version 2.2.0]]** (desktop); los diccionarios se publicaron en R2 antes del release. **Web reflejado** el 2026-09-30 (merge `79f8b8d`), sin publicar ni probar en la app; falta CORS en R2 y el esquema en D1. Spec en [[corrector-ortografico]] § 9 | ambas | — |
@@ -880,13 +880,15 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 > [[Skill o MCP, segun quien sabe hacerlo]]. Spec y partes: [[mcp-control]]. Lo de abajo es el
 > registro de la planificación original.
 
-> [!info] Las cuatro partes implementadas, pendientes de prueba en la app (2026-10-03)
+> [!info] Integrada en `desktop-tauri` el 2026-10-03, pendiente de confirmación en la app
 > Canal y mostrar, calendario y registro de actividad, archivos con confirmación y hook, y el
-> diccionario del vault: **12 herramientas** en `feat/mcp-control-desktop`, con tests de Rust
-> (incluida la punta a punta del binario real) y de Node verdes. **No** está en
-> `desktop-tauri` ni probada por el usuario: el recorrido completo para probarla y los
-> límites abiertos están en [[mcp-control]] § «Estado al cerrar las cuatro partes». No se
-> mueve a «Implementadas» hasta esa prueba.
+> diccionario del vault: **12 herramientas**, cada parte con su propio merge dentro de
+> `feat/mcp-control-desktop`, que entró a `desktop-tauri` con el merge `bb35fa9`. Verificado
+> al integrar: `cargo test` de `mycelium-vault` y `mycelium-mcp` (45, incluida la punta a
+> punta del binario real), `cargo check`, `cargo test --lib control`, `tsc` y los tests de
+> Node. **Todavía no se probó en la app real**: el recorrido está en [[mcp-control]]
+> § «Estado al cerrar las cuatro partes». Sin publicar: es un minor de la app; el framework
+> de IA sigue en `1.7.0`.
 
 - **Qué es**: un **servidor MCP** (Model Context Protocol) provisto por Mycelium que
   expone el vault a la IA como herramientas estructuradas: búsqueda en el índice,
@@ -1543,7 +1545,7 @@ dígito es el que sugiere la guía «Relación tamaño ↔ versión», no uno ac
 | ID | Por qué va sola | Dígito |
 |---|---|---|
 | ~~`FUN-L-03` `FILES-BASES-TABLA`~~ | ✅ **Implementada** en las dos ramas el 2026-08-08, sin confirmar. Salió en [[Version 1.6.0]], que nadie instaló: se publicó absorbida por la [[Version 1.6.2]] | minor |
-| `FUN-L-09` `IA-MCP-MYCELIUM` | Único pendiente de la línea de IA; `FUN-L-07` y `FUN-L-08` ya salieron | minor |
+| `FUN-L-09` `IA-MCP-MYCELIUM` | Integrada en desktop el 2026-10-03, sin publicar ni confirmar; `FUN-L-07` y `FUN-L-08` ya salieron | minor |
 | `FUN-L-01` `MACROS-HOTKEYS` | Capa transversal de comandos: no comparte código con ninguna funcionalidad concreta | minor |
 | `FUN-L-05` `IMPORT-ADJUNTOS` | Subsistema de importación, aislado del resto | minor |
 | ~~`FUN-L-20` `FILES-DRAWIO`~~ | ✅ **Implementada y confirmada** el 2026-09-23; salió en [[Version 2.1.0]]. Un tipo de archivo nuevo, con su editor embebido: no comparte código con nada pendiente. Sí comparte **molde** con `FUN-L-18`, pero aquella ya está hecha | minor |
