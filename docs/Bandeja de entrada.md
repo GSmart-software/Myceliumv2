@@ -101,6 +101,11 @@ lo digo.
 | 2026-09-25 | Un calendario con recordatorios que avisan al iniciar; con o sin hora, repetición diaria, semanal, mensual o anual; título, detalle en markdown con referencias a notas, sin archivo ni grafo; colores; como pestaña o panel lateral con la lista de día, semana o mes | `FUN-L-22` `CALENDARIO-RECORDATORIOS` · spec en [[calendario-recordatorios]]. Decidiste: de cada vault, aviso en la app y en Windows, paleta fija, solo desktop por ahora |
 | 2026-09-27 | Mientras se abre un vault no está la barra para minimizar, maximizar y cerrar | `DEF-114` |
 | 2026-09-27 | Abrir un segundo vault sin salir del actual ni lanzar el ejecutable otra vez | `FUN-S-24` `ABRIR-OTRO-VAULT` en el [[BACKLOG]] |
+| 2026-10-03 | La ventana de configuración tiene mucho texto; se siente sucia, no cómoda | `FUN-M-41` `UX-AJUSTES-MENOS-TEXTO` — **reclasificada**: no falla nada, es una mejora de la interfaz. Continúa la crítica de `FUN-M-34`/`FUN-M-35` · bloque **P** |
+| 2026-10-03 | La plantilla de los snippets está totalmente desactualizada | `DEF-123`. No está rota (todo lo que usa existe), pero es de junio: cubre 18 de 98 variables y no conoce nada posterior al rediseño · bloque **P** |
+| 2026-10-03 | Editar el `.mycignore` en una pestaña y no en un textarea chico de la configuración, con el visor de archivos no markdown | `FUN-S-25` `MYCIGNORE-EN-PESTANA` — **reclasificada**: es una mejora, no un defecto · bloque **P** |
+| 2026-10-03 | En la ventana abierta con «abrir otro vault» no se pueden arrastrar las pestañas para dividir la pantalla | `DEF-124`, con la **causa localizada**: las ventanas creadas desde Rust no desactivan el arrastre nativo de Tauri, que se queda con el arrastrar y soltar del HTML. Afecta a toda ventana de otro vault |
+| 2026-10-03 | Una «wiki» o ayuda en Configuración con todas las herramientas y los estilos especiales de markdown de Mycelium | `FUN-L-27` `AYUDA-INTEGRADA` · spec en [[ayuda-integrada]] · bloque **P**. Lo difícil es que no envejezca como la plantilla de snippets |
 
 > [!note] Esta tabla se puede vaciar cuando moleste
 > Es una comodidad para que veas en qué terminó cada cosa, no un registro canónico. La
@@ -113,8 +118,3 @@ lo digo.
 - [[BACKLOG]] — el inventario de funcionalidades con IDs, tamaños y agrupación en releases.
 - [[Ideas Mycelium]] — el documento donde anotabas ideas antes que esta bandeja.
 - [[Mapa de documentacion]] — índice general.
-| 2026-10-03 | La ventana de configuración tiene mucho texto; se siente sucia, no cómoda | `FUN-M-41` `UX-AJUSTES-MENOS-TEXTO` — **reclasificada**: no falla nada, es una mejora de la interfaz. Continúa la crítica de `FUN-M-34`/`FUN-M-35` · bloque **P** |
-| 2026-10-03 | La plantilla de los snippets está totalmente desactualizada | `DEF-123`. No está rota (todo lo que usa existe), pero es de junio: cubre 18 de 98 variables y no conoce nada posterior al rediseño · bloque **P** |
-| 2026-10-03 | Editar el `.mycignore` en una pestaña y no en un textarea chico de la configuración, con el visor de archivos no markdown | `FUN-S-25` `MYCIGNORE-EN-PESTANA` — **reclasificada**: es una mejora, no un defecto · bloque **P** |
-| 2026-10-03 | En la ventana abierta con «abrir otro vault» no se pueden arrastrar las pestañas para dividir la pantalla | `DEF-124`, con la **causa localizada**: las ventanas creadas desde Rust no desactivan el arrastre nativo de Tauri, que se queda con el arrastrar y soltar del HTML. Afecta a toda ventana de otro vault |
-| 2026-10-03 | Una «wiki» o ayuda en Configuración con todas las herramientas y los estilos especiales de markdown de Mycelium | `FUN-L-27` `AYUDA-INTEGRADA` · spec en [[ayuda-integrada]] · bloque **P**. Lo difícil es que no envejezca como la plantilla de snippets |
