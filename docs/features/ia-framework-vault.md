@@ -45,6 +45,7 @@ que la IA sepa qué herramienta corresponde a cada situación.
 | `.claude/skills/mycelium-{drawio,canvas,excalidraw}/validar-<formato>.mjs` | El **validador** de cada formato, sin dependencias: la IA lo corre con `node` sobre lo que escribió |
 | `.claude/mycelium-ia.json` | Marcador de versión del framework (y huellas de lo generado, `DEF-118`) |
 | `.mcp.json` | **No es un template**: el servidor MCP de control (`mycelium`), con la ruta del binario instalado y `MYCELIUM_VAULT`. Solo si el control está encendido; se **fusiona** con el del usuario ([[mcp-control]] § «Cómo quedó — Parte 1») |
+| `.claude/hooks/mycelium-mv-rm.mjs` + su entrada en `.claude/settings.json` | **Tampoco es un template**: el hook `PreToolUse` que, con el control encendido, frena `mv`/`rm` sobre notas y le recuerda a la IA `mycelium_renombrar` / `_mover` / `_borrar` (con un escape, `MYCELIUM_SIN_MCP=1`, para cuando el MCP no responde). Lo instala `lib/mcpControl.ts` junto con el `.mcp.json`; el `settings.json` se **fusiona** con el del usuario ([[mcp-control]] § «Cómo quedó — Parte 3») |
 
 Contenido **verificado contra el código real** de Mycelium: `[[Título|alias]]`,
 `![[embed]]`, `![[X.excalidraw]]`, `#tag`, callouts (10 tipos, plegables `-/+`,
@@ -52,8 +53,11 @@ anidados), `.mycelium/.trash`, **propiedades del frontmatter** con su subconjunt
 soportado (`FUN-M-04`, desde la v1.3.0 del framework), las **Esporas** y sus
 variables (`FUN-M-03`, desde la v1.4.0), los **tipos de archivo del vault** con la
 sintaxis de `.base` y `.canvas` (desde la v1.5.0), y que renombrar **sí** reescribe
-los enlaces —pero solo desde la app: un `mv` de la IA no dispara nada, y ahí los
-actualiza ella con grep (`FUN-M-08`).
+los enlaces —pero solo por Mycelium: un `mv` de la IA no dispara nada (`FUN-M-08`)—.
+Desde la Parte 3 del MCP de control (todavía en la `1.7.0`), la **regla dura 2** se
+invierte: para renombrar o mover, la IA usa `mycelium_renombrar` / `mycelium_mover`, y
+para borrar `mycelium_borrar` (papelera); `mv` solo si el MCP no está, y entonces los
+enlaces los arregla ella con grep.
 
 ## Versionado
 
@@ -127,7 +131,13 @@ actualiza ella con grep (`FUN-M-08`).
     `mycelium_estado`/`mycelium_abrir`), con una tabla a la que las partes 2–4
     agregan filas; «Tus herramientas aquí» la nombra y «por fuera» deja de decir que
     la IA no controla la app. Al generar con el control encendido se escribe además
-    el `.mcp.json`.
+    el `.mcp.json`. Parte 2: las cinco del calendario y la regla 8. Parte 3: las
+    cuatro de archivos (`mycelium_renombrar`, `_mover`, `_borrar`, `_papelera`), la
+    regla dura 2 al revés (la herramienta primero, `mv` solo sin MCP), qué hacer con
+    un `RECHAZADO`, y el **hook** de `mv`/`rm` en `.claude/settings.json` —que, como
+    el `.mcp.json`, se instala solo con el control encendido y se fusiona con el del
+    usuario—. Su script (`scripts/hook-mv-rm.mjs`) viaja por el mismo generador que
+    los validadores (`HOOK_MV_RM` en `lib/ia/skillsGeneradas.ts`).
 
     El texto de las skills y los validadores **no vive en `framework.ts`**: lo genera
     `scripts/generar-skills-ia.mjs` en `lib/ia/skillsGeneradas.ts` a partir de
@@ -174,8 +184,9 @@ La IA **entiende** Mycelium (documentos, vínculos, extensiones, metadatos y
 funciones). **Controlarlo** es opt-in y va por el MCP de control (`FUN-L-09`,
 [[mcp-control]]): con «Dejar que la IA controle Mycelium» encendido en
 Configuración → Vault, la IA puede mostrar notas, el grafo o el calendario y saber
-qué está abierto (Parte 1); renombrar, mover, borrar, el calendario y el
-diccionario llegan en las partes siguientes.
+qué está abierto (Parte 1), leer y modificar el calendario (Parte 2) y renombrar,
+mover o mandar a la papelera sin romper enlaces (Parte 3); el diccionario llega en
+la Parte 4.
 
 ## Relacionadas
 
