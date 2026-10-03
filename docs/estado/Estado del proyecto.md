@@ -6,14 +6,13 @@ Foto de dónde está Mycelium hoy. Para el detalle de cada tema, seguir los enla
 
 ## Resumen
 
-- **Versión: desktop `2.2.0`, publicada el 2026-09-28** ([[Version 2.2.0]]: el calendario
-  con recordatorios `FUN-L-22`, el corrector ortográfico `FUN-L-12`, abrir otro vault
-  `FUN-S-24` y el grafo para vaults grandes `FUN-L-25`, más los arreglos del índice y las
-  correcciones hasta `DEF-117`). **Integrado y sin publicar** en `desktop-tauri`: las skills
-  de IA por herramienta (`FUN-L-26`, framework `1.7.0`), la recarga desde disco y el encuadre
-  al abrir de lienzos, diagramas y dibujos, y `DEF-118` a `DEF-122`; apunta a una `2.3.0`
-  (minor), que el usuario decidió no publicar todavía (2026-10-01). La anterior fue
-  la `2.1.0` ([[Version 2.1.0]], 2026-09-23: draw.io como tipo de
+- **Versión: desktop `2.3.0`, publicada el 2026-10-03** ([[Version 2.3.0]]: la IA trabaja
+  con Mycelium —el MCP de control `FUN-L-09` y las skills por herramienta `FUN-L-26`,
+  framework `1.7.0`—, la recarga desde disco y el encuadre al abrir de lienzos, diagramas y
+  dibujos, la papelera con selección múltiple `FUN-S-04`, la rueda en el historial
+  `FUN-S-13`, y `DEF-118` a `DEF-122` y `DEF-124`). La anterior fue la `2.2.0`
+  ([[Version 2.2.0]], 2026-09-28: calendario, corrector ortográfico, abrir otro vault y el
+  grafo para vaults grandes). Antes, la `2.1.0` ([[Version 2.1.0]], 2026-09-23: draw.io como tipo de
   archivo, los enlaces web al navegador y el vídeo en la nota) · **web `2.1.0`** (le llega
   el vídeo y los enlaces; draw.io y las consolas son solo-desktop). La anterior de
   escritorio, [[Version 2.0.0]], se publicó el 2026-09-21. Las dos líneas **no

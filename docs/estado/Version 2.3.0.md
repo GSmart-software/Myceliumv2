@@ -2,6 +2,13 @@
 
 **Solo desktop** (`desktop-tauri`) · 2026-10-03 · sobre [[Version 2.2.0]]
 
+> [!success] Publicada el 2026-10-03 a las 19:58 (UTC)
+> Con `npm run publicar -- --sin-compilar`, sobre la compilación del ensayo (instaladores en
+> `installers/v2.3.0/`). El script verificó los tres manifiestos, que la firma coincide con el
+> `.sig` y que el `.exe` del bucket es el firmado (sha256 `035c287c…`). El primer ensayo falló
+> porque `next build` revisaba recursos binarios de `src-tauri/target`; se arregló excluyendo
+> esa carpeta del `tsconfig` (`cc94d8a`).
+
 La versión de la **IA que trabaja con Mycelium**. Dos funcionalidades la definen: el **MCP de
 control** (`FUN-L-09`), con el que Claude Code opera la app —muestra cosas, maneja el calendario,
 renombra y mueve sin romper enlaces, usa la papelera y el diccionario—, y las **skills por
