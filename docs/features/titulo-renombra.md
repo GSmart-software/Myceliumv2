@@ -125,6 +125,24 @@ Para que entrar a editar no mueva el texto ni un píxel, el estado en reposo lle
 el **mismo relleno y un borde transparente del mismo grosor** que la caja: lo
 único que aparece al hacer clic es el marco.
 
+## 6.1 La reparación de enlaces, desde la Parte 3 del MCP (2026-10-01)
+
+Renombrar desde el título o el explorador sigue pasando por `vaultStore.renameNota`,
+pero la reparación de los enlaces entrantes se separó a `frontend/lib/repararEnlaces.ts`
+para que **la IA renombre con el mismo código** (`mycelium_renombrar`,
+[[mcp-control]] § «Cómo quedó — Parte 3»). Dos cosas cambiaron para el usuario:
+
+- También se reparan los enlaces **con pista de carpeta** (`[[Proyectos/Plan]]`), que
+  antes quedaban rotos: `reescribirEnlacesMovidos` (`lib/enlaces.ts`) conserva la pista
+  si solo cambió el nombre.
+- **Mover** (arrastrar en el explorador, y Ctrl+Z de un movimiento) y **renombrar o
+  mover una carpeta** ahora también reparan: un enlace por título sigue resolviendo
+  solo, pero uno con pista deja de calzar y pasa a la ruta completa nueva.
+
+Los retroenlaces salen del índice con una sola consulta (`retroenlaces`, en
+`lib/db/grafo.ts`) en vez de las `conexiones` de cada nota. `motivoNombreInvalido` de
+este archivo es también lo que valida el nombre que manda la IA.
+
 ## 7. Archivos implicados
 
 | Archivo | Qué |
@@ -148,6 +166,7 @@ el **mismo relleno y un borde transparente del mismo grosor** que la caja: lo
 ## Relacionadas
 
 - [[bugs-progreso]] — `DEF-084`, que salió de implementar esto.
+- [[mcp-control]] — `FUN-L-09`: la IA renombra y mueve con la misma reparación (Parte 3).
 - [[CodeMirror y la vista en vivo]] — las seis reglas del widget interactivo.
 - [[edicion-en-el-render]] — `FUN-M-19` y `FUN-L-19`, de donde salen esas reglas.
 - [[BACKLOG]] — `FUN-M-24` y el bloqueo de `FUN-M-08` que hubo que levantar antes.

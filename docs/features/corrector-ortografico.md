@@ -60,6 +60,8 @@ Motor propio con diccionarios Hunspell que el usuario descarga. **Especificado e
 - Los **dos diccionarios personales** —el del vault y el de Mycelium—, cada uno con cuántas
   palabras tiene y una lista para **verlas y quitar** las que no se quieran. Sin vault
   abierto, el del vault no se muestra.
+- El del vault también lo maneja la IA, por el MCP de control (`mycelium_diccionario`, ver
+  «El diccionario del vault, también por MCP» al final del § 9).
 
 ## 3. Arquitectura (compartida por las dos versiones)
 
@@ -380,6 +382,28 @@ El segundo diccionario personal (§ 1), **sin probar en la app**:
 (criterio 7), reabrir la app y que siga, quitarla en Configuración y que se vuelva a marcar
 (7b), con dos ventanas abiertas, y la lista con muchas palabras en modo oscuro. El orden de las sugerencias lo da
 el motor: para «tezto», «texto» sale cuarta, detrás de «teto», «tote» y «testo».
+
+### El diccionario del vault, también por MCP (2026-10-03, `FUN-L-09` Parte 4)
+
+Con el control de la IA encendido ([[mcp-control]]), Claude Code maneja el **diccionario del
+vault** con `mycelium_diccionario` (`listar`, `agregar`, `quitar`). El de **Mycelium** no se
+toca por MCP: es del usuario y vale para todos sus vaults. Sin pruebas en la app todavía.
+
+- **El mismo camino que el menú**: `cambiarPalabrasDe("vault", …)` en `corrector.ts` (la
+  generalización de `agregarA`/`quitarDe` a varias palabras): relee el archivo, escribe por la
+  cola con el formato de `palabras.ts`, avisa al worker y a los editores —lo agregado deja de
+  subrayarse sin recargar— y a la lista de Configuración. Sin cambios no escribe.
+- **Qué es una palabra**: `motivoPalabraNoAceptada` (`palabras.ts`), la regla de
+  `extraerPalabras` al revés: una entrada vale si el corrector la revisaría tal cual. Se
+  rechazan, con el motivo, las vacías, con espacios o con signos que parten la palabra
+  («Wi-Fi» → «revisa Wi y Fi por separado»), con dígitos o `_`, `camelCase` y una sola letra.
+  Al **quitar** no se valida el formato: así se limpia una entrada rara escrita a mano.
+- **Una carrera que ya existía** (también para el menú): un «Agregar» que terminaba mientras
+  el corrector leía los diccionarios personales —al arrancar o al cambiar de vault— quedaba
+  tapado en memoria por la lectura vieja. Ahora esa lectura se repite si cambiaron los
+  personales mientras leía (`epocaPersonales`), y mientras lee el MCP contesta `OCUPADA`.
+- La IA aprende (framework `1.7.0`) que `.mycelium/diccionario.txt` **no se escribe a mano**
+  y que el diccionario es para los términos propios del vault, no para las erratas.
 
 ---
 

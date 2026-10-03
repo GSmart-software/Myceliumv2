@@ -2,6 +2,12 @@
 
 **Planificación** · 2026-09-23 · `FUN-L-09` `IA-MCP-MYCELIUM`
 
+> [!warning] Nota histórica: la búsqueda no entró
+> El 2026-09-25 esta mitad se evaluó y **no entra** al producto: no le ganó a `grep` en
+> exactitud ([[MCP de Mycelium - tesina, protocolo]] § 9). Su código quedó en la historia de
+> `feat/mcp-desktop` (`4d7830b`); del servidor solo sigue el protocolo y la resolución del
+> vault. Lo vigente es [[mcp-control]].
+
 Esta nota decide **cómo el MCP encuentra información en el vault**: el modelo de datos, la
 granularidad, el ranking, las herramientas y su formato de respuesta, cuándo se reindexa y
 dónde corre el servidor. Parte de [[MCP de Mycelium - encuadre]], que fija los hechos y las
@@ -10,6 +16,19 @@ restricciones; las otras dos mitades son [[MCP de Mycelium - control]] (operar l
 
 > [!important] Solo se planifica
 > No hay código todavía. Lo que sigue son decisiones con su porqué, no una implementación.
+
+> [!success] Actualización 2026-09-24: la fase 1 está construida
+> `vault_buscar` y `vault_leer` sobre el índice propio, en el crate compartido
+> `mycelium-vault` y el binario `mycelium-mcp` (rama `feat/mcp-memoria`). Lo que se
+> construyó **distinto** de lo que dice esta nota, y lo que se midió, está en el
+> § 13. El resto de la nota sigue siendo el diseño.
+
+> [!warning] Actualización 2026-09-24 (tarde): la fase 1 perdió y se rehizo
+> La tanda de la fase 1 perdió contra `grep` y [[MCP de Mycelium - diagnostico fase 1]]
+> explicó por qué. Lo rehecho —la búsqueda por **cobertura** en vez del Y, la lectura de
+> notas enteras hasta 20 KB, el índice de secciones sin corte y las instrucciones en las
+> descripciones— está en el **§ 14**, y reemplaza lo que dicen los §§ 4 («Lo que se
+> pierde, y cómo se recupera») y 7 (`vault_leer`, el tope de ~8 KB).
 
 > [!info] Cómo leer los números
 > Todo lo medido se midió **sobre este repo** el 2026-09-23 (`docs/`, 93 notas) y sobre el
@@ -282,6 +301,10 @@ vault personal. Es decir: **cuesta casi nada y cubre el caso patológico.**
 Indexar por sección rompe el `AND` implícito entre términos que hoy hace `buscar.ts`: si
 «tauri» está en una sección y «sqlite» en otra de la misma nota, la consulta `tauri sqlite`
 ya no casa. Es una regresión real.
+
+> [!caution] Reemplazado en el § 14
+> El respaldo de abajo se construyó y **falló** en la tanda: exigía el mismo Y un nivel más
+> arriba. Ahora alcanza con un término y el orden premia la cobertura.
 
 **Se resuelve sin una segunda tabla FTS**: `vault_buscar` primero consulta a nivel sección
 con `AND`; si devuelve cero, emite **una subconsulta por término** e **intersecta por
@@ -727,11 +750,457 @@ que los otros — no como un sistema paralelo.
 
 ---
 
+## 13. Notas de implementación de la fase 1 (2026-09-24)
+
+Lo construido para la fase 1 del [[MCP de Mycelium - plan]] (§ 6): `vault_buscar` y
+`vault_leer`. Esta sección dice **qué quedó distinto de lo diseñado arriba y por qué**,
+y los números medidos que reemplazan a las estimaciones.
+
+### 13.1 Dónde está cada cosa
+
+| Pieza | Dónde | Qué |
+|---|---|---|
+| Crate compartido | `frontend/src-tauri/crates/mycelium-vault` | `.mycignore`, `rutas` (`misma_ruta`, `hash_ruta`), `registro` (`vaults.json`), `tipos`, `recorrido` (el walker), `wikilinks`, `frontmatter`, `markdown` (código, enlaces, tags, secciones) y, detrás de la feature `indice`, el índice SQLite |
+| Servidor | `frontend/src-tauri/crates/mycelium-mcp` | Binario delgado: resolución del vault, protocolo, formato de respuesta, registro de búsquedas |
+| Prueba de equivalencia | `frontend/scripts/equivalencia-indice.mjs` | Parsers de TS contra los de Rust, sobre un vault real |
+
+`src-tauri/` pasó a ser un **workspace** con la app como paquete raíz: `target/` y
+`Cargo.lock` no se movieron y `tauri build` sigue compilando solo la app. Lo que la app
+ya tenía en Rust y el MCP necesitaba —`mycignore.rs`, `misma_ruta`, el walker de
+`listar_archivos_meta`, los tipos de archivo, el formato de `vaults.json`— **se movió** al
+crate (no se copió) y la app lo usa desde ahí; sus 43 tests pasan igual.
+
+### 13.2 Lo que se construyó distinto, y por qué
+
+- **`secciones_fts` usa el `rowid`** (= `secciones.id`) en vez de una columna
+  `seccion_id UNINDEXED`. Es lo mismo, sin una columna más en cada fila del FTS.
+- **La `ref` es `ruta#s<orden>`**, y el orden `0` existe **solo** si hay preámbulo con
+  contenido (frontmatter incluido): una nota que empieza con `#` arranca en `#s1`.
+  `ENLACES` guarda `seccion_orden` en vez de `seccion_id`, y además `destino` (sin alias):
+  así la sección de un enlace se resuelve por `(nota, orden)` sin otro join.
+- **Los enlaces se materializan ya en la fase 1**, aunque `vault_vecinos` sea de la
+  fase 2: la señal `pop` los necesita y `vault_leer` devuelve «a qué enlaza esta
+  sección» (con rotos y ambiguos). Lo que queda para la fase 2 son las herramientas.
+- **El código es texto buscable pero nunca estructura.** Plan § 3.1 dice que el código
+  «no es texto indexable de la misma forma»: se implementó como que su texto **sí** va al
+  FTS —un identificador entre acentos graves, `FUN-L-09`, `vault_buscar`, es justo lo que
+  se busca— pero **nunca** produce enlaces, etiquetas ni cortes de sección.
+- **Las migas omiten el H1-título.** Si un documento tiene un solo H1 y es su primer
+  encabezado, hace de título y como ancestro no entra: `Nota > H2 > H3`, que es como las
+  escribe el plan § 4.4. En el preview se omite además el título de la nota, que ya está
+  en la `ref`.
+- **Cinco señales, no cuatro**: `rel pop prox rec anc` (la quinta es la del plan § 4.1,
+  el texto de los enlaces entrantes, sobre `enlaces_fts`). Todas en peso 0 salvo `rel`. En
+  el preview van como `[1 .46 0 1 0]` con la leyenda una sola vez en la cabecera: los
+  nombres repetidos diez veces eran ~80 tokens que no le sirven al agente. `anc` es una
+  señal **de nota** aplicada igual a todas sus secciones; la regla de fusión que pide la
+  revisión (§ 3.8) queda para la calibración.
+- **BM25 con pesos de columna 4 · 2 · 1** (título · migas · cuerpo), tokenizador
+  `unicode61 remove_diacritics 2` («indice» encuentra «Índice») y prefijo en cada término
+  («enlace» encuentra «enlaces»). Los tres pesos quedan escritos en cada línea del registro
+  de búsquedas: son parámetros de calibración, no decisiones.
+- **Registro de búsquedas** (plan § 4.3): `mcp-<hash>-busquedas.jsonl`, al lado del índice.
+  Una línea por `vault_buscar` con la consulta, la expresión FTS, los filtros, el modo, el
+  total y la lista ordenada con `bm25`, las cinco señales y el puntaje. Rota a los 20 MB.
+- **El arranque en frío no bloquea `initialize`** (revisión § 3.3): corre en un hilo, y una
+  herramienta llamada antes devuelve `INDEXANDO (hechas/total)`.
+- **`vault_leer` revalida la nota antes de resolver la `ref`** (revisión § 2.5); si cambió,
+  la reindexa y lo avisa en la respuesta.
+- **Transacciones `IMMEDIATE`**, y la comprobación de versión del esquema dentro de una:
+  con dos sesiones en frío sobre el mismo índice, SQLite devuelve «locked» sin pasar por
+  `busy_timeout` en dos puntos (el paso a WAL y una transacción que empieza leyendo y
+  después escribe). Con `IMMEDIATE` la segunda sesión espera su turno.
+- **Los tipos que no son `.md` entran como nodos sin secciones** (la inclinación de § 12.4
+  y del plan § 8.4, que sigue abierta como decisión del usuario): `[[Mi base]]` resuelve y
+  no cuenta como roto.
+- **Nota de más de 8 KB pedida entera**: índice de secciones (hasta 40 filas; si hay más,
+  solo hasta H3/H2/H1) + la primera sección + el precio de la entera. *(Reemplazado en el
+  § 14: el tope es 20 KB y el índice va completo.)*
+
+### 13.3 Decisiones de construcción
+
+- **Protocolo a mano, no el SDK oficial (`rmcp`)**: la superficie es `initialize`, `ping`,
+  `tools/list` y `tools/call` sobre JSON-RPC por línea (~150 líneas). El SDK trae tokio,
+  macros y `schemars` para un servidor síncrono de una llamada a la vez, alarga la
+  compilación en una máquina que ya compila Tauri con `CARGO_BUILD_JOBS=2` y su API cambia
+  entre menores. Si hacen falta notificaciones, cancelación o HTTP, se migra: las
+  herramientas no dependen del transporte.
+- **rusqlite 0.32**, con la **misma** `libsqlite3-sys` 0.30 que sqlx: el crate declara
+  `links = "sqlite3"` y un workspace no admite dos. La feature `indice` hace que la app no
+  lo compile mientras siga indexando desde el frontend.
+- **Empaquetado (sin cablear)**: el binario se llama `mycelium-mcp` y comparte `target/`
+  con la app; va como `bundle.externalBin` (sidecar), que lo instala junto a
+  `Mycelium.exe`. Así la ruta a registrar en Claude Code es estable entre versiones.
+
+### 13.4 Medido (reemplaza las estimaciones de §§ 3, 7 y 9)
+
+Binario de release, Windows, 2026-09-24. Tokens a 4 bytes por token, como en el resto de
+la nota.
+
+| Qué | Estimado | Medido |
+|---|---|---|
+| `vault_buscar` con 10 previews («enlaces») | ~420 tokens | **2.292 bytes ≈ 573 tokens** |
+| `vault_buscar` con 5 previews («dos escritores») | — | 1.531 bytes ≈ 383 tokens |
+| `vault_leer` de una sección (plan § 2.3) | ~225 tokens | 630 bytes ≈ 158 tokens |
+| `vault_leer` de `BACKLOG.md` entero sin `forzar` | — | 2.635 bytes ≈ 659 tokens (contra ≈ 31.980 la nota entera) |
+| `tools/list` (una vez por sesión) | — | 2.635 bytes ≈ 659 tokens |
+| Índice, vault del repo sin copias (107 archivos) | 2–3 MB | **4,2 MB** |
+| Índice, `Trabajo y Estudio` (1.223 archivos) | 9–14 MB | **16,4 MB** |
+| Arranque en frío, 107 archivos | 1–3 s | **~0,33 s** (2,2–2,4 s en algunas corridas con la máquina cargada) |
+| Arranque en frío, 1.223 archivos | 1–3 s | **3,95 s** |
+| Revalidación sin cambios, 107 archivos | pocos ms | 2–3 ms |
+| Revalidación sin cambios, 1.004 / 1.223 archivos | pocos ms | **48–62 ms** / **53–55 ms** |
+
+> [!warning] A ~1.200 notas, la pasada de `stat` ya está en el umbral de § 9
+> § 9 decidió cambiar a un watcher si la revalidación perezosa pasa de ~50 ms. En los dos
+> vaults de más de mil archivos está **justo ahí** (48–62 ms). No se cambió: el umbral se
+> fijó a ojo y el costo real es 50 ms por consulta como mucho una vez cada 2 s. Pero es la
+> primera decisión que la medición pone en discusión.
+
+> [!danger] El vault del repo indexa las copias de los worktrees
+> El `.mycignore` de la raíz no ignora `.claude/`, así que cada worktree de un subagente
+> (`.claude/worktrees/agent-*/docs/…`) entra al índice —**el de la app también**, porque es
+> el mismo `.mycignore` y el mismo walker—: 1.004 archivos en vez de 107, y la búsqueda
+> «enlaces» devolvía nueve copias de la misma sección. El MCP respeta el `.mycignore` a
+> propósito; lo que falta es agregar `.claude/` ahí (decisión del usuario, que además
+> tiene que ver con versionar ese archivo: revisión crítica § 3.2).
+
+### 13.5 Prueba de equivalencia
+
+`node scripts/equivalencia-indice.mjs <vault>` (plan § 3) transpila los parsers de la app
+y compara archivo por archivo con `mycelium-mcp volcar`. Resultado el 2026-09-24:
+**ninguna diferencia inesperada** en `docs/` (99 notas), en el vault raíz del repo (1.004
+archivos, 588 filas de propiedades) ni en `Trabajo y Estudio` (1.223, 164 filas). Las
+esperadas, listadas y no escondidas:
+
+| Diferencia intencional | `docs/` | Vault raíz | `Trabajo y Estudio` |
+|---|---|---|---|
+| Enlaces que la app cuenta y están dentro de código | 111 | 1.014 | 49 |
+| Etiquetas que la app cuenta y están dentro de código (casi todas colores `#0F6E56`) | 19 | 174 | 185 |
+| `[[Nota#Sección]]` a notas que existen: la app no los resuelve, el MCP sí | 0 | 0 | 10 |
+
+### 13.6 Pendiente o distinto del plan
+
+- **`misma_ruta` sigue ignorando mayúsculas siempre.** El plan § 7.3 pide hacerlo solo
+  donde el sistema de archivos no las distingue (no en Linux); es un cambio de
+  comportamiento de la app y va aparte. Tampoco se tocó `vincular_vault` (deduplicar con
+  esa normalización, § 7.3.3).
+- **La app sigue parseando en TypeScript**: el crate ya tiene los parsers, pero pasar el
+  indexador de la app a Rust es `FUN-L-10` y no entra en la fase 1. Hasta entonces, la
+  prueba de equivalencia es lo que evita la deriva.
+- **El ranking no está calibrado**: con BM25 y el título pesando 4, «enlaces» llena el
+  top 10 con secciones de `enlaces-externos`. Es exactamente lo que la fase 3 viene a
+  medir con el registro de búsquedas.
+- **No se registró el servidor en Claude Code** (ni `.mcp.json` ni ámbito de usuario): se
+  probó por stdio directo. Cómo se registra sigue siendo la pregunta 5 del § 12.
+
+---
+
+## 14. La fase 1, rehecha según el diagnóstico (2026-09-24)
+
+La tanda de la fase 1 perdió **22,5 puntos** contra `grep` y la regla decidió «se rehace, y
+antes se investiga por qué». [[MCP de Mycelium - diagnostico fase 1]] es esa investigación;
+esta sección es lo que se cambió por ella, en la rama `feat/mcp-fase1b`, **sin correr
+ninguna tanda**. La § 9 de [[MCP de Mycelium - evaluacion]] no se tocó.
+
+### 14.1 La búsqueda: cobertura, no conjunción (causa 1 del diagnóstico)
+
+**Por qué.** Los términos se combinaban con Y: una sola palabra de la consulta que la nota
+no usara la sacaba de la lista. 58 de las 181 búsquedas de la tanda volvieron **vacías**, y
+en 17 fallos la sección con el dato no apareció nunca (D08: las cinco corridas preguntaron
+por «símbolos», y `titulo-renombra` no usa esa palabra). Es la causa de 11 de las 22 corridas
+perdidas. El respaldo del § 4 —intersectar por nota— exigía el mismo Y un nivel más arriba.
+
+**Qué se hizo** (`crates/mycelium-vault/src/indice/buscar.rs`):
+
+- La expresión FTS5 pasa a **O** (`"a"* OR "b"* OR "c"*`): alcanza con un término.
+- Cada término se consulta además por separado, para saber **qué secciones lo tienen**. Eso
+  da la cobertura de cada candidata y el `idf` de cada término.
+- El puntaje léxico es `bm25(O) · cobertura²`, con `cobertura = Σ idf(términos que tiene) /
+  Σ idf(términos)`. `rel` es ese puntaje dividido por el mejor, y sigue siendo lo único que
+  ordena (los pesos de la v1 no cambian).
+- **Se sacó el respaldo por intersección.**
+- La respuesta dice cuántas secciones tienen **todos** los términos y cuáles términos **no
+  están en ningún lado** (`Sin coincidencias en el vault: «símbolos»`): es la palabra que el
+  agente tiene que cambiar.
+
+**Por qué así, y no un O a secas.** El diagnóstico lo advirtió: con O, las secciones que
+repiten **un** término común —y lo tienen en el título, que pesa 4— suben, y D01 cae de 8 a 3
+de 10. Las tres decisiones de la fórmula responden a eso:
+
+| Decisión | Por qué |
+|---|---|
+| La cobertura **multiplica** al BM25 | Que una sección con casi todos los términos le gane a una que repite uno, sin volver a exigirlos todos |
+| **Al cuadrado** | Que la cobertura mande: con la mitad del peso cubierto, una sección necesita 4 veces el BM25 de la completa para empatarle. Entre coberturas parecidas, ordena el BM25 |
+| Pesada por **`idf`**, no contando términos | Con prefijo, «no»\*, «de»\* o «la»\* están en casi todas las secciones: contarlos como un término más haría ganar a las secciones largas. Un término ausente del vault pesa 0 (no distingue nada) |
+
+> [!note] No se afinó: se eligió y se midió
+> Antes de construirlo se probaron, sobre una copia del índice de la tanda, cinco formas
+> razonables de combinar cobertura y BM25 (orden lexicográfico por cantidad de términos, por
+> cobertura pesada, y la multiplicación con exponente 1, 2 y 3). **Todas** dan 87–88 de 133
+> en el top 10 y D01 en 7–8 de 10; el O a secas, 76 con D01 en 3. El resultado no depende del
+> exponente, así que no hay un número ajustado a estas 16 preguntas: se eligió la forma por
+> el razonamiento de la tabla y se paró.
+
+### 14.2 La lectura: más que una sección (causa 3)
+
+**Por qué.** 8 corridas perdidas —todas contra la base— tenían el dato en **otra sección de
+una nota que ya habían tocado**. En D11 el índice de `Bugs_errores_y_defectos` se cortaba en
+40 filas, en `DEF-059`, justo antes de todos los defectos de consolas. En D03 `drawio.md`
+(18 KB) pasaba el tope de 8 KB: el agente recibió el índice y eligió `#s4 #s5 #s9`, sin la
+`#s19` del costo real.
+
+**Qué se hizo** (`crates/mycelium-mcp/src/herramientas.rs`):
+
+1. **El índice de secciones de una nota va completo.** Una fila son ~30 bytes: las 85
+   secciones del catálogo de defectos son ~2.500 bytes contra los 37.000 de la nota.
+2. **Una nota pedida sin `#sN` vuelve entera hasta 20 KB** (antes 8 KB).
+3. Leer una sección de una nota que se devolvería entera agrega una línea con lo que cuesta
+   pedirla toda: `(la nota tiene 20 secciones; entera: vault_leer(refs=["docs/features/drawio.md"]), ≈4.473 tokens)`.
+
+> [!important] La tensión del umbral, y de qué lado se puso
+> La base gana leyendo notas enteras (mediana de 27.500 caracteres por corrida); la ventaja
+> de costo del MCP (`K = 0,53`) sale justamente de **no** hacerlo. **20 KB ≈ 5.000 tokens**
+> sale del costo, no de una nota: es lo que el MCP metió en contexto en una corrida
+> **entera** (mediana 5.533). Una lectura completa puede, como mucho, duplicar esa mediana
+> y queda lejos de los 14.809 de la base. Las notas grandes de verdad —`BACKLOG` (128 KB),
+> `bugs-progreso` (99 KB), el catálogo de defectos (37 KB), `autoactualizacion` (30 KB)—
+> siguen detrás del índice.
+>
+> **Lo que se pierde**: una nota de 8–20 KB (24 de las 115 del corpus) pedida sin `#sN`
+> cuesta 2.000–5.000 tokens en vez de un índice de ~300. Y el umbral **sí** cubre
+> `drawio.md` (17,9 KB), el caso de D03: con 16 KB no lo cubriría. Eso se dice para que no
+> se lea como una casualidad; la cota se eligió por el costo y sale del lado del MCP que
+> más le importa a la regla, que es no volver a perder el dato.
+
+### 14.3 Las instrucciones, en el servidor (causas 5 y 4)
+
+**Por qué.** Las instrucciones del `initialize` decían «preferí esto a grep», y la
+descripción de `vault_buscar` no decía que el código no está en el índice. En C7 el agente
+del MCP leyó código en **0 de 10** corridas (la base, en 4), y en D13 creyó a una nota que
+había quedado atrás del código. Además escribía consultas largas: con Y, cada término de más
+era una condición más.
+
+**Qué se hizo.** La descripción de `vault_buscar`, la de `vault_leer` y las instrucciones del
+`initialize` dicen ahora que el índice tiene **solo las notas `.md`**; que el código, la
+configuración y los otros tipos de archivo (`.ts`, `.rs`, `.json`, `.toml`, `.canvas`,
+`.base`…) se buscan con `grep`/`Grep` y se leen con `Read`; que la documentación puede ir por
+detrás del código y lo que funciona **hoy** se confirma en él; y que las consultas van con
+**2 o 3 términos distintivos**, sacando términos en vez de agregar si no aparece lo buscado.
+
+> [!warning] Va en el servidor, no en el `CLAUDE.md` ni en la skill
+> Las descripciones de las herramientas y las instrucciones del servidor son lo único que ve
+> **solo** el brazo MCP. El `CLAUDE.md` y la skill del corpus son el grupo de control y tienen
+> que ser idénticos en los dos brazos: si se tocaran, la comparación con la línea base dejaría
+> de valer (evaluación § 8.6).
+
+### 14.4 El arnés: una corrida que sale a la red se descarta
+
+D12 r3 (`2f42f55e`) hizo `curl` al bucket real de R2 y contestó desde fuera del corpus. Ahora
+la lectura de la transcripción junta **todos** los `tool_use` (los de subagentes incluidos) y
+el arnés descarta con el motivo `acceso a la red (…)` cualquier `curl`, `wget`,
+`Invoke-WebRequest`/`iwr`, `Invoke-RestMethod`/`irm`, URL `http(s)` en un comando o
+herramienta web (`eval/lib/red.mjs`). `eval/revisar-red.mjs` revisó las **258** corridas ya
+hechas: **solo esa** salió a la red, y quedó descartada con una fila nueva (append-only). No
+cambia ninguna decisión: el Δ de la fase 1 pasa de −22,5 a −22,2 puntos y la regla sigue en
+la fila 1 (la corrida tenía acierto citado 0).
+
+### 14.5 La prueba gratis: las mismas consultas, otro índice
+
+`eval/repetir-busquedas.mjs` toma las 181 `vault_buscar` y las 129 `vault_leer` de las 80
+corridas de la tanda, emparejadas una a una con el registro del servidor, y las repite contra
+un índice **nuevo** del corpus `c0a33b8`, construido por el binario a probar en un directorio
+de datos propio (nunca el app-data real ni `C:\mycelium-eval\app`). Mide contra las secciones
+oro del apéndice del diagnóstico. No llama a la API.
+
+```
+node eval/repetir-busquedas.mjs --binario C:\mycelium-eval\bin\mycelium-mcp-c487c58.exe --etiqueta antes
+node eval/repetir-busquedas.mjs --binario frontend\src-tauri\target\release\mycelium-mcp.exe --etiqueta despues
+```
+
+| | Antes (`c487c58`, el de la tanda) | Después |
+|---|---|---|
+| **Sección oro en el top 10** (133 búsquedas con oro) | 41 | **87** |
+| Alguna sección de la nota oro en el top 10 | 53 | 108 |
+| Búsquedas **vacías** (de 181) | 58 | **1** |
+| D01 / D02 | 8 de 10 / 5 de 5 | **8 de 10 / 5 de 5** |
+| Respuesta de `vault_buscar`: mediana · total de las 181 | ≈166 · ≈51.200 tokens | ≈636 · ≈116.800 tokens |
+| `vault_leer` repetidas: mediana · total de las 129 | ≈1.197 · ≈203.700 tokens | ≈1.644 · ≈266.200 tokens |
+| `tools/list` (una vez por sesión) | ≈648 tokens | ≈833 tokens |
+| Las 8 corridas de granularidad: la lectura trae el dato | 0 de 8 | 6 de 8 |
+
+Por pregunta, después: D03 7/11 · D04 11/15 · D05 6/7 · D06 8/13 · D07 7/7 · D08 **7/8** (antes
+0/8) · D11 5/5 · D12 2/14 · D15 13/25 (antes 3/25) · D16 8/13.
+
+> [!info] Cómo leer estos números
+> - **41 y no 37.** El diagnóstico contó 37 con Y. La repetición con el binario de la tanda
+>   devuelve **exactamente** las mismas listas que el registro (0 de 181 distintas), así que
+>   la diferencia está en cómo se contó en el diagnóstico, no en la repetición. La meta del
+>   diagnóstico (≥ 71, lo que daba el O a secas) se pasa igual por cualquiera de las dos.
+> - **El costo sube, y es a propósito.** Sumando búsquedas, lecturas y `tools/list`, la
+>   repetición mete ≈1.800 tokens más por corrida que la fase 1 (≈5.500 de mediana): del
+>   orden de 7.300, la mitad de la base. Lo que cuesta de verdad lo dice solo la tanda: con
+>   otras listas el agente va a leer otras cosas.
+> - **Las 2 de granularidad que siguen sin el dato**: D11 r1 no pidió la nota, y D16 r3 pidió
+>   tres secciones sueltas de `ventanas-multiples`, no la nota. Ahí solo ayuda la línea que
+>   dice cuánto cuesta la nota entera.
+> - **Es un diagnóstico, no una decisión.** Las consultas las escribió el agente mirando las
+>   listas del servidor viejo, y son de las preguntas de **desarrollo**. La confirmación la
+>   da una tanda nueva contra la misma línea base y, al final, las preguntas selladas.
+
+### 14.6 Verificación
+
+- `cargo test --workspace` (con `CARGO_BUILD_JOBS=2`): los 101 tests de antes, menos el de la intersección (que ya no existe), más 7 nuevos —la
+  cobertura (el caso de D01 incluido: el test comprueba que un O a secas ponía otra sección
+  primero), un término ausente que no vacía la lista, el `idf`, la nota de hasta 20 KB
+  entera, la línea con el costo de la nota entera, el índice sin corte y las descripciones—.
+- `node --test eval/test/`: los 72 de antes más 11 (detección de red y prueba gratis).
+
+## 15. Cada resultado y cada lectura dicen cómo se cita la nota (2026-09-24)
+
+**Por qué.** En la tanda de la fase 1b el MCP tuvo el dato correcto en 60 de 80 corridas, a
+3 de la base, pero **12 perdieron por la cita** ([[MCP de Mycelium - evaluacion]] § 13). Las
+«citas inventadas» subieron a 13 y eran notas **reales** citadas por su `# Título` visible
+—«Atmósferas», «Canvas: notas en el espacio»— en vez de por el nombre del archivo
+(`atmosferas`, `canvas`), que es lo único que resuelve como `[[enlace]]`. Fue un efecto
+colateral del § 14.2: con la nota entera, lo primero que el agente ve es el `# Título`. **No
+es un truco para la evaluación**: una cita que no resuelve no lleva a ningún lado. Es el
+primero de los dos experimentos del § 13 de la evaluación, **solo**: las conexiones van en
+otra tanda.
+
+**Qué se hizo** (rama `feat/mcp-citas`, sin correr ninguna tanda):
+
+- `vault_buscar`: cada resultado lleva `cita [[nombre]]` junto a su ref, y la última línea
+  recuerda citar con eso y no con el `# título`.
+- `vault_leer`: la línea **siguiente a la cabecera**, antes del texto, es la cita; si el H1
+  dice otra cosa, lo nombra para descartarlo:
+  `cita [[atmosferas]] (no «Atmósferas»: el # título no es enlace)`.
+- Las **descripciones** de las dos herramientas lo dicen. El `CLAUDE.md` y la skill del
+  corpus no se tocaron (grupo de control, § 14.3).
+- `crates/mycelium-vault/src/indice/citar.rs` calcula la cita espejando `resolveWikilink`
+  (`frontend/lib/editor/wikilink.ts`): nombre del archivo sin extensión, sin distinguir
+  mayúsculas.
+
+> [!important] Homónimas: como las resuelve la app
+> La app **sí** desambigua: `[[Carpeta/nombre]]` se queda con las notas cuya carpeta termina
+> en esos segmentos, y entre las que quedan gana la **menos profunda**. La cita es el destino
+> más corto que resuelve a esa nota: el nombre solo si ella es la menos profunda, y si no con
+> las carpetas justas delante (`docs/Plan.md` → `[[Plan]]`, `docs/viejo/Plan.md` →
+> `[[viejo/Plan]]`). Un **empate de profundidad** no cuenta como resuelto —la app elegiría por
+> el orden del árbol, que el índice no conoce—, así que ahí también va la carpeta. Solo dos
+> notas que difieren **únicamente en mayúsculas** quedan sin cita que las separe, y la línea
+> lo dice. `vault_leer` acepta la cita con carpeta (`viejo/Plan`) y la resuelve igual; un
+> título solo con homónimas sigue devolviendo la lista de rutas.
+
+**Lo que cuesta**, medido con la prueba gratis (§ 14.5) contra el binario `9d58453`: las 181
+búsquedas devuelven **exactamente las mismas listas** (0 distintas), y la respuesta crece
+≈90 tokens en una búsqueda de 10 resultados (mediana de 357 bytes; mediana de todas de ≈636 a
+≈724 tokens). Una lectura crece ≈10–25 tokens por nota (mediana de las 129 de ≈1.644 a
+≈1.659). `tools/list`, una vez por sesión, de ≈833 a ≈916.
+
+**Verificación**: `cargo test -p mycelium-vault -p mycelium-mcp` —75 tests, 7 nuevos: la cita
+de una nota común, acentos y mayúsculas del archivo contra el título visible, las homónimas
+(puras y en el índice), la cita con carpeta en `vault_leer`, la línea antes del contenido y las
+descripciones—; `node --test eval/test/`, 83.
+
+## 16. Cada lectura termina con quién enlaza a la nota (2026-09-24)
+
+**Por qué.** Es el segundo experimento del § 13 de [[MCP de Mycelium - evaluacion]], idea
+del usuario: que la lectura traiga las notas conectadas. El **contenido** quedó descartado
+(~16 enlaces × ~3.000 tokens ≈ 50.000 por lectura); se prueba una **lista compacta**. Apunta
+a las **contradicciones resueltas** —la nota que corrige una decisión vieja suele enlazarla— y
+a las **enumeraciones** —todo lo que apunta a un tema—. Un solo cambio sobre el servidor con
+citas (`3ef9c8d`); el criterio de elección del § 14 de la evaluación ya está escrito y no se
+toca.
+
+**Qué se hizo** (rama `feat/mcp-conexiones`, sin correr ninguna tanda):
+
+```
+← conexiones: la enlazan 23 notas; las 10 que más hablan de ella (el resto: grep -rlF "[[terminal-integrada" --include=*.md):
+  ↔ [[Mycelium como memoria de la IA]] [[…]] — dónde corre el asistente, con el cwd en el vault.
+  ← [[Version 2.1.0]] Las consolas no pertenecían al vault · DEF-099 · desktop · [[…]]
+  ← [[Bugs_errores_y_defectos]] …lo que se hizo. No lo es: es el CA7 de [[…]]. Cerrar la pestaña solo la oculta —la…
+```
+
+- **Al final** de cada lectura (sección, nota entera o índice de una nota grande), después de
+  todo el contenido, y **una vez por llamada**: tres secciones de la misma nota no repiten la
+  lista; va detrás del último bloque de esa nota.
+- **Solo los entrantes.** Los salientes ya están en el texto leído y en la línea
+  `→ enlaza a:`; repetirlos es pagar dos veces lo mismo. Los entrantes son lo que `grep` no
+  da barato —y da mal, § 5—. Si la nota leída **también** enlaza a la que la cita, la línea
+  lleva `↔` en vez de `←`. Sin entrantes, una línea: `← conexiones: ninguna nota la enlaza`.
+- **Cita**: con la misma regla que el resto (`indice/citar.rs`), homónimas incluidas; los
+  entrantes se resuelven como la app, así que un `[[Plan]]` que la app lleva a otra `Plan`
+  no cuenta. Salen de la tabla `enlaces` (`Indice::entrantes`), no de escanear el vault.
+- La **descripción** de `vault_leer` dice qué es la lista y cuándo seguirla (si el texto
+  sugiere que la corrige, la reemplaza o la actualiza, o si la pregunta pide todo lo de un
+  tema). El `CLAUDE.md` y la skill del corpus no se tocaron (grupo de control, § 14.3).
+
+### El tope: 10, por el costo
+
+Entrantes por nota en el corpus (115 notas `.md`, notas distintas que la enlazan):
+
+| Mediana | p75 | p90 | p95 | Máximo | Sin entrantes |
+|---|---|---|---|---|---|
+| 7 | 10 | 21 | 26 | 67 (el mapa) · 61 (`BACKLOG`) | 14 |
+
+**10 es el p75**: tres de cada cuatro notas salen con la lista **completa**, que es lo que
+pide una enumeración. Medido sobre las 115: una línea cuesta **~26 tokens**, y la lista
+entera **≈183 de mediana y ≈342 como máximo**. Un hub no convierte la lectura en cien líneas:
+lo que queda afuera se cuenta y la cabecera dice cómo pedirlo.
+
+### La pertinencia: quién **habla** de la nota, no quién la enumera
+
+Se ordena por **especificidad** = enlaces de la otra nota a esta / notas distintas a las que
+enlaza la otra. El mapa y el `BACKLOG` enlazan a todo, así que un enlace suyo dice poco y
+quedan al fondo; una nota que enlaza a tres y a esta dos veces está hablando de ella —es la
+misma idea que el `idf`, del lado de quien enlaza—. A igualdad: más enlaces, menos salientes,
+ruta. **No** se usa la fecha (el `mtime` de un vault versionado miente, § 6) ni el nombre de la
+sección (depende de las convenciones de este vault).
+
+### La pista: el texto alrededor del enlace
+
+~80 caracteres repartidos antes y después del enlace, cortando en palabra, con el enlace como
+`[[…]]` (o `[[…|alias]]`, que es vocabulario). Se suman los renglones vecinos solo si es prosa
+partida en renglones; las celdas de una tabla van separadas por `·`.
+
+| Pista candidata | Por qué no, o por qué sí |
+|---|---|
+| El `# Título` de la nota que enlaza | Casi siempre repite su nombre, que ya va en la cita |
+| El encabezado de la sección del enlace | El **34 %** de los enlaces entrantes del corpus están bajo `## Relacionadas`, que no dice nada |
+| **El texto alrededor** | Dice la **relación**: «reemplaza a [[…]]», «es el CA7 de [[…]]», «DEF-099 · …». Es lo que decide si abrirla |
+
+Si el texto no llega a 25 caracteres («Ver [[…]].») se le antepone el encabezado de la sección;
+si el archivo cambió y el enlace ya no está en esa línea, queda solo el encabezado.
+
+### Lo que cuesta, medido con la prueba gratis (§ 14.5)
+
+| | Con citas (`3ef9c8d`) | Con conexiones |
+|---|---|---|
+| Listas de las 181 búsquedas | — | **idénticas** (0 distintas) |
+| `vault_leer` repetidas: mediana · total de las 129 | ≈1.659 · ≈271.000 tokens | ≈2.033 · ≈312.900 tokens |
+| `tools/list` (una vez por sesión) | ≈916 | ≈1.053 |
+
+Una lectura crece **≈324 tokens de media** (+15 % del total): más que la mediana de la lista
+porque las lecturas de la tanda van mucho a hubs y a veces traen varias notas. Con ~1,6
+lecturas por corrida son **≈+520 tokens por corrida** sobre la mediana de 5.717 (~9 %): del
+orden de 0,05 en `K`, lejos del techo de 0,7 del criterio de elección. Lo que cuesta de verdad
+lo dice la tanda: si el agente sigue las conexiones, va a leer más notas.
+
+**Verificación**: `cargo test --workspace` —121: los 114 de antes más 7 (el orden por
+especificidad y la exclusión de la propia nota, los entrantes con homónimas, el fragmento, una
+nota sin entrantes, una con más entrantes que el tope, que las citas de la lista resuelvan a la
+nota que enlaza, y que la lista vaya después del contenido y una vez por nota)—; `node --test
+eval/test/`, 83.
+
+---
+
 ## Relacionadas
 
 - [[MCP de Mycelium - encuadre]] — los hechos y las restricciones de las que parte todo esto.
 - [[MCP de Mycelium - control]] — la otra mitad: operar la app, no solo leerla.
 - [[MCP de Mycelium - evaluacion]] — quién dice si esto mejora algo, y con qué números.
+- [[MCP de Mycelium - diagnostico fase 1]] — por qué perdió la fase 1; el § 14 es lo que se rehizo por él.
 - [[Capa de datos del desktop]] — el índice de la app, que este diseño decide **no** abrir.
 - [[Mycelium como memoria de la IA]] — la decisión de producto de la que sale `FUN-L-09`.
 - [[ia-framework-vault]] — lo que hace de memoria hoy, sin MCP.
