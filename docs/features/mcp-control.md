@@ -610,6 +610,179 @@ corrección del Deshacer de la Parte 2. El framework sigue en `1.7.0`.
 - **Restaurar una carpeta** no tiene Deshacer en el registro, y las subcarpetas vacías de
   una carpeta borrada no vuelven (la papelera guarda notas).
 
+## Cómo quedó — Parte 4 (diccionario del vault, 2026-10-03)
+
+Rama `feat/mcp-diccionario-desktop`, desde la integración de las partes 0–3 (`6f03fe1`).
+Entra `mycelium_diccionario` y lo que aprende la IA. El framework sigue en `1.7.0`. Solo el
+diccionario **del vault** (`.mycelium/diccionario.txt`); el de Mycelium no se toca.
+
+### Dónde está cada cosa
+
+| Pieza | Archivo |
+|---|---|
+| La herramienta: esquema y redacción (listado con total; efecto con rechazadas y la palabra parecida) | `src-tauri/crates/mycelium-mcp/src/herramientas.rs` (`herramienta_diccionario`, `redactar_diccionario`) |
+| Validar argumentos y el tope, qué se acepta, el efecto contra el archivo, el texto, el Deshacer (puro) | `frontend/lib/mcpDiccionarioLogica.ts` |
+| La operación y el Deshacer sobre el corrector | `frontend/lib/mcpDiccionario.ts` |
+| Qué es una palabra (la regla de `extraerPalabras` al revés) y la parecida sin tildes ni mayúsculas | `motivoPalabraNoAceptada` y `entradaParecida` en `frontend/lib/ortografia/palabras.ts` |
+| Escribir varias de una vez por el camino del menú | `cambiarPalabrasDe` en `frontend/lib/ortografia/corrector.ts` (y `cargandoPersonales`) |
+| El Deshacer en el registro | `lib/deshacerIa.ts` · `usePalabrasDelVault` en `components/actividad/ActividadPanel.tsx` · `esDeshacer` y `NOMBRE_OP` en `lib/actividadIa.ts` |
+| Lo que aprende la IA | «Operar Mycelium», la regla 8 y la tabla de herramientas en `lib/ia/framework.ts`; la línea de `.mycelium/` en la skill `mycelium-vault` |
+| Pruebas | `cargo test -p mycelium-vault -p mycelium-mcp` (`tests_diccionario` y `el_diccionario_de_punta_a_punta`) · `node --test scripts/test-mcp-diccionario.mjs` (12) · `test-framework-ia.mjs` · `test-ortografia.mjs` |
+
+### Decisiones
+
+- **El mismo camino que el clic derecho.** `agregarA`/`quitarDe` se generalizaron a
+  `cambiarPalabrasDe(dic, cambiar)`: recibe lo que hay **en el archivo** en ese momento
+  (dentro de la cola de escrituras), escribe con el formato de `palabras.ts` y avisa al
+  worker, a los editores y a Configuración. El efecto se cuenta contra ese archivo, no contra
+  la memoria. Sin cambios no se escribe (vale también para el menú).
+- **Qué es una palabra lo decide el corrector**: `motivoPalabraNoAceptada` acepta un texto si
+  `extraerPalabras` lo devolvería entero como una sola palabra. Lo que el corrector nunca
+  revisa (dígitos, `_`, `camelCase`, una letra) se rechaza con «no hace falta agregarla»; lo
+  que parte en varias («Wi-Fi», «dos palabras») dice cómo lo ve el corrector. No hay una
+  regla aparte que pueda desalinearse.
+- **Al quitar no se valida el formato**, solo que no esté vacía: el archivo puede tener
+  entradas escritas a mano que hoy no se aceptarían, y tienen que poder limpiarse. Una que no
+  está trae la **parecida** sin tildes ni mayúsculas («mycelium» → «Mycelium»).
+- **Tope de 200 por llamada** (`INVALIDO` con `campo: palabras`) y `listar` devuelve hasta
+  500 con el total. Las repetidas de un mismo pedido se cuentan una vez. Un campo desconocido
+  es `INVALIDO`, como en la Parte 2. La validación es de la app (como las partes 2 y 3): el
+  servidor solo exige un objeto.
+- **`OCUPADA`** si el corrector está leyendo los diccionarios personales (al arrancar o al
+  cambiar de vault) o la ventana no tiene todavía su vault. Al hacerlo apareció una carrera que
+  ya existía para el menú: un «Agregar» que terminaba durante esa lectura quedaba tapado en
+  memoria por la lectura vieja. Ahora la lectura se repite si cambió `epocaPersonales`. No
+  lleva `DEF-*`: no se observó, se encontró leyendo.
+- **Con el corrector apagado también anda**: se escribe el archivo y lo toma al encenderse.
+  «El corrector abierto se entera» aplica cuando está encendido.
+- **Deshacer**: agregar → quitar **las que se agregaron** (no las que ya estaban); quitar →
+  volver a agregar las quitadas. Se apaga («cambió después») si alguna de esas ya no está o
+  ya volvió; el panel lo sabe leyendo el diccionario (y se suscribe a sus cambios), y la
+  escritura lo vuelve a comprobar **dentro de la cola**, contra el archivo: si cambió, no
+  escribe nada. `listar` no se registra; sus fallos sí. Sin «Ir»: Configuración no tiene una
+  forma de abrirse en una sección.
+- **Sin la app**, `APP_CERRADA`/`MCP_DESACTIVADO` como siempre, más que el archivo no se
+  escribe a mano y que el usuario puede agregar la palabra con el clic derecho.
+
+### Cómo probarlo en la app
+
+1. `cd frontend && npx tauri dev`, vault con el control encendido y Español descargado y
+   activo (Configuración → Editor). Regenerar las instrucciones IA: «Operar Mycelium» trae
+   `mycelium_diccionario` y la regla 8 dice que `.mycelium/diccionario.txt` no se escribe a
+   mano.
+2. Sesión **nueva** de Claude Code: `/mcp` → `mycelium` con **doce** herramientas.
+3. Abrir una nota con términos propios subrayados (nombres de proyecto, siglas) y pedir
+   «agregá al diccionario los términos de esta nota» → la IA elige los términos (no las
+   erratas), la respuesta dice cuántos agregó; **los subrayados desaparecen sin recargar**.
+   En Configuración → Editor → «Diccionarios personales», el del vault los lista.
+4. «Agregá Wi-Fi y JavaScript» → las rechaza con el motivo. «¿Qué hay en el diccionario?» →
+   las lista con el total (no aparece en el registro).
+5. Registro de actividad: «Diccionario del vault» con **Deshacer** → las palabras vuelven a
+   subrayarse. Quitar una a mano en Configuración después de que la IA la agregó → el
+   Deshacer de esa entrada queda deshabilitado, «cambió después».
+6. «Quitá mycelium» con «Mycelium» en el diccionario → no la quita y dice cuál estaba.
+7. Cerrar Mycelium y pedir que agregue una palabra → `APP_CERRADA`, y la IA **no** escribe
+   el archivo.
+
+### Límites y lo que queda abierto
+
+- **Sin probar en la app** por quien lo implementó: tipos, lint, tests de Rust (la punta a
+  punta del binario real con un diccionario en memoria, app cerrada y control apagado) y de
+  Node (la lógica pura y que la regla coincide con `extraerPalabras`).
+- **Una edición a mano** del archivo mientras la app está abierta no la ve el panel hasta
+  la próxima escritura (no hay vigilancia del archivo, como antes).
+- **Dos ventanas** no aplica: un vault se abre en una sola. El diccionario de Mycelium, que sí
+  cruza ventanas, no se toca por MCP.
+
+## Estado al cerrar las cuatro partes (2026-10-03)
+
+Las cuatro partes están integradas en `feat/mcp-control-desktop` (la cuarta, en
+`feat/mcp-diccionario-desktop` hasta su merge) y **ninguna está probada por el usuario en la
+app**. No están en `desktop-tauri`.
+
+### Las 12 herramientas
+
+| Herramienta | Parte | Pregunta | Deshacer en el registro |
+|---|---|---|---|
+| `mycelium_estado` | 1 | No | — (no se registra) |
+| `mycelium_abrir` | 1 | No | — (se registra) |
+| `mycelium_recordatorios` | 2 | No | — (solo sus fallos) |
+| `mycelium_recordatorio_crear` | 2 | No | Sí: borrar |
+| `mycelium_recordatorio_editar` | 2 | No | Sí: los valores anteriores |
+| `mycelium_recordatorio_completar` | 2 | No | Sí, si cambió algo |
+| `mycelium_recordatorio_borrar` | 2 | No | Sí: restaurar con el mismo id |
+| `mycelium_renombrar` | 3 | Si reescribe enlaces en más de 5 notas | Sí: renombrar de vuelta |
+| `mycelium_mover` | 3 | Igual | Sí: mover de vuelta |
+| `mycelium_borrar` | 3 | Carpeta, siempre; nota, no | Sí: restaurar |
+| `mycelium_papelera` | 3 | No | Restaurar una nota: sí; una carpeta: no; listar no se registra |
+| `mycelium_diccionario` | 4 | No | Agregar y quitar: sí; listar no se registra |
+
+Todo Deshacer se apaga, con el motivo, si lo que dejó la operación cambió después.
+
+### Probar el conjunto en un solo recorrido
+
+1. **Arrancar**: `cd frontend && npx tauri dev` (compila el servidor con
+   `preparar-mcp -- --dev`). Abrir un vault de prueba con: una nota `Plan` enlazada desde dos
+   notas (una con `[[Carpeta/Plan]]`), una nota `Hub` enlazada desde seis o más, una carpeta
+   `Archivo`, y Español descargado en Configuración → Editor.
+2. **Encender el control**: Configuración → Vault → «Asistente IA (Claude Code)» → «Dejar que
+   la IA controle Mycelium». Comprobar en la raíz `.mcp.json` (entrada `mycelium`) y
+   `.claude/settings.json` + `.claude/hooks/mycelium-mv-rm.mjs`. El panel del robot en el rail
+   dice «Control encendido».
+3. **Regenerar el framework** (mismo bloque): el `CLAUDE.md` trae «Operar Mycelium» con las
+   doce herramientas, la regla dura 2 («Para renombrar o mover, usá la herramienta») y la 8
+   (calendario y diccionario solo por MCP).
+4. **Sesión nueva de Claude Code** en el vault (la terminal integrada sirve), aprobar el
+   servidor: `/mcp` → `mycelium` conectado con **12** herramientas. El panel pasa a
+   «Conectado» con el primer pedido.
+5. **Estado y abrir**: «¿qué tengo abierto?» (escribí algo antes en una nota: figura sin
+   guardar) → «abrime Plan» (segundo plano, no cambia la pestaña visible) → «llevame al
+   encabezado X de Plan» (con foco) → «mostrame el grafo» y «el calendario».
+6. **Calendario**: «recordame revisar Plan en dos minutos» → aparece y avisa (tarjeta y
+   notificación con la ventana minimizada) → «¿qué tengo esta semana?» (no va al registro) →
+   «cambialo a las 11», «marcalo como hecho», «borralo» → **Deshacer** el borrado en el
+   registro. «El 30 de febrero» → `INVALIDO` en rojo.
+7. **Archivos**: «renombrá Plan a Plan 2026» → no pregunta, los enlaces (también el de
+   carpeta) siguen andando; **Deshacer**. «Renombrá Hub» → diálogo de confirmación;
+   **Cancelar** → `RECHAZADO`, la IA no insiste; repetir y aceptar. «Mové Plan a Archivo»;
+   «borrá Plan» → aviso con Deshacer; «¿qué hay en la papelera?» → «restaurala». «Borrá la
+   carpeta Archivo» → pregunta siempre. Pedir un `mv` por terminal → el hook lo frena.
+8. **Diccionario**: «agregá al diccionario los términos de esta nota» → se van los
+   subrayados sin recargar; «agregá Wi-Fi» → rechazada con el motivo; **Deshacer** → vuelven a
+   subrayarse.
+9. **Cambió después**: renombrar a mano una nota que renombró la IA → su Deshacer queda
+   deshabilitado («cambió después»). Igual con una palabra quitada a mano.
+10. **Sin app y apagado**: cerrar Mycelium → `mycelium_estado` dice `app: cerrada`; las demás,
+    `APP_CERRADA`, y la IA no escribe `.mycelium/` (ni el calendario ni el diccionario).
+    Reabrir, apagar el control → `MCP_DESACTIVADO` con dónde se enciende; desaparecen la
+    entrada de `.mcp.json` y el hook (los archivos enteros si los había creado Mycelium).
+
+### Límites y decisiones abiertas (de las cuatro partes)
+
+- **Nada probado en la app** por quien lo implementó: tipos, lint, tests de Rust (con puntas a
+  punta del binario real contra apps falsas en un pipe de verdad) y de Node. Lo visible lo
+  confirma el usuario con el recorrido de arriba.
+- **Unix**: el socket compila con la misma forma, sin probar (Parte 1).
+- **Recompilar con una sesión de Claude Code abierta** falla en desarrollo: Windows no deja
+  reemplazar `target/debug/mycelium-mcp.exe` mientras corre (Parte 1).
+- **El salto en modo lectura** mueve el cursor pero no se ve el desplazamiento (Parte 1).
+- **Sin token** en el pipe: cualquier proceso del mismo usuario puede hablarle, la misma
+  confianza que para escribir el vault (Parte 1).
+- **Con la app cerrada, un argumento malo contesta `APP_CERRADA`**, no `INVALIDO`: la
+  validación es de la app (partes 2–4).
+- **«Ir» a una nota renombrada** avisa que ya no existe: el registro guarda la ruta (Parte 2).
+- **Abierta**: si el registro debería mostrar también lo que hace el usuario (Parte 2).
+- **El hook depende de `node`** en el `PATH` de la sesión, y su análisis del comando es simple
+  (no ve `mv $X`) (Parte 3).
+- **No entró el contador por sesión** del diseño de septiembre; el umbral (5 notas) y la
+  espera (2 min) son fijos, no preferencias (Parte 3).
+- **Lienzos**: mover una nota no actualiza las tarjetas de un `.canvas` que la apuntan (Parte 3,
+  igual que desde la UI).
+- **Restaurar una carpeta** no tiene Deshacer y no recrea subcarpetas vacías (Parte 3).
+- **El diccionario**: sin «Ir» en el registro, una edición a mano del archivo no se ve hasta la
+  próxima escritura, y el de Mycelium queda fuera del MCP (Parte 4).
+- **Candidata sin construir**: `mycelium_capturar` (la imagen de un dibujo), a medir antes.
+
 ## Relacionadas
 
 - [[Skill o MCP, segun quien sabe hacerlo]] — por qué esto va por MCP y lo demás por skill.
