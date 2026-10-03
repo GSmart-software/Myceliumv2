@@ -185,8 +185,9 @@ funciones). **Controlarlo** es opt-in y va por el MCP de control (`FUN-L-09`,
 [[mcp-control]]): con «Dejar que la IA controle Mycelium» encendido en
 Configuración → Vault, la IA puede mostrar notas, el grafo o el calendario y saber
 qué está abierto (Parte 1), leer y modificar el calendario (Parte 2) y renombrar,
-mover o mandar a la papelera sin romper enlaces (Parte 3); el diccionario llega en
-la Parte 4.
+mover o mandar a la papelera sin romper enlaces (Parte 3) y agregar o quitar
+palabras del diccionario del vault (Parte 4, `mycelium_diccionario`; la regla 8 dice
+que `.mycelium/diccionario.txt` no se escribe a mano).
 
 ## Relacionadas
 
