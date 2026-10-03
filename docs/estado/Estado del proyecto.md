@@ -1,6 +1,6 @@
 # Estado del proyecto
 
-**Actualizado**: 2026-09-26 · rama activa `desktop-tauri`
+**Actualizado**: 2026-10-01 · rama activa `desktop-tauri`
 
 Foto de dónde está Mycelium hoy. Para el detalle de cada tema, seguir los enlaces.
 
@@ -9,7 +9,10 @@ Foto de dónde está Mycelium hoy. Para el detalle de cada tema, seguir los enla
 - **Versión: desktop `2.2.0`, publicada el 2026-09-28** ([[Version 2.2.0]]: el calendario
   con recordatorios `FUN-L-22`, el corrector ortográfico `FUN-L-12`, abrir otro vault
   `FUN-S-24` y el grafo para vaults grandes `FUN-L-25`, más los arreglos del índice y las
-  correcciones hasta `DEF-117`). La próxima es la `2.2.1`, con `DEF-118`. La anterior fue
+  correcciones hasta `DEF-117`). **Integrado y sin publicar** en `desktop-tauri`: las skills
+  de IA por herramienta (`FUN-L-26`, framework `1.7.0`), la recarga desde disco y el encuadre
+  al abrir de lienzos, diagramas y dibujos, y `DEF-118` a `DEF-122`; apunta a una `2.3.0`
+  (minor), que el usuario decidió no publicar todavía (2026-10-01). La anterior fue
   la `2.1.0` ([[Version 2.1.0]], 2026-09-23: draw.io como tipo de
   archivo, los enlaces web al navegador y el vídeo en la nota) · **web `2.1.0`** (le llega
   el vídeo y los enlaces; draw.io y las consolas son solo-desktop). La anterior de
@@ -23,7 +26,12 @@ Foto de dónde está Mycelium hoy. Para el detalle de cada tema, seguir los enla
 - [[Version 1.0.0]] fue el primer release final en **ambas** versiones, con instaladores
   de escritorio generados.
 - **Todos los bugs `DEF-*`** del reporte original cerrados y reflejados
-  ([[bugs-progreso]]).
+  ([[bugs-progreso]]). Los últimos (`DEF-118` a `DEF-122`, 2026-09-30/10-01) están
+  arreglados en desktop; los que aplican a web (`DEF-119`, `DEF-120`, `DEF-122`), reflejados.
+- **Web tiene reflejado y sin publicar** lo posterior a su `2.1.0`: el calendario, el
+  corrector con motor propio (`FUN-L-12`; falta aplicar el esquema en D1 de producción y el
+  CORS del bucket de R2), la limpieza de `FUN-M-39`, los enlaces de `DEF-120` y el encuadre al
+  abrir.
 - Desde entonces, el foco está en la línea de **IA sobre el vault**
   ([[Mycelium como memoria de la IA]]), que avanza **solo en desktop**.
 
@@ -31,16 +39,13 @@ Foto de dónde está Mycelium hoy. Para el detalle de cada tema, seguir los enla
   circuito quedó verificado con la 1.5.0. Los instaladores generados se preservan en
   `installers/v<version>/` (fuera de git). Ver [[Generar instaladores desktop]] y
   [[Publicar una version]].
-- **La 1.5.0 publicada en R2 está desactualizada**: no lleva las correcciones del
-  2026-08-03. Hasta que salga una `1.5.1`, quien se actualice recibe una versión que borra
-  sin preguntar (`DEF-051`).
 
 ## Implementado después de 1.0.0
 
 | Funcionalidad | Estado |
 |---|---|
 | [[terminal-integrada]] (`FUN-L-07`) | Implementada y confirmada por el usuario en lo esencial; pasó por varias iteraciones (panel de consolas, shells de fondo, renombrar, selector de shell, tema reactivo) |
-| [[ia-framework-vault]] (`FUN-L-08`) | Implementada, framework en **v1.4.0** (describe las propiedades del frontmatter y las Esporas); pendiente de prueba de los comandos nuevos. **El vault de este repo tiene instalada la v1.2.0**: hay que regenerar desde Configuración → Vault |
+| [[ia-framework-vault]] (`FUN-L-08`) | Implementada; framework en **v1.7.0**: `CLAUDE.md` + 8 skills (las de memoria y sintaxis, y una por herramienta —draw.io, canvas, Excalidraw, bases, Esporas y calendario, de [[ia-skills-herramientas]] `FUN-L-26`, 🟢 finalizada el 2026-10-01—) + 6 comandos. Desde `DEF-118`, regenerar no pisa un `CLAUDE.md` ampliado a mano. **El vault de este repo tiene la v1.6.0** |
 | [[metadata-yaml]] (`FUN-M-04`) | **Confirmada** en desktop (1.2.0) el 2026-08-02 y **reflejada en web** el 2026-08-08 (el índice, reimplementado en el backend .NET): el frontmatter pasa a ser propiedades (tarjeta en lectura y en vivo, pestaña PROPIEDADES, tabla `propiedades` en el índice, filtro `clave:valor`). Ver [[Version 1.2.0]] y [[Version 1.1.0 de web]] |
 | [[esporas-plantillas]] (`FUN-M-03`) | **Confirmada** en desktop (1.3.0) el 2026-08-03 y **reflejada en web** el 2026-08-08: las notas de una carpeta configurable son plantillas con variables, usables desde el panel del rail, la barra del editor y el clic derecho de una carpeta. Ver [[Version 1.3.0]] y [[Version 1.1.0 de web]] |
 | [[autoactualizacion]] (`FUN-L-14` + `FUN-M-16`) | **Circuito confirmado de punta a punta** el 2026-08-03: se publicaron la 1.4.0 y la 1.5.0 en R2 y el usuario comprobó en la app que una instalación **detecta y aplica** la versión posterior. Mycelium comprueba una vez al día, muestra el changelog renderizado y ofrece instalar. El **modo avanzado** (`FUN-M-16`, siete clics en el número de versión, para instalar una versión cualquiera o anterior) quedó confirmado el 2026-08-18: su diálogo estuvo roto hasta `DEF-051` y después faltaron publicaciones contra las que probarlo. Ver [[Version 1.4.0]] |
@@ -49,16 +54,22 @@ Foto de dónde está Mycelium hoy. Para el detalle de cada tema, seguir los enla
 | [[mycignore]] (`FUN-M-11`) | Implementada en desktop (parser con tests); **parte web pendiente**. Su default se amplió en 1.1.1 |
 | Rendimiento de la apertura del vault (`FUN-M-12`) | Implementada en desktop (1.1.1), **sin confirmar por el usuario**: no se pudo medir el efecto real. Ver [[Rendimiento de la apertura del vault]] |
 | Navegación por pestaña (`DEF-039/040/041`) | **Confirmada** en desktop (1.1.5) el 2026-08-03 y **reflejada en web** el 2026-08-08: scroll conservado, historial propio por pestaña con botones. `DEF-041` quedó endurecido sin causa raíz confirmada, pero el síntoma no reapareció. Ver [[Version 1.1.5]] |
-| [[bases-tabla]] (`FUN-L-03`) | Sale en la [[Version 1.6.0]]. **Implementada en las dos ramas** el 2026-08-08, **sin confirmar**: el archivo `.base` (formato de Obsidian) agrega notas por sus propiedades y las muestra en una tabla de solo lectura, con filtros. Se implementa un subconjunto cerrado del lenguaje de Bases; lo que no se entiende **no se ignora**, se declara. El bloque **O** se cerró el 2026-09-05, confirmado en la app y reflejado a web: el **constructor de filtros** pasó de lista plana a árbol, con negación, grupos anidados y buscador de campos (`FUN-M-27` + `FUN-S-16` + `DEF-080`), y la **cabecera** ganó orden por columna, búsqueda dentro de la tabla y ancho arrastrable (`FUN-S-15` + `FUN-S-14` + `FUN-M-25`). Sin release todavía |
-| [[auditoria-y-relinkeado]] (`FUN-L-17`) | Sale en la [[Version 1.6.0]]. **Implementada en desktop** el 2026-08-08, **sin confirmar**: pantalla que audita las referencias sin estructura del vault y las convierte en `[[enlaces]]`, con simulacro, respaldo y deshacer. Con ella salió el **núcleo de `FUN-M-17`**, que no existía. Hoy **solo-desktop**: llevarla a web no es un reflejo (§ 17 de la spec) |
-| [[canvas]] (`FUN-L-18`) | Sale en la [[Version 1.6.0]]. **Implementado en desktop** el 2026-08-08, **sin confirmar**: tipo de archivo `.canvas` (JSON Canvas, el de Obsidian) con lienzo infinito, tarjetas de markdown y de nota, y flechas. Construido **sin librería de nodos**; el parser conserva lo que todavía no edita para no borrar trabajo de un canvas ajeno. **Reflejado a web** el mismo día, salvo que allá un canvas todavía no aporta aristas al grafo |
-| [[ventanas-multiples]] (`FUN-L-16`) | **Implementada en desktop** el 2026-08-13, **sin confirmar**: varios vaults a la vez, uno por ventana. La ventana pasa a ser el ámbito del watcher y de las terminales, que eran globales. Sale en la [[Version 1.6.1]] |
+| [[bases-tabla]] (`FUN-L-03`) | Salió en la [[Version 1.6.0]]. **Implementada en las dos ramas** el 2026-08-08, **sin confirmar**: el archivo `.base` (formato de Obsidian) agrega notas por sus propiedades y las muestra en una tabla de solo lectura, con filtros. Se implementa un subconjunto cerrado del lenguaje de Bases; lo que no se entiende **no se ignora**, se declara. El bloque **O** se cerró el 2026-09-05, confirmado en la app y reflejado a web: el **constructor de filtros** pasó de lista plana a árbol, con negación, grupos anidados y buscador de campos (`FUN-M-27` + `FUN-S-16` + `DEF-080`), y la **cabecera** ganó orden por columna, búsqueda dentro de la tabla y ancho arrastrable (`FUN-S-15` + `FUN-S-14` + `FUN-M-25`). Salió en la 1.6.0, publicada absorbida por la [[Version 1.6.2]] |
+| [[auditoria-y-relinkeado]] (`FUN-L-17`) | Salió en la [[Version 1.6.0]]. **Implementada en desktop** el 2026-08-08, **sin confirmar**: pantalla que audita las referencias sin estructura del vault y las convierte en `[[enlaces]]`, con simulacro, respaldo y deshacer. Con ella salió el **núcleo de `FUN-M-17`**, que no existía. Hoy **solo-desktop**: llevarla a web no es un reflejo (§ 17 de la spec) |
+| [[canvas]] (`FUN-L-18`) | Salió en la [[Version 1.6.0]]. **Implementado en desktop** el 2026-08-08, **sin confirmar**: tipo de archivo `.canvas` (JSON Canvas, el de Obsidian) con lienzo infinito, tarjetas de markdown y de nota, y flechas. Construido **sin librería de nodos**; el parser conserva lo que todavía no edita para no borrar trabajo de un canvas ajeno. **Reflejado a web** el mismo día, salvo que allá un canvas todavía no aporta aristas al grafo |
+| [[ventanas-multiples]] (`FUN-L-16`) | **Implementada en desktop** el 2026-08-13, **sin confirmar**: varios vaults a la vez, uno por ventana. La ventana pasa a ser el ámbito del watcher y de las terminales, que eran globales. Salió en la 1.6.1, publicada absorbida por la [[Version 1.6.2]] |
 | [[preferencias-por-vault]] (`FUN-M-28` + `FUN-M-21` + `FUN-M-25` + `FUN-M-29`) | **Confirmadas en desktop** el 2026-09-05 y **portadas a web** el mismo día. Las preferencias dejan de ser solo del usuario: números de línea, modo de nombres del grafo y anchos de columna pertenecen al vault. En desktop viven en `.mycelium/preferencias.json` y viajan con la carpeta; en web, en `localStorage` por `vaultId` —quedan en ese navegador—. Lo que se conservó igual en las dos ramas es la **superficie** del store, y es lo que mantiene compartidos a sus cinco consumidores |
 | [[otros-tipos-de-archivo]] (`FUN-L-11` + `FUN-M-26` + `FUN-S-09`) | El vault deja de ser solo markdown: los archivos que Mycelium no indexa se listan, se abren en un visor, se editan con guardado explícito y —desde el 2026-09-05— se ven **coloreados según su lenguaje**. El lector pasó a ser CodeMirror, que dibuja solo las líneas visibles: el archivo grande le cuesta menos que a los dos `<pre>` que tenía antes. **Solo-desktop**: en web esos archivos no existen |
 | [[marcas-en-las-pestanas]] (`FUN-S-11` + `FUN-S-12`) | **Confirmadas** el 2026-09-05; `FUN-S-11` reflejada a web el mismo día. El ícono del tipo en cada pestaña, y un color por consola que se atenúa cuando no tiene el foco |
 | [[busqueda-modos-y-arbol]] (`FUN-M-20` + `FUN-S-17`) | **Confirmadas y reflejadas** el 2026-09-05. El panel de búsqueda deja elegir si busca por nombre, por contenido o por los dos, y ver los resultados agrupados por carpeta. De ahí salió `FUN-S-17`: las guías verticales de indentación, que ahora tienen los dos árboles |
 | [[titulo-renombra]] (`FUN-M-24`) | **Confirmada y reflejada** el 2026-09-05. Escribir en el título de la nota renombra el archivo, solo en las vistas de edición. Un nombre inválido se rechaza con el motivo, al revés que al importar. De implementarla salió `DEF-084`: el renombrado reescribía los `[[enlaces]]` entrantes con un nombre que nunca existió en disco |
 | Dock de pestañas del panel lateral | Generalizado a cualquier sección (`SidebarDock`) |
+| draw.io (`FUN-L-20`) | 🟢 Confirmado; salió en [[Version 2.1.0]], solo-desktop |
+| [[calendario-recordatorios]] (`FUN-L-22`) | Salió en [[Version 2.2.0]], sin confirmar; reflejado a web, sin publicar |
+| [[corrector-ortografico]] (`FUN-L-12`) | Motor propio en WebAssembly con diccionarios descargables de R2, del vault y de Mycelium. Salió en [[Version 2.2.0]]; reflejado a web, sin publicar ni probar |
+| [[grafo-indice-y-motor]] (`FUN-L-25`) | 🟢 Confirmado; salió en [[Version 2.2.0]] |
+| Auditoría de código (`FUN-M-38`, `FUN-M-39`, `FUN-M-40`, `FUN-L-24`) | Rendimiento, limpieza, editor y enlaces, capa de datos. Salieron en [[Version 2.2.0]], sin confirmar en la app. Ver [[Auditoria de codigo 2026-09-26]] |
+| [[ia-skills-herramientas]] (`FUN-L-26`) | 🟢 Finalizada el 2026-10-01: la IA del vault sabe crear y modificar diagramas, lienzos y dibujos (con validadores que viajan con las skills), armar bases, usar Esporas y consultar el calendario. Con ella: las pestañas de lienzos, diagramas y dibujos se recargan desde disco y abren encuadradas. Sin publicar |
 
 ## Pendiente / próximos pasos
 
@@ -68,23 +79,24 @@ Foto de dónde está Mycelium hoy. Para el detalle de cada tema, seguir los enla
 > que borra sin preguntar (`DEF-051`). Lo cierra la [[Version 1.6.2]], que llegó con el
 > changelog de las tres. La `1.5.1` que estaba prevista nunca existió: un minor absorbe las
 > correcciones que vengan con él ([[Versionado del sistema]]).
-1. **Probar la web en la app**: el reflejo del 2026-08-08 ([[Version 1.1.0 de web]]) pasó
-   `tsc`, `next build`, `dotnet build` y un smoke contra la API, pero **nadie lo miró en
-   pantalla**. Lo primero, un `POST /vaults/{id}/reindexar`: las notas guardadas antes no
-   tienen sus propiedades en el índice.
-2. **`.mycignore` en web** (`FUN-M-11`): lo único del bloque G que quedó fuera, porque no
+1. **Publicar la `2.3.0` de desktop** cuando el usuario lo decida (ver el Resumen).
+2. **Web**: aplicar el esquema en D1 de producción y el CORS del bucket de R2 (corrector),
+   probar en el navegador lo reflejado desde la `2.1.0` y publicarlo. El reflejo del
+   2026-08-08 ([[Version 1.1.0 de web]]) tampoco se miró nunca en pantalla.
+3. **`.mycignore` en web** (`FUN-M-11`): lo único del bloque G que quedó fuera, porque no
    es un reflejo — en web la semántica sería otra (filtro de importación, con la config en
    el backend). Hay que definirla antes de implementarla.
-3. **Verificar 1.1.1 en la app**: abrir un vault grande y comprobar que el indexado es
+4. **Verificar 1.1.1 en la app**: abrir un vault grande y comprobar que el indexado es
    más rápido y que se ve el avance. El `.mycignore` de este vault **ya se amplió**
    (2026-08-01) con `node_modules/`, `target/`, `out/`, `dist/`, `installers/`,
    `installer/`, `backend/` y `scripts/`: pasó de 1830 archivos indexados a **63**, de
    4020 directorios a **110** y de 14 MB a **495 KB**. Hacía falta a mano porque el
    archivo ya existía y un `.mycignore` presente reemplaza al default (ver [[mycignore]]).
-4. **Probar** `/vault-buscar` y `/vault-recordar` del framework v1.4.0 en un vault real (hay que **regenerarlo** antes: este vault tiene la v1.2.0).
-5. **Reflejar a web** lo que corresponda de la línea de IA: por naturaleza, poco o nada
+5. **Regenerar el framework de IA** en este vault (tiene la v1.6.0; la vigente es la
+   v1.7.0) y probar en uso real los comandos y las skills por herramienta.
+6. **Reflejar a web** lo que corresponda de la línea de IA: por naturaleza, poco o nada
    (ver [[Diferencias funcionales aceptadas entre versiones]]).
-6. **Backlog de funcionalidades**: [[BACKLOG]] tiene el inventario completo con tamaños
+7. **Backlog de funcionalidades**: [[BACKLOG]] tiene el inventario completo con tamaños
    (`FUN-S/M/L/XL`) y, en su § 7, **la agrupación en releases**: qué conviene trabajar
    junto porque comparte subsistema, qué va solo y qué puede viajar de acompañante. No
    impone orden — el orden lo decidís vos. Con `FUN-M-04` hecho queda
@@ -92,9 +104,12 @@ Foto de dónde está Mycelium hoy. Para el detalle de cada tema, seguir los enla
    donde leería. Sus dos continuaciones directas son `FUN-M-15` (enlaces por `aliases`) y
    `FUN-S-08` (`cssclasses`), que la spec dejó fuera a propósito. Con `FUN-M-03` hecho,
    **`FUN-M-07`** (Daily Note) ya tiene de dónde tomar la plantilla y la sustitución.
-7. **`FUN-L-09`** — servidor MCP de Mycelium, el paso siguiente de la línea de IA.
-8. **Continuaciones de `FUN-M-12`**: `FUN-M-14` (reindex dirigido por el watcher, el más
-   valioso de los tres), `FUN-M-13` (un solo recorrido) y `FUN-L-10` (indexado en Rust).
+8. **`FUN-L-09`** — servidor MCP de Mycelium, el paso siguiente de la línea de IA. Se
+   trabaja en otra sesión, en ramas propias todavía sin integrar.
+9. **Continuaciones de `FUN-M-12`**: `FUN-M-13` (un solo recorrido) quedó absorbida por
+   `FUN-M-38`; de `FUN-M-14` está hecha la mitad (lo que guarda la app ya no reindexa) y falta
+   el reindexado dirigido para cambios externos; `FUN-L-10` (indexado en Rust) sigue
+   pendiente.
 
 ## Deuda y cosas a tener en cuenta
 
