@@ -771,6 +771,23 @@ se abre sola, en el visor de archivos.
 
 Reportado por el usuario el 2026-10-04.
 
+# DEF-127
+Un archivo que **no es una nota** —una imagen, un PDF, un `.txt`— agregado al vault **desde
+fuera de Mycelium** (el explorador de Windows, otra app) **no aparece en el explorador**, o
+aparece mucho más tarde: recién cuando otra cosa hace que la app vuelva a mirar el vault. Lo
+mismo con una carpeta nueva vacía, o una carpeta movida o renombrada desde fuera.
+
+Reportado por el usuario el 2026-10-04 («si agrego una imagen desde fuera de Mycelium,
+Mycelium tarda en mostrarlo en el explorador»).
+
+# DEF-128
+Al **soltar una carpeta** del sistema operativo sobre el explorador, si la carpeta tiene **más
+de 100 elementos**, la importación queda **incompleta sin avisar**: entran los primeros 100 y
+el resto se pierde en silencio.
+
+Detectado el 2026-10-04 al investigar el arrastre de archivos (leyendo el código), sin
+reproducir todavía en la app.
+
 ---
 
 > [!warning] Defectos sin reporte original
