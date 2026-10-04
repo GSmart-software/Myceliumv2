@@ -64,14 +64,18 @@ Relación con el backlog: B **completa `FUN-M-14`**; `FUN-L-10` (indexado en Rus
 independiente y deja de ser urgente para este síntoma. Soltar un archivo **sobre una nota**
 para crear un adjunto con su enlace va con `DEF-126` (imágenes en notas) y es tema aparte.
 
-## Decisiones pendientes del usuario
+## Decisiones (usuario, 2026-10-04)
 
-1. Arreglar `DEF-127` (parte A) ya, antes de B.
-2. Soltar sobre una carpeta: ¿copia (como Obsidian) o mover con una tecla?
-3. Soltar una carpeta del SO: ¿se respeta su `.mycignore` (hoy deja fuera `.git` y `.obsidian`)?
-4. Archivos grandes: ¿alcanza con IPC binario o vale el esfuerzo de las rutas absolutas?
-5. ¿Reconciliación al recuperar el foco, botón «Refrescar», o las dos?
-6. Soltar sobre una nota: ¿adjunto más enlace como Obsidian, con carpeta de adjuntos configurable?
+1. **Las tres partes**, cada una en su rama y con su merge `--no-ff`, para evaluarlas por
+   separado. A y B tocan el watcher: van **en serie** (A primero); C va en paralelo.
+2. Soltar sobre una carpeta **copia**, como Obsidian; el original queda donde estaba. Con
+   conflicto de nombre, el mismo diálogo de la importación.
+3. Soltar una carpeta del SO sigue dejando fuera `.git` y `.obsidian`, como hoy (default del
+   orquestador; no se preguntó).
+4. Archivos grandes: **IPC binario**. Las rutas absolutas de WebView2 quedan descartadas por ahora.
+5. **Las dos**: reconciliar al recuperar el foco (si pasó un rato) y botón «Refrescar» en el
+   explorador.
+6. Soltar sobre una **nota** (adjunto + enlace) queda fuera: es tema aparte, sobre `DEF-126`.
 
 ## Relacionadas
 
