@@ -131,6 +131,19 @@ y qué principio general dejó.
     servidores MCP arrancando en frío a la vez (`FUN-L-09`). La salida es pedir la
     escritura al empezar —`BEGIN IMMEDIATE`, ahí sí espera— y reintentar la apertura un
     rato. Detalle en [[MCP de Mycelium - memoria]] § 13.2.
+13. **Una ruta relativa en el HTML es relativa a la página, no al documento que la
+    escribió.** Las imágenes del vault no se veían en las notas (`DEF-126`): en lectura,
+    `![](foto.png)` salía como `<img src="foto.png">`, que el webview pide relativo a la
+    página de la app —no a la carpeta de la nota, ni al disco— y da el ícono roto; en vivo
+    no había widget de imagen (el único `![](…)` que se dibujaba era el vídeo, `FUN-S-21`);
+    y `![[foto.png]]` se buscaba entre las **notas**, donde una imagen nunca está (no se
+    indexa: vive en `vaultStore.otros`). El visor de archivos sí las mostraba porque pasaba
+    por `convertFileSrc` (protocolo `asset:`, `FUN-L-11`). Ahora una sola resolución pura
+    (`lib/imagenes.ts`: por nombre entre las imágenes del vault; `![](…)` relativo a la nota,
+    luego a la raíz) alimenta las dos vistas y la exportación (`lib/imagenesRender.ts`), y la
+    lectura deja un hueco sin `src` que quien sabe **qué nota es** rellena con la URL
+    `asset:`. **Todo lo que apunta a un archivo del vault se traduce a una URL que el webview
+    sepa servir; escrito tal cual, el navegador lo resuelve contra otra cosa.**
 
 ## Relacionadas
 
