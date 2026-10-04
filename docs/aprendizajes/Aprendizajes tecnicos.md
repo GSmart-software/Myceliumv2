@@ -154,8 +154,20 @@ y qué principio general dejó.
     lectura deja un hueco sin `src` que quien sabe **qué nota es** rellena con la URL
     `asset:`. **Todo lo que apunta a un archivo del vault se traduce a una URL que el webview
     sepa servir; escrito tal cual, el navegador lo resuelve contra otra cosa.**
+15. **Un filtro de eventos tiene que mirar lo mismo que el que muestra.** Una imagen o un PDF
+    agregados desde fuera no aparecían en el explorador (`DEF-127`), aunque el recorrido del
+    vault los listaba y el explorador los sabía dibujar: el watcher filtraba con otra regla
+    —«¿es una nota?»—, pensada cuando el explorador solo mostraba notas, y nadie la revisó
+    al aparecer los otros archivos (`FUN-S-03`). Ahora el watcher usa el mismo `.mycignore`
+    que el recorrido, y el ruido que no se quiere (temporales de Office, descargas a medias)
+    se filtra **en los dos** con la misma función: si solo lo filtrara el watcher, un
+    `~$informe.docx` listado por un reindexado cualquiera quedaría colgado en el árbol al
+    borrarse. Y al ensanchar el filtro, revisá qué otra cosa dependía de que fuera angosto:
+    el `Modify` que Windows emite sobre una **carpeta** cuando cambia algo adentro antes moría
+    por no ser nota, y si hubiera pasado, cada guardado de la app habría traído una ruta
+    ajena y reindexado (`FUN-M-38`).
 
-15. **Una API que entrega por partes no avisa cuando se la llama una sola vez.**
+16. **Una API que entrega por partes no avisa cuando se la llama una sola vez.**
     `FileSystemDirectoryReader.readEntries` devuelve como mucho 100 entradas por llamada en
     Chromium/WebView2 y hay que repetirla hasta que vuelva vacía; llamarla una vez dejaba
     fuera, sin error, todo lo que pasara de 100 al soltar una carpeta (`DEF-128`). Y los bytes
