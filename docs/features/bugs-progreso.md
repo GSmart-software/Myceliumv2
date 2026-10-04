@@ -18,6 +18,8 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | Bug | Descripción corta | Alcance | Estado |
 |---|---|---|---|
 | DEF-123 | La plantilla de snippets describe la interfaz de junio: le falta todo lo posterior | ambas (frontend, `public/plantilla-estilos.css`) | ⬜ registrado (2026-10-03). Comprobado: las 18 variables y las clases que usa siguen existiendo —no está rota—, pero su último cambio es del 2026-06-22 y cubre 18 de 98 tokens; no conoce atmósferas, paleta, propiedades, bases, canvas, calendario ni draw.io |
+| DEF-125 | El buscador de la nota no resalta las coincidencias dentro de las tablas renderizadas | ambas (frontend) | ⬜ registrado (2026-10-04). Pista: el resaltado del buscador (`components/editor/SearchBar.tsx`, con `CSS.highlights` desde `DEF-057`) recorre el texto del editor, y la tabla renderizada en vivo es un widget aparte (`FUN-L-19`), fuera de ese recorrido |
+| DEF-126 | Las imágenes del vault puestas en una nota no se dibujan | ambas (frontend; el origen difiere) | ⬜ registrado (2026-10-04). Pistas: en la vista en vivo `EMBED_IMAGEN_RE` (`lib/editor/livePreview.ts`) solo reemplaza `![](url)` cuando es un video (`FUN-S-21`) y no hay widget de imagen; en lectura la ruta relativa del `<img>` no pasa por `convertFileSrc`, que el visor de archivos (`lib/otrosArchivos.ts`) sí usa; `![[foto.png]]` no resuelve a una imagen. Sin reproducir todavía en la app |
 
 ## Corregidos
 

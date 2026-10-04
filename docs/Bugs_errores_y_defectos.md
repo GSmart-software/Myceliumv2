@@ -757,6 +757,20 @@ abiertas, ni A ni B se dejan llevar a un costado. En la ventana principal sí fu
 
 Reportado por el usuario el 2026-10-03.
 
+# DEF-125
+Al **buscar dentro de un documento** (el buscador de la nota), el texto que coincide **dentro
+de una tabla renderizada no se resalta**: las coincidencias del resto de la nota se marcan,
+las de las celdas de la tabla no.
+
+Reportado por el usuario el 2026-10-04.
+
+# DEF-126
+**Las imágenes no se ven en las notas**: una imagen del vault puesta en una nota (`![](foto.png)`
+o `![[foto.png]]`) no se dibuja; queda el texto del embed o nada. La misma imagen sí se ve si
+se abre sola, en el visor de archivos.
+
+Reportado por el usuario el 2026-10-04.
+
 ---
 
 > [!warning] Defectos sin reporte original
