@@ -83,6 +83,19 @@ archivos y es incremental por `mtime`, así que "app escribe → watcher dispara
 reindexa" termina en un reindex idempotente. Por eso no hace falta rastrear los
 propios escritos. Ver [[vault-en-carpeta]] y [[Capa de datos del desktop]].
 
+## Bytes por la IPC: binario, no JSON
+
+Pasar un archivo a Rust como argumento normal (`invoke(cmd, { bytes: Array.from(u8) })`) lo
+serializa como un arreglo de números: unas **cuatro veces** su tamaño y lento de armar y de
+parsear (20 MB → 71 MB de JSON, ~2,3 s). Tauri v2 acepta un `Uint8Array`/`ArrayBuffer` como
+**cuerpo** de la llamada: `invoke(cmd, u8, { headers: { "x-ruta": encodeURIComponent(r) } })`,
+y el comando lo recibe con `request: tauri::ipc::Request<'_>` → `InvokeBody::Raw(bytes)` y
+`request.headers()`. Los encabezados solo admiten ASCII, de ahí el `encodeURIComponent` (se
+decodifica en Rust). Para archivos grandes, en trozos (`File.slice`) para no tener el archivo
+entero en memoria. Los comandos sin `async` corren en el **hilo principal**: el que escriba o
+copie mucho va con `#[tauri::command(async)]`. Caso: `FUN-S-26`, en
+[[archivos-del-vault-en-vivo]].
+
 ## Relacionadas
 
 - [[Aprendizajes tecnicos]] — mapa del área.

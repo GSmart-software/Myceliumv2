@@ -77,6 +77,41 @@ para crear un adjunto con su enlace va con `DEF-126` (imágenes en notas) y es t
    explorador.
 6. Soltar sobre una **nota** (adjunto + enlace) queda fuera: es tema aparte, sobre `DEF-126`.
 
+## Implementación de C (2026-10-04, `FUN-S-26` + `DEF-128`)
+
+Rama `feat/soltar-cualquier-archivo-desktop`. **Sin confirmar en la app.**
+
+- **Cualquier archivo.** `ExplorerPanel.importarSoltados` ya no filtra `onlyMd`: todo lo
+  soltado (archivos y carpetas) va a `useImportStore.run` → `importarArchivos`. Si leer lo
+  soltado falla, sale un aviso en vez de nada. «Importar archivos…» (antes «Importar
+  archivos .md») y su selector aceptan también cualquier tipo.
+- **`DEF-128`.** El recorrido salió a `lib/recorrerSoltados.ts` (puro, probado con
+  `scripts/test-soltar-archivos.mjs`): `leerTodasLasEntradas` repite `readEntries` hasta que
+  vuelve vacío. Las carpetas **ocultas** (`.git/`, `.obsidian/`…) se saltan ya ahí —el
+  default del `.mycignore` las descarta igual al copiar—, para no leer y mandar un `.git`
+  entero por IPC. Las carpetas **vacías** de lo soltado no se crean (no hay archivo que las
+  lleve a la carpeta temporal).
+- **IPC binario.** El camino sigue siendo el de `FUN-M-40`: bajar a una carpeta temporal y
+  `conflictos_de_copia` + `copiar_arbol` —así el diálogo de conflicto (reemplazar / renombrar /
+  cancelar), el `.mycignore` y el indexado no se duplican—. Cambia el transporte:
+  `crear_temporal_importacion` crea la carpeta y `escribir_trozo_importacion` recibe el
+  **cuerpo crudo** (`tauri::ipc::Request`, `InvokeBody::Raw`) con `x-dir`, `x-ruta`
+  (`encodeURIComponent`) y `x-desde` en encabezados. Un archivo por vez, en **trozos de 8 MB**
+  leídos con `File.slice`: un archivo de 200 MB nunca está entero en memoria del webview, y un
+  trozo fuera de orden es error (el archivo tiene que medir exactamente `x-desde`). La ruta se
+  valida con `ruta_segura` dentro de la carpeta temporal, y esta con `temporal_valida`; la copia
+  al vault la valida `preparar_copia`. Se retiró `escribir_temporal_importacion` (el JSON con
+  `number[]`).
+- **Fuera del hilo principal.** `escribir_trozo_importacion`, `conflictos_de_copia` y
+  `copiar_arbol` son `#[tauri::command(async)]`: un comando sincrónico de Tauri corre en el
+  hilo principal y copiar cientos de MB congelaba la ventana.
+- **Progreso.** La barra de la importación aparece con más de 3 archivos **o** con 8 MB o más,
+  y avanza por bytes («Importando… 0/1 · 45,2 MB de 200 MB»). El resumen final dice «2 notas y
+  3 archivos importados» en vez de «0 nota(s) importada(s), 3 adjunto(s)».
+- **Refresco.** Sin cambios: `importarCarpeta` reindexa una vez, `setOtros` con los archivos
+  que no son notas y `loadTree`, así que lo copiado aparece en el explorador al terminar.
+- El arrastre nativo de Tauri sigue apagado (`DEF-036`, `DEF-124`): todo va por el drop HTML5.
+
 ## Relacionadas
 
 - [[BACKLOG]] — `FUN-M-42`, `FUN-S-26`, `FUN-M-14`, `FUN-L-10`, `FUN-L-11`.

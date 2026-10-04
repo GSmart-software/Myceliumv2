@@ -155,6 +155,17 @@ y qué principio general dejó.
     `asset:`. **Todo lo que apunta a un archivo del vault se traduce a una URL que el webview
     sepa servir; escrito tal cual, el navegador lo resuelve contra otra cosa.**
 
+15. **Una API que entrega por partes no avisa cuando se la llama una sola vez.**
+    `FileSystemDirectoryReader.readEntries` devuelve como mucho 100 entradas por llamada en
+    Chromium/WebView2 y hay que repetirla hasta que vuelva vacía; llamarla una vez dejaba
+    fuera, sin error, todo lo que pasara de 100 al soltar una carpeta (`DEF-128`). Y los bytes
+    por la IPC de Tauri **no van en el JSON**: un `Uint8Array` pasado como `number[]` ocupa
+    unas cuatro veces su tamaño (20 MB → 71 MB, ~2,3 s); `invoke(cmd, uint8array, { headers })`
+    los manda crudos y Rust los lee de `tauri::ipc::Request` (`InvokeBody::Raw`), con los
+    datos en encabezados ASCII (`encodeURIComponent`). Además, un comando **sincrónico** corre
+    en el hilo principal: el que mueva archivos grandes va con `#[tauri::command(async)]`
+    (`FUN-S-26`, detalle en [[archivos-del-vault-en-vivo]] y [[Tauri y el WebView]]).
+
 ## Relacionadas
 
 - [[Estado del proyecto]] — qué está hecho y qué falta; contexto de estos hallazgos.
