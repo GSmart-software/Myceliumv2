@@ -131,6 +131,16 @@ y qué principio general dejó.
     servidores MCP arrancando en frío a la vez (`FUN-L-09`). La salida es pedir la
     escritura al empezar —`BEGIN IMMEDIATE`, ahí sí espera— y reintentar la apertura un
     rato. Detalle en [[MCP de Mycelium - memoria]] § 13.2.
+13. **Lo que un widget reemplaza deja de ser texto para el editor.** El buscador de la nota
+    no resaltaba nada dentro de las tablas renderizadas (`DEF-125`): la búsqueda de
+    CodeMirror marca rangos del documento con decoraciones, y sobre un rango que un
+    `Decoration.replace` cambió por un widget esa marca no se dibuja. Peor que no verse: se
+    **contaba** el markdown oculto (`|`, `---`, `**`) y «siguiente» llevaba a un lugar sin
+    nada marcado. Toda función que recorre el texto del editor —buscar, contar, corregir,
+    resaltar— tiene que decidir qué hace con los rangos reemplazados: ahí lo que el usuario
+    ve es el **DOM del widget**, que se busca aparte (Highlight API, como la lectura en
+    `DEF-057`) y que fuera de pantalla no existe, así que la lista se arma desde el modelo
+    con el mismo render que usa el widget. Detalle en [[bugs-progreso]].
 
 ## Relacionadas
 
