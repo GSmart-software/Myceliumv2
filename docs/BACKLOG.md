@@ -83,7 +83,6 @@ una fila se implementa, **se mueve** a la §4 (ver «Cómo leerlo»).
 
 | ID | Nombre | Descripción | Aplica | Orig. |
 |---|---|---|---|---|
-| `FUN-S-01` | `EDITOR-CHECKBOX-ESTILOS` | Estilos de checkbox según el símbolo: `x`=X, `-`=tachado, `*`=estrella, `+`=check | ambas | C-M-06 |
 | `FUN-S-05` | `VAULT-EJEMPLO-DEFAULT` | Al crear un vault nuevo, generar un archivo de ejemplo por defecto | ambas | C-G-02 |
 | `FUN-S-08` | `NOTE-CSSCLASSES` | Aplicar a la nota las clases CSS que declare su propiedad `cssclasses`: hoy se parsea e indexa pero **no tiene comportamiento**. Continuación de `FUN-M-04` | ambas | — |
 | `FUN-S-10` | `ENLACES-AVISO-REFERENCIA` | Hook que avisa cuando se escribe una referencia a otra nota que Mycelium **no** cuenta como enlace (un `[texto](otra.md)`, o una forma ya registrada en el léxico escrita sin corchetes). Prevención, para que el problema que arregla `FUN-M-17` no vuelva a crecer | ambas | — |
@@ -136,7 +135,7 @@ una fila se implementa, **se mueve** a la §4 (ver «Cómo leerlo»).
 
 | ID | Nombre | Descripción | Aplica | Orig. |
 |---|---|---|---|---|
-| `FUN-S-06` | `EDITOR-CALLOUT-TITULO-COLOR` | El título del callout **ya lleva** el color de su etiqueta; lo que falta es el límite. Bug: ese color **pisa el color propio** de lo que se escriba dentro del título (un link, un `_texto_`, un color aplicado a mano), que se ve del color del callout en vez del suyo. Solo debería aplicarse al texto que no trae color propio | ambas | C-M-04 |
+| — | | Ninguna por ahora: `FUN-S-06`, la última, se corrigió el 2026-10-04 y pasó a la §4 | | |
 
 ---
 
@@ -183,6 +182,8 @@ mientras estaba pendiente; el detalle de lo construido está en la spec de cada 
 
 | ID | Nombre | Descripción | Aplica | Orig. |
 |---|---|---|---|---|
+| `FUN-S-01` 🛠️ | `EDITOR-CHECKBOX-ESTILOS` | Estilos de checkbox según el símbolo: `x`=X, `-`=tachado, `*`=estrella, `+`=check. **Implementada en desktop el 2026-10-04** (rama `feat/estados-de-tarea-desktop`), **sin confirmar en la app**, sin reflejar a web. Quedó como **estados de tarea** con los símbolos de Obsidian: `[ ]` pendiente, `[x]` hecha, `[-]` cancelada, `[/]` en curso, `[>]` pospuesta, `[*]` destacada, `[!]` importante, `[?]` pregunta, `[+]` agregada; cualquier otro se ve como hecha. Hecha y cancelada tachan el texto propio del ítem; el resto solo cambia el ícono. Clic: pendiente ↔ hecha (un estado especial vuelve a pendiente, como Obsidian); clic derecho: menú con los nueve. En vivo, lectura, panel lateral y PDF. De paso, la casilla de lectura escribe por **posición** y ya no desfasa las tareas de dentro de un callout. Framework de IA **1.8.0**. Spec en [[estados-de-tarea]] | ambas | C-M-06 |
+| `FUN-S-06` 🛠️ | `EDITOR-CALLOUT-TITULO-COLOR` | El título del callout **ya lleva** el color de su etiqueta; lo que falta es el límite. Bug: ese color **pisa el color propio** de lo que se escriba dentro del título (un link, un `_texto_`, un color aplicado a mano), que se ve del color del callout en vez del suyo. Solo debería aplicarse al texto que no trae color propio. **Corregida en desktop el 2026-10-04** con `FUN-S-01`, **sin confirmar en la app**, sin reflejar a web: la regla de cita del resaltado usa `var(--mic-cita-color, gris)` y la cabecera la define como `currentColor`, en vez de forzar `color: inherit` a todo `span`. Spec en [[estados-de-tarea]] § Parte 2 | ambas | C-M-04 |
 | `FUN-S-04` 🛠️🌐 | `TRASH-MULTISELECT` | Seleccionar varios archivos para borrar en la papelera. **Implementada el 2026-10-03** (`31c2327`), probada en la app de desarrollo, sin confirmar por el usuario; reflejada a web (`7bdb5c9`, merge `bbd0940`), sin probar | ambas | C-M-14 |
 | `FUN-S-13` 🛠️🌐 | `TABS-HISTORIAL-RUEDA` | Clic con la **rueda** en las flechas de atrás/adelante: abre en una **pestaña nueva** el documento anterior o siguiente del historial, en vez de navegar en la actual. Misma convención que la rueda sobre un archivo del explorador. **Implementada el 2026-10-03** (`3e7ef02`), probada en la app de desarrollo, sin confirmar por el usuario; reflejada a web (`947b5f1`), sin probar | ambas | — |
 | `FUN-S-24` 🛠️ | `ABRIR-OTRO-VAULT` | Abrir **otro vault desde el que está abierto**, sin «Salir del vault» y sin lanzar el ejecutable de nuevo. Hoy, para tener dos vaults a la vez, hay que salir del actual, abrir el segundo «en ventana nueva» desde el selector y volver a abrir el primero. Va en la barra superior, junto al nombre del vault: la lista de vaults, cada uno con **abrir en una ventana nueva** —el que ya está abierto en otra ventana, la trae al frente (`FUN-L-16`)— y **«Abrir carpeta…»** para uno que todavía no está en la lista. Pedido por el usuario el 2026-09-27. **Implementada en desktop el mismo día, sin confirmar en la app** (`13ed398`): `MenuVaults` en la barra superior. Salió en [[Version 2.2.0]] | desktop | — |
@@ -295,7 +296,7 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 
 ### Tamaño S
 
-#### `FUN-S-01` · `EDITOR-CHECKBOX-ESTILOS` (C-M-06)
+#### `FUN-S-01` · `EDITOR-CHECKBOX-ESTILOS` (C-M-06) — 🛠️ desktop
 - **Qué es**: en listas de tareas, el símbolo que va dentro de `[ ]` determina un
   estado visual distinto: `x` → una X, `-` → texto tachado, `*` → estrella, `+` →
   check. Cada símbolo representa un "tipo" de marca con su ícono/estilo propio.
@@ -304,6 +305,11 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   Markdown estándar.
 - **A definir**: el set exacto de símbolos y qué significa cada uno; si es configurable;
   si el estilo alcanza a toda la línea (p. ej. tachar el texto de un ítem descartado).
+- **Definido por el usuario el 2026-10-04 e implementado en desktop ese día** (sin
+  confirmar): los símbolos de Obsidian —`x`, `-`, `/`, `>`, `*`, `!`, `?`, `+`—, no
+  configurable; hecha y cancelada tachan el **texto del ítem** (no las subtareas), el resto
+  solo cambia el ícono; clic alterna y clic derecho abre el menú de estados. Detalle,
+  diseño y cómo reflejarlo a web en [[estados-de-tarea]].
 
 #### `FUN-S-02` · `EDITOR-TAB-WIDTH` (C-M-10) — 🟢 ambas
 - **Qué es**: opción en Configuración para elegir cuánto "vale" una tabulación en el editor.
@@ -1306,7 +1312,7 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 
 ### Con errores / a ajustar
 
-#### `FUN-S-06` · `EDITOR-CALLOUT-TITULO-COLOR` (C-M-04) — 🟡
+#### `FUN-S-06` · `EDITOR-CALLOUT-TITULO-COLOR` (C-M-04) — 🛠️ desktop
 - **Qué es**: el título de un callout lleva el **color de su etiqueta** (el color
   representativo del tipo, p. ej. *question*). Eso ya funciona — era la primera mitad de
   `C-M-04`, y el propio reporte dice «funciona, pero…». Lo que falta es el **límite**.
@@ -1326,6 +1332,11 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   cabecera, incluidos los que traen color propio.
 - **A definir**: cómo distinguir «span del resaltado de cita» de «span con estilo propio»
   sin volver a pelear especificidad a ciegas.
+- **Resuelto en desktop el 2026-10-04** (sin confirmar), con `FUN-S-01`: la causa se
+  confirmó leyendo el resaltado —el span de un enlace lleva a la vez la clase de cita y la
+  de enlace, y las marcas `mic-*` envuelven al de cita—. No se distingue el span: la regla
+  de cita usa `var(--mic-cita-color, gris)` y la cabecera define la variable como
+  `currentColor`. Detalle en [[estados-de-tarea]] § Parte 2.
 
 ---
 
@@ -1454,12 +1465,17 @@ Mismo panel, misma sesión de trabajo: seleccionar varios para borrar y previsua
 antes de decidir. Las dos existen por el mismo motivo — decidir con información y sin
 ir de a uno.
 
-#### E · Estilos propios al renderizar markdown — `FUN-S-01` + `FUN-S-06` 🟡 · minor · ambas
+#### E · Estilos propios al renderizar markdown — `FUN-S-01` + `FUN-S-06` 🛠️ · minor · ambas
 Las dos son la misma pregunta: **cuándo un elemento conserva su estilo propio y cuándo
 gana el del contenedor**. `FUN-S-01` da estilo al checkbox según su símbolo; `FUN-S-06`
 corrige que el título de un callout le pise el color a lo que lleva dentro. Comparten
 `lib/markdown.ts`, `livePreview.ts` y `editor.css`. El minor de `FUN-S-01` **absorbe** la
 corrección.
+
+> [!info] Estado del bloque (2026-10-04)
+> Las dos **implementadas en desktop** el mismo día (rama `feat/estados-de-tarea-desktop`),
+> **sin confirmar en la app**; falta reflejar a web. Spec compartida, con la tabla de
+> archivos compartidos y divergentes para el reflejo, en [[estados-de-tarea]].
 
 #### O · Las tablas de `.base` se vuelven usables — `FUN-S-14` + `FUN-S-15` + `FUN-M-25` + `FUN-M-27` + `FUN-S-16` · minor · ambas
 Buscar dentro de la tabla, ordenar por una columna y ajustar anchos. Las tres viven en el

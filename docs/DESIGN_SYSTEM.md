@@ -244,6 +244,26 @@ Definidos por tema (dentro de cada bloque `[data-theme="..."]`). Los componentes
 
 El fondo de todos los tipos usa `--mic-callout-bg: var(--mic-raw-mist)`.
 
+### Estados de tarea (`FUN-S-01`)
+
+El ícono de cada estado de una tarea (`- [?] …`) tiene su token, en `tokens.css`. Salen de
+los colores de callout **mezclados con la tinta** según `--mic-callout-tinta`, el mismo
+criterio que el título de un callout: casi puros en oscuro, oscurecidos en claro para pasar
+3:1 sobre el lienzo.
+
+| Estado | Token | Sale de |
+|---|---|---|
+| Hecha `[x]`, en curso `[/]` | `--mic-tarea-hecha`, `--mic-tarea-en-curso` | `--mic-accent` |
+| Agregada `[+]` | `--mic-tarea-agregada` | `--mic-callout-success-border` + tinta |
+| Cancelada `[-]` | `--mic-tarea-cancelada` | `--mic-text-muted` |
+| Pospuesta `[>]` | `--mic-tarea-pospuesta` | `--mic-callout-info-border` + tinta |
+| Destacada `[*]` | `--mic-tarea-destacada` | `--mic-callout-warning-border` + tinta |
+| Importante `[!]` | `--mic-tarea-importante` | `--mic-callout-caution-border` + tinta |
+| Pregunta `[?]` | `--mic-tarea-pregunta` | `--mic-callout-question-border` + tinta |
+
+La casilla la dibuja una sola regla por estado (`editor.css` § Estados de tarea) para la
+vista en vivo, la de lectura, el PDF y el menú de estados. Ver [[estados-de-tarea]].
+
 ---
 
 ## Tokens de métrica

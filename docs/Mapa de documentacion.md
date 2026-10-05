@@ -127,6 +127,8 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
   renombra sin romper enlaces y usa la papelera y el diccionario (`FUN-L-09`).
 - [[corrector-ortografico]] — el corrector del sistema en el editor, con el código y los enlaces
   excluidos (`FUN-L-12`).
+- [[estados-de-tarea]] — el símbolo dentro de `[ ]` como estado de la tarea, con los de
+  Obsidian, y el título del callout que deja su color a lo que lleva (`FUN-S-01` · `FUN-S-06`).
 - [[auditoria-rendimiento-1]] — tanda 1 de la auditoría: guardar sin reindexar, indexado
   por tandas multi-fila, un solo recorrido del disco, búsqueda desde dos letras (`FUN-M-38`).
 - [[auditoria-capa-de-datos]] — tanda 3 de la auditoría: retirar el modo clásico y la

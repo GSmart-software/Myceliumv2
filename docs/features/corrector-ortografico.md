@@ -243,7 +243,7 @@ Edge headless —el motor de WebView2— con Tauri simulado y los diccionarios r
 | Idioma y región del sistema, variante | `lib/ortografia/idioma.ts` (puro) |
 | Manifiesto y estado de cada idioma | `lib/ortografia/manifiesto.ts` (puro) |
 | **Capa desktop** (lo único que diverge de web) | `lib/ortografia/diccionarios.ts` |
-| Extensión de CodeMirror y menú propio | `lib/editor/ortografia.ts`, `components/editor/MenuOrtografia.tsx` |
+| Extensión de CodeMirror y menú propio | `lib/editor/ortografia.ts`, `components/editor/MenuFlotante.tsx` (se llamaba `MenuOrtografia.tsx` hasta `FUN-S-01`) |
 | Lo que no es prosa | `lib/editor/ortografiaExclusiones.ts` |
 | Configuración → Editor | `components/settings/DiccionariosCorrector.tsx` |
 | Descarga, verificación, lectura (Rust) | `src-tauri/src/diccionarios.rs` |

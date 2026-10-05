@@ -610,7 +610,7 @@ entre ramas):
   - **Compartidos** (traer enteros): `wasm/ortografia/` y `public/ortografia/motor.wasm`,
     `lib/ortografia/{palabras,idioma,manifiesto,motor,corrector.worker,corrector}.ts`,
     `lib/editor/ortografia.ts`, `lib/editor/ortografiaExclusiones.ts`,
-    `components/editor/MenuOrtografia.tsx`, `components/settings/DiccionariosCorrector.*`,
+    `components/editor/MenuFlotante.tsx` (antes `MenuOrtografia.tsx`), `components/settings/DiccionariosCorrector.*`,
     `scripts/test-ortografia.mjs`, `scripts/wasm-ortografia.mjs`, y lo del corrector en
     `styles/{tokens,editor}.css` y `EditorSection.tsx`.
   - **Diverge**: `lib/ortografia/diccionarios.ts` —la única pieza que sabe de dónde salen
