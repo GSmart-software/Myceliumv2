@@ -788,6 +788,13 @@ el resto se pierde en silencio.
 Detectado el 2026-10-04 al investigar el arrastre de archivos (leyendo el código), sin
 reproducir todavía en la app.
 
+# DEF-129
+En la **vista de lectura**, hacer clic en la casilla de una tarea que está **dentro de una
+cita o de un callout** marca o desmarca **otra tarea** de la nota, no la que se tocó.
+
+Detectado el 2026-10-04 al implementar `FUN-S-01` (leyendo el código), sin reproducir antes
+en la app.
+
 ---
 
 > [!warning] Defectos sin reporte original
