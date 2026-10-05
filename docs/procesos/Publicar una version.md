@@ -282,6 +282,71 @@ Opciones (`npm run publicar -- --ayuda`):
 | `--sin-compilar` | Reutiliza los instaladores ya compilados. Es lo que permite **rehacer un manifiesto mal escrito sin recompilar** (§ 5). |
 | `--forzar` | Republicar encima de una versión que ya está en el bucket. Sin esto se aborta: ver la § 5. |
 | `--notas <archivo>` | Toma el changelog de un archivo suelto en vez de la nota de release. |
+| `--ci <carpeta>` | Publica **también macOS y Linux**, compilados en GitHub Actions. Ver el paso 3. |
+
+### Paso 3 — macOS y Linux: `--ci <carpeta>` (`FUN-L-28`)
+
+Windows se sigue compilando acá; **macOS (Apple Silicon) y Linux (x64) los compila GitHub
+Actions** al fusionar un PR hacia la rama `despliegues` ([[instaladores-mac-linux]]). CI
+compila **sin firmar**: la clave privada no sale de tu PC, así que firma este script.
+
+1. **Bajar los artefactos del run.** En GitHub: pestaña **Actions** → el run del merge a
+   `despliegues` (workflow de build desktop) → al pie, **Artifacts**. Descargá los dos:
+   - `mycelium-<version>-macos-aarch64` → `Mycelium_<version>_aarch64.dmg` y
+     `Mycelium.app.tar.gz`
+   - `mycelium-<version>-linux-x86_64` → `Mycelium_<version>_amd64.deb`,
+     `Mycelium-<version>-1.x86_64.rpm` y `Mycelium_<version>_amd64.AppImage`
+
+   Ponelos en una carpeta cualquiera, p. ej. `Descargas\ci-2.4.0`. **No hace falta
+   descomprimirlos**: el script abre los `.zip` solo (con el `tar` de Windows), y si ya los
+   descomprimiste da igual si quedaron en subcarpetas o todo junto.
+2. **Correr el script con `--ci`**, igual que siempre pero con la carpeta:
+
+   ```sh
+   npm run publicar -- --ci "C:\Users\<vos>\Downloads\ci-2.4.0" --simulacro
+   npm run publicar -- --ci "C:\Users\<vos>\Downloads\ci-2.4.0"
+   ```
+
+Lo que agrega `--ci` a lo de siempre:
+
+- **Antes de compilar**, encuentra los cinco archivos y comprueba que sean **de la versión
+  que se publica** (por el nombre; el `Mycelium.app.tar.gz`, que no lleva versión en el
+  nombre, por el `Info.plist` de adentro). Si falta uno o es de otro run, no sigue.
+- Los **copia** a `installers/v<version>/` —tu carpeta no se toca— y renombra el
+  `Mycelium.app.tar.gz` a `Mycelium_<version>_aarch64.app.tar.gz`, para que no se pisen
+  versiones.
+- **Firma** con `tauri signer sign` el `.app.tar.gz`, el `.AppImage`, el `.deb` y el `.rpm`
+  (las mismas dos variables de entorno que el `.exe`), y **verifica cada firma contra la
+  `pubkey` de `tauri.conf.json`** antes de subir nada: si la clave no es la pareja de la
+  compilada en la app, lo dice ahí y no cuando un usuario intenta actualizar.
+- **Sube** los cinco archivos y los cuatro `.sig` a `<version>/`.
+- Los dos `latest.json` llevan, además de `windows-x86_64`:
+
+  | Clave | Apunta a | Quién la usa |
+  |---|---|---|
+  | `darwin-aarch64` | el `.app.tar.gz` | Mac instalado con el `.dmg` |
+  | `linux-x86_64` | el `.AppImage` | Linux con el AppImage |
+  | `linux-x86_64-deb` | el `.deb` | Linux instalado con el `.deb` |
+  | `linux-x86_64-rpm` | el `.rpm` | Linux instalado con el `.rpm` |
+
+- **Verifica** como con el `.exe`: la firma de cada plataforma en el manifiesto publicado es
+  la de su `.sig`, y el `.app.tar.gz`, el `.AppImage`, el `.deb` y el `.rpm` descargados
+  del bucket tienen el SHA-256 de lo que se firmó.
+
+> [!info] Por qué el `.deb` y el `.rpm` llevan su propia clave
+> El updater (`tauri-plugin-updater` 2.10, `Updater::get_urls`) busca primero
+> `{os}-{arch}-{instalador}` —el tipo de paquete con que se instaló esa copia— y después
+> `{os}-{arch}`. Si solo existiera `linux-x86_64`, una copia instalada con el `.deb` bajaría
+> el AppImage y el instalador de `.deb` lo rechazaría en cada actualización. En mac no hace
+> falta: el `.dmg` y el `.app` cuentan los dos como `app`, así que basta `darwin-aarch64`.
+
+> [!warning] Una versión con mac/linux se republica **con** `--ci`
+> Sin `--ci`, `--forzar` reescribiría su manifiesto solo con Windows y esas instalaciones se
+> quedarían sin actualizar. El script lo detecta y se niega. Las copias ya firmadas quedan
+> en `installers/v<version>/` y sirven como carpeta: `--ci installers/v<version>`.
+
+`--simulacro` y `--sin-compilar` funcionan igual con `--ci`; `--sin-compilar` solo afecta a
+Windows (lo de CI ya viene compilado).
 
 > [!info] Dos cosas que el script hace y son fáciles de olvidar a mano
 > **`versions.json` se actualiza, no se reemplaza**: lo descarga, agrega la versión nueva
@@ -480,6 +545,17 @@ mycelium-releases/
     └── …                             ← las versiones viejas se conservan
 ```
 
+Una versión publicada con `--ci` (§ 2, paso 3) suma en su carpeta:
+
+```
+<version>/
+├── Mycelium_<version>_aarch64.dmg                ← mac, primera instalación
+├── Mycelium_<version>_aarch64.app.tar.gz (+.sig) ← mac, lo que instala el updater
+├── Mycelium_<version>_amd64.AppImage     (+.sig)
+├── Mycelium_<version>_amd64.deb          (+.sig)
+└── Mycelium-<version>-1.x86_64.rpm       (+.sig)
+```
+
 ---
 
 ## 3. La primera vez hay que instalar a mano
@@ -589,8 +665,12 @@ la § 1.4 no es una formalidad.
 La automatización (`FUN-L-15`) **ya está**: es la § 2. Se hizo en ese orden a propósito —
 primero el circuito a mano de extremo a extremo con la `1.4.0`, y recién después el
 script, porque automatizar un proceso que no se sabe si funciona es multiplicar el fallo.
-Y es un **script local, no GitHub Actions**: usar el workflow obligaría a alinear `origin`
-(ver [[RAMAS]]) y a meter la clave privada como secreto de un repo público.
+
+Desde `FUN-L-28` ya **no es solo local**: GitHub Actions compila macOS y Linux
+([[instaladores-mac-linux]]), porque un Mac no se compila desde Windows. Pero CI compila
+**sin firmar**: la firma y la subida siguen siendo este script, en tu PC. La clave privada
+**sigue sin salir de ella** —meterla como secreto de un repo público es justo lo que se
+evita— y Windows se sigue compilando acá.
 
 Lo que sigue sin hacer:
 
@@ -600,10 +680,16 @@ Lo que sigue sin hacer:
 - **Publicar las versiones anteriores** que están en `installers/` pero no en el bucket.
   Nunca hizo falta: solo la `1.4.0` en adelante puede autoactualizarse.
 - **Instalar la salida** en la máquina propia para probarla; eso sigue siendo un doble clic.
+- **Bajar los artefactos de CI**: es a mano (§ 2, paso 3). El script no habla con la API de
+  GitHub a propósito: no necesita token ni depende del remoto.
+- **Volver atrás en mac/linux a una versión anterior a la primera con `--ci`**: esas
+  versiones no tienen entrada de mac/linux en su manifiesto, así que el modo avanzado las
+  lista pero no puede instalarlas ahí.
 
 ## Relacionadas
 
 - [[autoactualizacion]] — la spec: qué hace la app con todo esto.
+- [[instaladores-mac-linux]] — `FUN-L-28`: macOS y Linux compilados en CI, publicados con `--ci`.
 - [[Generar instaladores desktop]] — el empaquetado, que ahora emite también los `.sig`.
 - [[Publicar los diccionarios del corrector]] — lo otro que vive en el bucket, y se sube aparte.
 - [[Versionado del sistema]] — qué número lleva cada release.
