@@ -44,6 +44,30 @@ npx tauri build                      # ✓ exit code real
 > [!warning] No canalices comandos cuyo éxito necesitás evaluar
 > (o usá `PIPESTATUS` / `set -o pipefail`).
 
+### …y con `pipefail`, el error inverso: falso FALLO (`FUN-L-28`, 2026-10-05)
+
+`set -o pipefail` arregla el falso éxito, pero trae su propia trampa. GitHub Actions
+corre los pasos `shell: bash` con `bash -eo pipefail`, y el primer build de Linux falló con
+el sidecar **presente** en el `.deb`:
+
+```sh
+dpkg-deb -c x.deb | grep -q 'usr/bin/mycelium-mcp$'   # ✗ falla aunque encuentre
+# tar: stdout: write error / dpkg-deb: error: tar subprocess returned error exit status 2
+```
+
+`grep -q` (y `head`) **salen apenas tienen lo que buscan** y cierran la tubería; el
+productor recibe SIGPIPE y termina con error, y `pipefail` hace que ese error sea el del
+pipeline. Exit 141 en vez de 0. Con listados cortos no pasa (el productor termina de
+escribir antes): por eso se escapa en local y aparece con un paquete real.
+
+```sh
+listado="$(dpkg-deb -c x.deb)"                       # ✓ primero entero
+grep -q 'usr/bin/mycelium-mcp$' <<<"$listado"        #   después se busca
+```
+
+> [!warning] Bajo `pipefail`, nada que corte la entrada (`grep -q`, `head`, `grep -m`)
+> va a la derecha de una tubería cuyo productor puede escribir mucho.
+
 ## `cargo clean` falla si la app está corriendo
 
 `cargo clean` (o borrar `target/`) da `Acceso denegado (os error 5)` sobre
