@@ -88,6 +88,16 @@ Archivo: `frontend/scripts/publicar.mjs`.
 - Instaladores para la primera instalación (`.dmg`, `.deb`, `.rpm`) también se suben, aunque
   el updater no los use.
 
+> [!info] Implementado (2026-10-05): el `.deb` y el `.rpm` **sí** los usa el updater
+> `tauri-plugin-updater` 2.10 (`Updater::get_urls`) busca `{os}-{arch}-{instalador}` antes
+> que `{os}-{arch}`, con el tipo de paquete con que se instaló esa copia. Con solo
+> `linux-x86_64` → AppImage, una instalación por `.deb` bajaría el AppImage y `install_deb`
+> lo rechazaría (`InvalidUpdaterFormat`) en cada actualización. Por eso el script firma
+> también el `.deb` y el `.rpm` y el manifiesto lleva `linux-x86_64-deb` y
+> `linux-x86_64-rpm`; `darwin-aarch64-app` no hace falta (`.dmg` y `.app` cuentan como
+> `app`). Además verifica cada firma contra la `pubkey` de la app antes de subir. Detalle y
+> uso en [[Publicar una version]] § 2, paso 3.
+
 ## 5. Criterios de aceptación
 
 1. Un PR fusionado a `despliegues` produce, sin intervención, los artefactos de mac y linux.
