@@ -98,14 +98,12 @@ una fila se implementa, **se mueve** a la §4 (ver «Cómo leerlo»).
 |---|---|---|---|---|
 | `FUN-M-01` | `TRASH-PREVIEW` | Visualizar el contenido de los archivos en la papelera | ambas | C-M-13 |
 | `FUN-M-02` | `GRAPH-BUSCADOR-FILTRO` | Buscar por nombre en el grafo: atenúa los nodos que no coinciden | ambas | C-I-03 |
-| `FUN-M-14` | `VAULT-WATCH-REINDEX-DIRIGIDO` | El watcher emite `vault-cambios` **con las rutas afectadas** y `lib/vaultWatch.ts` las descarta: reindexa el vault entero ante cualquier cambio. Usar esas rutas para reindexar solo lo tocado. Continuación de `FUN-M-12`. **Parte hecha en `FUN-M-38`** (`d3c94be`): las escrituras propias de la app ya no reindexan. Falta el reindexado dirigido para los cambios externos | desktop | — |
 | `FUN-M-15` | `LINKS-POR-ALIAS` | Resolver `[[enlaces]]` por la propiedad `aliases` de la nota destino: hoy se parsea e indexa pero **no tiene comportamiento**. Toca la resolución de wikilinks, el autocompletado y el grafo. Continuación de `FUN-M-04` | ambas | — |
 | `FUN-M-18` | `EDITOR-REINDENTAR` | Reindentar las notas al ancho de tabulación configurado, para que el cambio se vea también en la vista en vivo y no solo al leer. Es una **edición masiva del vault**: reutiliza el respaldo, el manifiesto y el deshacer de `FUN-M-17`. Continuación de `FUN-S-02` | ambas | — |
 | `FUN-M-23` | `MERMAID-VISOR` | Visor propio para los diagramas Mermaid en la vista de lectura: al hacer clic se abre una ventana interna donde el diagrama se maneja como una imagen —**zoom** y **desplazamiento**—, porque hoy uno grande no se puede leer. **Segunda fase, si la primera sale bien**: sobre esa ventana, un **dibujo efímero** con unos pocos colores (se borra al cerrar, no se guarda nada) y un **puntero láser** para señalar sin dibujar. Pensado para explicar un diagrama a alguien | ambas | — |
 | `FUN-M-22` | `EXPORT-FEEDBACK-DESCARGA` | Avisar de la exportación: una tarjeta abajo a la derecha que indica que se está descargando, permanece 10-15 s al terminar —con cierre manual— y ofrece **abrir la carpeta** donde quedó el archivo. Hoy exportar no da ninguna señal | ambas (difiere) | — |
 | `FUN-M-37` | `EMBED-NOTA` | **Embeber una nota dentro de otra** (transclusión), como en Obsidian: `![[nota]]` muestra su contenido en el lugar. Hoy esa sintaxis **cuenta como enlace en el grafo pero no dibuja nada**, así que el usuario que la escribe no ve ni un error. Es `M` porque renderizar markdown dentro de markdown trae lo suyo: ciclos (A embebe B que embebe A), profundidad, qué pasa con el frontmatter de la nota embebida y si se puede editar ahí o solo leer. Misma tanda que `FUN-S-18`, de probar `FUN-L-20` | ambas | — |
 | `FUN-M-41` | `UX-AJUSTES-MENOS-TEXTO` | Aligerar la ventana de **Configuración**: hoy cada ajuste lleva mucho texto explicativo y la pantalla se siente cargada. Que se lea de un vistazo sin perder lo que explica —las explicaciones pasan a segundo plano— | ambas | — |
-| `FUN-M-42` | `ARBOL-EN-VIVO` | **Primero el árbol, después el índice**: el explorador refleja al instante lo que cambia en disco (árbol en memoria alimentado por los deltas del watcher) y el indexado sigue en segundo plano, dirigido por las rutas que cambiaron. Completa `FUN-M-14`. Sale de `DEF-127`. Spec en [[archivos-del-vault-en-vivo]] | desktop | — |
 
 ### 1.3 Grandes — tamaño L
 
@@ -208,6 +206,8 @@ mientras estaba pendiente; el detalle de lo construido está en la spec de cada 
 |---|---|---|---|---|
 | `FUN-M-11` 🛠️ | `VAULT-MYCIGNORE` | `.mycignore` por vault (estilo `.gitignore`) para decidir qué archivos/carpetas ignora Mycelium; por defecto `.*/` + carpetas de build. **Implementado en desktop** (sin confirmar); parte **web** pendiente (otra semántica). Spec en `docs/features/mycignore.md` | ambas | — |
 | `FUN-M-12` 🛠️ | `VAULT-INDEX-PERF` | Rendimiento de la apertura del vault: default de `.mycignore` con `node_modules/`/`target/`/`dist/`/`out/`, metadatos sin contenido + `leer_archivos` en tandas, carpetas incrementales, WAL y progreso visible. **Implementado en desktop** (sin confirmar); spec en `docs/features/rendimiento-apertura-vault.md`. Salió en [[Version 1.1.1]] | desktop | — |
+| `FUN-M-14` 🛠️ | `VAULT-WATCH-REINDEX-DIRIGIDO` | El watcher emite `vault-cambios` **con las rutas afectadas** y `lib/vaultWatch.ts` las descartaba: reindexaba el vault entero ante cualquier cambio. Usar esas rutas para reindexar solo lo tocado. Continuación de `FUN-M-12`. Primera parte en `FUN-M-38` (`d3c94be`): las escrituras propias de la app ya no reindexan. **Completada con `FUN-M-42` el 2026-10-04** (rama `feat/arbol-en-vivo-desktop`), **sin confirmar en la app**: `indexarRutas` indexa solo las rutas del evento —notas nuevas, tocadas o incompletas; borra lo ausente y lo que colgaba de una carpeta ida, salvo la papelera— y el esquema del índice se crea una vez por sesión. Vault sintético de 2.000 notas, dos notas tocadas: 26,8 → 9,6 ms sin IPC, sin los 170 KB del recorrido. El indexado completo queda para la apertura, la importación, «Reindexar» y la reconciliación. Spec en [[archivos-del-vault-en-vivo]] § Implementación de B | desktop | — |
+| `FUN-M-42` 🛠️ | `ARBOL-EN-VIVO` | **Primero el árbol, después el índice**: el explorador refleja al instante lo que cambia en disco (árbol en memoria alimentado por los deltas del watcher) y el indexado sigue en segundo plano, dirigido por las rutas que cambiaron. Completa `FUN-M-14`. Sale de `DEF-127`. **Implementada en desktop el 2026-10-04** (rama `feat/arbol-en-vivo-desktop`), **sin confirmar en la app**: el evento del watcher dice qué hay en cada ruta y expande las carpetas que aparecen; el árbol se actualiza con él en el acto (debounce nativo 400 → 60 ms; medido 402 → 71 ms de mediana del disco al evento) y el índice va detrás; reconciliación al recuperar el foco (≥ 30 s) y botón «Refrescar» en el explorador. Spec en [[archivos-del-vault-en-vivo]] § Implementación de B | desktop | — |
 | `FUN-M-13` 🛠️ | `VAULT-INDEX-UN-RECORRIDO` | Fusionar `listar_archivos_meta` y `listar_directorios` en un solo comando que devuelva `{archivos, directorios}`: el vault se recorría **dos veces** por apertura. Continuación de `FUN-M-12`. **Absorbida por `FUN-M-38`** (`cc7fea4`, 2026-09-26): un solo walker, `recorrer_vault`, para el índice, el explorador y el watcher. Salió en [[Version 2.2.0]] | desktop | — |
 | `FUN-M-31` 🛠️ | `UI-MARCO-VENTANA` | **Marco propio**: la ventana deja la barra de título de Windows (`decorations: false`) y los botones de minimizar, maximizar y cerrar pasan a la barra superior de la app, como en VS Code y Obsidian; el fondo libre de esa barra arrastra la ventana y ocho franjas de 6px reponen el redimensionado, que Windows deja de atender sin decoración. Incluye el **ícono de la aplicación**: el isotipo sobre Esporo reemplaza al de Tauri en la barra de tareas, el alt-tab y el instalador. Incluye el **menú de anclaje de Windows 11**, que se repone subclaseando la ventana desde Rust (`marco.rs`). **Implementado en desktop (2.0.0)**, sin confirmar en la app: nació en `experimento/ui-impeccable` el 2026-09-19 y se integró con `e2d1866`. Spec en [[marco-de-ventana]] | desktop | — |
 | `FUN-M-17` 🛠️ | `VAULT-RELINKEADO` | Adoptar un vault que viene de otro proyecto: **la IA descubre** cómo se referencian sus documentos (`` `HU-009` ``, el nombre suelto, `[texto](otra.md)`) y lo registra en un léxico persistente; **el script aplica** esas formas y las convierte en `[[wikilinks]]`. La auditoría **no modifica documentos**; el enlazado sí, con respaldo y deshacer. Es el **caso de entrada** de Mycelium sobre un proyecto existente. **Parcial**: el núcleo está hecho en `FUN-L-17` (`lib/enlaces.ts`, 41 tests); faltan los dos comandos de la IA. Spec en [[auditoria-y-relinkeado]] | ambas | — |
@@ -593,8 +593,10 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 - **Parte hecha en `FUN-M-38`** (`d3c94be`, 2026-09-26): las escrituras propias de la app
   ya no reindexan (el guardado registra el `mtime` y el watcher ignora lo que la app acaba
   de escribir). **Falta** el reindexado dirigido para los cambios externos.
-- **A definir**: cómo se agrupan las ráfagas y qué hacer con renombres/borrados de
-  carpetas enteras (donde el reindex completo es más simple).
+- **Completada con `FUN-M-42`** (2026-10-04, sin confirmar en la app): `indexarRutas`
+  en `lib/db/indexer.ts`. Las ráfagas se agrupan como antes (300 ms, tope 1 s); un
+  renombrado llega como origen ausente + destino, y una carpeta movida, con su contenido
+  expandido por el watcher. Ver [[archivos-del-vault-en-vivo]] § Implementación de B.
 
 #### `FUN-M-15` · `LINKS-POR-ALIAS` (—)
 - **Qué es**: que `[[Otro nombre]]` resuelva a la nota que declara `Otro nombre` en su
@@ -1396,10 +1398,10 @@ Ver [[Rendimiento de la apertura del vault]].
 
 > [!info] Estado del bloque (2026-10-01)
 > `DEF-042` ✅ (pantalla de carga propia, 2026-08-13). `FUN-M-13` quedó **absorbida por
-> `FUN-M-38`** (un solo walker, `cc7fea4`) sin esperar a `FUN-L-10`. `FUN-M-14` está **a
-> medias**: `FUN-M-38` hizo que las escrituras propias no reindexen (`d3c94be`), y falta el
-> reindexado dirigido de los cambios externos. **Queda** `FUN-L-10` y lo que falta de
-> `FUN-M-14`.
+> `FUN-M-38`** (un solo walker, `cc7fea4`) sin esperar a `FUN-L-10`. `FUN-M-14` quedó
+> **completa con `FUN-M-42`** (2026-10-04, sin confirmar en la app): las escrituras propias
+> no reindexan desde `FUN-M-38` y los cambios externos se indexan por ruta. **Queda**
+> `FUN-L-10`, que deja de ser urgente para el síntoma del explorador.
 
 #### B · Etiquetas — `FUN-M-05` + `FUN-M-06` · minor · ambas
 Las dos necesitan lo mismo y hoy inexistente: una **agregación de etiquetas del vault**
