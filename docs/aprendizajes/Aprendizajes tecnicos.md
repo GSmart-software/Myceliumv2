@@ -178,6 +178,22 @@ y qué principio general dejó.
     en el hilo principal: el que mueva archivos grandes va con `#[tauri::command(async)]`
     (`FUN-S-26`, detalle en [[archivos-del-vault-en-vivo]] y [[Tauri y el WebView]]).
 
+17. **Lo que el usuario ve no tiene que esperar a lo que el usuario no ve.** Un archivo
+    agregado desde fuera tardaba ~1 s en aparecer en el explorador porque el árbol salía del
+    índice: dos debounces (400 + 300 ms) y un indexado completo antes de pintarlo. El evento
+    del watcher ya sabía qué había cambiado; ahora dice además **qué hay** en cada ruta (nota,
+    otro, carpeta o nada), el árbol se actualiza con eso en el acto (~70 ms) y el índice va
+    detrás, solo con esas rutas (`FUN-M-42`, `FUN-M-14`). Tres condiciones lo hicieron
+    simple: (1) **el id ya era la ruta**, así que la entrada provisional es la definitiva y no
+    hay ids que reconciliar; (2) **aplicar el cambio es idempotente**, así que se puede
+    reaplicar lo que el índice todavía no tiene (los «pendientes») encima de cada recarga
+    desde el índice, en vez de pelear con las ~15 operaciones que la disparan; y (3) un
+    evento que se pierde se repara **comparando con el disco** (reconciliación al foco y botón
+    «Refrescar»), no confiando en que llegue. Y al acortar un debounce, mirá qué ruido
+    escondía: el temporal de la escritura atómica propia (`nota.md.tmp-<pid>`) no terminaba
+    en `.tmp` y pasaba el filtro desde `DEF-127`; con 400 ms se fundía con su renombrado, con
+    60 ms podía asomar en el árbol. Detalle en [[archivos-del-vault-en-vivo]].
+
 ## Relacionadas
 
 - [[Estado del proyecto]] — qué está hecho y qué falta; contexto de estos hallazgos.
