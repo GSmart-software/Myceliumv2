@@ -194,6 +194,20 @@ y qué principio general dejó.
     en `.tmp` y pasaba el filtro desde `DEF-127`; con 400 ms se fundía con su renombrado, con
     60 ms podía asomar en el árbol. Detalle en [[archivos-del-vault-en-vivo]].
 
+18. **Para que un contenedor tiña lo de adentro sin pisarlo, que el hijo lea una variable;
+    no le fuerces el color.** El título de un callout quedaba gris porque el resaltado pinta
+    la cita en un span interno, y se arregló con `.mic-live-callout-head span { color:
+    inherit }`: eso alcanzó también a los enlaces y a los `_énfasis_`, que salían del color
+    del callout (`FUN-S-06`). La salida no fue un selector más fino sino invertir quién
+    decide: la regla de cita usa `var(--mic-cita-color, gris)` y el contenedor define
+    `--mic-cita-color: currentColor` —en `color`, equivale a heredar—. Cada regla con color
+    propio sigue ganando por su cuenta, y fuera del contenedor no cambia nada. Y su pariente
+    de `FUN-S-01`: **dos parsers de la misma sintaxis tienen que decidir con la misma
+    condición, y un test tiene que pasarles el mismo documento.** Ni `@lezer/markdown` (vivo)
+    ni `remark-gfm` (lectura) aceptaban `[-]`; extender uno solo habría hecho aparecer y
+    desaparecer la casilla al cambiar de vista. Detalle en [[estados-de-tarea]] y
+    [[CodeMirror y la vista en vivo]].
+
 ## Relacionadas
 
 - [[Estado del proyecto]] — qué está hecho y qué falta; contexto de estos hallazgos.

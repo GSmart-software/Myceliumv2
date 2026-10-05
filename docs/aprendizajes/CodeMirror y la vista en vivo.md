@@ -285,9 +285,39 @@ el día que se tradujeran.
 Los textos de CodeMirror son para personas, no para selectores. Detectado el 2026-09-19
 en el `harden` de [[Rediseñar la UI con impeccable]].
 
+## El resaltado va ADENTRO de las marcas, y un span puede llevar varias reglas (`FUN-S-06`)
+
+Dos hechos que deciden cualquier regla de color en la vista en vivo:
+
+- **Anidamiento**: el resaltado de sintaxis (`syntaxHighlighting`) está registrado con
+  `Prec.high`, y en CodeMirror la decoración de **más** precedencia crea el nodo
+  **interior**. Así que el `<span>` del resaltado queda siempre dentro de nuestras marcas
+  (`.mic-em-cm-us`, `.mic-wikilink-cm`, `.mic-tag-cm`…): si fija un `color`, le gana por
+  herencia a la marca de afuera, sin importar especificidad. Por eso varias reglas pintan
+  también `*`.
+- **Clases combinadas**: `HighlightStyle.define` da **una clase por regla**, y un tramo
+  recibe la de cada etiqueta que le toca. Dentro de una cita la regla es `Blockquote/...`
+  (heredable), así que un enlace en una cita lleva **a la vez** la clase de cita y la de
+  enlace; cuál color gana lo decide el **orden de las reglas** en el `HighlightStyle` (la de
+  enlace va después).
+
+Para ver qué clases recibe cada tramo sin abrir la app: `highlightTree(parser.parse(texto),
+tagHighlighter([...]), (from, to, cls) => …)` en node, con `@lezer/markdown`. La tabla del
+título de un callout está en [[estados-de-tarea]] § 2.2.
+
+## Un widget interactivo en una línea (`FUN-S-01`)
+
+La casilla de una tarea pasó de visual a clicable. Lo que hizo falta: `ignoreEvent()` →
+`true` (CodeMirror no procesa los eventos del widget), `mousedown` con `preventDefault`
+—si no, el cursor entra a la línea, el marcador se abre en crudo y la casilla desaparece
+debajo del puntero antes del `click`— y la posición del documento pedida al DOM en el
+momento (`view.posAtDOM(span)`), no guardada al dibujar. Antes de escribir se comprueba que
+ahí siga habiendo un marcador.
+
 ## Relacionadas
 
 - [[Aprendizajes tecnicos]] — mapa del área.
+- [[estados-de-tarea]] — la casilla interactiva y el color del título de callout.
 - [[Drag and drop en Mycelium]] — el editor como participante involuntario del arrastre.
 - [[DESIGN_SYSTEM]] — tokens y estilos que usan estas decoraciones.
 - [[bugs-progreso]] — trazabilidad de `DEF-021`, `DEF-022`, `DEF-026`, `DEF-031/037`,
