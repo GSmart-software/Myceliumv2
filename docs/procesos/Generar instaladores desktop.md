@@ -14,6 +14,14 @@ Empaquetado de la versión de escritorio con Tauri. Hecho por primera vez para l
 > El proceso completo está en **[[Publicar una version]]**; acá queda solo el
 > empaquetado, que sigue siendo idéntico salvo por la firma.
 
+> [!info] macOS y Linux se compilan en GitHub Actions, no acá (`FUN-L-28`, 2026-10-05)
+> Este documento es el build **local de Windows**. Los instaladores de macOS (Apple Silicon,
+> `.dmg` + `.app.tar.gz`) y Linux (`.deb`, `.rpm`, `.AppImage`) los genera el workflow
+> `.github/workflows/desktop-build.yml` **al fusionar un PR hacia la rama `despliegues`**,
+> sin la clave del updater; se firman y publican en local con
+> `npm run publicar -- --ci <carpeta>` ([[Publicar una version]]). Spec y decisiones en
+> [[instaladores-mac-linux]].
+
 ## Antes de empezar
 
 - Rama `desktop-tauri`, árbol limpio.
