@@ -20,7 +20,7 @@ los temas de Obsidian: el vault sigue siendo intercambiable.
 | Símbolo | Estado | Casilla | Texto del ítem |
 |---|---|---|---|
 | `[ ]` | Pendiente | vacía, borde gris | — |
-| `[x]` / `[X]` | Hecha | llena (acento) con check | tachado y atenuado |
+| `[x]` / `[X]` | Hecha | llena (acento) con check | apagado (gris), **sin tachar** — decisión del usuario del 2026-10-04 |
 | `[-]` | Cancelada | borde gris con una cruz | tachado y **más** atenuado |
 | `[/]` | En curso | medio llena (acento) | — |
 | `[>]` | Pospuesta | flecha en un círculo | — |
@@ -28,7 +28,7 @@ los temas de Obsidian: el vault sigue siendo intercambiable.
 | `[!]` | Importante | signo de exclamación en un círculo | — |
 | `[?]` | Pregunta | signo de pregunta en un círculo | — |
 | `[+]` | Agregada | llena (verde) con check | — |
-| cualquier otro | se ve como **hecha** | | tachado y atenuado |
+| cualquier otro | se ve como **hecha** | | apagado, sin tachar |
 
 Ese es también el orden del menú. Un símbolo es **un** carácter cualquiera salvo `[`, `]`,
 `\` y tabulador; tiene que ir seguido de espacio o tabulador (como en GFM). `- []`,
@@ -36,7 +36,7 @@ Ese es también el orden del menú. Un símbolo es **un** carácter cualquiera s
 
 **Alcance del estilo.** Solo hecha y cancelada cambian el texto, y solo el **propio** del
 ítem: las subtareas llevan su estado. Lo que trae color propio dentro del texto (un enlace,
-un `_énfasis_`) lo conserva y queda tachado igual. El resto de los estados cambian solo la
+un `_énfasis_`) conserva su color: en hecha se apaga igual (opacidad) y en cancelada queda tachado. El resto de los estados cambian solo la
 casilla.
 
 **Colores.** Tokens nuevos `--mic-tarea-*` en `tokens.css`, que salen de los colores de
@@ -74,7 +74,7 @@ temas (`input[data-task="-"]`, `li[data-task="?"]`) se aplica igual. El estilo p
 
 1. Cada símbolo de la tabla se ve con su casilla en vivo y en lectura, igual en las dos, en
    claro y en oscuro.
-2. `- [x] madre` con `- [ ] hija` debajo: la madre tachada, la hija no.
+2. `- [x] madre` con `- [ ] hija` debajo: la madre apagada, la hija no.
 3. Clic en `[ ]` → `[x]`; clic en `[x]`, `[-]`, `[?]`… → `[ ]`. En vivo el clic no lleva el
    cursor a la línea.
 4. Clic derecho → menú; elegir un estado reescribe **solo** ese carácter del documento.
@@ -240,7 +240,7 @@ En una nota nueva, en **vivo**, **lectura** y **dividido**, y en **claro y oscur
 > Cuerpo.
 ```
 
-1. Mirar los íconos y el tachado (solo hecha, desconocida y cancelada; la subtarea no).
+1. Mirar los íconos, el apagado de hecha y desconocida y el tachado de cancelada (la subtarea, ni uno ni otro).
 2. Clic en varias casillas, en vivo y en lectura: pendiente ↔ hecha, especial → pendiente;
    en vivo el cursor no entra a la línea.
 3. Clic derecho en una casilla: menú con íconos, el vigente marcado; elegir otro estado.
