@@ -14,13 +14,19 @@ Empaquetado de la versión de escritorio con Tauri. Hecho por primera vez para l
 > El proceso completo está en **[[Publicar una version]]**; acá queda solo el
 > empaquetado, que sigue siendo idéntico salvo por la firma.
 
-> [!info] macOS y Linux se compilan en GitHub Actions, no acá (`FUN-L-28`, 2026-10-05)
-> Este documento es el build **local de Windows**. Los instaladores de macOS (Apple Silicon,
-> `.dmg` + `.app.tar.gz`) y Linux (`.deb`, `.rpm`, `.AppImage`) los genera el workflow
-> `.github/workflows/desktop-build.yml` **al fusionar un PR hacia la rama `despliegues`**,
-> sin la clave del updater; se firman y publican en local con
-> `npm run publicar -- --ci <carpeta>` ([[Publicar una version]]). Spec y decisiones en
-> [[instaladores-mac-linux]].
+> [!important] El build normal es el de CI; este documento es el **respaldo** (`FUN-L-28`, 2026-10-05)
+> Los instaladores de **los tres sistemas** —Windows (`-setup.exe` + `.msi`), macOS (Apple
+> Silicon, `.dmg` + `.app.tar.gz`) y Linux (`.deb`, `.rpm`, `.AppImage`)— los genera el
+> workflow `.github/workflows/desktop-build.yml` **al fusionar un PR hacia la rama
+> `despliegues`**, sin la clave del updater; se firman y publican en local con
+> `npm run publicar -- --ci <carpeta>`, que **no compila nada** ([[Publicar una version]]
+> § 2). Spec y decisión («opción 2») en [[instaladores-mac-linux]] § 1.1.
+>
+> Lo que sigue es el build **local de Windows**: sigue valiendo entero, pero ahora para
+> cuando CI no esté disponible (`npm run publicar` sin `--ci` lo hace solo), para probar un
+> instalador en la PC antes de un merge, o para entender qué hace el job de Windows del
+> workflow —que es este mismo build, sin la clave (`createUpdaterArtifacts: false`) y sin
+> `CARGO_BUILD_JOBS`, porque el runner no tiene el límite de memoria de la PC—.
 
 ## Antes de empezar
 
@@ -81,6 +87,11 @@ frontend/src-tauri/target/release/bundle/
 > NSIS instala en modo `currentUser`, así que actualizar **no dispara UAC**. El MSI
 > instala por máquina y pediría elevación en cada actualización. El MSI se sigue
 > publicando para la instalación inicial y el despliegue silencioso.
+>
+> Desde el 2026-10-05 el MSI **también** tiene canal propio: `npm run publicar` lo firma y
+> lo publica como `windows-x86_64-msi`, que es lo que busca primero una copia instalada con
+> el MSI. Así esa copia se actualiza con el MSI —con UAC— en vez de recibir el NSIS y
+> terminar con dos Mycelium (ver «No mezclar MSI y NSIS», abajo).
 
 También queda el ejecutable suelto en `target/release/app.exe`.
 
@@ -121,6 +132,12 @@ define bloques `wix`/`nsis`, así que aplican los defaults).
 > `Program Files`, NSIS por usuario en `%LOCALAPPDATA%`). Si instalás una versión con
 > uno y la siguiente con el otro, **pueden coexistir** y aparecer dos Mycelium
 > instalados. Usá siempre el mismo tipo de instalador.
+>
+> Hasta la 2.3.0 el **updater** cometía esta mezcla solo (deducido del código de
+> `tauri-plugin-updater` 2.10, `Updater::get_urls`; no se observó en una PC): el manifiesto tenía únicamente
+> `windows-x86_64` (el NSIS), así que una copia instalada con el MSI se actualizaba con el
+> NSIS. Desde las versiones publicadas con `windows-x86_64-msi` (2026-10-05) ya no; quien
+> ya tenga dos copias por eso tiene que desinstalar una a mano.
 
 ### Los datos del usuario se conservan
 
