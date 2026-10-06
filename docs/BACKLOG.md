@@ -89,7 +89,6 @@ una fila se implementa, **se mueve** a la §4 (ver «Cómo leerlo»).
 | `FUN-S-18` | `EMBED-SIN-EXTENSION` | Que un embed **resuelva por título**, como ya hacen los `[[enlaces]]`: hoy `![[Mi diagrama]]` queda escrito tal cual y hay que poner `![[Mi diagrama.excalidraw]]` o `![[Mi diagrama.drawio]]`. El reconocedor exige la extensión porque **decide por ella** qué dibuja; resolver primero el destino y mirar después su tipo es lo que falta. Salió de probar `FUN-L-20` el 2026-09-23: el usuario escribió la forma de Obsidian y no pasó nada | ambas | — |
 | `FUN-S-19` | `EMBED-CANVAS` | Que `![[lienzo.canvas]]` **muestre el lienzo** dentro de la nota, como ya hace `![[dibujo.excalidraw]]`. Hoy no dibuja nada: los embeds de canvas **nunca se implementaron** —la spec de `FUN-L-18` no los prometía— y el texto queda escrito tal cual. Se descubrió el 2026-09-23, probando `FUN-L-20`, al comparar los tres tipos: el de Excalidraw anda y los otros dos no. **Hoy solo falta el canvas**: el embed de draw.io se resolvió en `516306d` (2026-09-23) | ambas | — |
 | `FUN-S-23` | `REINDEXAR-VAULT` | Un botón en Configuración → Vault para **reconstruir el índice** desde cero, con aviso. Hoy la única vía es encontrar `index-<hash>.db` en el app-data y apartarlo a mano, que no es descubrible. Estaba bloqueado por `DEF-107`, **ya resuelto**: los snippets, la apariencia y la papelera viven en `.mycelium/` y vuelven solos. Falta una pieza: al salir de un vault la app **no cierra el índice**, así que el botón tiene que cerrarlo antes de borrarlo. Salió del incidente de `DEF-105` el 2026-09-25 | desktop | — |
-| `FUN-S-25` | `MYCIGNORE-EN-PESTANA` | Editar el `.mycignore` en una **pestaña** de Mycelium, con el visor y editor de archivos que no son notas (`FUN-L-11`), en vez del cuadro de texto chico dentro de Configuración | desktop | — |
 
 ### 1.2 Intermedias — tamaño M
 
@@ -189,6 +188,7 @@ mientras estaba pendiente; el detalle de lo construido está en la spec de cada 
 | `FUN-S-13` 🛠️🌐 | `TABS-HISTORIAL-RUEDA` | Clic con la **rueda** en las flechas de atrás/adelante: abre en una **pestaña nueva** el documento anterior o siguiente del historial, en vez de navegar en la actual. Misma convención que la rueda sobre un archivo del explorador. **Implementada el 2026-10-03** (`3e7ef02`), probada en la app de desarrollo, sin confirmar por el usuario; reflejada a web (`947b5f1`), sin probar | ambas | — |
 | `FUN-S-24` 🛠️ | `ABRIR-OTRO-VAULT` | Abrir **otro vault desde el que está abierto**, sin «Salir del vault» y sin lanzar el ejecutable de nuevo. Hoy, para tener dos vaults a la vez, hay que salir del actual, abrir el segundo «en ventana nueva» desde el selector y volver a abrir el primero. Va en la barra superior, junto al nombre del vault: la lista de vaults, cada uno con **abrir en una ventana nueva** —el que ya está abierto en otra ventana, la trae al frente (`FUN-L-16`)— y **«Abrir carpeta…»** para uno que todavía no está en la lista. Pedido por el usuario el 2026-09-27. **Implementada en desktop el mismo día, sin confirmar en la app** (`13ed398`): `MenuVaults` en la barra superior. Salió en [[Version 2.2.0]] | desktop | — |
 | `FUN-S-26` 🛠️ | `SOLTAR-CUALQUIER-ARCHIVO` | Soltar **cualquier tipo de archivo y carpetas** desde el explorador del SO sobre cualquier carpeta del explorador de Mycelium, como en Obsidian (hoy solo entran `.md`; el resto se descarta sin aviso). Va con `DEF-128`. **Implementada en desktop el 2026-10-04** (rama `feat/soltar-cualquier-archivo-desktop`), **sin confirmar en la app**: se copia lo que sea, el original queda donde estaba, con el diálogo de conflicto de la importación; los bytes viajan por **IPC binario** en trozos de 8 MB, con progreso en MB. «Importar archivos…» del menú también acepta cualquier tipo. Spec en [[archivos-del-vault-en-vivo]] § Implementación de C | desktop | — |
+| `FUN-S-25` 🛠️ | `MYCIGNORE-EN-PESTANA` | Editar el `.mycignore` en una **pestaña** de Mycelium, con el visor y editor de archivos que no son notas (`FUN-L-11`), en vez del cuadro de texto chico dentro de Configuración. **Implementada el 2026-10-06**, sin confirmar en la app | desktop | — |
 | `FUN-S-27` 🛠️ | `MENU-CUALQUIER-ARCHIVO` | Clic derecho (y tecla Menú) en **cualquier archivo** del explorador, no solo en los tipos que Mycelium maneja (notas, `.base`, `.excalidraw`, `.canvas`, `.drawio`): abrir, abrir con la aplicación predeterminada, renombrar (sin tocar la extensión), duplicar, guardar una copia, mostrar en el explorador y eliminar. **Implementada en desktop el 2026-10-06**, sin confirmar en la app. Solo desktop: web no lista archivos que no son notas | desktop | — |
 | `FUN-S-28` 🛠️ | `MENUS-CON-ICONOS` | Un **ícono por entrada** en los menús del explorador (carpeta, nota, archivo, submenú de Esporas), con los mismos íconos de tipo del árbol y separadores por grupo (crear · traer · organizar · eliminar). **Implementada en desktop el 2026-10-06**, sin confirmar en la app | ambas | — |
 | `FUN-S-02` 🟢🌐 | `EDITOR-TAB-WIDTH` | Cuánto sangra un nivel de indentación: **al leer** cambia listas y tabuladores de todos los documentos al instante (CSS), **al escribir** es lo que inserta <kbd>Tab</kbd>. Valor libre 1–16, por defecto 4. **Confirmada en desktop** el 2026-08-03 tras rehacerla por `DEF-049`/`DEF-050`, y **reflejada en web** el 2026-08-08. Continuación: `FUN-M-18` (reindentar), para que el cambio se vea también en la vista en vivo | ambas | C-M-10 |
@@ -476,7 +476,7 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   es un token: cambiarlo es una línea en `styles/tokens.css`. Reflejada en web el mismo día
   (`5ee9fb3`). **Salió en [[Version 2.2.0]]**.
 
-#### `FUN-S-25` · `MYCIGNORE-EN-PESTANA`
+#### `FUN-S-25` · `MYCIGNORE-EN-PESTANA` — 🛠️ desktop
 - **Qué es**: «Editar» el `.mycignore` desde Configuración → Vault lo abre en una **pestaña**
   del área de trabajo, con el visor/editor de archivos que no son notas (`FUN-L-11`:
   CodeMirror, guardado explícito), en vez del cuadro de texto que hoy se despliega dentro de
@@ -486,6 +486,18 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   oculta del explorador: se abre por su ruta, no desde el árbol. Al guardarlo, el vault se
   re-filtra como hoy. Lo que `FUN-M-34` hizo con el borrador (que no se pierda al cerrar los
   ajustes) lo cubre la pestaña por naturaleza. Pedida por el usuario el 2026-10-03.
+- **Implementada el 2026-10-06** (sin confirmar en la app):
+  - «Editar .mycignore» en Configuración → Vault abre la pestaña `archivo:.mycignore` del
+    visor y cierra la ventana de ajustes. Si el vault no tiene `.mycignore`, primero lo crea
+    con la plantilla de Rust (`mycignore::DEFAULT`): es la misma lista que ya se aplica sin
+    archivo, así que crearlo no cambia qué se ve, y el visor solo edita archivos que existen.
+  - Al guardar desde el visor, el watcher ve el cambio del `.mycignore` y `lib/vaultWatch.ts`
+    reconcilia el vault entero: ya no hace falta el «Guardar y reindexar» propio.
+  - La pestaña sobrevive a reiniciar la app: `reconcileArchivos` la trata como válida aunque
+    el `.mycignore` no figure entre los archivos listados (`RUTA_MYCIGNORE`).
+  - Se retiró el cuadro de texto de Configuración y, con él, `stores/borradoresStore.ts` y la
+    pregunta al cerrar la ventana (`FUN-M-34`): era su único texto que se podía perder. El
+    visor tiene su guardado explícito y su aviso de cambios sin guardar.
 
 #### `FUN-S-27` · `MENU-CUALQUIER-ARCHIVO` — 🛠️ desktop
 - **Qué es**: el menú contextual de los archivos que Mycelium lista pero no indexa (una
