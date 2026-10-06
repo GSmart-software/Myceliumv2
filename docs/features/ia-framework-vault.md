@@ -28,7 +28,7 @@ El framework enseña dos **protocolos** y los hace obligatorios:
 Además, el `CLAUDE.md` incluye un **mapa de cuándo usar cada skill/comando**, para
 que la IA sepa qué herramienta corresponde a cada situación.
 
-## Qué genera (v1.7.0)
+## Qué genera (v1.8.0)
 
 | Archivo en el vault | Rol |
 |---|---|
@@ -61,7 +61,7 @@ enlaces los arregla ella con grep.
 
 ## Versionado
 
-- `FRAMEWORK_IA_VERSION` en `frontend/lib/ia/framework.ts` (hoy `1.7.0`),
+- `FRAMEWORK_IA_VERSION` en `frontend/lib/ia/framework.ts` (hoy `1.8.0`),
   independiente de la versión de la app. **Al agregar funciones a Mycelium que la
   IA deba conocer, subir la versión y actualizar los templates.**
   - `1.0.0` — primera versión.
@@ -143,6 +143,11 @@ enlaces los arregla ella con grep.
     `scripts/generar-skills-ia.mjs` en `lib/ia/skillsGeneradas.ts` a partir de
     `lib/ia/borradores/` y `scripts/validar-*.mjs` (ver
     [[Generar el framework de IA en un vault]]).
+  - `1.8.0` — **estados de tarea** (`FUN-S-01`, [[estados-de-tarea]]): la skill
+    `mycelium-vault` suma la fila «Tarea» a la tabla de sintaxis y una sección con los
+    nueve símbolos (`[ ]`, `[x]`, `[-]`, `[/]`, `[>]`, `[*]`, `[!]`, `[?]`, `[+]`) y
+    cómo se ve cada uno; el `CLAUDE.md` los nombra entre lo que ve el usuario. Minor:
+    conocimiento nuevo sobre la sintaxis del vault. 2026-10-04, sin publicar.
 - Cada archivo generado lleva el marcador `<!-- mycelium-ia vX -->`; la versión
   instalada vive en `.claude/mycelium-ia.json`.
 - Configuración → Vault muestra instalada vs disponible y ofrece

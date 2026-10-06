@@ -83,14 +83,12 @@ una fila se implementa, **se mueve** a la §4 (ver «Cómo leerlo»).
 
 | ID | Nombre | Descripción | Aplica | Orig. |
 |---|---|---|---|---|
-| `FUN-S-01` | `EDITOR-CHECKBOX-ESTILOS` | Estilos de checkbox según el símbolo: `x`=X, `-`=tachado, `*`=estrella, `+`=check | ambas | C-M-06 |
 | `FUN-S-05` | `VAULT-EJEMPLO-DEFAULT` | Al crear un vault nuevo, generar un archivo de ejemplo por defecto | ambas | C-G-02 |
 | `FUN-S-08` | `NOTE-CSSCLASSES` | Aplicar a la nota las clases CSS que declare su propiedad `cssclasses`: hoy se parsea e indexa pero **no tiene comportamiento**. Continuación de `FUN-M-04` | ambas | — |
 | `FUN-S-10` | `ENLACES-AVISO-REFERENCIA` | Hook que avisa cuando se escribe una referencia a otra nota que Mycelium **no** cuenta como enlace (un `[texto](otra.md)`, o una forma ya registrada en el léxico escrita sin corchetes). Prevención, para que el problema que arregla `FUN-M-17` no vuelva a crecer | ambas | — |
 | `FUN-S-18` | `EMBED-SIN-EXTENSION` | Que un embed **resuelva por título**, como ya hacen los `[[enlaces]]`: hoy `![[Mi diagrama]]` queda escrito tal cual y hay que poner `![[Mi diagrama.excalidraw]]` o `![[Mi diagrama.drawio]]`. El reconocedor exige la extensión porque **decide por ella** qué dibuja; resolver primero el destino y mirar después su tipo es lo que falta. Salió de probar `FUN-L-20` el 2026-09-23: el usuario escribió la forma de Obsidian y no pasó nada | ambas | — |
 | `FUN-S-19` | `EMBED-CANVAS` | Que `![[lienzo.canvas]]` **muestre el lienzo** dentro de la nota, como ya hace `![[dibujo.excalidraw]]`. Hoy no dibuja nada: los embeds de canvas **nunca se implementaron** —la spec de `FUN-L-18` no los prometía— y el texto queda escrito tal cual. Se descubrió el 2026-09-23, probando `FUN-L-20`, al comparar los tres tipos: el de Excalidraw anda y los otros dos no. **Hoy solo falta el canvas**: el embed de draw.io se resolvió en `516306d` (2026-09-23) | ambas | — |
 | `FUN-S-23` | `REINDEXAR-VAULT` | Un botón en Configuración → Vault para **reconstruir el índice** desde cero, con aviso. Hoy la única vía es encontrar `index-<hash>.db` en el app-data y apartarlo a mano, que no es descubrible. Estaba bloqueado por `DEF-107`, **ya resuelto**: los snippets, la apariencia y la papelera viven en `.mycelium/` y vuelven solos. Falta una pieza: al salir de un vault la app **no cierra el índice**, así que el botón tiene que cerrarlo antes de borrarlo. Salió del incidente de `DEF-105` el 2026-09-25 | desktop | — |
-| `FUN-S-25` | `MYCIGNORE-EN-PESTANA` | Editar el `.mycignore` en una **pestaña** de Mycelium, con el visor y editor de archivos que no son notas (`FUN-L-11`), en vez del cuadro de texto chico dentro de Configuración | desktop | — |
 
 ### 1.2 Intermedias — tamaño M
 
@@ -98,7 +96,6 @@ una fila se implementa, **se mueve** a la §4 (ver «Cómo leerlo»).
 |---|---|---|---|---|
 | `FUN-M-01` | `TRASH-PREVIEW` | Visualizar el contenido de los archivos en la papelera | ambas | C-M-13 |
 | `FUN-M-02` | `GRAPH-BUSCADOR-FILTRO` | Buscar por nombre en el grafo: atenúa los nodos que no coinciden | ambas | C-I-03 |
-| `FUN-M-14` | `VAULT-WATCH-REINDEX-DIRIGIDO` | El watcher emite `vault-cambios` **con las rutas afectadas** y `lib/vaultWatch.ts` las descarta: reindexa el vault entero ante cualquier cambio. Usar esas rutas para reindexar solo lo tocado. Continuación de `FUN-M-12`. **Parte hecha en `FUN-M-38`** (`d3c94be`): las escrituras propias de la app ya no reindexan. Falta el reindexado dirigido para los cambios externos | desktop | — |
 | `FUN-M-15` | `LINKS-POR-ALIAS` | Resolver `[[enlaces]]` por la propiedad `aliases` de la nota destino: hoy se parsea e indexa pero **no tiene comportamiento**. Toca la resolución de wikilinks, el autocompletado y el grafo. Continuación de `FUN-M-04` | ambas | — |
 | `FUN-M-18` | `EDITOR-REINDENTAR` | Reindentar las notas al ancho de tabulación configurado, para que el cambio se vea también en la vista en vivo y no solo al leer. Es una **edición masiva del vault**: reutiliza el respaldo, el manifiesto y el deshacer de `FUN-M-17`. Continuación de `FUN-S-02` | ambas | — |
 | `FUN-M-23` | `MERMAID-VISOR` | Visor propio para los diagramas Mermaid en la vista de lectura: al hacer clic se abre una ventana interna donde el diagrama se maneja como una imagen —**zoom** y **desplazamiento**—, porque hoy uno grande no se puede leer. **Segunda fase, si la primera sale bien**: sobre esa ventana, un **dibujo efímero** con unos pocos colores (se borra al cerrar, no se guarda nada) y un **puntero láser** para señalar sin dibujar. Pensado para explicar un diagrama a alguien | ambas | — |
@@ -138,7 +135,7 @@ una fila se implementa, **se mueve** a la §4 (ver «Cómo leerlo»).
 
 | ID | Nombre | Descripción | Aplica | Orig. |
 |---|---|---|---|---|
-| `FUN-S-06` | `EDITOR-CALLOUT-TITULO-COLOR` | El título del callout **ya lleva** el color de su etiqueta; lo que falta es el límite. Bug: ese color **pisa el color propio** de lo que se escriba dentro del título (un link, un `_texto_`, un color aplicado a mano), que se ve del color del callout en vez del suyo. Solo debería aplicarse al texto que no trae color propio | ambas | C-M-04 |
+| — | | Ninguna por ahora: `FUN-S-06`, la última, se corrigió el 2026-10-04 y pasó a la §4 | | |
 
 ---
 
@@ -185,9 +182,15 @@ mientras estaba pendiente; el detalle de lo construido está en la spec de cada 
 
 | ID | Nombre | Descripción | Aplica | Orig. |
 |---|---|---|---|---|
+| `FUN-S-01` 🛠️ | `EDITOR-CHECKBOX-ESTILOS` | Estilos de checkbox según el símbolo: `x`=X, `-`=tachado, `*`=estrella, `+`=check. **Implementada en desktop el 2026-10-04** (rama `feat/estados-de-tarea-desktop`), **sin confirmar en la app**, sin reflejar a web. Quedó como **estados de tarea** con los símbolos de Obsidian: `[ ]` pendiente, `[x]` hecha, `[-]` cancelada, `[/]` en curso, `[>]` pospuesta, `[*]` destacada, `[!]` importante, `[?]` pregunta, `[+]` agregada; cualquier otro se ve como hecha. Hecha y cancelada tachan el texto propio del ítem; el resto solo cambia el ícono. Clic: pendiente ↔ hecha (un estado especial vuelve a pendiente, como Obsidian); clic derecho: menú con los nueve. En vivo, lectura, panel lateral y PDF. De paso, la casilla de lectura escribe por **posición** y ya no desfasa las tareas de dentro de un callout. Framework de IA **1.8.0**. Spec en [[estados-de-tarea]] | ambas | C-M-06 |
+| `FUN-S-06` 🛠️ | `EDITOR-CALLOUT-TITULO-COLOR` | El título del callout **ya lleva** el color de su etiqueta; lo que falta es el límite. Bug: ese color **pisa el color propio** de lo que se escriba dentro del título (un link, un `_texto_`, un color aplicado a mano), que se ve del color del callout en vez del suyo. Solo debería aplicarse al texto que no trae color propio. **Corregida en desktop el 2026-10-04** con `FUN-S-01`, **sin confirmar en la app**, sin reflejar a web: la regla de cita del resaltado usa `var(--mic-cita-color, gris)` y la cabecera la define como `currentColor`, en vez de forzar `color: inherit` a todo `span`. Spec en [[estados-de-tarea]] § Parte 2 | ambas | C-M-04 |
 | `FUN-S-04` 🛠️🌐 | `TRASH-MULTISELECT` | Seleccionar varios archivos para borrar en la papelera. **Implementada el 2026-10-03** (`31c2327`), probada en la app de desarrollo, sin confirmar por el usuario; reflejada a web (`7bdb5c9`, merge `bbd0940`), sin probar | ambas | C-M-14 |
 | `FUN-S-13` 🛠️🌐 | `TABS-HISTORIAL-RUEDA` | Clic con la **rueda** en las flechas de atrás/adelante: abre en una **pestaña nueva** el documento anterior o siguiente del historial, en vez de navegar en la actual. Misma convención que la rueda sobre un archivo del explorador. **Implementada el 2026-10-03** (`3e7ef02`), probada en la app de desarrollo, sin confirmar por el usuario; reflejada a web (`947b5f1`), sin probar | ambas | — |
 | `FUN-S-24` 🛠️ | `ABRIR-OTRO-VAULT` | Abrir **otro vault desde el que está abierto**, sin «Salir del vault» y sin lanzar el ejecutable de nuevo. Hoy, para tener dos vaults a la vez, hay que salir del actual, abrir el segundo «en ventana nueva» desde el selector y volver a abrir el primero. Va en la barra superior, junto al nombre del vault: la lista de vaults, cada uno con **abrir en una ventana nueva** —el que ya está abierto en otra ventana, la trae al frente (`FUN-L-16`)— y **«Abrir carpeta…»** para uno que todavía no está en la lista. Pedido por el usuario el 2026-09-27. **Implementada en desktop el mismo día, sin confirmar en la app** (`13ed398`): `MenuVaults` en la barra superior. Salió en [[Version 2.2.0]] | desktop | — |
+| `FUN-S-26` 🛠️ | `SOLTAR-CUALQUIER-ARCHIVO` | Soltar **cualquier tipo de archivo y carpetas** desde el explorador del SO sobre cualquier carpeta del explorador de Mycelium, como en Obsidian (hoy solo entran `.md`; el resto se descarta sin aviso). Va con `DEF-128`. **Implementada en desktop el 2026-10-04** (rama `feat/soltar-cualquier-archivo-desktop`), **sin confirmar en la app**: se copia lo que sea, el original queda donde estaba, con el diálogo de conflicto de la importación; los bytes viajan por **IPC binario** en trozos de 8 MB, con progreso en MB. «Importar archivos…» del menú también acepta cualquier tipo. Spec en [[archivos-del-vault-en-vivo]] § Implementación de C | desktop | — |
+| `FUN-S-25` 🛠️ | `MYCIGNORE-EN-PESTANA` | Editar el `.mycignore` en una **pestaña** de Mycelium, con el visor y editor de archivos que no son notas (`FUN-L-11`), en vez del cuadro de texto chico dentro de Configuración. **Implementada el 2026-10-06**, sin confirmar en la app | desktop | — |
+| `FUN-S-27` 🛠️ | `MENU-CUALQUIER-ARCHIVO` | Clic derecho (y tecla Menú) en **cualquier archivo** del explorador, no solo en los tipos que Mycelium maneja (notas, `.base`, `.excalidraw`, `.canvas`, `.drawio`): abrir, abrir con la aplicación predeterminada, renombrar (sin tocar la extensión), duplicar, guardar una copia, mostrar en el explorador y eliminar. **Implementada en desktop el 2026-10-06**, sin confirmar en la app. Solo desktop: web no lista archivos que no son notas | desktop | — |
+| `FUN-S-28` 🛠️ | `MENUS-CON-ICONOS` | Un **ícono por entrada** en los menús del explorador (carpeta, nota, archivo, submenú de Esporas), con los mismos íconos de tipo del árbol y separadores por grupo (crear · traer · organizar · eliminar). **Implementada en desktop el 2026-10-06**, sin confirmar en la app | ambas | — |
 | `FUN-S-02` 🟢🌐 | `EDITOR-TAB-WIDTH` | Cuánto sangra un nivel de indentación: **al leer** cambia listas y tabuladores de todos los documentos al instante (CSS), **al escribir** es lo que inserta <kbd>Tab</kbd>. Valor libre 1–16, por defecto 4. **Confirmada en desktop** el 2026-08-03 tras rehacerla por `DEF-049`/`DEF-050`, y **reflejada en web** el 2026-08-08. Continuación: `FUN-M-18` (reindentar), para que el cambio se vea también en la vista en vivo | ambas | C-M-10 |
 | `FUN-S-03` 🟢🌐 | `EXPLORER-EXTENSIONES` | Mostrar la extensión de **todos** los archivos —el enunciado original decía «no-markdown», pero dejar sin extensión justo al tipo más común la hace parecer una omisión en vez de la norma—, **y listar los que Mycelium no indexa** (PDF, imágenes, código, texto): hasta ahora ni aparecían, así que el vault se veía más vacío de lo que está. **Implementado en desktop** el 2026-08-18 (sin confirmar). Se listan aparte de `store.notas` a propósito: meterlos ahí los metería en el autocompletado de `[[`, en la búsqueda y en el grafo. La extensión va **pegada al nombre** (`nota.md`), no en un elemento aparte: se lee como un solo texto. **Abrirlos ya es posible** desde `FUN-L-11` (2026-08-22): el clic abre el visor. **Confirmado en la app** el 2026-09-03 y **reflejado a web** el mismo día (`ec7d01e`), a medias por naturaleza: la extensión sí, listar lo no indexado no (en web no hay carpeta que recorrer) | ambas | C-M-12 |
 | `FUN-S-09` 🟢 | `CODE-RESALTADO-SINTAXIS` | Colorear los archivos de código al visualizarlos según su lenguaje (palabras reservadas, tipos, cadenas). **Depende de `FUN-L-11`**: sin visor de código no hay nada que colorear — y como ese visor es **solo-desktop**, esta también lo es (figuraba como «ambas», corregido el 2026-09-04). **Implementado y confirmado en la app** el 2026-09-05. Lo hace **CodeMirror**, no `highlight.js`: el lector pasó de dos `<pre>` a un editor de solo lectura, que dibuja solo las líneas visibles —así que el archivo grande le cuesta **menos**, que era justo el motivo por el que no se usaba— y de paso leer y editar dejan de poder verse distinto. El lenguaje sale del **nombre** del archivo y la gramática se carga bajo demanda, así que el bundle no crece por soportar cuarenta lenguajes. Spec en [[otros-tipos-de-archivo]] § 8 | desktop | — |
@@ -207,6 +210,8 @@ mientras estaba pendiente; el detalle de lo construido está en la spec de cada 
 |---|---|---|---|---|
 | `FUN-M-11` 🛠️ | `VAULT-MYCIGNORE` | `.mycignore` por vault (estilo `.gitignore`) para decidir qué archivos/carpetas ignora Mycelium; por defecto `.*/` + carpetas de build. **Implementado en desktop** (sin confirmar); parte **web** pendiente (otra semántica). Spec en `docs/features/mycignore.md` | ambas | — |
 | `FUN-M-12` 🛠️ | `VAULT-INDEX-PERF` | Rendimiento de la apertura del vault: default de `.mycignore` con `node_modules/`/`target/`/`dist/`/`out/`, metadatos sin contenido + `leer_archivos` en tandas, carpetas incrementales, WAL y progreso visible. **Implementado en desktop** (sin confirmar); spec en `docs/features/rendimiento-apertura-vault.md`. Salió en [[Version 1.1.1]] | desktop | — |
+| `FUN-M-14` 🛠️ | `VAULT-WATCH-REINDEX-DIRIGIDO` | El watcher emite `vault-cambios` **con las rutas afectadas** y `lib/vaultWatch.ts` las descartaba: reindexaba el vault entero ante cualquier cambio. Usar esas rutas para reindexar solo lo tocado. Continuación de `FUN-M-12`. Primera parte en `FUN-M-38` (`d3c94be`): las escrituras propias de la app ya no reindexan. **Completada con `FUN-M-42` el 2026-10-04** (rama `feat/arbol-en-vivo-desktop`), **sin confirmar en la app**: `indexarRutas` indexa solo las rutas del evento —notas nuevas, tocadas o incompletas; borra lo ausente y lo que colgaba de una carpeta ida, salvo la papelera— y el esquema del índice se crea una vez por sesión. Vault sintético de 2.000 notas, dos notas tocadas: 26,8 → 9,6 ms sin IPC, sin los 170 KB del recorrido. El indexado completo queda para la apertura, la importación, «Reindexar» y la reconciliación. Spec en [[archivos-del-vault-en-vivo]] § Implementación de B | desktop | — |
+| `FUN-M-42` 🛠️ | `ARBOL-EN-VIVO` | **Primero el árbol, después el índice**: el explorador refleja al instante lo que cambia en disco (árbol en memoria alimentado por los deltas del watcher) y el indexado sigue en segundo plano, dirigido por las rutas que cambiaron. Completa `FUN-M-14`. Sale de `DEF-127`. **Implementada en desktop el 2026-10-04** (rama `feat/arbol-en-vivo-desktop`), **sin confirmar en la app**: el evento del watcher dice qué hay en cada ruta y expande las carpetas que aparecen; el árbol se actualiza con él en el acto (debounce nativo 400 → 60 ms; medido 402 → 71 ms de mediana del disco al evento) y el índice va detrás; reconciliación al recuperar el foco (≥ 30 s) y botón «Refrescar» en el explorador. Spec en [[archivos-del-vault-en-vivo]] § Implementación de B | desktop | — |
 | `FUN-M-13` 🛠️ | `VAULT-INDEX-UN-RECORRIDO` | Fusionar `listar_archivos_meta` y `listar_directorios` en un solo comando que devuelva `{archivos, directorios}`: el vault se recorría **dos veces** por apertura. Continuación de `FUN-M-12`. **Absorbida por `FUN-M-38`** (`cc7fea4`, 2026-09-26): un solo walker, `recorrer_vault`, para el índice, el explorador y el watcher. Salió en [[Version 2.2.0]] | desktop | — |
 | `FUN-M-31` 🛠️ | `UI-MARCO-VENTANA` | **Marco propio**: la ventana deja la barra de título de Windows (`decorations: false`) y los botones de minimizar, maximizar y cerrar pasan a la barra superior de la app, como en VS Code y Obsidian; el fondo libre de esa barra arrastra la ventana y ocho franjas de 6px reponen el redimensionado, que Windows deja de atender sin decoración. Incluye el **ícono de la aplicación**: el isotipo sobre Esporo reemplaza al de Tauri en la barra de tareas, el alt-tab y el instalador. Incluye el **menú de anclaje de Windows 11**, que se repone subclaseando la ventana desde Rust (`marco.rs`). **Implementado en desktop (2.0.0)**, sin confirmar en la app: nació en `experimento/ui-impeccable` el 2026-09-19 y se integró con `e2d1866`. Spec en [[marco-de-ventana]] | desktop | — |
 | `FUN-M-17` 🛠️ | `VAULT-RELINKEADO` | Adoptar un vault que viene de otro proyecto: **la IA descubre** cómo se referencian sus documentos (`` `HU-009` ``, el nombre suelto, `[texto](otra.md)`) y lo registra en un léxico persistente; **el script aplica** esas formas y las convierte en `[[wikilinks]]`. La auditoría **no modifica documentos**; el enlazado sí, con respaldo y deshacer. Es el **caso de entrada** de Mycelium sobre un proyecto existente. **Parcial**: el núcleo está hecho en `FUN-L-17` (`lib/enlaces.ts`, 41 tests); faltan los dos comandos de la IA. Spec en [[auditoria-y-relinkeado]] | ambas | — |
@@ -294,7 +299,7 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 
 ### Tamaño S
 
-#### `FUN-S-01` · `EDITOR-CHECKBOX-ESTILOS` (C-M-06)
+#### `FUN-S-01` · `EDITOR-CHECKBOX-ESTILOS` (C-M-06) — 🛠️ desktop
 - **Qué es**: en listas de tareas, el símbolo que va dentro de `[ ]` determina un
   estado visual distinto: `x` → una X, `-` → texto tachado, `*` → estrella, `+` →
   check. Cada símbolo representa un "tipo" de marca con su ícono/estilo propio.
@@ -303,6 +308,11 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   Markdown estándar.
 - **A definir**: el set exacto de símbolos y qué significa cada uno; si es configurable;
   si el estilo alcanza a toda la línea (p. ej. tachar el texto de un ítem descartado).
+- **Definido por el usuario el 2026-10-04 e implementado en desktop ese día** (sin
+  confirmar): los símbolos de Obsidian —`x`, `-`, `/`, `>`, `*`, `!`, `?`, `+`—, no
+  configurable; hecha y cancelada tachan el **texto del ítem** (no las subtareas), el resto
+  solo cambia el ícono; clic alterna y clic derecho abre el menú de estados. Detalle,
+  diseño y cómo reflejarlo a web en [[estados-de-tarea]].
 
 #### `FUN-S-02` · `EDITOR-TAB-WIDTH` (C-M-10) — 🟢 ambas
 - **Qué es**: opción en Configuración para elegir cuánto "vale" una tabulación en el editor.
@@ -466,7 +476,7 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   es un token: cambiarlo es una línea en `styles/tokens.css`. Reflejada en web el mismo día
   (`5ee9fb3`). **Salió en [[Version 2.2.0]]**.
 
-#### `FUN-S-25` · `MYCIGNORE-EN-PESTANA`
+#### `FUN-S-25` · `MYCIGNORE-EN-PESTANA` — 🛠️ desktop
 - **Qué es**: «Editar» el `.mycignore` desde Configuración → Vault lo abre en una **pestaña**
   del área de trabajo, con el visor/editor de archivos que no son notas (`FUN-L-11`:
   CodeMirror, guardado explícito), en vez del cuadro de texto que hoy se despliega dentro de
@@ -476,6 +486,56 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   oculta del explorador: se abre por su ruta, no desde el árbol. Al guardarlo, el vault se
   re-filtra como hoy. Lo que `FUN-M-34` hizo con el borrador (que no se pierda al cerrar los
   ajustes) lo cubre la pestaña por naturaleza. Pedida por el usuario el 2026-10-03.
+- **Implementada el 2026-10-06** (sin confirmar en la app):
+  - «Editar .mycignore» en Configuración → Vault abre la pestaña `archivo:.mycignore` del
+    visor y cierra la ventana de ajustes. Si el vault no tiene `.mycignore`, primero lo crea
+    con la plantilla de Rust (`mycignore::DEFAULT`): es la misma lista que ya se aplica sin
+    archivo, así que crearlo no cambia qué se ve, y el visor solo edita archivos que existen.
+  - Al guardar desde el visor, el watcher ve el cambio del `.mycignore` y `lib/vaultWatch.ts`
+    reconcilia el vault entero: ya no hace falta el «Guardar y reindexar» propio.
+  - La pestaña sobrevive a reiniciar la app: `reconcileArchivos` la trata como válida aunque
+    el `.mycignore` no figure entre los archivos listados (`RUTA_MYCIGNORE`).
+  - Se retiró el cuadro de texto de Configuración y, con él, `stores/borradoresStore.ts` y la
+    pregunta al cerrar la ventana (`FUN-M-34`): era su único texto que se podía perder. El
+    visor tiene su guardado explícito y su aviso de cambios sin guardar.
+
+#### `FUN-S-27` · `MENU-CUALQUIER-ARCHIVO` — 🛠️ desktop
+- **Qué es**: el menú contextual de los archivos que Mycelium lista pero no indexa (una
+  imagen, un PDF, código, cualquier extensión). Antes no tenían ninguno: el clic derecho no
+  hacía nada y para renombrar o borrar había que salir de la app. Pedida por el usuario el
+  2026-10-04.
+- **Entradas**: Abrir (en Mycelium, como el clic) · Abrir con la aplicación predeterminada ·
+  Renombrar · Duplicar (`foto 1.png`) · Guardar una copia… · Mostrar en el explorador ·
+  Eliminar. También con la tecla Menú/Shift+F10 y F2 o doble clic para renombrar.
+- **Decisiones** (2026-10-06):
+  - **Renombrar edita el nombre sin la extensión**, como Obsidian: cambiar `captura` por
+    `portada` no puede dejar un PNG sin tipo. Chocar con otro archivo de la carpeta avisa y no
+    hace nada.
+  - **Guardar una copia** es el «exportar» de un archivo que no es nota: lo descarga tal cual,
+    por el mismo camino que «Exportar como .md».
+  - **Eliminar va a la papelera del sistema** (la de Windows), con confirmación previa. La
+    papelera de Mycelium lista notas del índice: un archivo que no es nota quedaría escondido
+    en `.mycelium/.trash` sin forma de verlo ni de traerlo. Llevarlo a la papelera de Mycelium
+    pide que esa papelera aprenda a guardar archivos sin fila en `notas`; queda como mejora.
+- **Dónde**: `lib/accionesOtroArchivo.ts` (las acciones), `OtroRow` y `otroMenu` en
+  `components/explorer/ExplorerPanel.tsx`. El árbol se actualiza solo por el watcher
+  (`FUN-M-42`); las pestañas abiertas del archivo se renombran o se cierran a mano.
+- **Web**: no aplica — web no lista archivos que no son notas.
+
+#### `FUN-S-28` · `MENUS-CON-ICONOS` — 🛠️ desktop
+- **Qué es**: un ícono por entrada en los menús del explorador. El de carpeta tiene más de
+  diez opciones y sin íconos había que leerlas todas. Pedida por el usuario el 2026-10-04.
+- **Íconos**: los de tipo del árbol (`lib/iconosDeTipo.ts`) para nota, Excalidraw, base,
+  canvas, draw.io y consola; el de la sección de Esporas del rail (`CircleDot`) para «Nueva
+  desde Espora», con el de nota en cada plantilla del submenú; y lucide para el resto
+  (`FolderPlus`, `Upload`, `Pencil`, `Copy`, `FileDown`, `FileOutput`, `FolderOpen`,
+  `ExternalLink`, `Eye`, `Trash2`). En tono secundario; el de Eliminar, en el color de peligro.
+- **Grupos**: separadores entre crear · traer al vault · organizar · eliminar.
+- **Dónde**: `ContextMenu.tsx` (ahora también dibuja el ícono en las filas con submenú y
+  dentro del submenú) y `ContextMenu.module.css`, compartidos con web; los menús, en
+  `ExplorerPanel.tsx`. El botón «Nuevo» de la cabecera ya tenía íconos.
+- **Web**: `ContextMenu.*` se trae entero; en `ExplorerPanel.tsx` (divergente) van a mano
+  los `icono:` y `separadorAntes:` de los menús de carpeta y de nota.
 
 ### Tamaño M
 
@@ -592,8 +652,10 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 - **Parte hecha en `FUN-M-38`** (`d3c94be`, 2026-09-26): las escrituras propias de la app
   ya no reindexan (el guardado registra el `mtime` y el watcher ignora lo que la app acaba
   de escribir). **Falta** el reindexado dirigido para los cambios externos.
-- **A definir**: cómo se agrupan las ráfagas y qué hacer con renombres/borrados de
-  carpetas enteras (donde el reindex completo es más simple).
+- **Completada con `FUN-M-42`** (2026-10-04, sin confirmar en la app): `indexarRutas`
+  en `lib/db/indexer.ts`. Las ráfagas se agrupan como antes (300 ms, tope 1 s); un
+  renombrado llega como origen ausente + destino, y una carpeta movida, con su contenido
+  expandido por el watcher. Ver [[archivos-del-vault-en-vivo]] § Implementación de B.
 
 #### `FUN-M-15` · `LINKS-POR-ALIAS` (—)
 - **Qué es**: que `[[Otro nombre]]` resuelva a la nota que declara `Otro nombre` en su
@@ -1303,7 +1365,7 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 
 ### Con errores / a ajustar
 
-#### `FUN-S-06` · `EDITOR-CALLOUT-TITULO-COLOR` (C-M-04) — 🟡
+#### `FUN-S-06` · `EDITOR-CALLOUT-TITULO-COLOR` (C-M-04) — 🛠️ desktop
 - **Qué es**: el título de un callout lleva el **color de su etiqueta** (el color
   representativo del tipo, p. ej. *question*). Eso ya funciona — era la primera mitad de
   `C-M-04`, y el propio reporte dice «funciona, pero…». Lo que falta es el **límite**.
@@ -1323,6 +1385,11 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   cabecera, incluidos los que traen color propio.
 - **A definir**: cómo distinguir «span del resaltado de cita» de «span con estilo propio»
   sin volver a pelear especificidad a ciegas.
+- **Resuelto en desktop el 2026-10-04** (sin confirmar), con `FUN-S-01`: la causa se
+  confirmó leyendo el resaltado —el span de un enlace lleva a la vez la clase de cita y la
+  de enlace, y las marcas `mic-*` envuelven al de cita—. No se distingue el span: la regla
+  de cita usa `var(--mic-cita-color, gris)` y la cabecera define la variable como
+  `currentColor`. Detalle en [[estados-de-tarea]] § Parte 2.
 
 ---
 
@@ -1395,10 +1462,10 @@ Ver [[Rendimiento de la apertura del vault]].
 
 > [!info] Estado del bloque (2026-10-01)
 > `DEF-042` ✅ (pantalla de carga propia, 2026-08-13). `FUN-M-13` quedó **absorbida por
-> `FUN-M-38`** (un solo walker, `cc7fea4`) sin esperar a `FUN-L-10`. `FUN-M-14` está **a
-> medias**: `FUN-M-38` hizo que las escrituras propias no reindexen (`d3c94be`), y falta el
-> reindexado dirigido de los cambios externos. **Queda** `FUN-L-10` y lo que falta de
-> `FUN-M-14`.
+> `FUN-M-38`** (un solo walker, `cc7fea4`) sin esperar a `FUN-L-10`. `FUN-M-14` quedó
+> **completa con `FUN-M-42`** (2026-10-04, sin confirmar en la app): las escrituras propias
+> no reindexan desde `FUN-M-38` y los cambios externos se indexan por ruta. **Queda**
+> `FUN-L-10`, que deja de ser urgente para el síntoma del explorador.
 
 #### B · Etiquetas — `FUN-M-05` + `FUN-M-06` · minor · ambas
 Las dos necesitan lo mismo y hoy inexistente: una **agregación de etiquetas del vault**
@@ -1451,12 +1518,17 @@ Mismo panel, misma sesión de trabajo: seleccionar varios para borrar y previsua
 antes de decidir. Las dos existen por el mismo motivo — decidir con información y sin
 ir de a uno.
 
-#### E · Estilos propios al renderizar markdown — `FUN-S-01` + `FUN-S-06` 🟡 · minor · ambas
+#### E · Estilos propios al renderizar markdown — `FUN-S-01` + `FUN-S-06` 🛠️ · minor · ambas
 Las dos son la misma pregunta: **cuándo un elemento conserva su estilo propio y cuándo
 gana el del contenedor**. `FUN-S-01` da estilo al checkbox según su símbolo; `FUN-S-06`
 corrige que el título de un callout le pise el color a lo que lleva dentro. Comparten
 `lib/markdown.ts`, `livePreview.ts` y `editor.css`. El minor de `FUN-S-01` **absorbe** la
 corrección.
+
+> [!info] Estado del bloque (2026-10-04)
+> Las dos **implementadas en desktop** el mismo día (rama `feat/estados-de-tarea-desktop`),
+> **sin confirmar en la app**; falta reflejar a web. Spec compartida, con la tabla de
+> archivos compartidos y divergentes para el reflejo, en [[estados-de-tarea]].
 
 #### O · Las tablas de `.base` se vuelven usables — `FUN-S-14` + `FUN-S-15` + `FUN-M-25` + `FUN-M-27` + `FUN-S-16` · minor · ambas
 Buscar dentro de la tabla, ordenar por una columna y ajustar anchos. Las tres viven en el

@@ -127,6 +127,8 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
   renombra sin romper enlaces y usa la papelera y el diccionario (`FUN-L-09`).
 - [[corrector-ortografico]] — el corrector del sistema en el editor, con el código y los enlaces
   excluidos (`FUN-L-12`).
+- [[estados-de-tarea]] — el símbolo dentro de `[ ]` como estado de la tarea, con los de
+  Obsidian, y el título del callout que deja su color a lo que lleva (`FUN-S-01` · `FUN-S-06`).
 - [[auditoria-rendimiento-1]] — tanda 1 de la auditoría: guardar sin reindexar, indexado
   por tandas multi-fila, un solo recorrido del disco, búsqueda desde dos letras (`FUN-M-38`).
 - [[auditoria-capa-de-datos]] — tanda 3 de la auditoría: retirar el modo clásico y la
@@ -186,7 +188,10 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
   enlaces en pestaña nueva. Sin publicar.
 - [[Version 2.0.0 de web]] — el rediseño de la interfaz, **reflejado a web** el
   2026-09-22. **Numeración propia**: coincidir con la 2.0.0 de escritorio es casualidad.
-- [[Version 2.3.0]] — **release actual de desktop**, publicada el 2026-10-03: la IA trabaja
+- [[Version 2.4.0]] — **release en preparación de desktop** (2026-10-06): los archivos del
+  vault al instante, soltar y operar cualquier archivo, imágenes en las notas y estados de
+  tarea; primera compilada por CI para Windows, macOS y Linux.
+- [[Version 2.3.0]] — **release publicada de desktop**, 2026-10-03: la IA trabaja
   con Mycelium —el MCP de control y las skills por herramienta—, más la recarga y el
   encuadre de dibujos, la papelera con selección múltiple y los arreglos hasta `DEF-124`.
 - [[Version 2.2.0]] — la anterior de desktop, publicada el 2026-09-28: el

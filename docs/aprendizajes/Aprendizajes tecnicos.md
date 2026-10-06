@@ -131,6 +131,82 @@ y qué principio general dejó.
     servidores MCP arrancando en frío a la vez (`FUN-L-09`). La salida es pedir la
     escritura al empezar —`BEGIN IMMEDIATE`, ahí sí espera— y reintentar la apertura un
     rato. Detalle en [[MCP de Mycelium - memoria]] § 13.2.
+13. **Lo que un widget reemplaza deja de ser texto para el editor.** El buscador de la nota
+    no resaltaba nada dentro de las tablas renderizadas (`DEF-125`): la búsqueda de
+    CodeMirror marca rangos del documento con decoraciones, y sobre un rango que un
+    `Decoration.replace` cambió por un widget esa marca no se dibuja. Peor que no verse: se
+    **contaba** el markdown oculto (`|`, `---`, `**`) y «siguiente» llevaba a un lugar sin
+    nada marcado. Toda función que recorre el texto del editor —buscar, contar, corregir,
+    resaltar— tiene que decidir qué hace con los rangos reemplazados: ahí lo que el usuario
+    ve es el **DOM del widget**, que se busca aparte (Highlight API, como la lectura en
+    `DEF-057`) y que fuera de pantalla no existe, así que la lista se arma desde el modelo
+    con el mismo render que usa el widget. Detalle en [[bugs-progreso]].
+14. **Una ruta relativa en el HTML es relativa a la página, no al documento que la
+    escribió.** Las imágenes del vault no se veían en las notas (`DEF-126`): en lectura,
+    `![](foto.png)` salía como `<img src="foto.png">`, que el webview pide relativo a la
+    página de la app —no a la carpeta de la nota, ni al disco— y da el ícono roto; en vivo
+    no había widget de imagen (el único `![](…)` que se dibujaba era el vídeo, `FUN-S-21`);
+    y `![[foto.png]]` se buscaba entre las **notas**, donde una imagen nunca está (no se
+    indexa: vive en `vaultStore.otros`). El visor de archivos sí las mostraba porque pasaba
+    por `convertFileSrc` (protocolo `asset:`, `FUN-L-11`). Ahora una sola resolución pura
+    (`lib/imagenes.ts`: por nombre entre las imágenes del vault; `![](…)` relativo a la nota,
+    luego a la raíz) alimenta las dos vistas y la exportación (`lib/imagenesRender.ts`), y la
+    lectura deja un hueco sin `src` que quien sabe **qué nota es** rellena con la URL
+    `asset:`. **Todo lo que apunta a un archivo del vault se traduce a una URL que el webview
+    sepa servir; escrito tal cual, el navegador lo resuelve contra otra cosa.**
+15. **Un filtro de eventos tiene que mirar lo mismo que el que muestra.** Una imagen o un PDF
+    agregados desde fuera no aparecían en el explorador (`DEF-127`), aunque el recorrido del
+    vault los listaba y el explorador los sabía dibujar: el watcher filtraba con otra regla
+    —«¿es una nota?»—, pensada cuando el explorador solo mostraba notas, y nadie la revisó
+    al aparecer los otros archivos (`FUN-S-03`). Ahora el watcher usa el mismo `.mycignore`
+    que el recorrido, y el ruido que no se quiere (temporales de Office, descargas a medias)
+    se filtra **en los dos** con la misma función: si solo lo filtrara el watcher, un
+    `~$informe.docx` listado por un reindexado cualquiera quedaría colgado en el árbol al
+    borrarse. Y al ensanchar el filtro, revisá qué otra cosa dependía de que fuera angosto:
+    el `Modify` que Windows emite sobre una **carpeta** cuando cambia algo adentro antes moría
+    por no ser nota, y si hubiera pasado, cada guardado de la app habría traído una ruta
+    ajena y reindexado (`FUN-M-38`).
+
+16. **Una API que entrega por partes no avisa cuando se la llama una sola vez.**
+    `FileSystemDirectoryReader.readEntries` devuelve como mucho 100 entradas por llamada en
+    Chromium/WebView2 y hay que repetirla hasta que vuelva vacía; llamarla una vez dejaba
+    fuera, sin error, todo lo que pasara de 100 al soltar una carpeta (`DEF-128`). Y los bytes
+    por la IPC de Tauri **no van en el JSON**: un `Uint8Array` pasado como `number[]` ocupa
+    unas cuatro veces su tamaño (20 MB → 71 MB, ~2,3 s); `invoke(cmd, uint8array, { headers })`
+    los manda crudos y Rust los lee de `tauri::ipc::Request` (`InvokeBody::Raw`), con los
+    datos en encabezados ASCII (`encodeURIComponent`). Además, un comando **sincrónico** corre
+    en el hilo principal: el que mueva archivos grandes va con `#[tauri::command(async)]`
+    (`FUN-S-26`, detalle en [[archivos-del-vault-en-vivo]] y [[Tauri y el WebView]]).
+
+17. **Lo que el usuario ve no tiene que esperar a lo que el usuario no ve.** Un archivo
+    agregado desde fuera tardaba ~1 s en aparecer en el explorador porque el árbol salía del
+    índice: dos debounces (400 + 300 ms) y un indexado completo antes de pintarlo. El evento
+    del watcher ya sabía qué había cambiado; ahora dice además **qué hay** en cada ruta (nota,
+    otro, carpeta o nada), el árbol se actualiza con eso en el acto (~70 ms) y el índice va
+    detrás, solo con esas rutas (`FUN-M-42`, `FUN-M-14`). Tres condiciones lo hicieron
+    simple: (1) **el id ya era la ruta**, así que la entrada provisional es la definitiva y no
+    hay ids que reconciliar; (2) **aplicar el cambio es idempotente**, así que se puede
+    reaplicar lo que el índice todavía no tiene (los «pendientes») encima de cada recarga
+    desde el índice, en vez de pelear con las ~15 operaciones que la disparan; y (3) un
+    evento que se pierde se repara **comparando con el disco** (reconciliación al foco y botón
+    «Refrescar»), no confiando en que llegue. Y al acortar un debounce, mirá qué ruido
+    escondía: el temporal de la escritura atómica propia (`nota.md.tmp-<pid>`) no terminaba
+    en `.tmp` y pasaba el filtro desde `DEF-127`; con 400 ms se fundía con su renombrado, con
+    60 ms podía asomar en el árbol. Detalle en [[archivos-del-vault-en-vivo]].
+
+18. **Para que un contenedor tiña lo de adentro sin pisarlo, que el hijo lea una variable;
+    no le fuerces el color.** El título de un callout quedaba gris porque el resaltado pinta
+    la cita en un span interno, y se arregló con `.mic-live-callout-head span { color:
+    inherit }`: eso alcanzó también a los enlaces y a los `_énfasis_`, que salían del color
+    del callout (`FUN-S-06`). La salida no fue un selector más fino sino invertir quién
+    decide: la regla de cita usa `var(--mic-cita-color, gris)` y el contenedor define
+    `--mic-cita-color: currentColor` —en `color`, equivale a heredar—. Cada regla con color
+    propio sigue ganando por su cuenta, y fuera del contenedor no cambia nada. Y su pariente
+    de `FUN-S-01`: **dos parsers de la misma sintaxis tienen que decidir con la misma
+    condición, y un test tiene que pasarles el mismo documento.** Ni `@lezer/markdown` (vivo)
+    ni `remark-gfm` (lectura) aceptaban `[-]`; extender uno solo habría hecho aparecer y
+    desaparecer la casilla al cambiar de vista. Detalle en [[estados-de-tarea]] y
+    [[CodeMirror y la vista en vivo]].
 
 ## Relacionadas
 

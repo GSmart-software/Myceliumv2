@@ -106,6 +106,8 @@ lo digo.
 | 2026-10-03 | Editar el `.mycignore` en una pestaña y no en un textarea chico de la configuración, con el visor de archivos no markdown | `FUN-S-25` `MYCIGNORE-EN-PESTANA` — **reclasificada**: es una mejora, no un defecto · bloque **P** |
 | 2026-10-03 | En la ventana abierta con «abrir otro vault» no se pueden arrastrar las pestañas para dividir la pantalla | `DEF-124`, con la **causa localizada**: las ventanas creadas desde Rust no desactivan el arrastre nativo de Tauri, que se queda con el arrastrar y soltar del HTML. Afecta a toda ventana de otro vault |
 | 2026-10-03 | Una «wiki» o ayuda en Configuración con todas las herramientas y los estilos especiales de markdown de Mycelium | `FUN-L-27` `AYUDA-INTEGRADA` · spec en [[ayuda-integrada]] · bloque **P**. Lo difícil es que no envejezca como la plantilla de snippets |
+| 2026-10-04 | Al buscar dentro de un documento, lo que coincide en las tablas renderizadas no se remarca | `DEF-125` |
+| 2026-10-04 | No se renderizan las imágenes al poner `![*.png]` | `DEF-126` (vale para `![](foto.png)` y `![[foto.png]]`: en vivo no hay widget de imagen y en lectura la ruta no se convierte para Tauri) |
 
 > [!note] Esta tabla se puede vaciar cuando moleste
 > Es una comodidad para que veas en qué terminó cada cosa, no un registro canónico. La

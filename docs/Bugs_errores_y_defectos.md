@@ -757,6 +757,44 @@ abiertas, ni A ni B se dejan llevar a un costado. En la ventana principal sí fu
 
 Reportado por el usuario el 2026-10-03.
 
+# DEF-125
+Al **buscar dentro de un documento** (el buscador de la nota), el texto que coincide **dentro
+de una tabla renderizada no se resalta**: las coincidencias del resto de la nota se marcan,
+las de las celdas de la tabla no.
+
+Reportado por el usuario el 2026-10-04.
+
+# DEF-126
+**Las imágenes no se ven en las notas**: una imagen del vault puesta en una nota (`![](foto.png)`
+o `![[foto.png]]`) no se dibuja; queda el texto del embed o nada. La misma imagen sí se ve si
+se abre sola, en el visor de archivos.
+
+Reportado por el usuario el 2026-10-04.
+
+# DEF-127
+Un archivo que **no es una nota** —una imagen, un PDF, un `.txt`— agregado al vault **desde
+fuera de Mycelium** (el explorador de Windows, otra app) **no aparece en el explorador**, o
+aparece mucho más tarde: recién cuando otra cosa hace que la app vuelva a mirar el vault. Lo
+mismo con una carpeta nueva vacía, o una carpeta movida o renombrada desde fuera.
+
+Reportado por el usuario el 2026-10-04 («si agrego una imagen desde fuera de Mycelium,
+Mycelium tarda en mostrarlo en el explorador»).
+
+# DEF-128
+Al **soltar una carpeta** del sistema operativo sobre el explorador, si la carpeta tiene **más
+de 100 elementos**, la importación queda **incompleta sin avisar**: entran los primeros 100 y
+el resto se pierde en silencio.
+
+Detectado el 2026-10-04 al investigar el arrastre de archivos (leyendo el código), sin
+reproducir todavía en la app.
+
+# DEF-129
+En la **vista de lectura**, hacer clic en la casilla de una tarea que está **dentro de una
+cita o de un callout** marca o desmarca **otra tarea** de la nota, no la que se tocó.
+
+Detectado el 2026-10-04 al implementar `FUN-S-01` (leyendo el código), sin reproducir antes
+en la app.
+
 ---
 
 > [!warning] Defectos sin reporte original
