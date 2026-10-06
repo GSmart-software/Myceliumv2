@@ -1,6 +1,6 @@
 # Ayuda integrada
 
-`FUN-L-27` · **ambas** · pedida por el usuario el 2026-10-03 · sin implementar
+`FUN-L-27` · **ambas** · pedida por el usuario el 2026-10-03 · en implementación (desktop) desde el 2026-10-06
 
 ## Qué se pide
 
@@ -61,6 +61,40 @@ tiene el mismo riesgo multiplicado. Defensas:
   haciendo; la ayuda, explicando. Pueden compartir ejemplos.
 - Idioma: hoy la interfaz es solo en español; con `FUN-L-13` (idiomas de la interfaz) la
   ayuda tendría que traducirse.
+
+## Decisiones (usuario, 2026-10-06)
+
+1. **Una ventana sobre la app**, como la de edición de snippets de CSS: índice de temas y
+   subtemas a la izquierda, con buscador por título y contenido, y la página a la derecha. Ni
+   pestaña del área de trabajo ni sección dentro de Configuración (esa duda de «A decidir»
+   queda resuelta).
+2. **Se abre desde** Configuración (una entrada «Ayuda»), la barra superior (el comando
+   «Ayuda» de la paleta) y la tecla **F1**, desde cualquier parte de la app.
+3. **Primero desktop**; web se refleja cuando se confirme, mostrando solo las páginas de lo que
+   existe ahí (sin terminal, draw.io, visor de archivos ni MCP).
+4. **Temas y subtemas** (punto de partida aprobado):
+   - **Primeros pasos**: qué es un vault · abrir y cambiar de vault · la interfaz (rail,
+     explorador, pestañas, paneles).
+   - **Escribir notas**: vista en vivo y lectura · el título renombra el archivo · énfasis
+     (`_`, `__`, `___` y `*`) · tareas y sus estados · callouts · tablas · imágenes y
+     archivos embebidos · fórmulas (KaTeX) y diagramas Mermaid · propiedades.
+   - **Enlazar y organizar**: enlaces `[[ ]]`, alias y embeds · etiquetas · grafo · búsqueda ·
+     Esporas.
+   - **Tipos de archivo**: bases · lienzos · Excalidraw · draw.io · otros archivos (visor,
+     soltar desde el sistema, menú).
+   - **Herramientas**: calendario · terminal · corrector · papelera · exportar e importar.
+   - **Configuración**: `.mycignore` · CSS y snippets · actualizaciones.
+   - **IA**: instrucciones de IA del vault · control de la IA (MCP).
+   - **Atajos de teclado**.
+
+## Plan de trabajo
+
+- **Parte A — la ventana y el circuito del contenido**: la ventana, el índice, el buscador,
+  el render con el motor real, el botón de copiar en los ejemplos, los tres accesos, cómo
+  viajan las páginas con la app (Markdown en el repo → módulo generado) y el test de
+  cobertura. Con dos o tres páginas de muestra que fijen el tono.
+- **Parte B — el contenido**: el resto de las páginas, en paralelo por tema una vez que la A
+  fije el formato.
 
 ## Relacionadas
 
