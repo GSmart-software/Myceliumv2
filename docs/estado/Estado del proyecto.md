@@ -6,7 +6,11 @@ Foto de dónde está Mycelium hoy. Para el detalle de cada tema, seguir los enla
 
 ## Resumen
 
-- **Versión: desktop `2.3.0`, publicada el 2026-10-03** ([[Version 2.3.0]]: la IA trabaja
+- **Versión: desktop `2.4.0`, preparada el 2026-10-06 y pendiente de publicar** ([[Version 2.4.0]]:
+  los archivos del vault —el explorador al instante `FUN-M-42`, soltar cualquier archivo
+  `FUN-S-26`, el menú de los archivos `FUN-S-27`, las imágenes en las notas `DEF-126`—, los
+  estados de tarea `FUN-S-01` y los instaladores de los tres sistemas por CI `FUN-L-28`).
+  La publicada es la `2.3.0`, del 2026-10-03 ([[Version 2.3.0]]: la IA trabaja
   con Mycelium —el MCP de control `FUN-L-09` y las skills por herramienta `FUN-L-26`,
   framework `1.7.0`—, la recarga desde disco y el encuadre al abrir de lienzos, diagramas y
   dibujos, la papelera con selección múltiple `FUN-S-04`, la rueda en el historial
@@ -78,7 +82,8 @@ Foto de dónde está Mycelium hoy. Para el detalle de cada tema, seguir los enla
 > que borra sin preguntar (`DEF-051`). Lo cierra la [[Version 1.6.2]], que llegó con el
 > changelog de las tres. La `1.5.1` que estaba prevista nunca existió: un minor absorbe las
 > correcciones que vengan con él ([[Versionado del sistema]]).
-1. **Publicar la `2.3.0` de desktop** cuando el usuario lo decida (ver el Resumen).
+1. **Publicar la `2.4.0` de desktop**: PR de `desktop-tauri` a `despliegues`, bajar los tres
+   artefactos y `npm run publicar -- --ci <carpeta>` ([[Publicar una version]]).
 2. **Web**: aplicar el esquema en D1 de producción y el CORS del bucket de R2 (corrector),
    probar en el navegador lo reflejado desde la `2.1.0` y publicarlo. El reflejo del
    2026-08-08 ([[Version 1.1.0 de web]]) tampoco se miró nunca en pantalla.
