@@ -101,7 +101,6 @@ una fila se implementa, **se mueve** a la §4 (ver «Cómo leerlo»).
 | `FUN-M-23` | `MERMAID-VISOR` | Visor propio para los diagramas Mermaid en la vista de lectura: al hacer clic se abre una ventana interna donde el diagrama se maneja como una imagen —**zoom** y **desplazamiento**—, porque hoy uno grande no se puede leer. **Segunda fase, si la primera sale bien**: sobre esa ventana, un **dibujo efímero** con unos pocos colores (se borra al cerrar, no se guarda nada) y un **puntero láser** para señalar sin dibujar. Pensado para explicar un diagrama a alguien | ambas | — |
 | `FUN-M-22` | `EXPORT-FEEDBACK-DESCARGA` | Avisar de la exportación: una tarjeta abajo a la derecha que indica que se está descargando, permanece 10-15 s al terminar —con cierre manual— y ofrece **abrir la carpeta** donde quedó el archivo. Hoy exportar no da ninguna señal | ambas (difiere) | — |
 | `FUN-M-37` | `EMBED-NOTA` | **Embeber una nota dentro de otra** (transclusión), como en Obsidian: `![[nota]]` muestra su contenido en el lugar. Hoy esa sintaxis **cuenta como enlace en el grafo pero no dibuja nada**, así que el usuario que la escribe no ve ni un error. Es `M` porque renderizar markdown dentro de markdown trae lo suyo: ciclos (A embebe B que embebe A), profundidad, qué pasa con el frontmatter de la nota embebida y si se puede editar ahí o solo leer. Misma tanda que `FUN-S-18`, de probar `FUN-L-20` | ambas | — |
-| `FUN-M-41` | `UX-AJUSTES-MENOS-TEXTO` | Aligerar la ventana de **Configuración**: hoy cada ajuste lleva mucho texto explicativo y la pantalla se siente cargada. Que se lea de un vistazo sin perder lo que explica —las explicaciones pasan a segundo plano— | ambas | — |
 
 ### 1.3 Grandes — tamaño L
 
@@ -208,6 +207,7 @@ mientras estaba pendiente; el detalle de lo construido está en la spec de cada 
 
 | ID | Nombre | Descripción | Aplica | Orig. |
 |---|---|---|---|---|
+| `FUN-M-41` 🛠️ | `UX-AJUSTES-MENOS-TEXTO` | Aligerar la ventana de **Configuración**: cada ajuste con su nombre, su control y **una línea** visible; el resto de la explicación, plegado detrás de «Más». Los avisos de pérdida de datos siguen visibles. **Implementada en desktop el 2026-10-06**, sin confirmar en la app; web después | ambas | — |
 | `FUN-M-11` 🛠️ | `VAULT-MYCIGNORE` | `.mycignore` por vault (estilo `.gitignore`) para decidir qué archivos/carpetas ignora Mycelium; por defecto `.*/` + carpetas de build. **Implementado en desktop** (sin confirmar); parte **web** pendiente (otra semántica). Spec en `docs/features/mycignore.md` | ambas | — |
 | `FUN-M-12` 🛠️ | `VAULT-INDEX-PERF` | Rendimiento de la apertura del vault: default de `.mycignore` con `node_modules/`/`target/`/`dist/`/`out/`, metadatos sin contenido + `leer_archivos` en tandas, carpetas incrementales, WAL y progreso visible. **Implementado en desktop** (sin confirmar); spec en `docs/features/rendimiento-apertura-vault.md`. Salió en [[Version 1.1.1]] | desktop | — |
 | `FUN-M-14` 🛠️ | `VAULT-WATCH-REINDEX-DIRIGIDO` | El watcher emite `vault-cambios` **con las rutas afectadas** y `lib/vaultWatch.ts` las descartaba: reindexaba el vault entero ante cualquier cambio. Usar esas rutas para reindexar solo lo tocado. Continuación de `FUN-M-12`. Primera parte en `FUN-M-38` (`d3c94be`): las escrituras propias de la app ya no reindexan. **Completada con `FUN-M-42` el 2026-10-04** (rama `feat/arbol-en-vivo-desktop`), **sin confirmar en la app**: `indexarRutas` indexa solo las rutas del evento —notas nuevas, tocadas o incompletas; borra lo ausente y lo que colgaba de una carpeta ida, salvo la papelera— y el esquema del índice se crea una vez por sesión. Vault sintético de 2.000 notas, dos notas tocadas: 26,8 → 9,6 ms sin IPC, sin los 170 KB del recorrido. El indexado completo queda para la apertura, la importación, «Reindexar» y la reconciliación. Spec en [[archivos-del-vault-en-vivo]] § Implementación de B | desktop | — |
@@ -749,7 +749,7 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   muestra el frontmatter de la embebida, si se puede embeber un trozo (`![[nota#título]]`) y
   si desde el embed se edita o solo se lee.
 
-#### `FUN-M-41` · `UX-AJUSTES-MENOS-TEXTO`
+#### `FUN-M-41` · `UX-AJUSTES-MENOS-TEXTO` — 🛠️ desktop
 - **Qué es**: una pasada sobre la ventana de Configuración para que **se lea de un
   vistazo**: cada ajuste con su nombre y su control, y la explicación larga fuera de la
   vista principal (un «?» o un texto que aparece al pasar el puntero o al enfocar), salvo
@@ -760,6 +760,22 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   ordenaron los ajustes pero no recortaron el texto. Si `FUN-L-27` (ayuda integrada) entra
   antes, las explicaciones largas pueden enlazar a su página en vez de quedarse en el ajuste.
   Pedida por el usuario el 2026-10-03.
+- **Decisión** (usuario, 2026-10-06): **una línea + «Más»**, frente a solo un «?» con globo
+  (esconde todo y un globo con párrafos se lee mal) o recortar sin plegar (se pierde el
+  matiz). Primero desktop; web se refleja cuando se confirme en la app.
+- **Implementada el 2026-10-06** (sin confirmar en la app):
+  - Componente `components/settings/Explicacion.tsx`: la frase visible y un botón «Más»
+    de divulgación (`aria-expanded`, `aria-controls`) que abre el resto en el lugar, con un
+    filete a la izquierda. Cada explicación se abre por su cuenta. `Interruptor` suma la
+    prop `detalle` al lado de `ayuda`.
+  - Reescritas a una línea las explicaciones de Editor (ancho de tabulación, pestañas,
+    autocerrar, corrector, números de línea, título), Vault (último vault, Esporas,
+    referencias, exportar, importar, instrucciones de IA, control de la IA, `.mycignore`),
+    Terminal, Grafo, Actualizaciones (comprobación diaria y el modo avanzado), CSS y los
+    diccionarios del corrector. Nada se borró: lo que no entra en la línea está en «Más».
+  - Siguen siempre visibles los avisos (`.warn`) y los mensajes de estado cortos
+    («Cargando…», «Disponible solo con un vault en carpeta», la versión fijada).
+  - El buscador de la ventana no cambia: busca por rótulo y alias, no por el texto.
 
 ### Tamaño L
 
