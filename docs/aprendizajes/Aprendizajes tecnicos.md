@@ -17,7 +17,7 @@ y qué principio general dejó.
 | [[Drag and drop en Mycelium]] | Los tres sistemas de arrastre que conviven y por qué se estorban entre sí |
 | [[Estado con Zustand]] | `persist`, `partialize` y el efecto de `set()` sobre el DOM en el mismo handler |
 | [[Tauri y el WebView]] | ConPTY, `dragDropEnabled`, `elementFromPoint`, límites del WebView2 |
-| [[Compilacion y entorno de desarrollo]] | `cargo` sin memoria, `tee` que oculta fallos, procesos huérfanos en `:3000` |
+| [[Compilacion y entorno de desarrollo]] | `cargo` sin memoria, `tee` que oculta fallos, `pipefail` que inventa fallos en CI, procesos huérfanos en `:3000` |
 | [[Auditoria de codigo 2026-09-26]] | Auditoría a tres bandas (complejidad, eficiencia, código muerto) con mediciones sobre tres vaults, cuatro defectos nuevos y el plan en tandas; los tres informes crudos enlazados desde ahí |
 | [[Como construye Obsidian su grafo]] | Por qué el grafo de Obsidian es fluido: índice de enlaces persistente e incremental, grafo como lectura del índice, física en un worker con Barnes-Hut, WebGL; qué copiar y en qué orden |
 | [[Rendimiento del grafo]] | Dónde se va el tiempo por frame (repulsión O(n²), `shadowBlur`, flujo animado) y el segundo análisis para más de 1.000 notas (`DEF-109`) |
