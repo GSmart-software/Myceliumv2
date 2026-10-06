@@ -188,6 +188,8 @@ mientras estaba pendiente; el detalle de lo construido está en la spec de cada 
 | `FUN-S-13` 🛠️🌐 | `TABS-HISTORIAL-RUEDA` | Clic con la **rueda** en las flechas de atrás/adelante: abre en una **pestaña nueva** el documento anterior o siguiente del historial, en vez de navegar en la actual. Misma convención que la rueda sobre un archivo del explorador. **Implementada el 2026-10-03** (`3e7ef02`), probada en la app de desarrollo, sin confirmar por el usuario; reflejada a web (`947b5f1`), sin probar | ambas | — |
 | `FUN-S-24` 🛠️ | `ABRIR-OTRO-VAULT` | Abrir **otro vault desde el que está abierto**, sin «Salir del vault» y sin lanzar el ejecutable de nuevo. Hoy, para tener dos vaults a la vez, hay que salir del actual, abrir el segundo «en ventana nueva» desde el selector y volver a abrir el primero. Va en la barra superior, junto al nombre del vault: la lista de vaults, cada uno con **abrir en una ventana nueva** —el que ya está abierto en otra ventana, la trae al frente (`FUN-L-16`)— y **«Abrir carpeta…»** para uno que todavía no está en la lista. Pedido por el usuario el 2026-09-27. **Implementada en desktop el mismo día, sin confirmar en la app** (`13ed398`): `MenuVaults` en la barra superior. Salió en [[Version 2.2.0]] | desktop | — |
 | `FUN-S-26` 🛠️ | `SOLTAR-CUALQUIER-ARCHIVO` | Soltar **cualquier tipo de archivo y carpetas** desde el explorador del SO sobre cualquier carpeta del explorador de Mycelium, como en Obsidian (hoy solo entran `.md`; el resto se descarta sin aviso). Va con `DEF-128`. **Implementada en desktop el 2026-10-04** (rama `feat/soltar-cualquier-archivo-desktop`), **sin confirmar en la app**: se copia lo que sea, el original queda donde estaba, con el diálogo de conflicto de la importación; los bytes viajan por **IPC binario** en trozos de 8 MB, con progreso en MB. «Importar archivos…» del menú también acepta cualquier tipo. Spec en [[archivos-del-vault-en-vivo]] § Implementación de C | desktop | — |
+| `FUN-S-27` 🛠️ | `MENU-CUALQUIER-ARCHIVO` | Clic derecho (y tecla Menú) en **cualquier archivo** del explorador, no solo en los tipos que Mycelium maneja (notas, `.base`, `.excalidraw`, `.canvas`, `.drawio`): abrir, abrir con la aplicación predeterminada, renombrar (sin tocar la extensión), duplicar, guardar una copia, mostrar en el explorador y eliminar. **Implementada en desktop el 2026-10-06**, sin confirmar en la app. Solo desktop: web no lista archivos que no son notas | desktop | — |
+| `FUN-S-28` 🛠️ | `MENUS-CON-ICONOS` | Un **ícono por entrada** en los menús del explorador (carpeta, nota, archivo, submenú de Esporas), con los mismos íconos de tipo del árbol y separadores por grupo (crear · traer · organizar · eliminar). **Implementada en desktop el 2026-10-06**, sin confirmar en la app | ambas | — |
 | `FUN-S-02` 🟢🌐 | `EDITOR-TAB-WIDTH` | Cuánto sangra un nivel de indentación: **al leer** cambia listas y tabuladores de todos los documentos al instante (CSS), **al escribir** es lo que inserta <kbd>Tab</kbd>. Valor libre 1–16, por defecto 4. **Confirmada en desktop** el 2026-08-03 tras rehacerla por `DEF-049`/`DEF-050`, y **reflejada en web** el 2026-08-08. Continuación: `FUN-M-18` (reindentar), para que el cambio se vea también en la vista en vivo | ambas | C-M-10 |
 | `FUN-S-03` 🟢🌐 | `EXPLORER-EXTENSIONES` | Mostrar la extensión de **todos** los archivos —el enunciado original decía «no-markdown», pero dejar sin extensión justo al tipo más común la hace parecer una omisión en vez de la norma—, **y listar los que Mycelium no indexa** (PDF, imágenes, código, texto): hasta ahora ni aparecían, así que el vault se veía más vacío de lo que está. **Implementado en desktop** el 2026-08-18 (sin confirmar). Se listan aparte de `store.notas` a propósito: meterlos ahí los metería en el autocompletado de `[[`, en la búsqueda y en el grafo. La extensión va **pegada al nombre** (`nota.md`), no en un elemento aparte: se lee como un solo texto. **Abrirlos ya es posible** desde `FUN-L-11` (2026-08-22): el clic abre el visor. **Confirmado en la app** el 2026-09-03 y **reflejado a web** el mismo día (`ec7d01e`), a medias por naturaleza: la extensión sí, listar lo no indexado no (en web no hay carpeta que recorrer) | ambas | C-M-12 |
 | `FUN-S-09` 🟢 | `CODE-RESALTADO-SINTAXIS` | Colorear los archivos de código al visualizarlos según su lenguaje (palabras reservadas, tipos, cadenas). **Depende de `FUN-L-11`**: sin visor de código no hay nada que colorear — y como ese visor es **solo-desktop**, esta también lo es (figuraba como «ambas», corregido el 2026-09-04). **Implementado y confirmado en la app** el 2026-09-05. Lo hace **CodeMirror**, no `highlight.js`: el lector pasó de dos `<pre>` a un editor de solo lectura, que dibuja solo las líneas visibles —así que el archivo grande le cuesta **menos**, que era justo el motivo por el que no se usaba— y de paso leer y editar dejan de poder verse distinto. El lenguaje sale del **nombre** del archivo y la gramática se carga bajo demanda, así que el bundle no crece por soportar cuarenta lenguajes. Spec en [[otros-tipos-de-archivo]] § 8 | desktop | — |
@@ -483,6 +485,44 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   oculta del explorador: se abre por su ruta, no desde el árbol. Al guardarlo, el vault se
   re-filtra como hoy. Lo que `FUN-M-34` hizo con el borrador (que no se pierda al cerrar los
   ajustes) lo cubre la pestaña por naturaleza. Pedida por el usuario el 2026-10-03.
+
+#### `FUN-S-27` · `MENU-CUALQUIER-ARCHIVO` — 🛠️ desktop
+- **Qué es**: el menú contextual de los archivos que Mycelium lista pero no indexa (una
+  imagen, un PDF, código, cualquier extensión). Antes no tenían ninguno: el clic derecho no
+  hacía nada y para renombrar o borrar había que salir de la app. Pedida por el usuario el
+  2026-10-04.
+- **Entradas**: Abrir (en Mycelium, como el clic) · Abrir con la aplicación predeterminada ·
+  Renombrar · Duplicar (`foto 1.png`) · Guardar una copia… · Mostrar en el explorador ·
+  Eliminar. También con la tecla Menú/Shift+F10 y F2 o doble clic para renombrar.
+- **Decisiones** (2026-10-06):
+  - **Renombrar edita el nombre sin la extensión**, como Obsidian: cambiar `captura` por
+    `portada` no puede dejar un PNG sin tipo. Chocar con otro archivo de la carpeta avisa y no
+    hace nada.
+  - **Guardar una copia** es el «exportar» de un archivo que no es nota: lo descarga tal cual,
+    por el mismo camino que «Exportar como .md».
+  - **Eliminar va a la papelera del sistema** (la de Windows), con confirmación previa. La
+    papelera de Mycelium lista notas del índice: un archivo que no es nota quedaría escondido
+    en `.mycelium/.trash` sin forma de verlo ni de traerlo. Llevarlo a la papelera de Mycelium
+    pide que esa papelera aprenda a guardar archivos sin fila en `notas`; queda como mejora.
+- **Dónde**: `lib/accionesOtroArchivo.ts` (las acciones), `OtroRow` y `otroMenu` en
+  `components/explorer/ExplorerPanel.tsx`. El árbol se actualiza solo por el watcher
+  (`FUN-M-42`); las pestañas abiertas del archivo se renombran o se cierran a mano.
+- **Web**: no aplica — web no lista archivos que no son notas.
+
+#### `FUN-S-28` · `MENUS-CON-ICONOS` — 🛠️ desktop
+- **Qué es**: un ícono por entrada en los menús del explorador. El de carpeta tiene más de
+  diez opciones y sin íconos había que leerlas todas. Pedida por el usuario el 2026-10-04.
+- **Íconos**: los de tipo del árbol (`lib/iconosDeTipo.ts`) para nota, Excalidraw, base,
+  canvas, draw.io y consola; el de la sección de Esporas del rail (`CircleDot`) para «Nueva
+  desde Espora», con el de nota en cada plantilla del submenú; y lucide para el resto
+  (`FolderPlus`, `Upload`, `Pencil`, `Copy`, `FileDown`, `FileOutput`, `FolderOpen`,
+  `ExternalLink`, `Eye`, `Trash2`). En tono secundario; el de Eliminar, en el color de peligro.
+- **Grupos**: separadores entre crear · traer al vault · organizar · eliminar.
+- **Dónde**: `ContextMenu.tsx` (ahora también dibuja el ícono en las filas con submenú y
+  dentro del submenú) y `ContextMenu.module.css`, compartidos con web; los menús, en
+  `ExplorerPanel.tsx`. El botón «Nuevo» de la cabecera ya tenía íconos.
+- **Web**: `ContextMenu.*` se trae entero; en `ExplorerPanel.tsx` (divergente) van a mano
+  los `icono:` y `separadorAntes:` de los menús de carpeta y de nota.
 
 ### Tamaño M
 
