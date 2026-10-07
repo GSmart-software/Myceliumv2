@@ -17,7 +17,7 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 
 | Bug | Descripción corta | Alcance | Estado |
 |---|---|---|---|
-| — | Ninguno abierto (2026-10-06) | | |
+| DEF-133 | Un dibujo de Excalidraw embebido se ve como marcador «Diagrama …» al volver a la nota | ambas (frontend) | ⬜ registrado (2026-10-07), sin reproducir. Visto en vista de lectura con el vault demo «Huerta del barrio» (`C:\Trabajo\GSmart\mycelium-vault-demo`, nota «Tres hermanas») |
 
 ## Corregidos
 

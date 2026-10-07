@@ -818,6 +818,14 @@ la dirección desaparece de la línea en vez de verse como enlace.
 
 Reportado por el usuario el 2026-10-06.
 
+# DEF-133
+Un **dibujo de Excalidraw embebido** en una nota (`![[Croquis de la huerta.excalidraw]]`) se
+ve bien la primera vez, pero **al volver a esa nota** más tarde aparece un marcador con el
+texto «Diagrama Croquis de la huerta» en lugar del dibujo.
+
+Detectado el 2026-10-07 al sacar las capturas de la landing (vault de demostración «Huerta
+del barrio», nota «Tres hermanas», vista de lectura); sin reproducir todavía a propósito.
+
 ---
 
 > [!warning] Defectos sin reporte original
