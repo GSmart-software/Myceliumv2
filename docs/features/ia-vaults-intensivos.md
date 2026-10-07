@@ -2,7 +2,7 @@
 
 **Solo desktop** (web no tiene MCP, framework de IA ni `.mycignore`) · registrado el
 2026-10-06 · `FUN-L-29`, `FUN-L-30`, `FUN-M-44`, `FUN-M-45`, `FUN-M-46`, `FUN-L-31`,
-`FUN-M-47`, `FUN-S-29`, `FUN-S-30` · sin implementar
+`FUN-M-47`, `FUN-S-29`, `FUN-S-30` · `FUN-L-29` y `FUN-S-30` en implementación (2026-10-06)
 
 ## De dónde sale
 
@@ -59,6 +59,15 @@ en vez de que el agente lo reimplemente con `grep`.
   framework. Achicar el núcleo es rehacer el framework: `FRAMEWORK_IA_VERSION` **2.0.0**.
   Migración: un `CLAUDE.md` existente sin bloque necesita una regla para insertar el bloque sin
   perder lo del usuario.
+
+- **Decisiones del usuario (2026-10-06)**, al encargarla:
+  1. Un `CLAUDE.md` propio, sin bloque, recibe el bloque **al principio**; lo del usuario queda
+     debajo, intacto. Uno que generó Mycelium entero (con la marca vieja) se reemplaza por el
+     bloque solo.
+  2. **Núcleo de ~2 KB**: las dos obligaciones, las reglas duras en una línea cada una y un
+     puntero por skill; el resto, a skills.
+  3. Al terminar, **se aplica a este repo**: el `CLAUDE.md` del proyecto deja de llevar la
+     sección de memoria copiada a mano y pasa a tener el bloque gestionado arriba.
 
 ### 2 · Salud del grafo — `FUN-L-30`
 
