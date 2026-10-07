@@ -812,6 +812,12 @@ prometerle al usuario algo que no va a ver.
 
 Detectado el 2026-10-06 al escribir las páginas de ayuda de enlaces y etiquetas (`FUN-L-27`).
 
+# DEF-132
+En la **vista en vivo**, una **URL** escrita en una nota **se vuelve invisible**: el texto de
+la dirección desaparece de la línea en vez de verse como enlace.
+
+Reportado por el usuario el 2026-10-06.
+
 ---
 
 > [!warning] Defectos sin reporte original

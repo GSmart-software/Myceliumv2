@@ -18,6 +18,7 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | Bug | Descripción corta | Alcance | Estado |
 |---|---|---|---|
 | DEF-123 | La plantilla de snippets describe la interfaz de junio: le falta todo lo posterior | ambas (frontend, `public/plantilla-estilos.css`) | ⬜ registrado (2026-10-03). Comprobado: las 18 variables y las clases que usa siguen existiendo —no está rota—, pero su último cambio es del 2026-06-22 y cubre 18 de 98 tokens; no conoce atmósferas, paleta, propiedades, bases, canvas, calendario ni draw.io |
+| DEF-132 | En la vista en vivo, una URL escrita en una nota se vuelve invisible | ambas (frontend) | ⬜ registrado (2026-10-06), en investigación |
 
 ## Corregidos
 
