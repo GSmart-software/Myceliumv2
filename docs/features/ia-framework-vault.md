@@ -25,25 +25,26 @@ El framework enseña dos **protocolos** y los hace obligatorios:
   (fecha, contexto, **por qué**), asociaciones explicadas y entrada a la red desde su
   mapa/nota madre (nada huérfano).
 
-Además, el `CLAUDE.md` incluye un **mapa de cuándo usar cada skill/comando**, para
+Además, el núcleo incluye **un puntero por skill y comando** (cuándo cargar cada uno), para
 que la IA sepa qué herramienta corresponde a cada situación.
 
-## Qué genera (v1.8.0)
+## Qué genera (v2.0.0)
 
 | Archivo en el vault | Rol |
 |---|---|
-| `CLAUDE.md` | Eje de memoria: obligaciones (recuperar/consolidar), anatomía de la memoria (nota/enlace/tag/carpeta/grafo/MOC), los dos protocolos, **tabla de herramientas y cuándo usarlas**, reglas duras, **«Operar Mycelium»** (las herramientas `mycelium_*` del MCP de control y la línea divisoria, [[mcp-control]]) y qué es Mycelium por fuera |
-| `.claude/skills/mycelium-vault/SKILL.md` | Referencia **técnica**: sintaxis verificada (wikilinks/alias/embeds/tags/callouts/Mermaid/KaTeX), estructura, recetas de `grep` para recorrer el vault (backlinks, salientes, tags), `.mycignore`, precauciones |
-| `.claude/skills/mycelium-memoria/SKILL.md` | **Técnicas de memoria**: recuperación en cinco movimientos, señales de que falta recuperar más, cuándo crear vs ampliar (tabla de decisión), cómo redactar para recuperación futura, mantenimiento (huérfanas, enlaces rotos, hubs) y antipatrones |
-| `.claude/commands/vault-buscar.md` | `/vault-buscar <pregunta>`: responde con evidencia del vault y citas (solo lee) |
-| `.claude/commands/vault-recordar.md` | `/vault-recordar <qué>`: consolida un hecho/decisión/aprendizaje (crea o amplía + enlaza) |
-| `.claude/commands/vault-mapa.md` | `/vault-mapa`: genera/actualiza el MOC "Mapa del vault" (puerta de entrada de la memoria) |
-| `.claude/commands/vault-vincular.md` | `/vault-vincular <nota>`: refuerza asociaciones (con la razón de cada vínculo) |
-| `.claude/commands/vault-huerfanas.md` | `/vault-huerfanas`: audita salud de la memoria — huérfanas + enlaces rotos (reporta, no aplica solo) |
-| `.claude/commands/vault-nota.md` | `/vault-nota <título>`: crea una nota siguiendo las convenciones (sin dejarla huérfana) |
+| `CLAUDE.md` — **solo el bloque** `<!-- mycelium:inicio vX -->` … `<!-- mycelium:fin -->` | El **núcleo** (2,2 KB): las dos obligaciones (recuperar/consolidar), doce reglas duras de una línea y un puntero por skill y comando. Lo de fuera del bloque es del usuario (ver § «Framework 2.0.0», abajo) |
+| `.claude/skills/mycelium-vault/SKILL.md` | Referencia **técnica**: sintaxis verificada (wikilinks/alias/embeds/tags/callouts/Mermaid/KaTeX), **tipos de archivo y cuáles están en la memoria**, qué es de Mycelium y qué del usuario en `CLAUDE.md` y `.claude/`, recetas de `grep` (backlinks, salientes, tags), propiedades, `.mycignore` (con negaciones), **qué ve el usuario** en la app, precauciones |
+| `.claude/skills/mycelium-memoria/SKILL.md` | **Técnicas de memoria**: cómo está construida (nota/enlace/tag/carpeta/grafo/MOC), recuperación en seis movimientos, señales de que falta recuperar más, cuándo crear vs ampliar, cómo redactar para recuperación futura, mantenimiento y antipatrones |
+| `.claude/skills/mycelium-operar/SKILL.md` | **Nueva en la 2.0.0**: el criterio para usar el MCP de control ([[mcp-control]]) —la línea divisoria, antes de escribir, renombrar/mover/borrar, qué pregunta y qué no, `RECHAZADO` y los demás errores, el diccionario del vault— y qué hacer sin las herramientas (`mv`/`rm` y los enlaces a mano, el hook) |
+| `.claude/commands/mycelium/vault-buscar.md` | `/vault-buscar <pregunta>`: responde con evidencia del vault y citas (solo lee) |
+| `.claude/commands/mycelium/vault-recordar.md` | `/vault-recordar <qué>`: consolida un hecho/decisión/aprendizaje (crea o amplía + enlaza) |
+| `.claude/commands/mycelium/vault-mapa.md` | `/vault-mapa`: genera/actualiza el MOC "Mapa del vault" (puerta de entrada de la memoria) |
+| `.claude/commands/mycelium/vault-vincular.md` | `/vault-vincular <nota>`: refuerza asociaciones (con la razón de cada vínculo) |
+| `.claude/commands/mycelium/vault-huerfanas.md` | `/vault-huerfanas`: audita salud de la memoria — huérfanas + enlaces rotos (reporta, no aplica solo) |
+| `.claude/commands/mycelium/vault-nota.md` | `/vault-nota <título>`: crea una nota siguiendo las convenciones (sin dejarla huérfana) |
 | `.claude/skills/mycelium-{drawio,canvas,excalidraw,base,esporas,calendario}/SKILL.md` | **Una skill por herramienta** (desde la 1.7.0, [[ia-skills-herramientas]]): formato, geometría, recetas y cómo modificar sin romper |
 | `.claude/skills/mycelium-{drawio,canvas,excalidraw}/validar-<formato>.mjs` | El **validador** de cada formato, sin dependencias: la IA lo corre con `node` sobre lo que escribió |
-| `.claude/mycelium-ia.json` | Marcador de versión del framework (y huellas de lo generado, `DEF-118`) |
+| `.claude/mycelium-ia.json` | Marcador de versión del framework (desde la 2.0.0, sin huellas: ya no hacen falta) |
 | `.mcp.json` | **No es un template**: el servidor MCP de control (`mycelium`), con la ruta del binario instalado y `MYCELIUM_VAULT`. Solo si el control está encendido; se **fusiona** con el del usuario ([[mcp-control]] § «Cómo quedó — Parte 1») |
 | `.claude/hooks/mycelium-mv-rm.mjs` + su entrada en `.claude/settings.json` | **Tampoco es un template**: el hook `PreToolUse` que, con el control encendido, frena `mv`/`rm` sobre notas y le recuerda a la IA `mycelium_renombrar` / `_mover` / `_borrar` (con un escape, `MYCELIUM_SIN_MCP=1`, para cuando el MCP no responde). Lo instala `lib/mcpControl.ts` junto con el `.mcp.json`; el `settings.json` se **fusiona** con el del usuario ([[mcp-control]] § «Cómo quedó — Parte 3») |
 
@@ -61,7 +62,7 @@ enlaces los arregla ella con grep.
 
 ## Versionado
 
-- `FRAMEWORK_IA_VERSION` en `frontend/lib/ia/framework.ts` (hoy `1.8.0`),
+- `FRAMEWORK_IA_VERSION` en `frontend/lib/ia/framework.ts` (hoy `2.0.0`),
   independiente de la versión de la app. **Al agregar funciones a Mycelium que la
   IA deba conocer, subir la versión y actualizar los templates.**
   - `1.0.0` — primera versión.
@@ -148,30 +149,184 @@ enlaces los arregla ella con grep.
     nueve símbolos (`[ ]`, `[x]`, `[-]`, `[/]`, `[>]`, `[*]`, `[!]`, `[?]`, `[+]`) y
     cómo se ve cada uno; el `CLAUDE.md` los nombra entre lo que ve el usuario. Minor:
     conocimiento nuevo sobre la sintaxis del vault. 2026-10-04, sin publicar.
-- Cada archivo generado lleva el marcador `<!-- mycelium-ia vX -->`; la versión
-  instalada vive en `.claude/mycelium-ia.json`.
+  - `1.8.1` — la tabla de sintaxis decía que `![[Título]]` de una nota muestra su contenido y
+    que una `#etiqueta` es una píldora clicable (`DEF-131`). Patch.
+  - `2.0.0` — **instrucciones por capas** (`FUN-L-29`, 2026-10-06): bloque gestionado en
+    `CLAUDE.md`, núcleo de 2,2 KB (era ~20 KB), skill nueva `mycelium-operar`, comandos en
+    `.claude/commands/mycelium/` y la regla «no edites lo que lleva prefijo `mycelium`».
+    Desaparecen la copia `CLAUDE (mycelium-ia vX).md` y `Conflictos instrucciones IA.md`.
+    Major: cambia dónde y cómo se instala, y qué es de quién. Detalle abajo.
+- Cada archivo de `.claude/` lleva el marcador `<!-- mycelium-ia vX -->` (los `.mjs`, en un
+  comentario de su primera línea); el bloque de `CLAUDE.md` lleva la versión en su marcador
+  de inicio; la versión instalada vive en `.claude/mycelium-ia.json`.
 - Configuración → Vault muestra instalada vs disponible y ofrece
   Generar / Actualizar / Regenerar. **Solo se genera si el usuario lo pide.**
 
-## Conflictos: nunca se pisa un archivo del usuario
+## Framework 2.0.0: instrucciones por capas
 
-Un `CLAUDE.md` (o cualquier destino) **preexistente y ajeno al framework NO se
-sobrescribe**. La detección es por la marca `<!-- mycelium-ia v` en el contenido:
+`FUN-L-29`, implementada en desktop el 2026-10-06; propuesta y decisiones del usuario en
+[[ia-vaults-intensivos]] § 1. Resuelve dos problemas: el `CLAUDE.md` generado pesaba ~20 KB
+(~5.500 tokens) y se cargaba en **cada** sesión, y la regeneración chocaba con lo del
+usuario —«no edites `.claude/`» no se podía cumplir y la copia `CLAUDE (mycelium-ia vX).md`
+con su `Conflictos instrucciones IA.md` no la integraba nadie—.
 
-| Situación | Acción |
+### El bloque gestionado
+
+```md
+<!-- mycelium:inicio v2.0.0 — lo escribe Mycelium (Configuración → Vault); lo tuyo, fuera del bloque -->
+# Este vault es tu memoria
+…el núcleo…
+<!-- mycelium:fin -->
+```
+
+- Cada marcador va **en su propia línea**. El de inicio lleva la versión (se ve sin abrir la
+  app) y un aviso para quien abra el archivo a mano; se reconoce por el prefijo
+  `<!-- mycelium:inicio v` **al principio de una línea** (tras un BOM, si es la primera): uno
+  citado en medio de un párrafo o entre backticks no es el bloque.
+- Al regenerar se reemplaza desde el `<` del inicio hasta el `>` del fin. Lo de antes y lo
+  de después —incluido el salto que sigue al fin— queda **byte a byte** igual.
+- El bloque se escribe con los saltos de línea del archivo: CRLF si el archivo los tiene.
+- **Bloque roto** (inicio sin fin): error, y no se escribe **nada** (ni `CLAUDE.md` ni
+  `.claude/`). Adivinar dónde terminaba podría comerse texto del usuario.
+
+### Migración de `CLAUDE.md`
+
+`planificarClaudeMd` (pura, en `lib/ia/framework.ts`) decide; `generarFramework` escribe
+solo si cambió.
+
+| `CLAUDE.md` que hay | Resultado | Acción (aviso) |
+|---|---|---|
+| No existe, o vacío | El bloque solo | `creado` |
+| Con bloque | Se reemplaza el bloque; lo demás, byte a byte | `actualizado` |
+| Propio, sin bloque | El bloque **al principio**, una línea en blanco y lo del usuario intacto (decisión del usuario). Si hay BOM, sigue primero | `insertado` |
+| El que generó **entero** una 1.x, sin tocar (su huella está en `HUELLAS_CLAUDE_MD_PREVIAS` —todas las 1.x, sacadas del historial de git— o es la que registró la 1.6–1.8 en `mycelium-ia.json`; CRLF no cuenta como edición) | El bloque solo | `reemplazado` |
+| Uno de una 1.x **editado** (marca vieja `<!-- mycelium-ia v` en la primera línea, huella desconocida) | Como «propio»: el bloque arriba y **todo** lo que había debajo, incluidas las instrucciones viejas | `insertado-sobre-anterior`: el aviso le dice al usuario que borre la sección vieja, que empieza en «# Este vault es tu memoria» |
+
+> [!info] Por qué el editado no vuelve al archivo de conflicto
+> Las dos opciones seguras eran insertar el bloque arriba sin descartar nada, o dejar el
+> archivo como estaba y escribir la copia al lado (la regla de la 1.x, solo para este caso).
+> Se eligió la primera: no se puede separar lo editado de lo generado sin el texto viejo
+> (solo hay huellas), la copia al lado es justo lo que «nadie integra», y con el bloque
+> arriba la IA ya recibe las instrucciones nuevas desde la primera sesión. El costo —las
+> instrucciones viejas duplicadas debajo hasta que el usuario las borre— es visible en el
+> único archivo del usuario y el aviso dice qué borrar. Es el mismo trato que recibe un
+> `CLAUDE.md` propio en el que alguien copió a mano la sección de memoria (el caso de este
+> repo).
+
+Lo que dejó la 1.x y **no** se toca: una copia `CLAUDE (mycelium-ia vX).md` o un
+`Conflictos instrucciones IA.md` que ya existan. Desde la 2.0.0 son archivos del usuario, que
+puede borrarlos.
+
+### El prefijo `mycelium`
+
+Todo lo que Mycelium escribe en `.claude/` lleva `mycelium` en la ruta, y la regla para la IA
+(regla dura 10 del núcleo) pasa de «no edites `.claude/`» a **«no edites lo que lleva prefijo
+`mycelium`»**:
+
+| Ruta | Qué |
 |---|---|
-| La ruta está libre | Se escribe normalmente |
-| Existe y **tiene** la marca (lo generó el framework) | Se sobrescribe (es la actualización esperada) |
-| Existe y **no** tiene la marca (es del usuario) | **No se toca**: la versión nueva se escribe al lado como `nombre (mycelium-ia vX).md`; si también existe, `… (1)`, `… (2)`, … |
+| `.claude/skills/mycelium-*/` | Las nueve skills y sus scripts |
+| `.claude/commands/mycelium/vault-*.md` | Los seis comandos |
+| `.claude/hooks/mycelium-mv-rm.mjs` | El hook de `mv`/`rm` (con el control encendido; su entrada en `settings.json` se fusiona) |
+| `.claude/mycelium-ia.json` | La versión instalada |
 
-Cuando hay conflictos: la UI los lista en su mensaje y se escribe un reporte
-resumido en la raíz del vault, `Conflictos instrucciones IA.md`, con archivo
-original → archivo generado.
+Con eso **ya no hay conflictos**: lo que lleva el prefijo es de Mycelium y se pisa al
+regenerar aunque se haya editado; lo demás no se toca nunca. El mecanismo de copia al lado
+(`rutaAlternativa`, `RUTAS_PROTEGIDAS`, el reporte) se eliminó.
+
+**Comandos en una subcarpeta.** Claude Code nombra un comando por su archivo; la subcarpeta
+solo aparece en la descripción («(project:mycelium)»). Así los comandos siguen siendo
+`/vault-buscar`, etc. —la ayuda, la costumbre del usuario y los textos de las skills siguen
+valiendo— y el archivo vive en un espacio de Mycelium. Se descartó renombrarlos a
+`/mycelium-buscar`: cambiaba el nombre que el usuario ya usa sin ganar nada.
+
+**Migración de los comandos sueltos de la 1.x** (`.claude/commands/vault-*.md`): al
+regenerar, los que siguen tal cual los escribió Mycelium —su huella, **sin la línea de
+marca**, está en `HUELLAS_COMANDOS_ANTERIORES`— se borran con el comando Rust
+`ia_borrar_anterior` (lista cerrada de esas seis rutas; no pasa por la papelera porque no son
+notas del índice). Los editados se quedan donde están, ya como del usuario, y el aviso los
+nombra. Si conviven con el de Mycelium del mismo nombre, Claude Code muestra los dos.
+
+### El núcleo
+
+2.138 bytes de núcleo, **2.269** con los marcadores (era ~20 KB). `scripts/test-framework-ia.mjs`
+falla si el bloque pasa de **2.560 bytes**: lo que no entra va a una skill.
+
+- Las **dos obligaciones**: recuperar antes de responder (buscar, leer entero, seguir enlaces
+  y backlinks, citar con `[[ ]]`, decir si no está) y consolidar lo que valga recordar
+  (escribir y enlazar, con fecha y motivo).
+- **Doce reglas duras**, una línea cada una: títulos únicos · renombrar/mover/borrar por MCP
+  (`mv`/`rm` solo sin MCP, y los enlaces a mano) · nada huérfano · no duplicar · usar las
+  carpetas existentes · propiedades planas y claves reusadas · idioma del vault · solo los
+  `.md` son memoria · `.mycelium/` no se escribe, calendario y diccionario solo por MCP · lo
+  que lleva prefijo `mycelium` no se edita (lo demás es del usuario) · `.mycignore` oculta de
+  la app · las Esporas son moldes.
+- **Un puntero por skill** (las nueve) y la lista de los seis comandos.
+
+### Dónde quedó cada regla del `CLAUDE.md` 1.8.1
+
+Ninguna se perdió. Casi todas se comprueban por una frase clave en la tabla `DONDE_QUEDO` de
+`scripts/test-framework-ia.mjs` (si una frase se reescribe, se cambia la
+fila, no se borra).
+
+| Sección del 1.8.1 | Regla o afirmación | Dónde quedó |
+|---|---|---|
+| Intro | El vault es memoria de largo plazo, en red, compartida | Núcleo (intro) |
+| Intro | Obligación 1: recuperar antes de responder, citando | Núcleo |
+| Intro | Obligación 2: consolidar y enlazar | Núcleo |
+| Cómo está construida la memoria | Tabla nota/enlace/tag/carpeta/grafo/MOC | `mycelium-memoria` |
+| Cómo está construida la memoria | «El enlace es la unidad de valor» | `mycelium-memoria` |
+| Qué puede haber en el vault | Tabla de tipos de archivo (qué es, qué podés) | `mycelium-vault` |
+| Qué puede haber en el vault | Lienzos/diagramas/dibujos se rompen; validador; `dibujo.mjs` | `mycelium-vault` (y cada skill) |
+| Qué puede haber en el vault | Solo las notas están en la memoria; citar «según el archivo» | Núcleo, regla 8 (corta) · `mycelium-vault` (completa) · `mycelium-memoria` |
+| Qué puede haber en el vault | `.base` y `.canvas` son nodos; el canvas aporta aristas; el YAML del `.base` no se escanea | `mycelium-vault` |
+| Protocolo de recuperación | Entradas → léxico → leer entero → expandir 1–2 saltos → facetas → citar y decir lo que falta, ofrecer la nota | `mycelium-memoria` («seis movimientos»; facetas y «ofrecé crear» se agregaron) · resumen en el núcleo |
+| Protocolo de consolidación | Buscar antes de crear; ampliar | Núcleo, regla 4 · `mycelium-memoria` |
+| Protocolo de consolidación | Una idea por nota, título único | Núcleo, regla 1 · `mycelium-memoria` |
+| Protocolo de consolidación | Enlazar hacia afuera y hacia adentro | Núcleo, regla 3 · `mycelium-memoria` |
+| Protocolo de consolidación | Contexto suficiente: fecha y motivo | Núcleo, obligación 2 · `mycelium-memoria` |
+| Protocolo de consolidación | Callouts para lo que salta a la vista | `mycelium-memoria` |
+| Tus herramientas aquí | Tabla skill → cuándo | Núcleo (puntero por skill) + la `description` de cada skill |
+| Tus herramientas aquí | Los seis comandos | Núcleo (lista) + la `description` de cada comando |
+| Tus herramientas aquí | Fila «herramientas `mycelium_*`» | Núcleo → `mycelium-operar` |
+| Regla 1 | Títulos únicos | Núcleo, regla 1 |
+| Regla 2 | Renombrar/mover con la herramienta; borrar a la papelera; `mv`/`rm` solo sin MCP | Núcleo, regla 2 · `mycelium-operar` |
+| Regla 2 | Sin MCP: buscar `[[viejo` (alias, embeds, con carpeta); `rm` no pasa por la papelera | `mycelium-operar` § «Sin las herramientas» · `mycelium-vault` § Precauciones |
+| Regla 2 | Caracteres prohibidos en el nombre | `mycelium-operar` · `mycelium-vault` · `description` de `mycelium_renombrar` |
+| Regla 3 | Nada huérfano | Núcleo, regla 3 |
+| Regla 4 | No dupliques | Núcleo, regla 4 |
+| Regla 5 | Usar las carpetas existentes | Núcleo, regla 5 · `mycelium-memoria` |
+| Regla 6 | Subconjunto del frontmatter, `tags:`, `clave:valor`, lo no soportado, moderación, reusar claves | Núcleo, regla 6 (corta) · `mycelium-vault` § Propiedades |
+| Regla 7 | Idioma del vault | Núcleo, regla 7 |
+| Regla 8 | No escribir en `.mycelium/`; leer solo `recordatorios.json` y `preferencias.json` | Núcleo, regla 9 · `mycelium-vault` |
+| Regla 8 | Calendario y diccionario solo por MCP; sin las herramientas, decírselo y no tocar | Núcleo, regla 9 · `mycelium-vault` · `mycelium-operar` |
+| Regla 8 | «No edites `.claude/`» y la política de conflictos | **Reemplazada** por la regla 10 del núcleo (prefijo `mycelium`) · `mycelium-vault`. Los conflictos ya no existen |
+| Regla 9 | `.mycignore`: lo ignorado no se ve; el default; no esconder documentación | Núcleo, regla 11 · `mycelium-vault` § `.mycignore` (ahora con negaciones `!`, `FUN-S-30`) |
+| Regla 10 | Esporas: moldes; no consolidar, citar ni reportar como huérfanas; partir de ella y expandir las variables | Núcleo, regla 12 · `mycelium-vault` · `mycelium-esporas` |
+| Operar Mycelium | Qué es el MCP y dónde se enciende | `mycelium-operar` |
+| Operar Mycelium | La línea divisoria (contenido por archivos, operar por Mycelium) | `mycelium-operar` |
+| Operar Mycelium | Tabla «Querés… / Herramienta» | **Eliminada**: lo dice la `description` de cada herramienta del MCP |
+| Operar Mycelium | Mirar `mycelium_estado` antes de escribir lo que el usuario edita | `mycelium-operar` · `description` de `mycelium_estado` (agregado) · `mycelium-vault` § Qué ve el usuario |
+| Operar Mycelium | `mycelium_abrir` no roba el foco | `mycelium-operar` · `description` de `mycelium_abrir` |
+| Operar Mycelium | Los errores dicen qué hacer (`NO_ENCONTRADO`, `AMBIGUO`, `APP_CERRADA`, `MCP_DESACTIVADO`) | `mycelium-operar` |
+| Operar Mycelium | Lo reversible no pregunta; contar el efecto, no repetir la llamada | `mycelium-operar` |
+| Operar Mycelium | Lo grande pregunta; `RECHAZADO` es una respuesta, no insistir ni por otro camino | `mycelium-operar` · `description` de `mycelium_renombrar` (agregado: «ni en partes ni con `mv`») |
+| Operar Mycelium | El diccionario del vault: términos propios, una errata se corrige, mayúsculas, el de Mycelium no es tuyo | `mycelium-operar` · `description` de `mycelium_diccionario` (agregado) |
+| Operar Mycelium | `CAMBIOS_SIN_GUARDAR`: esperar y repetir | `mycelium-operar` · `description` de `mycelium_borrar` |
+| Operar Mycelium | Sin las herramientas; el hook y `MYCELIUM_SIN_MCP=1` | `mycelium-operar` § «Sin las herramientas» |
+| Qué es Mycelium por fuera | Lo que ve el usuario (editor, callouts, tareas, propiedades, Esporas, bases, lienzos, diagramas, dibujos, calendario, grafo, búsqueda, visor, terminal, exportación, papelera, Mermaid, KaTeX) | `mycelium-vault` § Qué ve el usuario |
+| Qué es Mycelium por fuera | Renombrar escribiendo en el título; recarga desde disco salvo cambios sin guardar; el modal de Excalidraw pisa | `mycelium-vault` § Qué ve el usuario |
+
+Se corrigió de paso: `mycelium-vault` decía que `.mycignore` no tiene negaciones (`FUN-S-30`
+las agrega); la tabla de sintaxis mantiene lo corregido en `DEF-131` (un test lo vigila).
 
 ## UI
 
 Configuración → Vault → "Asistente IA (Claude Code)": descripción + estado de
-versión + botón. Solo con **vault en carpeta** (los archivos se escriben en
+versión + botón. Desde la 2.0.0 la línea dice «un bloque en `CLAUDE.md`, sin tocar lo
+demás» y el «Más» explica el prefijo `mycelium`; el aviso al generar dice qué pasó con
+`CLAUDE.md` (las cinco acciones de la tabla de migración) y qué comandos viejos editados
+quedaron como del usuario. Solo con **vault en carpeta** (los archivos se escriben en
 disco); en SQLite clásico se muestra el motivo.
 
 ## Implementación
@@ -180,6 +335,8 @@ disco); en SQLite clásico se muestra el motivo.
 - Lectura de versión: comando Rust nuevo `leer_archivo_texto` (devuelve `None` si
   no existe).
 - Regenerar sobrescribe SOLO los archivos del framework; no toca el resto.
+- Borrar los comandos sueltos de la 1.x: comando Rust `ia_borrar_anterior`, que solo acepta
+  esa lista cerrada de seis rutas (el frontend lo llama si la huella coincide).
 - El watcher del vault ignora `.claude/` (directorios ocultos), así que generar no
   dispara reindexados.
 
@@ -199,7 +356,8 @@ que `.mycelium/diccionario.txt` no se escribe a mano).
 - [[ia-skills-herramientas]] — `FUN-L-26`: una skill por herramienta (draw.io, canvas, excalidraw, base, Esporas, calendario) para la `1.7.0`.
 - [[mcp-control]] — `FUN-L-09`: el MCP de control; su Parte 1 agrega «Operar Mycelium» y el `.mcp.json`.
 - [[Mycelium como memoria de la IA]] — la decisión de producto que lo motiva.
-- [[Generar el framework de IA en un vault]] — el procedimiento y la política de conflictos.
+- [[Generar el framework de IA en un vault]] — el procedimiento y qué es de quién.
+- [[ia-vaults-intensivos]] — `FUN-L-29`: la propuesta y las decisiones del usuario detrás de la 2.0.0.
 - [[terminal-integrada]] — dónde corre el asistente.
 - [[mycignore]] — por qué `.claude/` no se ve en la app por defecto.
 - [[Versionado del sistema]] — cómo se versiona el framework (independiente de la app).
