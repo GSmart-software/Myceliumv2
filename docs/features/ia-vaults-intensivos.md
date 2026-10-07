@@ -2,7 +2,8 @@
 
 **Solo desktop** (web no tiene MCP, framework de IA ni `.mycignore`) · registrado el
 2026-10-06 · `FUN-L-29`, `FUN-L-30`, `FUN-M-44`, `FUN-M-45`, `FUN-M-46`, `FUN-L-31`,
-`FUN-M-47`, `FUN-S-29`, `FUN-S-30` · `FUN-L-29` y `FUN-S-30` en implementación (2026-10-06)
+`FUN-M-47`, `FUN-S-29`, `FUN-S-30` · `FUN-L-29` **implementada en desktop** (2026-10-06, sin
+confirmar en la app) · `FUN-S-30` en implementación (2026-10-06)
 
 ## De dónde sale
 
@@ -42,6 +43,12 @@ en vez de que el agente lo reimplemente con `grep`.
 | 8 | `FUN-S-30` `MYCIGNORE-NEGACIONES` | Negaciones `!` en `.mycignore`, para ver `.claude/*.md` en el vault | S |
 
 ### 1 · Instrucciones de IA por capas — `FUN-L-29`
+
+> [!success] Implementada en desktop el 2026-10-06 — framework de IA 2.0.0
+> Sin confirmar en la app. El formato del bloque, la migración desde la 1.x, el prefijo, qué
+> quedó en el núcleo (2,2 KB) y **dónde quedó cada regla** del `CLAUDE.md` anterior están en
+> [[ia-framework-vault]] § «Framework 2.0.0: instrucciones por capas». Falta el punto 3 de
+> las decisiones —aplicarlo a este repo—, que hace el orquestador al integrar.
 
 - **Problema**: el bloque que genera Mycelium en `CLAUDE.md` pesa ~20 KB (~5.500 tokens) y se
   carga en **cada** sesión; repite lo que ya dicen las descripciones de las herramientas MCP y
