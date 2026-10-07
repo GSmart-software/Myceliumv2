@@ -207,6 +207,13 @@ y qué principio general dejó.
     ni `remark-gfm` (lectura) aceptaban `[-]`; extender uno solo habría hecho aparecer y
     desaparecer la casilla al cambiar de vista. Detalle en [[estados-de-tarea]] y
     [[CodeMirror y la vista en vivo]].
+19. **Un nombre de nodo no dice lo mismo en todo contexto: decidí mirando el padre.** La vista
+    en vivo ocultaba todo nodo `URL` fuera de la línea del cursor, pensando en el `(url)` de
+    `[texto](url)`, donde lo visible es el texto. Pero GFM también llama `URL` a una dirección
+    suelta (`https://…`, `www.…`, un correo) y a la de `<https://…>`, y ahí la URL **es** el
+    texto: desaparecía entera (`DEF-132`). Al decorar o esconder un nodo del árbol de
+    `@lezer/markdown`, preguntá **dentro de qué** está (`node.node.parent?.name`) antes de
+    tratarlo, sobre todo si lo que hacés es ocultarlo. Ver [[bugs-progreso]].
 
 ## Relacionadas
 
