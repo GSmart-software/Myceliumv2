@@ -144,7 +144,7 @@ en vez de que el agente lo reimplemente con `grep`.
   árbol en vivo de la 2.4.0 (`FUN-M-42`) el par borrado/creación ya llega en la misma ráfaga,
   así que la detección es factible.
 
-### 8 · Notas de instrucciones visibles — `FUN-S-30`
+### 8 · Notas de instrucciones visibles — `FUN-S-30` 🛠️
 
 - **Problema**: las normas de trabajo del vault viven en `.claude/` y el default de `.mycignore`
   oculta todo lo que empieza con punto: no se encuentran, no se enlazan, no están en el grafo.
@@ -154,6 +154,11 @@ en vez de que el agente lo reimplemente con `grep`.
   Cuidado con el orden de evaluación (la última regla que coincide gana) y con que una carpeta
   ignorada no se recorre: `!` dentro de una carpeta ignorada no la vuelve a abrir, igual que en
   git.
+- **Estado**: 🛠️ **implementada en desktop el 2026-10-06**, sin confirmar en la app. Con la
+  semántica estricta de git: `!.claude/*.md` debajo de `.*/` **no** alcanza (la carpeta sigue
+  ignorada); lo que se escribe es `!.claude/`, o `!.claude/` + `.claude/*` + `!.claude/*.md`
+  para ver solo las notas de primer nivel. Recetas, semántica y por qué no se relajó la regla
+  de git en [[mycignore]] § Negaciones.
 
 ## Orden propuesto
 
