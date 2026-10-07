@@ -16,6 +16,7 @@ orquestador como los subagentes.
 | Reflejo a web | `npm ci` + `tsc` + `npx next build` | worktree de `web-cloud` |
 | Módulo con tests headless | `node --test scripts/test-<modulo>.mjs` | `frontend/` |
 | Smoke tests (si aplica) | `node scripts/smoke-*.mjs` | `frontend/` |
+| Tokens (`styles/tokens.css`), clases globales `mic-*` o la plantilla de snippets | `node --test scripts/test-plantilla-estilos.mjs` | `frontend/` |
 | Páginas de la ayuda (`frontend/ayuda/`) | `npm run generar-ayuda` + `node --test scripts/test-ayuda.mjs` | `frontend/` |
 
 > [!important] Una funcionalidad nueva no se da por terminada sin su página de ayuda
@@ -26,6 +27,16 @@ orquestador como los subagentes.
 > archivo nuevo en `lib/extensionesDeTipo` hace fallar `scripts/test-ayuda.mjs` hasta
 > que una página lo declare en `cubre:`. Cómo se escribe una página: [[ayuda-integrada]]
 > § «Implementación de la parte A».
+
+> [!important] Una superficie con tokens o clases públicas actualiza la plantilla de snippets
+> Regla de `DEF-123` (2026-10-06). La plantilla de snippets (`frontend/public/plantilla-estilos.css`,
+> la de «Nuevo snippet» y «Descargar plantilla») es la documentación de lo que el usuario
+> puede estilar. Si agregás o renombrás una variable `--mic-*` de `styles/tokens.css` o una
+> clase global `mic-*` pensada para estilarse, la plantilla se toca en el mismo cambio, con un
+> ejemplo comentado. Lo obliga `node --test scripts/test-plantilla-estilos.mjs`: falla con un
+> token de `tokens.css` que la plantilla no menciona (o que no está en su lista `EXCLUIDOS`,
+> con el motivo) y con una variable o clase que la plantilla nombra y ya no existe. Las clases
+> de los `.module.css` no van: cambian en cada build.
 
 > [!info] `src-tauri/` es un workspace desde `FUN-L-09`
 > La app es el paquete raíz; en `crates/` viven `mycelium-mcp` (el servidor del
