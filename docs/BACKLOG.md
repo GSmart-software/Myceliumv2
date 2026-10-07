@@ -1299,6 +1299,13 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 - **Objetivo**: que el usuario descubra lo que puede hacer sin salir de la app.
 - **Lo difícil**: que **no se desactualice** —lo que acaba de pasar con la plantilla de
   snippets (`DEF-123`)—. Spec en [[ayuda-integrada]]. Pedida por el usuario el 2026-10-03.
+- **Parte A hecha en desktop el 2026-10-06** (rama `feat/ayuda-integrada-desktop`, sin
+  confirmar en la app): la ventana (F1, comando «Ayuda» de la paleta, botón «Ayuda» en
+  Configuración), índice de temas y subtemas, buscador, render con el motor real y
+  ejemplos copiables, el circuito `frontend/ayuda/*.md` → `lib/ayuda/paginasGeneradas.ts`
+  y el test de cobertura. Tres páginas escritas; las demás del índice están como
+  «próximamente». **Sigue ⬜ hasta la parte B** (el resto de las páginas). Detalle en
+  [[ayuda-integrada]] § «Implementación de la parte A».
 
 ### Tamaño XL
 
