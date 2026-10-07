@@ -89,6 +89,8 @@ una fila se implementa, **se mueve** a la §4 (ver «Cómo leerlo»).
 | `FUN-S-18` | `EMBED-SIN-EXTENSION` | Que un embed **resuelva por título**, como ya hacen los `[[enlaces]]`: hoy `![[Mi diagrama]]` queda escrito tal cual y hay que poner `![[Mi diagrama.excalidraw]]` o `![[Mi diagrama.drawio]]`. El reconocedor exige la extensión porque **decide por ella** qué dibuja; resolver primero el destino y mirar después su tipo es lo que falta. Salió de probar `FUN-L-20` el 2026-09-23: el usuario escribió la forma de Obsidian y no pasó nada | ambas | — |
 | `FUN-S-19` | `EMBED-CANVAS` | Que `![[lienzo.canvas]]` **muestre el lienzo** dentro de la nota, como ya hace `![[dibujo.excalidraw]]`. Hoy no dibuja nada: los embeds de canvas **nunca se implementaron** —la spec de `FUN-L-18` no los prometía— y el texto queda escrito tal cual. Se descubrió el 2026-09-23, probando `FUN-L-20`, al comparar los tres tipos: el de Excalidraw anda y los otros dos no. **Hoy solo falta el canvas**: el embed de draw.io se resolvió en `516306d` (2026-09-23) | ambas | — |
 | `FUN-S-23` | `REINDEXAR-VAULT` | Un botón en Configuración → Vault para **reconstruir el índice** desde cero, con aviso. Hoy la única vía es encontrar `index-<hash>.db` en el app-data y apartarlo a mano, que no es descubrible. Estaba bloqueado por `DEF-107`, **ya resuelto**: los snippets, la apariencia y la papelera viven en `.mycelium/` y vuelven solos. Falta una pieza: al salir de un vault la app **no cierra el índice**, así que el botón tiene que cerrarlo antes de borrarlo. Salió del incidente de `DEF-105` el 2026-09-25 | desktop | — |
+| `FUN-S-29` | `EMBED-BASE` | Embeber una vista `.base` en una nota (`![[tabla.base#Vista]]`), para que una nota índice muestre la tabla derivada en vez de una copia a mano. Propuesta 4 de [[ia-vaults-intensivos]] | desktop | — |
+| `FUN-S-30` | `MYCIGNORE-NEGACIONES` | Negaciones `!` en `.mycignore`, como en gitignore, para poder ver e indexar p. ej. `.claude/*.md` (las normas del vault) y enlazarlas. Hoy la sintaxis no las admite. Propuesta 8 de [[ia-vaults-intensivos]] | desktop | — |
 
 ### 1.2 Intermedias — tamaño M
 
@@ -102,6 +104,10 @@ una fila se implementa, **se mueve** a la §4 (ver «Cómo leerlo»).
 | `FUN-M-43` | `MERMAID-EN-VIVO` | Dibujar los diagramas **Mermaid en la vista en vivo**, como ya se ven en lectura, dividido, el PDF y la ayuda; hoy en vivo el bloque queda como código | ambas | — |
 | `FUN-M-22` | `EXPORT-FEEDBACK-DESCARGA` | Avisar de la exportación: una tarjeta abajo a la derecha que indica que se está descargando, permanece 10-15 s al terminar —con cierre manual— y ofrece **abrir la carpeta** donde quedó el archivo. Hoy exportar no da ninguna señal | ambas (difiere) | — |
 | `FUN-M-37` | `EMBED-NOTA` | **Embeber una nota dentro de otra** (transclusión), como en Obsidian: `![[nota]]` muestra su contenido en el lugar. Hoy esa sintaxis **cuenta como enlace en el grafo pero no dibuja nada**, así que el usuario que la escribe no ve ni un error. Es `M` porque renderizar markdown dentro de markdown trae lo suyo: ciclos (A embebe B que embebe A), profundidad, qué pasa con el frontmatter de la nota embebida y si se puede editar ahí o solo leer. Misma tanda que `FUN-S-18`, de probar `FUN-L-20` | ambas | — |
+| `FUN-M-44` | `VAULT-VERIFICADORES` | Los chequeos de salud y de esquemas, marcados como diagnósticos en el editor **al guardar**, y una tool `mycelium_diagnosticos` para que el agente lea lo marcado. **Sin** ejecutar comandos guardados en el vault (riesgo de seguridad). Propuesta 3 de [[ia-vaults-intensivos]] | desktop | — |
+| `FUN-M-45` | `MCP-CONSULTAR-INDICE` | Tools MCP para consultar el índice: `mycelium_buscar` (solo notas indexadas), `mycelium_enlaces` (salientes y backlinks) y `mycelium_base` (las filas de una vista `.base`). Propuesta 4 de [[ia-vaults-intensivos]] | desktop | — |
+| `FUN-M-46` | `PROPIEDADES-ESQUEMAS` | Esquemas de propiedades por carpeta o por `tipo` (claves obligatorias, tipos, valores permitidos), con avisos en el editor y aviso específico para un valor que empieza con `#` sin comillas. Propuesta 5 de [[ia-vaults-intensivos]] | desktop | — |
+| `FUN-M-47` | `RENOMBRE-ALIAS` | Al renombrar, conservar el nombre anterior como alias; y al ver un borrado + creación casi idéntica en disco, ofrecer reparar los enlaces. Depende de `FUN-M-15`. Propuesta 7 de [[ia-vaults-intensivos]] | desktop | — |
 
 ### 1.3 Grandes — tamaño L
 
@@ -113,6 +119,9 @@ una fila se implementa, **se mueve** a la §4 (ver «Cómo leerlo»).
 | `FUN-L-10` | `VAULT-INDEX-EN-RUST` | Mover el indexado entero a Rust: el walker lee y escribe el índice en el mismo proceso, en **una** transacción, sin pasar contenido por IPC. Resuelve de raíz lo que `FUN-M-12` mitigó desde el frontend (incluido el `BEGIN`/`COMMIT` que el pool de `tauri-plugin-sql` impide). Continuación de `FUN-M-12` | desktop | — |
 | `FUN-L-13` | `UI-IDIOMAS` | La interfaz en varios idiomas (español, inglés, italiano) y preparada para agregar más. Hoy todos los textos están escritos en español dentro de los componentes | ambas | — |
 | `FUN-L-21` | `DIAGNOSTICO-FALLOS` | Que **ningún fallo pase en silencio**: todo lo que sale mal, en el frontend o en Rust, deja una línea en la consola de F12 con el área, la operación y el error original. Para depurar y para usuarios experimentados. No es sembrar `console.error`: es una **fachada única** (`lib/fallos.ts`) con **tres niveles** —fallo, degradado, esperado—, destinos intercambiables, redes globales para lo que escapa de todo `catch`, `tauri-plugin-log` hacia la webview también en release, y un **chequeo automático** que impide volver a escribir un `catch {}` vacío. Medido el 2026-09-25: de 100 `catch`, **6** registran algo; 24 están vacíos y 40 siguen de largo en silencio. Pedido por el usuario el 2026-09-25. Spec en [[registro-de-fallos]] | ambas (difiere) | — |
+| `FUN-L-29` | `IA-INSTRUCCIONES-POR-CAPAS` | Instrucciones de IA en un **bloque gestionado** dentro de `CLAUDE.md` (sin archivos de conflicto), archivos de Mycelium con prefijo propio y un **núcleo de ~2 KB** con el resto en skills (~4.000 tokens menos por sesión). Framework 2.0.0. Propuesta 1 de [[ia-vaults-intensivos]] | desktop | — |
+| `FUN-L-30` | `VAULT-SALUD` | Salud del grafo con el criterio del índice: tool `mycelium_salud` (rotos, huérfanas, títulos duplicados, embeds rotos), `mycelium_validar_nota` y un panel en la app. Propuesta 2 de [[ia-vaults-intensivos]] | desktop | — |
+| `FUN-L-31` | `MCP-SESIONES` | Coordinación entre sesiones de IA: registro de sesiones activas, reservas con vencimiento (aviso, no bloqueo) en `mycelium_reservar`, y actividad agrupada por sesión. Investigar antes de especificar. Propuesta 6 de [[ia-vaults-intensivos]] | desktop | — |
 | `FUN-L-28` | `INSTALADORES-MAC-LINUX` | Instaladores de **macOS (Apple Silicon)** y **Linux (x64)**, que eran parte de la propuesta y nunca se compilaron. Los genera **GitHub Actions al fusionar un PR hacia la rama `despliegues`**. CI compila **sin** la clave del updater: firma y publica `npm run publicar -- --ci <carpeta>` en la PC del usuario, que agrega `darwin-aarch64` y `linux-x86_64` a `latest.json`. Firma de Apple ad-hoc. Decidido por el usuario el 2026-10-05. Spec en [[instaladores-mac-linux]] | desktop | — |
 
 ### 1.4 Muy grandes — tamaño XL
@@ -538,6 +547,14 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 - **Web**: `ContextMenu.*` se trae entero; en `ExplorerPanel.tsx` (divergente) van a mano
   los `icono:` y `separadorAntes:` de los menús de carpeta y de nota.
 
+#### `FUN-S-29` · `EMBED-BASE` (—)
+- Embeber una vista `.base` en una nota. Detalle en [[ia-vaults-intensivos]] § 4. Va con los
+  otros embeds pendientes (`FUN-S-19`, `FUN-M-37`).
+
+#### `FUN-S-30` · `MYCIGNORE-NEGACIONES` (—)
+- Negaciones `!` en `.mycignore`. Detalle y cuidados (orden de evaluación, carpeta ignorada que
+  no se recorre) en [[ia-vaults-intensivos]] § 8.
+
 ### Tamaño M
 
 #### `FUN-M-01` · `TRASH-PREVIEW` (C-M-13)
@@ -790,6 +807,20 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   - Siguen siempre visibles los avisos (`.warn`) y los mensajes de estado cortos
     («Cargando…», «Disponible solo con un vault en carpeta», la versión fijada).
   - El buscador de la ventana no cambia: busca por rótulo y alias, no por el texto.
+
+#### `FUN-M-44` · `VAULT-VERIFICADORES` (—)
+- Diagnósticos al guardar con los chequeos incluidos, y `mycelium_diagnosticos`. Sin comandos
+  del vault. Detalle en [[ia-vaults-intensivos]] § 3.
+
+#### `FUN-M-45` · `MCP-CONSULTAR-INDICE` (—)
+- `mycelium_buscar`, `mycelium_enlaces` y `mycelium_base`. Detalle en [[ia-vaults-intensivos]] § 4.
+
+#### `FUN-M-46` · `PROPIEDADES-ESQUEMAS` (—)
+- Esquemas de propiedades y el aviso del `#` sin comillas. Detalle en [[ia-vaults-intensivos]] § 5.
+
+#### `FUN-M-47` · `RENOMBRE-ALIAS` (—)
+- Alias al renombrar y detección de renombres hechos por fuera; depende de `FUN-M-15`. Detalle
+  en [[ia-vaults-intensivos]] § 7.
 
 ### Tamaño L
 
@@ -1321,6 +1352,16 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   «próximamente». **Sigue ⬜ hasta la parte B** (el resto de las páginas). Detalle en
   [[ayuda-integrada]] § «Implementación de la parte A».
 
+#### `FUN-L-29` · `IA-INSTRUCCIONES-POR-CAPAS` (—)
+- Bloque gestionado en `CLAUDE.md`, prefijo propio y núcleo corto. Framework 2.0.0. Detalle en
+  [[ia-vaults-intensivos]] § 1.
+
+#### `FUN-L-30` · `VAULT-SALUD` (—)
+- Salud del grafo por MCP y en un panel. Detalle en [[ia-vaults-intensivos]] § 2.
+
+#### `FUN-L-31` · `MCP-SESIONES` (—)
+- Coordinación entre sesiones de IA; investigar primero. Detalle en [[ia-vaults-intensivos]] § 6.
+
 ### Tamaño XL
 
 #### `FUN-XL-01` · `STORAGE-LOCAL-FIRST-NUBE` (C-G-03)
@@ -1718,6 +1759,15 @@ que lo impida. Lo que se pierde es diseñar dos veces el mismo selector.
 Objects no hay edición simultánea. `FUN-L-06` (historial de quién cambió qué) y
 `FUN-S-07` (afinar presencia) son parte de la misma experiencia y carecen de sentido
 sueltas. Es rearquitectura → **major**.
+
+#### Q · Mycelium para vaults con agentes — `FUN-M-45` + `FUN-L-30` + `FUN-L-29` + `FUN-S-30` + `FUN-M-46` + `FUN-M-47` + `FUN-M-44` + `FUN-S-29` + `FUN-L-31` · minor · desktop
+Salen de un documento de propuestas escrito desde un vault de uso intensivo con agentes
+(2026-10-06): con muchos agentes escribiendo, la memoria se degrada sin que nadie lo note, y
+la salida es que Mycelium **exponga lo que su índice ya calcula** y **valide** lo que el agente
+escribe. Orden propuesto: primero exponer el índice (`FUN-M-45`, `FUN-L-30`), después el
+framework por capas (`FUN-L-29`), las negaciones de `.mycignore` (`FUN-S-30`), y el resto. La
+propuesta 9 (diagnóstico de `.mycignore`) se descartó por decisión del usuario. Ver
+[[ia-vaults-intensivos]].
 
 #### P · Configuración que se lee y que enseña — `FUN-M-41` + `FUN-S-25` + `FUN-L-27` + `DEF-123` · minor · ambas
 Todo pasa por la ventana de ajustes: menos texto en cada ajuste (`FUN-M-41`), el
