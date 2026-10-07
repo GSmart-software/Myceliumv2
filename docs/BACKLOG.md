@@ -99,6 +99,7 @@ una fila se implementa, **se mueve** a la §4 (ver «Cómo leerlo»).
 | `FUN-M-15` | `LINKS-POR-ALIAS` | Resolver `[[enlaces]]` por la propiedad `aliases` de la nota destino: hoy se parsea e indexa pero **no tiene comportamiento**. Toca la resolución de wikilinks, el autocompletado y el grafo. Continuación de `FUN-M-04` | ambas | — |
 | `FUN-M-18` | `EDITOR-REINDENTAR` | Reindentar las notas al ancho de tabulación configurado, para que el cambio se vea también en la vista en vivo y no solo al leer. Es una **edición masiva del vault**: reutiliza el respaldo, el manifiesto y el deshacer de `FUN-M-17`. Continuación de `FUN-S-02` | ambas | — |
 | `FUN-M-23` | `MERMAID-VISOR` | Visor propio para los diagramas Mermaid en la vista de lectura: al hacer clic se abre una ventana interna donde el diagrama se maneja como una imagen —**zoom** y **desplazamiento**—, porque hoy uno grande no se puede leer. **Segunda fase, si la primera sale bien**: sobre esa ventana, un **dibujo efímero** con unos pocos colores (se borra al cerrar, no se guarda nada) y un **puntero láser** para señalar sin dibujar. Pensado para explicar un diagrama a alguien | ambas | — |
+| `FUN-M-43` | `MERMAID-EN-VIVO` | Dibujar los diagramas **Mermaid en la vista en vivo**, como ya se ven en lectura, dividido, el PDF y la ayuda; hoy en vivo el bloque queda como código | ambas | — |
 | `FUN-M-22` | `EXPORT-FEEDBACK-DESCARGA` | Avisar de la exportación: una tarjeta abajo a la derecha que indica que se está descargando, permanece 10-15 s al terminar —con cierre manual— y ofrece **abrir la carpeta** donde quedó el archivo. Hoy exportar no da ninguna señal | ambas (difiere) | — |
 | `FUN-M-37` | `EMBED-NOTA` | **Embeber una nota dentro de otra** (transclusión), como en Obsidian: `![[nota]]` muestra su contenido en el lugar. Hoy esa sintaxis **cuenta como enlace en el grafo pero no dibuja nada**, así que el usuario que la escribe no ve ni un error. Es `M` porque renderizar markdown dentro de markdown trae lo suyo: ciclos (A embebe B que embebe A), profundidad, qué pasa con el frontmatter de la nota embebida y si se puede editar ahí o solo leer. Misma tanda que `FUN-S-18`, de probar `FUN-L-20` | ambas | — |
 
@@ -748,6 +749,19 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 - **Lo que hay que decidir**: ciclos (A embebe B que embebe A), profundidad máxima, si se
   muestra el frontmatter de la embebida, si se puede embeber un trozo (`![[nota#título]]`) y
   si desde el embed se edita o solo se lee.
+
+#### `FUN-M-43` · `MERMAID-EN-VIVO` (—)
+- **Qué es**: en la vista en vivo, un bloque ```` ```mermaid ```` se dibuja como diagrama
+  cuando el cursor no está adentro, igual que las tablas o las fórmulas en bloque; con el
+  cursor adentro vuelve a ser texto para editarlo.
+- **De dónde sale**: lo encontró la parte B de la ayuda integrada (`FUN-L-27`, 2026-10-06)
+  al verificar contra el código; la página «Fórmulas y diagramas» avisa que en vivo no se
+  dibuja. Registrada como pendiente por el usuario el mismo día.
+- **A tener en cuenta**: Mermaid renderiza asíncrono y su alto no se conoce hasta dibujarlo,
+  así que el widget tiene que medir después (`requestMeasure`, como las imágenes de
+  `DEF-126`) para no descolocar el cursor. Comparte motor con `FUN-M-23` (el visor con zoom
+  de lectura): conviene hacerlas juntas, y el clic en el diagrama en vivo puede abrir ese
+  visor.
 
 #### `FUN-M-41` · `UX-AJUSTES-MENOS-TEXTO` — 🛠️ desktop
 - **Qué es**: una pasada sobre la ventana de Configuración para que **se lea de un
@@ -1736,7 +1750,7 @@ dígito es el que sugiere la guía «Relación tamaño ↔ versión», no uno ac
 | `FUN-S-23` `REINDEXAR-VAULT` | **Sin agrupar**. Roza el bloque A (índice del vault), pero no comparte su código: es un botón en Configuración → Vault que cierra y borra el índice | minor |
 | `FUN-M-18` `EDITOR-REINDENTAR` | **Sin agrupar**. Es continuación de `FUN-S-02` y reutiliza el respaldo, el manifiesto y el deshacer de `FUN-M-17`, así que conviene hacerla **después** de completar esa | minor |
 | `FUN-M-22` `EXPORT-FEEDBACK-DESCARGA` | **Sin agrupar**. Solo toca la exportación | minor |
-| `FUN-M-23` `MERMAID-VISOR` | **Sin agrupar**. Solo toca la vista de lectura de los diagramas Mermaid | minor |
+| `FUN-M-23` `MERMAID-VISOR` + `FUN-M-43` `MERMAID-EN-VIVO` | **Sin agrupar** con el resto, pero juntas entre sí: las dos son el render de Mermaid —el visor con zoom en lectura y el dibujo en la vista en vivo— | minor |
 | `FUN-L-21` `DIAGNOSTICO-FALLOS` | **Sin agrupar**. Recorre todo el proyecto (frontend y Rust), así que no comparte código con una funcionalidad concreta sino con todas | a decidir: el usuario común no ve nada nuevo (patch), pero gana un registro para usuarios experimentados |
 
 ### Las dos que pueden viajar de acompañantes
