@@ -16,6 +16,16 @@ orquestador como los subagentes.
 | Reflejo a web | `npm ci` + `tsc` + `npx next build` | worktree de `web-cloud` |
 | Módulo con tests headless | `node --test scripts/test-<modulo>.mjs` | `frontend/` |
 | Smoke tests (si aplica) | `node scripts/smoke-*.mjs` | `frontend/` |
+| Páginas de la ayuda (`frontend/ayuda/`) | `npm run generar-ayuda` + `node --test scripts/test-ayuda.mjs` | `frontend/` |
+
+> [!important] Una funcionalidad nueva no se da por terminada sin su página de ayuda
+> Regla de [[ayuda-integrada]] (`FUN-L-27`, 2026-10-06). Si el usuario puede hacer algo
+> que antes no podía, la ayuda integrada (F1) tiene que contarlo: una página nueva o un
+> párrafo en la que corresponde, con un ejemplo ```` ```ejemplo ```` si es sintaxis. Si
+> cambia una sintaxis o un atajo, se corrige la página en el mismo cambio. Un tipo de
+> archivo nuevo en `lib/extensionesDeTipo` hace fallar `scripts/test-ayuda.mjs` hasta
+> que una página lo declare en `cubre:`. Cómo se escribe una página: [[ayuda-integrada]]
+> § «Implementación de la parte A».
 
 > [!info] `src-tauri/` es un workspace desde `FUN-L-09`
 > La app es el paquete raíz; en `crates/` viven `mycelium-mcp` (el servidor del
