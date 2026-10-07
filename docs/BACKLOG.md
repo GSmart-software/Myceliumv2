@@ -112,7 +112,6 @@ una fila se implementa, **se mueve** a la §4 (ver «Cómo leerlo»).
 | `FUN-L-10` | `VAULT-INDEX-EN-RUST` | Mover el indexado entero a Rust: el walker lee y escribe el índice en el mismo proceso, en **una** transacción, sin pasar contenido por IPC. Resuelve de raíz lo que `FUN-M-12` mitigó desde el frontend (incluido el `BEGIN`/`COMMIT` que el pool de `tauri-plugin-sql` impide). Continuación de `FUN-M-12` | desktop | — |
 | `FUN-L-13` | `UI-IDIOMAS` | La interfaz en varios idiomas (español, inglés, italiano) y preparada para agregar más. Hoy todos los textos están escritos en español dentro de los componentes | ambas | — |
 | `FUN-L-21` | `DIAGNOSTICO-FALLOS` | Que **ningún fallo pase en silencio**: todo lo que sale mal, en el frontend o en Rust, deja una línea en la consola de F12 con el área, la operación y el error original. Para depurar y para usuarios experimentados. No es sembrar `console.error`: es una **fachada única** (`lib/fallos.ts`) con **tres niveles** —fallo, degradado, esperado—, destinos intercambiables, redes globales para lo que escapa de todo `catch`, `tauri-plugin-log` hacia la webview también en release, y un **chequeo automático** que impide volver a escribir un `catch {}` vacío. Medido el 2026-09-25: de 100 `catch`, **6** registran algo; 24 están vacíos y 40 siguen de largo en silencio. Pedido por el usuario el 2026-09-25. Spec en [[registro-de-fallos]] | ambas (difiere) | — |
-| `FUN-L-27` | `AYUDA-INTEGRADA` | Una **ayuda** dentro de Configuración, tipo wiki, con todo lo que Mycelium ofrece: cada herramienta y los estilos especiales del markdown propios de Mycelium (p. ej. los `_` que estilan distinto que `*`). Spec en [[ayuda-integrada]] | ambas | — |
 | `FUN-L-28` | `INSTALADORES-MAC-LINUX` | Instaladores de **macOS (Apple Silicon)** y **Linux (x64)**, que eran parte de la propuesta y nunca se compilaron. Los genera **GitHub Actions al fusionar un PR hacia la rama `despliegues`**. CI compila **sin** la clave del updater: firma y publica `npm run publicar -- --ci <carpeta>` en la PC del usuario, que agrega `darwin-aarch64` y `linux-x86_64` a `latest.json`. Firma de Apple ad-hoc. Decidido por el usuario el 2026-10-05. Spec en [[instaladores-mac-linux]] | desktop | — |
 
 ### 1.4 Muy grandes — tamaño XL
@@ -241,6 +240,7 @@ mientras estaba pendiente; el detalle de lo construido está en la spec de cada 
 
 | ID | Nombre | Descripción | Aplica | Orig. |
 |---|---|---|---|---|
+| `FUN-L-27` 🛠️ | `AYUDA-INTEGRADA` | Una **ayuda** tipo wiki, en su propia ventana (F1, la paleta o Configuración): 33 páginas en 8 temas, con buscador y ejemplos dibujados con el motor real. **Implementada en desktop el 2026-10-06** (partes A y B), sin confirmar en la app; web después. Spec en [[ayuda-integrada]] | ambas | — |
 | `FUN-L-03` 🛠️ | `FILES-BASES-TABLA` | Archivo `.base` (formato de Obsidian) que agrega notas por sus propiedades y las muestra en una tabla, con filtros y columnas configurables. Solo lectura. **Implementado en las dos ramas** el 2026-08-08 (sin confirmar); sale en la [[Version 1.6.0]]; spec en [[bases-tabla]] | ambas | C-I-07b |
 | `FUN-L-08` 🛠️ | `IA-FRAMEWORK-VAULT` | Framework IA versionado generado en el vault (CLAUDE.md + **8 skills** —desde la `1.7.0` del framework, con `FUN-L-26`— + 6 comandos en `.claude/`) para que Claude Code use el vault como **memoria**: recuperar antes de responder y consolidar lo que valga recordar, navegando por vínculos. Botón opt‑in en Configuración → Vault. **Implementada** (sin confirmar explícitamente). El framework salió en [[Version 1.1.0]]; spec en `docs/features/ia-framework-vault.md` | desktop | — |
 | `FUN-L-09` 🛠️ | `IA-MCP-MYCELIUM` | Servidor MCP de **control** de Mycelium: la IA muestra cosas en pantalla, modifica el calendario y el diccionario del vault, renombra y mueve sin romper enlaces y usa la papelera. La mitad de búsqueda se evaluó y **no entra** ([[mcp-control]]). **Las cuatro partes integradas en `desktop-tauri`** el 2026-10-03 (merge `bb35fa9`), pendientes de confirmación del usuario en la app; sin publicar | desktop | — |
@@ -1290,7 +1290,7 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   instalador quedó en 40,3 MB, por encima de lo estimado, y el usuario lo aceptó.
 - Spec completa en [[drawio]].
 
-#### `FUN-L-27` · `AYUDA-INTEGRADA`
+#### `FUN-L-27` · `AYUDA-INTEGRADA` — 🛠️ desktop
 - **Qué es**: una sección de **ayuda** en Configuración, navegable como una wiki: una página
   por herramienta (notas, propiedades, Esporas, bases, lienzos, dibujos, draw.io,
   calendario, grafo, terminal, corrector, IA del vault…) y una referencia de la **sintaxis

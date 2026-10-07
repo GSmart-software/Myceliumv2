@@ -795,6 +795,23 @@ cita o de un callout** marca o desmarca **otra tarea** de la nota, no la que se 
 Detectado el 2026-10-04 al implementar `FUN-S-01` (leyendo el código), sin reproducir antes
 en la app.
 
+# DEF-130
+En el **editor de un snippet de CSS** (Configuración → CSS), la **X** de la esquina cierra el
+editor **sin guardar y sin preguntar**: lo escrito desde el último «Guardar» se pierde. La
+tecla **Escape**, en cambio, no cierra el editor.
+
+Detectado el 2026-10-06 al escribir la página de ayuda «CSS y snippets» (`FUN-L-27`), leyendo
+el código; sin reproducir todavía en la app.
+
+# DEF-131
+Las **instrucciones de IA del vault** (la skill de sintaxis `mycelium-vault`) le dicen a la IA
+dos cosas que Mycelium no hace: que `![[Título]]` de una nota **muestra su contenido dentro**
+de la otra (hoy se ve como `!` seguido de un enlace común) y que una `#etiqueta` es una
+**píldora clicable** (hoy el clic en una etiqueta no hace nada). La IA puede apoyarse en eso y
+prometerle al usuario algo que no va a ver.
+
+Detectado el 2026-10-06 al escribir las páginas de ayuda de enlaces y etiquetas (`FUN-L-27`).
+
 ---
 
 > [!warning] Defectos sin reporte original

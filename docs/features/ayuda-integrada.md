@@ -1,6 +1,6 @@
 # Ayuda integrada
 
-`FUN-L-27` · **ambas** · pedida por el usuario el 2026-10-03 · en implementación (desktop) desde el 2026-10-06 · **parte A hecha** el 2026-10-06, sin
+`FUN-L-27` · **ambas** · pedida por el usuario el 2026-10-03 · implementada en desktop el 2026-10-06 (partes A y B), sin confirmar en la app · **parte A hecha** el 2026-10-06, sin
 confirmar en la app (ver § «Implementación de la parte A»)
 
 ## Qué se pide
@@ -212,6 +212,27 @@ Todo es frontend. En web, `VERSION_AYUDA` (`lib/ayuda/indice.ts`) pasa a `"web"`
 desaparecen las páginas `solo: desktop` (draw.io, otros archivos, terminal, `.mycignore`,
 actualizaciones, IA). La página «Qué es un vault» habla de una carpeta de la computadora:
 en web habrá que escribir su versión (`solo: web`) o generalizarla.
+
+## Parte B: hecha (2026-10-06)
+
+Las 30 páginas que faltaban, escritas por cuatro subagentes en paralelo, uno por grupo de
+temas, con la regla de que toda afirmación salga del código o de la documentación y de dejar
+afuera lo que no se pudiera confirmar. El test «ninguna página pendiente» quedó activo.
+
+Lo que encontraron al verificar contra el código:
+
+- `DEF-130`: la X del editor de un snippet de CSS cierra sin guardar ni preguntar.
+- `DEF-131`: la skill de sintaxis de la IA promete el embed de una nota (`FUN-M-37`, sin hacer)
+  y etiquetas clicables.
+- `[[Nota#Encabezado]]` no resuelve (el `#` no se quita al buscar la nota): no se documentó.
+- Mermaid se dibuja en lectura, dividido, PDF y la ayuda, pero **no en la vista en vivo**: la
+  página lo avisa.
+- El clic en un enlace roto no crea la nota (Obsidian sí): la página lo describe como es.
+
+**Para web**: «Qué es un vault», «La interfaz» y «Atajos de teclado» nombran cosas que web no
+tiene (carpeta del equipo, consolas, actividad de la IA, F12); hay que escribir su variante
+`solo: web` o recortarlas. «CSS y snippets» dice que los snippets viven en el vault, y en web
+son del usuario. «Imágenes y embebidos» menciona draw.io «en la versión de escritorio».
 
 ## Relacionadas
 

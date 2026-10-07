@@ -18,6 +18,8 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | Bug | Descripción corta | Alcance | Estado |
 |---|---|---|---|
 | DEF-123 | La plantilla de snippets describe la interfaz de junio: le falta todo lo posterior | ambas (frontend, `public/plantilla-estilos.css`) | ⬜ registrado (2026-10-03). Comprobado: las 18 variables y las clases que usa siguen existiendo —no está rota—, pero su último cambio es del 2026-06-22 y cubre 18 de 98 tokens; no conoce atmósferas, paleta, propiedades, bases, canvas, calendario ni draw.io |
+| DEF-130 | La X del editor de un snippet de CSS cierra sin guardar ni preguntar | ambas (frontend, `components/settings/CssEditorModal.tsx`) | ⬜ registrado (2026-10-06). Causa localizada: la X llama a `onClose` directo, sin guardar ni confirmar; Escape está anulado a propósito para no perder cambios, pero la X quedó sin esa defensa |
+| DEF-131 | Las instrucciones de IA describen el embed de una nota y las etiquetas clicables, que no existen | desktop (framework de IA) | ⬜ registrado (2026-10-06). Causa: la tabla de sintaxis de `lib/ia/framework.ts` dice «Muestra el contenido inline» para `![[Título]]` (pendiente como `FUN-M-37`) y «Píldora clicable» para `#tag`. Arreglo: corregir el texto y subir `FRAMEWORK_IA_VERSION` (patch) |
 
 ## Corregidos
 
