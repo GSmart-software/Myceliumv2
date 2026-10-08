@@ -283,6 +283,16 @@ y qué principio general dejó.
     Costo: sin `ORDER BY rank` puro, FTS5 ya no ordena por dentro y el `snippet` se calcula
     para cada coincidencia antes de ordenar: con 20.000 notas que TODAS coinciden, de 31 a
     61 ms; con ~1 000 coincidencias, de 2,6 a 6 ms. Ver [[bugs-progreso]].
+27. **Lo que se muestra de un índice FTS se limpia al indexar, no al pintar.** El fragmento
+    de un resultado es el `snippet()` de la columna, que corta diez palabras en cualquier
+    lugar: limpiarlo después no sabe qué hacer con `…Pulgón|pulgones]]` partido a la mitad
+    (`DEF-148`). Por eso la columna que da el fragmento guarda el texto **como se lee**
+    (`lib/textoBuscable.ts`), y lo que debe encontrarse sin verse —valores de propiedades,
+    destinos de alias, URLs— va a otra columna (`extra`) del mismo FTS: `MATCH` sin filtro
+    de columna busca en las dos, y `{contenido extra} : …` restringe a ambas. Un FTS5 **no
+    admite `ALTER TABLE ADD COLUMN`**: cambiarle columnas es borrarlo y recrearlo, y la
+    reparación de notas sin fila de búsqueda (`DEF-121`) hace el resto sin código propio.
+    Ver [[bugs-progreso]].
 
 ## Relacionadas
 
