@@ -246,6 +246,13 @@ y qué principio general dejó.
     `blur` tardío de la edición de texto cierre el arrastre que lo provocó. Y un historial
     de snapshots **se descarta al recargar desde disco**: volver a uno de ellos pisaría lo
     que llegó de afuera. Ver [[bugs-progreso]].
+23. **«No pisar lo que se está editando» no basta: tampoco hay que pisar lo de afuera.**
+    El editor ignoraba el aviso del watcher mientras la nota estaba sucia, y el guardado
+    escribía sin mirar el disco: lo que había escrito la IA desaparecía (`DEF-138`). Todo
+    guardado que parte de una lectura tiene que comparar el disco con **esa base** justo
+    antes de escribir —leyendo el archivo, no el índice, que va detrás del watcher— y, si
+    los dos lados cambiaron, no decidir solo. Y la base es de la pestaña: tomar el disco
+    como base al volver a ella absorbe el cambio de afuera. Ver [[def-138-cambio-externo]].
 
 ## Relacionadas
 
