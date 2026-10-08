@@ -283,6 +283,13 @@ y qué principio general dejó.
     Costo: sin `ORDER BY rank` puro, FTS5 ya no ordena por dentro y el `snippet` se calcula
     para cada coincidencia antes de ordenar: con 20.000 notas que TODAS coinciden, de 31 a
     61 ms; con ~1 000 coincidencias, de 2,6 a 6 ms. Ver [[bugs-progreso]].
+27. **Una regla de resolución que se agrega en una sola punta vuelve a partir el
+    resolutor único.** `FUN-M-40` dejó un resolutor para el editor y el grafo, pero
+    `FUN-L-25` le enseñó el ancla (`[[Nota#Sección]]`) solo al grafo, envolviéndolo en
+    `lib/enlacesNota.ts`: el grafo contaba la arista y el editor, la lectura, el lienzo y
+    el calendario pintaban el mismo enlace roto (`DEF-141`). La regla nueva va **dentro**
+    del resolutor compartido (`resolveWikilinkEnIndice`), no en un envoltorio de quien la
+    necesitó primero. Ver [[bugs-progreso]].
 
 ## Relacionadas
 
