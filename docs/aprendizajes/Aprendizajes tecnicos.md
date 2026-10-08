@@ -237,6 +237,13 @@ y qué principio general dejó.
     que la tarjeta podía tener otro id que el «en edición» y nunca abría su texto. Lo que no
     es determinista (`Math.random`, `Date.now`) y los otros `setState` van afuera. Ver
     [[bugs-progreso]].
+22. **«No pisar lo que se está editando» no basta: tampoco hay que pisar lo de afuera.**
+    El editor ignoraba el aviso del watcher mientras la nota estaba sucia, y el guardado
+    escribía sin mirar el disco: lo que había escrito la IA desaparecía (`DEF-138`). Todo
+    guardado que parte de una lectura tiene que comparar el disco con **esa base** justo
+    antes de escribir —leyendo el archivo, no el índice, que va detrás del watcher— y, si
+    los dos lados cambiaron, no decidir solo. Y la base es de la pestaña: tomar el disco
+    como base al volver a ella absorbe el cambio de afuera. Ver [[def-138-cambio-externo]].
 
 ## Relacionadas
 
