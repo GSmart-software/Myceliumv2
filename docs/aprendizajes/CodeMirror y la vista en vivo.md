@@ -95,6 +95,16 @@ Lo que hay que sostener cuando un widget deja de ser un adorno y pasa a editar e
 >   cambian, la quinta regla obliga a medir en cada `mouseover`. Reservarles el lugar con
 >   `visibility` y sacar el menú del flujo con `position: absolute` lo evita de raíz.
 
+> [!warning] Al cerrar un control del widget, el foco hay que devolverlo a mano (`DEF-139`)
+> Quitar del DOM un `<input>` enfocado deja el foco en `<body>`: lo que se teclee después
+> no va a ningún lado. Todo control que se cierre por teclado (Enter, Esc) tiene que decir
+> adónde va el foco. Y ojo con **cuál** vista: si la acción del control cambia el id de la
+> nota —renombrar, en modo carpeta el id es la ruta—, `NoteEditor` **destruye la vista y
+> crea otra**; la `view` que el widget recibió ya está desmontada cuando la acción termina.
+> El título lo resuelve con un facet (`salirDelTitulo`) que el editor implementa sobre
+> `viewRef`, un frame después, y con un pendiente que toma `createView` si la nueva todavía
+> no existe.
+
 > [!tip] Lo que CodeMirror ya resuelve solo
 > Las mutaciones del DOM **dentro** de un widget se ignoran (`readMutation` devuelve `null`
 > para los tiles de widget), y la selección no se fuerza mientras el `activeElement` no sea
