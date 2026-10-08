@@ -107,6 +107,9 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
 - [[busqueda-modos-y-arbol]] — elegir dónde busca el panel del vault, ver los resultados
   por carpeta, y las guías de indentación (`FUN-M-20` · `FUN-S-17`).
 - [[titulo-renombra]] — escribir en el título de la nota renombra el archivo (`FUN-M-24`).
+- [[titulos-homonimos]] — dos notas con el mismo título: renombrar, crear o mover nunca
+  cambia a dónde lleva un enlace; los que cambiarían van con su ruta, y un aviso lo cuenta
+  (`DEF-134`).
 - [[metadata-yaml]] — frontmatter YAML como propiedades: ver, editar e indexar (`FUN-M-04`).
 - [[ventanas-multiples]] — varios vaults abiertos a la vez, uno por ventana (`FUN-L-16`).
 - [[auditoria-y-relinkeado]] — adoptar un vault que ya existía: descubrir cómo se
