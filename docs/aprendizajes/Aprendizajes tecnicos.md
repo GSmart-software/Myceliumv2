@@ -290,6 +290,15 @@ y qué principio general dejó.
     el calendario pintaban el mismo enlace roto (`DEF-141`). La regla nueva va **dentro**
     del resolutor compartido (`resolveWikilinkEnIndice`), no en un envoltorio de quien la
     necesitó primero. Ver [[bugs-progreso]].
+28. **Un atributo de presentación HTML (`align`, `width`, `bgcolor`) pierde contra
+    cualquier regla CSS de autor.** El navegador lo aplica con especificidad cero, así que
+    `.mic-preview td { text-align: left }` pisaba el `align="right"` que remark-rehype pone
+    en las celdas de una columna `---:`, y en lectura todas las columnas quedaban a la
+    izquierda (`DEF-143`). No hacía falta sospechar de un sanitizador: no había. La salida
+    es nombrar el atributo en el selector (`.mic-preview td[align="right"]`), que gana por
+    especificidad sin abrir `style` en línea. Cuando una regla base fija una propiedad que
+    el HTML generado también fija, **comprobá que el caso particular siga ganando**. Ver
+    [[bugs-progreso]].
 
 ## Relacionadas
 
