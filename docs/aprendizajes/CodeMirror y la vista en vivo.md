@@ -324,6 +324,22 @@ debajo del puntero antes del `click`— y la posición del documento pedida al D
 momento (`view.posAtDOM(span)`), no guardada al dibujar. Antes de escribir se comprueba que
 ahí siga habiendo un marcador.
 
+## Esconder una línea entera: widget, no `Decoration.replace({})` (`DEF-150 k`)
+
+Para que las cercas ` ``` ` de un bloque de código desaparezcan con el cursor fuera, no
+sirve reemplazarlas por nada: una línea cuyo contenido queda todo oculto se queda sin
+nada que le dé alto en el DOM y puede colapsar (y con ella el height-map). Se reemplazan
+por un widget que ocupa la línea (`display: inline-block; width: 100%; min-height: 1em`),
+el mismo truco de la regla horizontal (`HrWidget`). De paso, el widget de la apertura
+muestra el lenguaje. Con `ignoreEvent() → false`, un clic en él lleva el cursor ahí y la
+cerca reaparece en crudo. «Activo» es **el bloque**, no la línea: cualquier línea del
+bloque con el cursor muestra las dos cercas.
+
+La viñeta «•» de una lista (`DEF-150 b`) es el mismo patrón al revés: el widget ocupa **un**
+carácter, igual que el `-` que reemplaza, para que la sangría no salte al entrar y salir de
+la línea. En una tarea se oculta de `ListMark.from` a `TaskMarker.from` (dos reemplazos
+contiguos, sin solaparse: el de la casilla empieza donde termina el otro).
+
 ## Relacionadas
 
 - [[Aprendizajes tecnicos]] — mapa del área.
