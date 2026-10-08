@@ -980,6 +980,15 @@ notas que tienen la palabra `x` en el texto o en una propiedad. `tag:solanaceas`
 
 Detectado el 2026-10-07 al arreglar `DEF-144` ([[Auditoria e2e 2026-10-07]]).
 
+
+# DEF-153
+Sin conexión a internet, el **texto de los dibujos de Excalidraw** se ve con la fuente del
+sistema en lugar de la letra a mano de Excalidraw. Mycelium pide esas fuentes a un servidor
+externo (`esm.sh`) cada vez que abre un dibujo, aunque es una app de escritorio que debería
+funcionar sin red.
+
+Detectado el 2026-10-08 al arreglar `DEF-147` ([[Auditoria e2e 2026-10-07]]).
+
 ---
 
 > [!warning] Defectos sin reporte original

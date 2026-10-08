@@ -22,6 +22,7 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-150 | Lote de 14 detalles de la auditoría e2e (a–n) | ambas (frontend) | ⬜ registrado (2026-10-07). Se arreglan juntos, en una rama. Lista en el catálogo y en [[Auditoria e2e 2026-10-07]] |
 | DEF-151 | En el lienzo, una flecha entre tarjetas dentro de un grupo queda tapada por el grupo | ambas (frontend, lienzo) | ⬜ registrado (2026-10-07). Visto al armar el lienzo del vault demo «Bosque de hongos» para la landing |
 | DEF-152 | Búsqueda: `tag:x` trae también notas con la palabra `x` en el texto o en una propiedad | ambas (búsqueda) | ⬜ registrado (2026-10-07), detectado al arreglar `DEF-144` |
+| DEF-153 | Sin red, el texto de los dibujos de Excalidraw sale con la fuente del sistema: las fuentes se piden a `esm.sh` | desktop (frontend, assets de Excalidraw) | ⬜ registrado (2026-10-08), detectado al arreglar `DEF-147` |
 
 ## Corregidos
 
