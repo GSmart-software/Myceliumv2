@@ -62,7 +62,7 @@ enlaces los arregla ella con grep.
 
 ## Versionado
 
-- `FRAMEWORK_IA_VERSION` en `frontend/lib/ia/framework.ts` (hoy `2.0.0`),
+- `FRAMEWORK_IA_VERSION` en `frontend/lib/ia/framework.ts` (hoy `2.1.0`),
   independiente de la versión de la app. **Al agregar funciones a Mycelium que la
   IA deba conocer, subir la versión y actualizar los templates.**
   - `1.0.0` — primera versión.
@@ -156,6 +156,11 @@ enlaces los arregla ella con grep.
     `.claude/commands/mycelium/` y la regla «no edites lo que lleva prefijo `mycelium`».
     Desaparecen la copia `CLAUDE (mycelium-ia vX).md` y `Conflictos instrucciones IA.md`.
     Major: cambia dónde y cómo se instala, y qué es de quién. Detalle abajo.
+  - `2.1.0` — lo que cambió con los defectos de la [[Auditoria e2e 2026-10-07]]: la sintaxis
+    `[[Nota#Encabezado]]`, `[[#Encabezado]]` y `[[Nota#^bloque]]` (`DEF-141`); en una nota con
+    cambios sin guardar, un cambio externo ya no se pierde: el usuario ve una barra y elige
+    (`DEF-138`); la nota creada desde una Espora se llama «Espora 1», «Espora 2»… (`DEF-140`).
+    Minor: conocimiento nuevo sobre la app. 2026-10-08, sin publicar.
 - Cada archivo de `.claude/` lleva el marcador `<!-- mycelium-ia vX -->` (los `.mjs`, en un
   comentario de su primera línea); el bloque de `CLAUDE.md` lleva la versión en su marcador
   de inicio; la versión instalada vive en `.claude/mycelium-ia.json`.
