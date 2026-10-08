@@ -96,6 +96,20 @@ entero en memoria. Los comandos sin `async` corren en el **hilo principal**: el 
 copie mucho va con `#[tauri::command(async)]`. Caso: `FUN-S-26`, en
 [[archivos-del-vault-en-vivo]].
 
+## `invoke` rechaza con TEXTO, no con un `Error`
+
+Un comando que devuelve `Result<_, String>` —y el plugin SQL, que serializa sus errores
+como texto— llega al `catch` como `"UNIQUE constraint failed: notas.id"`. El patrón
+`e instanceof Error ? e.message : "Error desconocido"` **tira ese texto**: el usuario y el
+registro ven «Error desconocido». Para sacar el mensaje de cualquier rechazo está
+`mensajeDeError` (`lib/mensajeError.ts`). Pasó dos veces: al abrir un vault ya abierto en
+otra ventana (arreglado a mano en `vaultSessionStore`) y en todo el dispatcher `lib/api.ts`
+(`DEF-136`).
+
+Y la otra mitad de ese defecto: **elegir un nombre libre y ocuparlo tiene que ser un solo
+paso**. Entre leer el índice y el `INSERT` hay `await` de IPC; dos creaciones seguidas
+eligen el mismo nombre. Las creaciones van por la cola `conNombreReservado` (`vaultFs.ts`).
+
 ## Relacionadas
 
 - [[Aprendizajes tecnicos]] — mapa del área.
