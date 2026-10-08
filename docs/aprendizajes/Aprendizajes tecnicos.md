@@ -317,6 +317,17 @@ y qué principio general dejó.
     `window.EXCALIDRAW_ASSET_PATH`. Al integrar una librería con UI, revisá **idioma** y
     **de dónde baja lo que carga en tiempo de ejecución**, y pasá el idioma desde **una
     constante** (`IDIOMA_EXCALIDRAW`) para que ninguna instancia nueva lo olvide.
+31. **Para el FTS, la puntuación no existe: un término `"#x"` es la palabra `x`.** El
+    tokenizador `unicode61` descarta todo lo que no es letra ni número, así que `tag:x`
+    —que se buscaba como `"#x"*`— encontraba la palabra en cualquier lado, y
+    `tag:solanaceas` traía la nota que solo decía `familia: solanáceas` (`DEF-152`). Lo que
+    tiene estructura (una etiqueta, una propiedad) se filtra por **su tabla** del índice
+    —`etiquetas`, ya derivada para el grafo—, plegado como el texto y con índice. Una
+    jerarquía con separador (`huerta/riego`) se pide por índice como igualdad **o** rango
+    (`t = 'x' OR (t > 'x/' AND t < 'x0')`: `0` es el carácter que sigue a `/`), que SQLite
+    resuelve con `MULTI-INDEX OR`. Y si una consulta auxiliar filtra por la clave de un
+    índice que no conviene (`clave_plegada = 'tags'` recorre las `tags` del vault entero),
+    `+columna` la saca del índice y deja que mande el de `nota_id`. Ver [[bugs-progreso]].
 
 ## Relacionadas
 
