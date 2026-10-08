@@ -215,6 +215,17 @@ y qué principio general dejó.
     texto: desaparecía entera (`DEF-132`). Al decorar o esconder un nodo del árbol de
     `@lezer/markdown`, preguntá **dentro de qué** está (`node.node.parent?.name`) antes de
     tratarlo, sobre todo si lo que hacés es ocultarlo. Ver [[bugs-progreso]].
+20. **Cuando la referencia es un nombre y no una identidad, toda operación que cambia nombres
+    o profundidades cambia a dónde llevan referencias que nadie tocó.** `[[Tomate]]` no
+    apunta a un archivo: apunta a «la nota llamada Tomate más cercana a la raíz». Renombrar
+    otra nota a «Tomate» en la raíz **robaba** los enlaces del cultivo sin escribir un byte,
+    y el renombrado siguiente —que repara «los enlaces que llegan a esta nota» según el
+    índice— los reescribía hacia la nota equivocada: el índice había registrado el robo como
+    verdad (`DEF-134`). La reparación no puede preguntar «quién enlaza a lo que cambia» sino
+    «a dónde llevaba cada enlace **antes**, y a dónde lleva **después**»: se resuelve contra
+    los dos estados del vault y se escribe con ruta lo que cambiaría. Y eso hay que leerlo
+    antes de la operación, porque después el índice ya re-resolvió. Ver
+    [[titulos-homonimos]].
 
 ## Relacionadas
 
