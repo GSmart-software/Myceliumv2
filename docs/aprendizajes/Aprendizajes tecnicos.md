@@ -338,6 +338,19 @@ y qué principio general dejó.
     `elementFromPoint` **ignora** lo que tiene `pointer-events: none` (como el SVG de las
     flechas): en la prueba se le da `pointer-events: stroke` y así responde si, y solo si,
     está pintado encima (`scripts/smoke-lienzo-grupos.mjs`). Ver [[bugs-progreso]].
+33. **En React 19, `dangerouslySetInnerHTML={{ __html }}` reasigna `innerHTML` en cada
+    render, aunque el texto sea el mismo.** React compara la prop por **identidad del
+    objeto**, y el literal crea uno nuevo por render. Todo lo que un efecto agrega después
+    al DOM de ese HTML —el dibujo de un embed de Excalidraw o draw.io, un Mermaid, los
+    botones de copiar, las flechas de plegado— se borra con cualquier re-render ajeno, y
+    si el efecto que decora no tiene esa causa entre sus dependencias, no vuelve a correr:
+    quedaba el placeholder «Diagrama Croquis de la huerta» hasta que la nota cambiara
+    (`DEF-133`; `DEF-050` era el mismo mecanismo con las flechas de plegado, y se tapó
+    corriendo ese efecto en cada render). Para HTML que se decora, el objeto se
+    **memoiza** con las mismas dependencias que el efecto decorador
+    (`lib/useHtmlDecorable.ts`): el HTML crudo vuelve solo cuando el efecto va a volver a
+    correr. Prueba en Chromium con el React real: `scripts/smoke-html-decorable.mjs`. Ver
+    [[bugs-progreso]].
 
 ## Relacionadas
 
