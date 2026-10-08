@@ -328,6 +328,16 @@ y qué principio general dejó.
     resuelve con `MULTI-INDEX OR`. Y si una consulta auxiliar filtra por la clave de un
     índice que no conviene (`clave_plegada = 'tags'` recorre las `tags` del vault entero),
     `+columna` la saca del índice y deja que mande el de `nota_id`. Ver [[bugs-progreso]].
+32. **En un lienzo, el eje z no es solo el orden del arreglo: los marcos van al fondo.**
+    JSON Canvas dice que el orden de `nodes` es el apilado, y el lienzo pintaba el `<svg>`
+    de las flechas primero y después cada nodo en ese orden: un grupo tapaba las flechas
+    entre las tarjetas que contiene, y si el archivo lo listaba al final, también las
+    tarjetas (`DEF-151`). Obsidian —y ahora Mycelium, con `ordenDePintado` en
+    `lib/canvas.ts`— pinta en **capas**: grupos (de mayor a menor área, para que uno
+    anidado siga tocándose) → flechas → tarjetas. Para probar un apilado en el navegador,
+    `elementFromPoint` **ignora** lo que tiene `pointer-events: none` (como el SVG de las
+    flechas): en la prueba se le da `pointer-events: stroke` y así responde si, y solo si,
+    está pintado encima (`scripts/smoke-lienzo-grupos.mjs`). Ver [[bugs-progreso]].
 
 ## Relacionadas
 
