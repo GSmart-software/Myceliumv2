@@ -309,6 +309,17 @@ y qué principio general dejó.
     admite `ALTER TABLE ADD COLUMN`**: cambiarle columnas es borrarlo y recrearlo, y la
     reparación de notas sin fila de búsqueda (`DEF-121`) hace el resto sin código propio.
     Ver [[bugs-progreso]].
+30. **Para el FTS, la puntuación no existe: un término `"#x"` es la palabra `x`.** El
+    tokenizador `unicode61` descarta todo lo que no es letra ni número, así que `tag:x`
+    —que se buscaba como `"#x"*`— encontraba la palabra en cualquier lado, y
+    `tag:solanaceas` traía la nota que solo decía `familia: solanáceas` (`DEF-152`). Lo que
+    tiene estructura (una etiqueta, una propiedad) se filtra por **su tabla** del índice
+    —`etiquetas`, ya derivada para el grafo—, plegado como el texto y con índice. Una
+    jerarquía con separador (`huerta/riego`) se pide por índice como igualdad **o** rango
+    (`t = 'x' OR (t > 'x/' AND t < 'x0')`: `0` es el carácter que sigue a `/`), que SQLite
+    resuelve con `MULTI-INDEX OR`. Y si una consulta auxiliar filtra por la clave de un
+    índice que no conviene (`clave_plegada = 'tags'` recorre las `tags` del vault entero),
+    `+columna` la saca del índice y deja que mande el de `nota_id`. Ver [[bugs-progreso]].
 
 ## Relacionadas
 
