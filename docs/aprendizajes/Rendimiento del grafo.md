@@ -394,6 +394,17 @@ describe.
 >   mete adentro. Con ventana y GPU real no sirve: esa lectura cuesta 50–80 ms.
 > Detalle en [[grafo-indice-y-motor]] § Cómo quedó · Parte D.
 
+> [!info] Nombres: colocar, no saltear (`DEF-149`, 2026-10-07)
+> La rejilla de la Parte C evitaba que dos nombres se pisaran **salteando** el segundo:
+> barata, pero con «Todos» los nodos chicos se quedaban sin nombre, y como los nodos no
+> estaban en la rejilla, un nombre podía tapar a otro nodo. Ahora la rejilla
+> (`components/graph/nombres.ts`) tiene también los discos y cada nombre prueba cuatro
+> lados de su nodo; siempre se escribe, con halo del color del fondo, y al alejar se
+> desvanece (umbrales 0,35–0,6). Sigue siendo O(n) con rejilla y solo en la repintada del
+> reposo, nunca por frame: 3,7 ms con 1.300 nombres en Node. La lección: un límite de
+> legibilidad se resuelve con zoom (desvanecer) y lugar (otro lado), no ocultando al azar
+> de importancia. Estado en [[bugs-progreso]].
+
 > [!important] Qué verificar en la app, no solo con `tsc`
 > Que el flujo se vea igual con zoom ≥ 0,5; que el layout con Barnes-Hut sea
 > indistinguible del actual (mismo vault, misma caché de posiciones); que al guardar una
