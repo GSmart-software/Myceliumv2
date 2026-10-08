@@ -299,6 +299,16 @@ y qué principio general dejó.
     especificidad sin abrir `style` en línea. Cuando una regla base fija una propiedad que
     el HTML generado también fija, **comprobá que el caso particular siga ganando**. Ver
     [[bugs-progreso]].
+29. **Lo que se muestra de un índice FTS se limpia al indexar, no al pintar.** El fragmento
+    de un resultado es el `snippet()` de la columna, que corta diez palabras en cualquier
+    lugar: limpiarlo después no sabe qué hacer con `…Pulgón|pulgones]]` partido a la mitad
+    (`DEF-148`). Por eso la columna que da el fragmento guarda el texto **como se lee**
+    (`lib/textoBuscable.ts`), y lo que debe encontrarse sin verse —valores de propiedades,
+    destinos de alias, URLs— va a otra columna (`extra`) del mismo FTS: `MATCH` sin filtro
+    de columna busca en las dos, y `{contenido extra} : …` restringe a ambas. Un FTS5 **no
+    admite `ALTER TABLE ADD COLUMN`**: cambiarle columnas es borrarlo y recrearlo, y la
+    reparación de notas sin fila de búsqueda (`DEF-121`) hace el resto sin código propio.
+    Ver [[bugs-progreso]].
 
 ## Relacionadas
 
