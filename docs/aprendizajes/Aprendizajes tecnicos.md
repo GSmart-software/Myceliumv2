@@ -309,6 +309,14 @@ y qué principio general dejó.
     admite `ALTER TABLE ADD COLUMN`**: cambiarle columnas es borrarlo y recrearlo, y la
     reparación de notas sin fila de búsqueda (`DEF-121`) hace el resto sin código propio.
     Ver [[bugs-progreso]].
+30. **Un componente de terceros con interfaz propia llega en inglés y con sus assets en un
+    CDN, salvo que le digas lo contrario.** `<Excalidraw>` sin `langCode` mostraba
+    «Library» y «To move canvas…» en una app en español (`DEF-147`); con `langCode="es-ES"`
+    la traducción viaja en un chunk propio del bundle (`import()` dinámico del paquete), así
+    que funciona offline en Tauri. Sus **fuentes**, en cambio, se piden a `esm.sh` si no hay
+    `window.EXCALIDRAW_ASSET_PATH`. Al integrar una librería con UI, revisá **idioma** y
+    **de dónde baja lo que carga en tiempo de ejecución**, y pasá el idioma desde **una
+    constante** (`IDIOMA_EXCALIDRAW`) para que ninguna instancia nueva lo olvide.
 
 ## Relacionadas
 
