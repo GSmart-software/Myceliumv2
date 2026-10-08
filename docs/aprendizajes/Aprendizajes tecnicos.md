@@ -226,6 +226,17 @@ y qué principio general dejó.
     los dos estados del vault y se escribe con ruta lo que cambiaría. Y eso hay que leerlo
     antes de la operación, porque después el índice ya re-resolvió. Ver
     [[titulos-homonimos]].
+21. **Un botón que crea algo editable tiene que entregar el foco.** Crear es asíncrono y el
+    `<button>` pulsado conserva el foco; un botón enfocado se activa con **espacio y Enter**,
+    así que lo que el usuario teclea para lo nuevo crea más cosas (`DEF-135`: diez notas
+    «Sin título» por escribir un título). Lo creado tiene que tomar el foco cuando exista
+    —un pedido de un solo uso que consume quien lo monta, como `pendingMatch`— y el botón
+    soltarlo en el clic. Y su pariente: **un actualizador de `setState` tiene que ser puro.**
+    El lienzo sorteaba el id de la tarjeta nueva dentro del actualizador y desde ahí la
+    marcaba en edición; React lo corre dos veces en desarrollo y se queda con una pasada, así
+    que la tarjeta podía tener otro id que el «en edición» y nunca abría su texto. Lo que no
+    es determinista (`Math.random`, `Date.now`) y los otros `setState` van afuera. Ver
+    [[bugs-progreso]].
 
 ## Relacionadas
 
