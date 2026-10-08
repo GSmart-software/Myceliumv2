@@ -17,7 +17,7 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 
 | Bug | Descripción corta | Alcance | Estado |
 |---|---|---|---|
-| DEF-133 | Un dibujo de Excalidraw embebido se ve como marcador «Diagrama …» al volver a la nota | ambas (frontend) | ⬜ registrado (2026-10-07), sin reproducir. Visto en vista de lectura con el vault demo «Huerta del barrio» (`C:\Trabajo\GSmart\mycelium-vault-demo`, nota «Tres hermanas») |
+| DEF-133 | Un dibujo de Excalidraw embebido se ve como marcador «Diagrama …» al volver a la nota | ambas (frontend) | ⬜ registrado (2026-10-07), sin reproducir. Visto en vista de lectura con el vault demo «Huerta del barrio» (`C:\Trabajo\GSmart\mycelium-vault-demo`, nota «Tres hermanas»). Se repitió con «Bosque de hongos» (nota «Micorrizas»): el dibujo apareció recién tras un cambio externo al archivo |
 | DEF-138 | Con cambios sin guardar, un cambio externo al archivo se pierde en silencio al guardar | ambas (frontend, editor) | ⬜ registrado (2026-10-07). Auditoría e2e (`H36`), [[Auditoria e2e 2026-10-07]] |
 | DEF-139 | Renombrar desde el título: Enter no pasa al cuerpo y lo que se escribe se pierde | ambas (frontend, editor) | ⬜ registrado (2026-10-07). Auditoría e2e (`H9`), [[Auditoria e2e 2026-10-07]] |
 | DEF-140 | Usar una Espora crea una nota con el mismo título que la Espora (homónimas) | ambas (frontend, Esporas) | ⬜ registrado (2026-10-07). Auditoría e2e (`H21`), [[Auditoria e2e 2026-10-07]] |
@@ -31,6 +31,7 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-148 | Fragmentos de la búsqueda con frontmatter aplastado, markdown crudo y `\n` literales | ambas (búsqueda) | ⬜ registrado (2026-10-07). Auditoría e2e (`H16, H19`), [[Auditoria e2e 2026-10-07]] |
 | DEF-149 | Grafo con «Nombres: Todos»: faltan nombres y otros se pisan con nodos | ambas (frontend, grafo) | ⬜ registrado (2026-10-07). Auditoría e2e (`H20`), [[Auditoria e2e 2026-10-07]] |
 | DEF-150 | Lote de 14 detalles de la auditoría e2e (a–n) | ambas (frontend) | ⬜ registrado (2026-10-07). Se arreglan juntos, en una rama. Lista en el catálogo y en [[Auditoria e2e 2026-10-07]] |
+| DEF-151 | En el lienzo, una flecha entre tarjetas dentro de un grupo queda tapada por el grupo | ambas (frontend, lienzo) | ⬜ registrado (2026-10-07). Visto al armar el lienzo del vault demo «Bosque de hongos» para la landing |
 
 ## Corregidos
 

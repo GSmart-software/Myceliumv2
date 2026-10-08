@@ -826,6 +826,10 @@ texto «Diagrama Croquis de la huerta» en lugar del dibujo.
 Detectado el 2026-10-07 al sacar las capturas de la landing (vault de demostración «Huerta
 del barrio», nota «Tres hermanas», vista de lectura); sin reproducir todavía a propósito.
 
+Volvió a pasar el 2026-10-07 con el vault «Bosque de hongos» (nota «Micorrizas», dibujo «Red
+micorrícica», vista de lectura): el marcador se cambió por el dibujo recién cuando la nota se
+modificó desde afuera (se agregó una línea vacía al final del archivo).
+
 # DEF-134
 **Renombrar una nota con el título de otra que ya existe en otra carpeta** se permite sin
 ningún aviso, y desde ese momento **todos los `[[enlaces]]` a la otra nota llevan a la
@@ -959,6 +963,13 @@ uno, en la nota de la auditoría):
 - **n** (`H40`) En Configuración, «Ancho de tabulación» es un campo enorme para una cifra, y Tipografía no tiene los «Más» del resto.
 
 Detectado el 2026-10-07.
+
+# DEF-151
+En un **lienzo**, una **flecha entre tarjetas que están dentro de un grupo no se ve**: queda
+dibujada por debajo del grupo, que la tapa. Sacando las tarjetas del grupo, la flecha aparece.
+
+Detectado el 2026-10-07 al armar el lienzo «Ciclo de vida del hongo» del vault de
+demostración «Bosque de hongos» para las capturas de la landing.
 
 ---
 
