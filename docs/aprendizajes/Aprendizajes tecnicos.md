@@ -263,6 +263,13 @@ y qué principio general dejó.
     nueva en el índice de un vault ya abierto se **migra en el lugar** (`ALTER TABLE` +
     llenar lo que quedó en NULL), no con un reindexado que relee todos los archivos. Ver
     [[bugs-progreso]].
+25. **Una regla de resolución que se agrega en una sola punta vuelve a partir el
+    resolutor único.** `FUN-M-40` dejó un resolutor para el editor y el grafo, pero
+    `FUN-L-25` le enseñó el ancla (`[[Nota#Sección]]`) solo al grafo, envolviéndolo en
+    `lib/enlacesNota.ts`: el grafo contaba la arista y el editor, la lectura, el lienzo y
+    el calendario pintaban el mismo enlace roto (`DEF-141`). La regla nueva va **dentro**
+    del resolutor compartido (`resolveWikilinkEnIndice`), no en un envoltorio de quien la
+    necesitó primero. Ver [[bugs-progreso]].
 
 ## Relacionadas
 
