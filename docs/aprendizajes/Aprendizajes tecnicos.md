@@ -237,6 +237,15 @@ y qué principio general dejó.
     que la tarjeta podía tener otro id que el «en edición» y nunca abría su texto. Lo que no
     es determinista (`Math.random`, `Date.now`) y los otros `setState` van afuera. Ver
     [[bugs-progreso]].
+22. **Si el documento ya se modifica sin mutar, deshacer es guardar referencias.** El lienzo
+    no tenía historial y Supr perdía una tarjeta sin vuelta (`DEF-137`). Como cada cambio
+    del `Canvas` ya devolvía un objeto nuevo, el historial es una pila de snapshots
+    (`lib/historialCanvas.ts`): sin comandos inversos que escribir por operación ni forma de
+    deshacer hacia un estado que nunca existió. La granularidad la dan **gestos con clave**
+    —abrir anota el «antes», cerrar empuja un paso si algo cambió—: la clave evita que el
+    `blur` tardío de la edición de texto cierre el arrastre que lo provocó. Y un historial
+    de snapshots **se descarta al recargar desde disco**: volver a uno de ellos pisaría lo
+    que llegó de afuera. Ver [[bugs-progreso]].
 
 ## Relacionadas
 
