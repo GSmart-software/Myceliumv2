@@ -273,6 +273,16 @@ y qué principio general dejó.
     2,5 ms sin ninguna. Y al tokenizar una consulta, `clave:"con espacios"` tiene que ser
     **un** token: la frase entre comillas no siempre empieza en la comilla. Ver
     [[bugs-progreso]].
+26. **El `rank` (bm25) de FTS5 puntúa la fila entera, no la columna: un título no pesa más
+    que el cuerpo.** La nota «Tomate», con un cuerpo largo que no repetía la palabra, salía
+    detrás de todas las que la mencionaban varias veces (`DEF-146`). Para que el título
+    mande, el `ORDER BY` lo resuelve con subconsultas FTS restringidas a la columna
+    (`f.rowid IN (SELECT rowid FROM notas_fts WHERE notas_fts MATCH 'titulo : ^"…"')`; `^`
+    ancla la frase a la primera palabra de la columna) y deja `rank` como desempate. Va en
+    SQL y no en el cliente porque el `LIMIT` puede dejar afuera justo la nota buscada.
+    Costo: sin `ORDER BY rank` puro, FTS5 ya no ordena por dentro y el `snippet` se calcula
+    para cada coincidencia antes de ordenar: con 20.000 notas que TODAS coinciden, de 31 a
+    61 ms; con ~1 000 coincidencias, de 2,6 a 6 ms. Ver [[bugs-progreso]].
 
 ## Relacionadas
 
