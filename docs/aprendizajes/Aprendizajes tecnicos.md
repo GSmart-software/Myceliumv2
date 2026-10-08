@@ -263,6 +263,16 @@ y qué principio general dejó.
     nueva en el índice de un vault ya abierto se **migra en el lugar** (`ALTER TABLE` +
     llenar lo que quedó en NULL), no con un reindexado que relee todos los archivos. Ver
     [[bugs-progreso]].
+25. **Un `LIKE '%x%'` no es caro si una igualdad sobre la columna anterior del índice ya
+    acotó el rango.** El filtro `clave:valor` por palabra (`DEF-145`) usa un `LIKE` con `%`
+    adelante, que no puede usar el índice por sí solo; pero `clave_plegada = ?` es la
+    primera columna de `idx_propiedades_plegado`, así que SQLite recorre solo las filas de
+    esa clave y evalúa el `LIKE` sobre el valor leído del índice. Un `instr(col, ?) > 0`
+    previo descarta barato las filas que ni contienen el término, antes de los `replace`
+    que arman las palabras: con 20.000 notas, de 38 a 20 ms con coincidencias y de 31 a
+    2,5 ms sin ninguna. Y al tokenizar una consulta, `clave:"con espacios"` tiene que ser
+    **un** token: la frase entre comillas no siempre empieza en la comilla. Ver
+    [[bugs-progreso]].
 
 ## Relacionadas
 
