@@ -253,6 +253,16 @@ y qué principio general dejó.
     antes de escribir —leyendo el archivo, no el índice, que va detrás del watcher— y, si
     los dos lados cambiaron, no decidir solo. Y la base es de la pestaña: tomar el disco
     como base al volver a ella absorbe el cambio de afuera. Ver [[def-138-cambio-externo]].
+24. **En SQLite, `NOCASE` y `lower()` solo entienden ASCII; lo que compare como el FTS se
+    pliega en JS y se guarda plegado.** El texto de la búsqueda ignoraba tildes porque lo
+    pliega el tokenizador `unicode61` de `notas_fts`, pero el filtro `clave:valor`
+    comparaba la tabla `propiedades` cruda con `COLLATE NOCASE`: «solanaceas» no
+    encontraba «solanáceas», ni «Á» a «á» (`DEF-144`). `tauri-plugin-sql` no deja registrar
+    funciones propias, así que el plegado (`plegar`, `lib/db/fts.ts`) va en JS al escribir
+    —columnas `clave_plegada`/`valor_plegado`, con índice— y al consultar. Una columna
+    nueva en el índice de un vault ya abierto se **migra en el lugar** (`ALTER TABLE` +
+    llenar lo que quedó en NULL), no con un reindexado que relee todos los archivos. Ver
+    [[bugs-progreso]].
 
 ## Relacionadas
 
