@@ -29,6 +29,7 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | DEF-149 | Grafo con «Nombres: Todos»: faltan nombres y otros se pisan con nodos | ambas (frontend, grafo) | ⬜ registrado (2026-10-07). Auditoría e2e (`H20`), [[Auditoria e2e 2026-10-07]] |
 | DEF-150 | Lote de 14 detalles de la auditoría e2e (a–n) | ambas (frontend) | ⬜ registrado (2026-10-07). Se arreglan juntos, en una rama. Lista en el catálogo y en [[Auditoria e2e 2026-10-07]] |
 | DEF-151 | En el lienzo, una flecha entre tarjetas dentro de un grupo queda tapada por el grupo | ambas (frontend, lienzo) | ⬜ registrado (2026-10-07). Visto al armar el lienzo del vault demo «Bosque de hongos» para la landing |
+| DEF-152 | Búsqueda: `tag:x` trae también notas con la palabra `x` en el texto o en una propiedad | ambas (búsqueda) | ⬜ registrado (2026-10-07), detectado al arreglar `DEF-144` |
 
 ## Corregidos
 

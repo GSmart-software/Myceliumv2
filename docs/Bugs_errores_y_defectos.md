@@ -971,6 +971,15 @@ dibujada por debajo del grupo, que la tapa. Sacando las tarjetas del grupo, la f
 Detectado el 2026-10-07 al armar el lienzo «Ciclo de vida del hongo» del vault de
 demostración «Bosque de hongos» para las capturas de la landing.
 
+
+# DEF-152
+En la **búsqueda global**, `tag:x` no busca solo las notas con la etiqueta `x`: trae también
+notas que tienen la palabra `x` en el texto o en una propiedad. `tag:solanaceas` encuentra
+«Ají», que tiene `#solanaceas`, pero también «Tomate», que no tiene esa etiqueta y solo dice
+`familia: solanáceas`.
+
+Detectado el 2026-10-07 al arreglar `DEF-144` ([[Auditoria e2e 2026-10-07]]).
+
 ---
 
 > [!warning] Defectos sin reporte original
