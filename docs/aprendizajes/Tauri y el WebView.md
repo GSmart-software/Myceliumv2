@@ -110,6 +110,21 @@ Y la otra mitad de ese defecto: **elegir un nombre libre y ocuparlo tiene que se
 paso**. Entre leer el índice y el `INSERT` hay `await` de IPC; dos creaciones seguidas
 eligen el mismo nombre. Las creaciones van por la cola `conNombreReservado` (`vaultFs.ts`).
 
+## Una dependencia puede bajar sus recursos de un CDN en tiempo de ejecución
+
+Que un paquete esté en `node_modules` no significa que todo lo suyo viaje en el bundle.
+Excalidraw 0.18 baja las **fuentes de los dibujos** con `fetch` a
+`window.EXCALIDRAW_ASSET_PATH` y, si no está definido, a `esm.sh` (`DEF-153`). Como la CSP
+de Tauri es `null`, nada lo bloqueaba: **con red se veía bien**, y por eso nadie lo notó
+hasta probar sin ella. Se arregla sirviendo esos archivos desde `public/` (los copia
+`scripts/preparar-excalidraw.mjs`, como `preparar-drawio.mjs` con draw.io) y apuntando la
+librería ahí antes de importarla (`cargarExcalidraw()`).
+
+La forma de encontrarlos es probar **con la red bloqueada** y mirar las peticiones a otros
+orígenes (los smoke de Excalidraw lo hacen con `page.route`). Vale para toda librería nueva
+que dibuje texto, traduzca o cargue *workers*: `DEF-147` (el idioma) resultó viajar en un
+chunk propio; las fuentes, no.
+
 ## Relacionadas
 
 - [[Aprendizajes tecnicos]] — mapa del área.
