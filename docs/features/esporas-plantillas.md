@@ -104,7 +104,10 @@ Reglas:
   rellena. Es la sinergia natural con [[metadata-yaml]] y conviene que las plantillas de
   ejemplo la muestren.
 - `{{titulo}}` se resuelve con el título **final** de la nota (después de sanear y
-  desambiguar), no con el que se pidió.
+  desambiguar), no con el que se pidió. Al crear desde el panel ese título es el
+  provisional (`Reunión 1`): si el usuario renombra la nota después, el contenido **no** se
+  re-expande. Es lo esperado, como en Obsidian: la plantilla se aplica una vez, al crear, y
+  reescribir el cuerpo por un renombre pisaría lo que el usuario ya escribió.
 - **No hay `{{cursor}}`** en esta unidad: obligaría a acoplar la creación con el editor.
   Si se pide, es una continuación.
 
@@ -130,9 +133,18 @@ panel **Esporas** en el panel lateral, como cualquier otra sección.
 - **Un clic en una Espora crea la nota** en la **carpeta activa** del explorador
   (`vaultStore.activeFolderId`, la misma que usa "Nueva nota" hoy), con el contenido ya
   sustituido, y la abre. Sin diálogo.
-- **El nombre de la nota nueva es el nombre de la plantilla**, desambiguado por el
-  mecanismo que ya existe (`Reunión`, `Reunión 2`, …). Es más útil que "Sin título" y no
-  cuesta nada.
+- **El nombre de la nota nueva es provisional: el de la plantilla con un número**
+  (`Reunión 1`, `Reunión 2`, …), el primero que no use **ninguna** nota del vault en
+  cualquier carpeta (sin distinguir mayúsculas). **Nunca** el de la plantilla tal cual: la
+  Espora cuenta como ocupada. La nota abre con el título seleccionado para escribir el
+  nombre enseguida (`DEF-135`).
+
+  > [!warning] Cambió con `DEF-140` (2026-10-07)
+  > Antes la nota se llamaba **como la plantilla**, desambiguada solo dentro de la carpeta
+  > destino: «Reunión» en la raíz y `Esporas/Reunión.md` quedaban homónimas, los
+  > `[[Reunión]]` se volvían ambiguos y cada uso disparaba el aviso de `DEF-134`. El
+  > cálculo vive en `tituloNotaDesdeEspora` (`lib/esporas.ts`, puro, con tests en
+  > `scripts/test-esporas.mjs`).
 - Cada fila tiene, además: **editar** (abre la plantilla como nota normal), **renombrar** y
   **borrar** (a la papelera, como cualquier nota).
 - Botón **"Nueva Espora"**: crea una plantilla vacía en la carpeta y la abre para editarla.
@@ -197,8 +209,10 @@ defecto.
    ofrece crear la primera; no aparece un panel vacío ni un error.
 2. "Nueva Espora" crea una plantilla en la carpeta configurada y la abre para editarla.
 3. Un clic en una Espora del panel crea la nota en la carpeta activa, con el nombre de la
-   plantilla, la abre, y el contenido tiene las variables ya sustituidas.
-4. Crear dos notas de la misma Espora da `Reunión` y `Reunión 2`; ninguna pisa a la otra.
+   plantilla y un número (`Reunión 1`), la abre con el título seleccionado, y el contenido
+   tiene las variables ya sustituidas. No aparece el aviso de homónimos.
+4. Crear dos notas de la misma Espora da `Reunión 1` y `Reunión 2`; ninguna pisa a la otra
+   ni se llama como la plantilla (`DEF-140`).
 5. Una Espora con `fecha: {{fecha}}` en el frontmatter produce una nota cuya pestaña
    PROPIEDADES muestra una propiedad **de tipo fecha** con la fecha de hoy.
 6. `{{autor}}` (token inexistente) llega a la nota **escrito tal cual**.
