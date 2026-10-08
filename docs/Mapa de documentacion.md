@@ -166,6 +166,9 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
 - [[Auditoria de codigo 2026-09-26]] — la auditoría a tres bandas (complejidad, eficiencia,
   código muerto): qué se creía y no era, `DEF-110` a `DEF-113`, y el plan en tandas con las
   decisiones pendientes.
+- [[Auditoria e2e 2026-10-07]] — Mycelium usado a fondo como pruebas de extremo a extremo:
+  40 hallazgos, `DEF-134` a `DEF-150` (`DEF-134` corrompe enlaces al renombrar) y el bloque R
+  del [[BACKLOG]].
 - [[Como construye Obsidian su grafo]] — el modelo de referencia: por qué Obsidian no
   «construye» el grafo, y qué de eso conviene copiar en Mycelium y en qué orden.
 - [[Rendimiento del grafo]] — análisis del costo por frame, propuestas de optimización y el segundo análisis para vaults de más de 1.000 notas (`DEF-109`).

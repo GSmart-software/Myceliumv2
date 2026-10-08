@@ -18,6 +18,23 @@ Estados: ⬜ pendiente · 🔧 en curso · 🛠️ implementado (sin confirmar) 
 | Bug | Descripción corta | Alcance | Estado |
 |---|---|---|---|
 | DEF-133 | Un dibujo de Excalidraw embebido se ve como marcador «Diagrama …» al volver a la nota | ambas (frontend) | ⬜ registrado (2026-10-07), sin reproducir. Visto en vista de lectura con el vault demo «Huerta del barrio» (`C:\Trabajo\GSmart\mycelium-vault-demo`, nota «Tres hermanas») |
+| DEF-134 | Renombrar con el título de otra nota se permite; la renombrada se queda con sus enlaces y un segundo renombre los reescribe | ambas (frontend, renombrar y resolución de `[[enlaces]]`) | ⬜ registrado (2026-10-07). **Crítico**: corrompe los enlaces del vault sin aviso. Auditoría e2e (`H38`), [[Auditoria e2e 2026-10-07]] |
+| DEF-135 | «Nueva nota» y «Tarjeta de texto» dejan el foco en el botón: lo escrito se pierde y cada espacio crea otra | ambas (frontend, explorador y lienzo) | ⬜ registrado (2026-10-07). Grave. Auditoría e2e (`H6, H25`), [[Auditoria e2e 2026-10-07]] |
+| DEF-136 | Una creación de nota falla con «Error desconocido» sin avisar; los errores nativos pierden su mensaje | desktop (`lib/api.ts`) | ⬜ registrado (2026-10-07). Auditoría e2e (`H7, H8`), [[Auditoria e2e 2026-10-07]] |
+| DEF-137 | En el lienzo, Supr borra una tarjeta sin confirmar y Ctrl+Z no la devuelve | ambas (frontend, lienzo) | ⬜ registrado (2026-10-07). Grave: pérdida de contenido. Auditoría e2e (`H28`), [[Auditoria e2e 2026-10-07]] |
+| DEF-138 | Con cambios sin guardar, un cambio externo al archivo se pierde en silencio al guardar | ambas (frontend, editor) | ⬜ registrado (2026-10-07). Auditoría e2e (`H36`), [[Auditoria e2e 2026-10-07]] |
+| DEF-139 | Renombrar desde el título: Enter no pasa al cuerpo y lo que se escribe se pierde | ambas (frontend, editor) | ⬜ registrado (2026-10-07). Auditoría e2e (`H9`), [[Auditoria e2e 2026-10-07]] |
+| DEF-140 | Usar una Espora crea una nota con el mismo título que la Espora (homónimas) | ambas (frontend, Esporas) | ⬜ registrado (2026-10-07). Auditoría e2e (`H21`), [[Auditoria e2e 2026-10-07]] |
+| DEF-141 | `[[Nota#Encabezado]]` se ve como enlace roto y no navega | ambas (frontend, enlaces) | ⬜ registrado (2026-10-07). Auditoría e2e (`H32`), [[Auditoria e2e 2026-10-07]] |
+| DEF-142 | Mermaid en lectura con tema claro sobre fondo oscuro | ambas (frontend) | ⬜ registrado (2026-10-07). Auditoría e2e (`H33`), [[Auditoria e2e 2026-10-07]] |
+| DEF-143 | En lectura, la alineación de columna `---:` de una tabla se ignora | ambas (frontend) | ⬜ registrado (2026-10-07). Auditoría e2e (`H34`), [[Auditoria e2e 2026-10-07]] |
+| DEF-144 | Búsqueda: `clave:valor` no ignora tildes y el texto sí | ambas (búsqueda; en web, backend) | ⬜ registrado (2026-10-07). Auditoría e2e (`H13`), [[Auditoria e2e 2026-10-07]] |
+| DEF-145 | Búsqueda: `clave:valor` con espacios en el valor no encuentra nada | ambas (búsqueda; en web, backend) | ⬜ registrado (2026-10-07). Auditoría e2e (`H14`), [[Auditoria e2e 2026-10-07]] |
+| DEF-146 | Búsqueda: el título exacto no sale primero | ambas (búsqueda) | ⬜ registrado (2026-10-07). Auditoría e2e (`H15`), [[Auditoria e2e 2026-10-07]] |
+| DEF-147 | Excalidraw aparece en inglés | ambas (frontend) | ⬜ registrado (2026-10-07). Auditoría e2e (`H30`), [[Auditoria e2e 2026-10-07]] |
+| DEF-148 | Fragmentos de la búsqueda con frontmatter aplastado, markdown crudo y `\n` literales | ambas (búsqueda) | ⬜ registrado (2026-10-07). Auditoría e2e (`H16, H19`), [[Auditoria e2e 2026-10-07]] |
+| DEF-149 | Grafo con «Nombres: Todos»: faltan nombres y otros se pisan con nodos | ambas (frontend, grafo) | ⬜ registrado (2026-10-07). Auditoría e2e (`H20`), [[Auditoria e2e 2026-10-07]] |
+| DEF-150 | Lote de 14 detalles de la auditoría e2e (a–n) | ambas (frontend) | ⬜ registrado (2026-10-07). Se arreglan juntos, en una rama. Lista en el catálogo y en [[Auditoria e2e 2026-10-07]] |
 
 ## Corregidos
 

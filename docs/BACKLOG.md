@@ -90,6 +90,11 @@ una fila se implementa, **se mueve** a la §4 (ver «Cómo leerlo»).
 | `FUN-S-19` | `EMBED-CANVAS` | Que `![[lienzo.canvas]]` **muestre el lienzo** dentro de la nota, como ya hace `![[dibujo.excalidraw]]`. Hoy no dibuja nada: los embeds de canvas **nunca se implementaron** —la spec de `FUN-L-18` no los prometía— y el texto queda escrito tal cual. Se descubrió el 2026-09-23, probando `FUN-L-20`, al comparar los tres tipos: el de Excalidraw anda y los otros dos no. **Hoy solo falta el canvas**: el embed de draw.io se resolvió en `516306d` (2026-09-23) | ambas | — |
 | `FUN-S-23` | `REINDEXAR-VAULT` | Un botón en Configuración → Vault para **reconstruir el índice** desde cero, con aviso. Hoy la única vía es encontrar `index-<hash>.db` en el app-data y apartarlo a mano, que no es descubrible. Estaba bloqueado por `DEF-107`, **ya resuelto**: los snippets, la apariencia y la papelera viven en `.mycelium/` y vuelven solos. Falta una pieza: al salir de un vault la app **no cierra el índice**, así que el botón tiene que cerrarlo antes de borrarlo. Salió del incidente de `DEF-105` el 2026-09-25 | desktop | — |
 | `FUN-S-29` | `EMBED-BASE` | Embeber una vista `.base` en una nota (`![[tabla.base#Vista]]`), para que una nota índice muestre la tabla derivada en vez de una copia a mano. Propuesta 4 de [[ia-vaults-intensivos]] | desktop | — |
+| `FUN-S-31` | `ENLACE-ROTO-CREA` | Que el clic en un `[[enlace]]` a una nota que **no existe** la cree (en la carpeta por defecto) y la abra, como Obsidian. Hoy no hace nada, y la ayuda lo dice así («no lleva a ningún lado»): al cambiarlo, se actualiza la página «Enlaces». Salió de la [[Auditoria e2e 2026-10-07]] (`H4`) | ambas | — |
+| `FUN-S-32` | `MENU-NOTA-COMPLETO` | Completar el menú contextual de una nota en el explorador: **Mover a…** (elegir carpeta, reparando enlaces), **Abrir al lado** (en un pane nuevo) y **Copiar enlace** (`[[Título]]` al portapapeles). Salió de la [[Auditoria e2e 2026-10-07]] (`H11`) | ambas | — |
+| `FUN-S-33` | `EDITOR-RESALTADO` | Dibujar `==resaltado==` (sintaxis de Obsidian) en vivo, en lectura y al exportar. Hoy queda el texto con los `==`. Suma una clase `mic-*` a la plantilla de snippets. Salió de la [[Auditoria e2e 2026-10-07]] (`H31`) | ambas | — |
+| `FUN-S-34` | `NAV-ATRAS-ENTRE-PESTANAS` | Que **Atrás** vuelva a la nota de origen cuando un enlace se abrió en una pestaña nueva: hoy la pestaña nueva nace sin historial y el botón queda deshabilitado. Salió de la [[Auditoria e2e 2026-10-07]] (`H1`) | ambas | — |
+| `FUN-S-35` | `PANE-DIVIDIR-DUPLICA` | Que «Dividir a la derecha/abajo» **muestre la misma nota en los dos lados** (como Obsidian), en lugar de mover la pestaña al pane nuevo. Salió de la [[Auditoria e2e 2026-10-07]] (`H37`) | ambas | — |
 
 ### 1.2 Intermedias — tamaño M
 
@@ -107,6 +112,9 @@ una fila se implementa, **se mueve** a la §4 (ver «Cómo leerlo»).
 | `FUN-M-45` | `MCP-CONSULTAR-INDICE` | Tools MCP para consultar el índice: `mycelium_buscar` (solo notas indexadas), `mycelium_enlaces` (salientes y backlinks) y `mycelium_base` (las filas de una vista `.base`). Propuesta 4 de [[ia-vaults-intensivos]] | desktop | — |
 | `FUN-M-46` | `PROPIEDADES-ESQUEMAS` | Esquemas de propiedades por carpeta o por `tipo` (claves obligatorias, tipos, valores permitidos), con avisos en el editor y aviso específico para un valor que empieza con `#` sin comillas. Propuesta 5 de [[ia-vaults-intensivos]] | desktop | — |
 | `FUN-M-47` | `RENOMBRE-ALIAS` | Al renombrar, conservar el nombre anterior como alias; y al ver un borrado + creación casi idéntica en disco, ofrecer reparar los enlaces. Depende de `FUN-M-15`. Propuesta 7 de [[ia-vaults-intensivos]] | desktop | — |
+| `FUN-M-48` | `PALETA-COMANDOS` | Ampliar la paleta de comandos (`>`): hoy tiene unos 12. Faltan, entre otros, cerrar pestaña, dividir panel, exportar, renombrar/mover/borrar la nota actual, nueva tabla/lienzo/dibujo/diagrama, insertar Espora, abrir la papelera, revelar en el explorador y cambiar de vista (vivo/lectura/fuente). Cada comando con su atajo si lo tiene. Salió de la [[Auditoria e2e 2026-10-07]] (`H5`) | ambas | — |
+| `FUN-M-49` | `EXPLORADOR-MULTISELECCION` | Selección múltiple en el explorador (Ctrl+clic, Shift+clic) para mover, borrar o exportar varios a la vez, y teclas **Supr** (a la papelera) y **F2** (renombrar) sobre lo seleccionado. Hoy limpiar ocho notas son ocho menús contextuales. La papelera ya tiene selección (`FUN-S-04`). Salió de la [[Auditoria e2e 2026-10-07]] (`H10`) | ambas | — |
+| `FUN-M-50` | `BUSQUEDA-OPERADORES` | Operadores en la búsqueda global: exclusión (`-término`), `OR` y comparaciones en propiedades (`kilos:>2`, `fecha:<2026-10-01`). Hoy solo hay AND implícito, frase exacta, `tag:` y `clave:valor`. Va después de `DEF-144`/`DEF-145`, que arreglan `clave:valor`. Salió de la [[Auditoria e2e 2026-10-07]] (`H18`) | ambas | — |
 
 ### 1.3 Grandes — tamaño L
 
@@ -555,6 +563,21 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 - Negaciones `!` en `.mycignore`. Detalle y cuidados (orden de evaluación, carpeta ignorada que
   no se recorre) en [[ia-vaults-intensivos]] § 8. Lo construido, en [[mycignore]] § Negaciones.
 
+#### `FUN-S-31` · `ENLACE-ROTO-CREA` (—)
+- Detalle y cómo se reprodujo en [[Auditoria e2e 2026-10-07]].
+
+#### `FUN-S-32` · `MENU-NOTA-COMPLETO` (—)
+- Detalle y cómo se reprodujo en [[Auditoria e2e 2026-10-07]].
+
+#### `FUN-S-33` · `EDITOR-RESALTADO` (—)
+- Detalle y cómo se reprodujo en [[Auditoria e2e 2026-10-07]].
+
+#### `FUN-S-34` · `NAV-ATRAS-ENTRE-PESTANAS` (—)
+- Detalle y cómo se reprodujo en [[Auditoria e2e 2026-10-07]].
+
+#### `FUN-S-35` · `PANE-DIVIDIR-DUPLICA` (—)
+- Detalle y cómo se reprodujo en [[Auditoria e2e 2026-10-07]].
+
 ### Tamaño M
 
 #### `FUN-M-01` · `TRASH-PREVIEW` (C-M-13)
@@ -821,6 +844,15 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 #### `FUN-M-47` · `RENOMBRE-ALIAS` (—)
 - Alias al renombrar y detección de renombres hechos por fuera; depende de `FUN-M-15`. Detalle
   en [[ia-vaults-intensivos]] § 7.
+
+#### `FUN-M-48` · `PALETA-COMANDOS` (—)
+- Detalle y cómo se reprodujo en [[Auditoria e2e 2026-10-07]].
+
+#### `FUN-M-49` · `EXPLORADOR-MULTISELECCION` (—)
+- Detalle y cómo se reprodujo en [[Auditoria e2e 2026-10-07]].
+
+#### `FUN-M-50` · `BUSQUEDA-OPERADORES` (—)
+- Detalle y cómo se reprodujo en [[Auditoria e2e 2026-10-07]].
 
 ### Tamaño L
 
@@ -1775,6 +1807,13 @@ Todo pasa por la ventana de ajustes: menos texto en cada ajuste (`FUN-M-41`), el
 explicaciones pueden remitir (`FUN-L-27`) y la plantilla de snippets puesta al día
 (`DEF-123`), que es el mismo problema que la ayuda tiene que evitar: documentación que
 envejece. Registradas el 2026-10-03.
+
+#### R · Lo que salió de usar Mycelium a fondo — `FUN-S-31` + `FUN-S-32` + `FUN-S-33` + `FUN-S-34` + `FUN-S-35` + `FUN-M-48` + `FUN-M-49` + `FUN-M-50` · minor · ambas
+Mejoras de la [[Auditoria e2e 2026-10-07]]: el uso intensivo del vault de demostración mostró
+que lo que más falta es **operar sin el mouse y en lote** (paleta, selección múltiple, menú
+completo) y **sintaxis de Obsidian** que un vault importado ya trae (`==resaltado==`). Los
+defectos de la misma auditoría (`DEF-134` a `DEF-150`) van antes y por su cuenta: son
+correcciones, no este bloque. Registradas el 2026-10-07.
 
 ### Van solas
 

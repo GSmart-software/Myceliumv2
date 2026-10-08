@@ -826,6 +826,140 @@ texto «Diagrama Croquis de la huerta» en lugar del dibujo.
 Detectado el 2026-10-07 al sacar las capturas de la landing (vault de demostración «Huerta
 del barrio», nota «Tres hermanas», vista de lectura); sin reproducir todavía a propósito.
 
+# DEF-134
+**Renombrar una nota con el título de otra que ya existe en otra carpeta** se permite sin
+ningún aviso, y desde ese momento **todos los `[[enlaces]]` a la otra nota llevan a la
+renombrada** si esta queda más cerca de la raíz. Si después se renombra otra vez, Mycelium
+**reescribe esos enlaces** con el nombre nuevo: en el vault de prueba, renombrar «Riego de
+verano» a «Tomate» (existiendo `Cultivos/Tomate`) y luego a otro nombre dejó los 17
+`[[Tomate]]` del vault —alias incluidos— apuntando a la nota de riego. El vault queda con los
+enlaces cambiados y nada lo señala.
+
+Detectado el 2026-10-07 en la [[Auditoria e2e 2026-10-07]] (`H38`).
+
+# DEF-135
+Después de **«Nueva nota»** (explorador) o **«Tarjeta de texto»** (lienzo), lo que se escribe
+enseguida **no llega a lo creado**: se pierde, y cada **espacio o Enter crea otra nota u otra
+tarjeta**. Tipeando un título y una frase justo después de «Nueva nota» se crearon diez notas
+«Sin título»; en el lienzo, la primera palabra desapareció y quedó una tarjeta vacía debajo de
+la escrita.
+
+Detectado el 2026-10-07 en la [[Auditoria e2e 2026-10-07]] (`H6`, `H25`).
+
+# DEF-136
+Al crear varias notas seguidas, **una falló** y el usuario no vio nada: en la app de
+desarrollo apareció un error de ejecución «Error desconocido». Ese mismo texto reemplaza el
+mensaje de cualquier error que venga del lado nativo, así que tampoco el registro dice qué
+pasó.
+
+Detectado el 2026-10-07 en la [[Auditoria e2e 2026-10-07]] (`H7`, `H8`).
+
+# DEF-137
+En un **lienzo**, la tecla **Supr** borra la tarjeta seleccionada sin preguntar, y **Ctrl+Z
+no la devuelve**: el contenido de la tarjeta se pierde con una sola tecla.
+
+Detectado el 2026-10-07 en la [[Auditoria e2e 2026-10-07]] (`H28`).
+
+# DEF-138
+Si una nota abierta tiene **cambios sin guardar** y el archivo **cambia en disco** (otro
+programa, la IA, una sincronización), al guardar **lo de afuera desaparece** sin ningún aviso.
+Sin cambios locales, la nota sí se recarga con lo de afuera.
+
+Detectado el 2026-10-07 en la [[Auditoria e2e 2026-10-07]] (`H36`).
+
+# DEF-139
+Al **renombrar una nota escribiendo en su título**, Enter confirma el nombre pero el cursor
+**no pasa al cuerpo**: queda en ningún lado y lo que se escribe a continuación se pierde.
+
+Detectado el 2026-10-07 en la [[Auditoria e2e 2026-10-07]] (`H9`).
+
+# DEF-140
+Al usar una **Espora** con un clic en su panel, la nota nueva se crea **con el mismo título
+que la Espora** («Registro de cosecha» en la raíz y en `Esporas/`): quedan dos notas homónimas
+y los `[[enlaces]]` a ese título pasan a ser ambiguos. Tampoco se ofrece escribir el título.
+
+Detectado el 2026-10-07 en la [[Auditoria e2e 2026-10-07]] (`H21`).
+
+# DEF-141
+Un enlace a un **encabezado** de otra nota, `[[Tomate#Cuidados]]`, se muestra **como enlace
+roto** aunque la nota y el encabezado existen, y el clic no lleva a ningún lado. Se ve con el
+texto crudo `Tomate#Cuidados`, en vivo y en lectura.
+
+Detectado el 2026-10-07 en la [[Auditoria e2e 2026-10-07]] (`H32`).
+
+# DEF-142
+En la **vista de lectura** con tema oscuro, un diagrama **Mermaid** se dibuja con colores de
+tema claro: cajas blancas y una flecha gris que casi no se ve sobre el fondo.
+
+Detectado el 2026-10-07 en la [[Auditoria e2e 2026-10-07]] (`H33`).
+
+# DEF-143
+En la **vista de lectura**, una tabla con una columna alineada a la derecha (`---:`) la
+muestra **alineada a la izquierda**. En la vista en vivo se ve bien.
+
+Detectado el 2026-10-07 en la [[Auditoria e2e 2026-10-07]] (`H34`).
+
+# DEF-144
+En la **búsqueda global**, el texto se encuentra sin importar las tildes («pulgon» encuentra
+«Pulgón»), pero un filtro **`clave:valor`** no: `familia:solanaceas` no encuentra nada y
+`familia:solanáceas` encuentra dos notas.
+
+Detectado el 2026-10-07 en la [[Auditoria e2e 2026-10-07]] (`H13`).
+
+# DEF-145
+En la **búsqueda global**, un filtro **`clave:valor` cuyo valor tiene espacios** no encuentra
+nada: `bancal:"Bancal 1"` da cero resultados aunque haya notas con `bancal: Bancal 1`, y
+`bancal:Bancal` tampoco.
+
+Detectado el 2026-10-07 en la [[Auditoria e2e 2026-10-07]] (`H14`).
+
+# DEF-146
+Buscar el **título exacto** de una nota en la búsqueda global («Tomate») no la muestra
+primera: aparece casi al final, después de todas las notas que la mencionan.
+
+Detectado el 2026-10-07 en la [[Auditoria e2e 2026-10-07]] (`H15`).
+
+# DEF-147
+El editor de **Excalidraw** está en **inglés** («Library», «To move canvas, hold mouse wheel
+or spacebar…», sus menús y ayudas), en una app que está entera en español.
+
+Detectado el 2026-10-07 en la [[Auditoria e2e 2026-10-07]] (`H30`).
+
+# DEF-148
+Los **fragmentos** de los resultados de la búsqueda global se leen mal: cuando la coincidencia
+es una propiedad o etiqueta, el fragmento es el frontmatter aplastado en una línea («cultivo
+cucurbitáceas Bancal 3 planificado 2026-10-25 cultivo verano…»); los enlaces se ven crudos
+(`[[Pulgón|pulgones]]`), y en un `.canvas` aparecen `\n` literales.
+
+Detectado el 2026-10-07 en la [[Auditoria e2e 2026-10-07]] (`H16`, `H19`).
+
+# DEF-149
+En el **grafo** con «Nombres: Todos», varios nodos **no muestran su nombre** (en el vault de
+prueba, encuentros como «Jornada de siembra de primavera») y otros nombres quedan **encima de
+nodos ajenos** («Bancal 1 — Solanáceas» sobre «Abejas nativas»).
+
+Detectado el 2026-10-07 en la [[Auditoria e2e 2026-10-07]] (`H20`).
+
+# DEF-150
+**Lote de detalles** de la [[Auditoria e2e 2026-10-07]], cada uno chico (el detalle de cada
+uno, en la nota de la auditoría):
+- **a** (`H2`) Al abrir una nota, el explorador resalta su carpeta pero no la despliega.
+- **b** (`H3`) En vivo, las viñetas se ven como «-», y en una tarea queda «- » antes de la casilla.
+- **c** (`H12`) En la papelera, el origen de una nota de la raíz se muestra como «/»; las tarjetas son muy altas.
+- **d** (`H17`) El campo de la búsqueda global tiene dos botones para limpiarlo.
+- **e** (`H22`) Al renombrar desde el explorador, el nombre no queda seleccionado.
+- **f** (`H23`) El popup de un recordatorio mezcla tres tipografías.
+- **g** (`H24`) En el panel del calendario, el título del día se corta con un hueco grande y la fecha se parte en dos líneas.
+- **h** (`H26`) Una tarjeta nueva del lienzo aparece encima de una existente.
+- **i** (`H27`) Cada tarjeta de texto del lienzo lleva un rótulo «Texto» y su texto está en serif.
+- **j** (`H29`) Ordenar por una columna de una tabla `.base` reescribe el archivo sin avisar.
+- **k** (`H35`) En vivo, las cercas ` ``` ` de un bloque de código siguen visibles con el cursor fuera.
+- **l** (`H37`) Con los panes divididos, las pestañas se encogen hasta no leerse («T…»).
+- **m** (`H39`) Renombrar con `:` o `?` los cambia por `-` sin avisar.
+- **n** (`H40`) En Configuración, «Ancho de tabulación» es un campo enorme para una cifra, y Tipografía no tiene los «Más» del resto.
+
+Detectado el 2026-10-07.
+
 ---
 
 > [!warning] Defectos sin reporte original
