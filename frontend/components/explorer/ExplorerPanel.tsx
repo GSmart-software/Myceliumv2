@@ -44,7 +44,7 @@ import { useImportStore } from "@/stores/importStore";
 import { useTabsStore } from "@/stores/tabsStore";
 import { useUiStore } from "@/stores/uiStore";
 import { HAY_COMPARTIR } from "@/lib/capacidades";
-import { avisar } from "@/stores/avisosStore";
+import { avisar, avisarFallo } from "@/stores/avisosStore";
 import { SharedSection } from "./SharedSection";
 import {
   useVaultStore,
@@ -55,6 +55,7 @@ import {
 import { ContextMenu, type MenuItem } from "./ContextMenu";
 import { MenuNuevo, type ItemNuevo } from "./MenuNuevo";
 import styles from "./ExplorerPanel.module.css";
+import { pedirEdicionDeTitulo, soltarFoco } from "@/lib/editor/tituloPendiente";
 
 /**
  * DEF-023 P2: pane y zona (borde = dividir / centro = abrir) bajo un punto de
@@ -214,7 +215,7 @@ export function ExplorerPanel() {
       if (editable) return;
       if (event.ctrlKey && event.key === "z" && store.lastMove) {
         event.preventDefault();
-        void store.undoLastMove();
+        void store.undoLastMove().catch(avisarFallo("deshacer el movimiento"));
       }
     }
     window.addEventListener("keydown", onKeyDown);
@@ -294,6 +295,19 @@ export function ExplorerPanel() {
       router.replace(`/workspace?note=${id}`);
     },
     [router],
+  );
+
+  /**
+   * Abre una nota recién creada con el título en edición (`DEF-135`): lo que se
+   * escribe enseguida la nombra, en vez de perderse o de volver a activar el
+   * botón que la creó.
+   */
+  const abrirNueva = useCallback(
+    (id: string) => {
+      pedirEdicionDeTitulo(id);
+      openNota(id);
+    },
+    [openNota],
   );
 
   // Clic con la rueda: abre la nota en segundo plano (sin robar el foco).
@@ -384,14 +398,16 @@ export function ExplorerPanel() {
     if (dragged.startsWith("nota:")) {
       const notaId = dragged.replace("nota:", "");
       const nota = store.notas.find((n) => n.id === notaId);
-      if (nota && nota.carpetaId !== destinoId) void store.moveNota(notaId, destinoId);
+      if (nota && nota.carpetaId !== destinoId) {
+        void store.moveNota(notaId, destinoId).catch(avisarFallo(`mover «${nota.titulo}»`));
+      }
     } else if (dragged.startsWith("carpeta:")) {
       const carpetaId = dragged.replace("carpeta:", "");
       const carpeta = store.carpetas.find((c) => c.id === carpetaId);
       if (!carpeta || carpeta.padreId === destinoId) return;
       // No mover dentro de sí misma ni de sus hijos (HU-24 CA6)
       if (destinoId !== null && store.subtreeIds(carpetaId).has(destinoId)) return;
-      void store.moveCarpeta(carpetaId, destinoId);
+      void store.moveCarpeta(carpetaId, destinoId).catch(avisarFallo(`mover «${carpeta.nombre}»`));
     }
   }
 
@@ -413,8 +429,8 @@ export function ExplorerPanel() {
         label: espora.titulo,
         onClick: () =>
           void crearNotaDesdeEspora(espora, carpetaId)
-            .then(openNota)
-            .catch((e) => console.error("[esporas] no se pudo crear la nota:", e)),
+            .then(abrirNueva)
+            .catch(avisarFallo(`crear la nota desde «${espora.titulo}»`)),
       })),
     };
   }
@@ -449,21 +465,25 @@ export function ExplorerPanel() {
     return [
       {
         label: "Nueva nota",
-        onClick: () => void store.createNota(carpeta.id).then(openNota),
+        onClick: () => void store.createNota(carpeta.id).then(abrirNueva).catch(avisarFallo("crear la nota")),
       },
       {
         label: "Nuevo dibujo Excalidraw",
-        onClick: () => void store.createNota(carpeta.id, "excalidraw").then(openNota),
+        onClick: () =>
+          void store
+            .createNota(carpeta.id, "excalidraw")
+            .then(openNota)
+            .catch(avisarFallo("crear el dibujo")),
       },
       // Base (FUN-L-03): una tabla que agrega notas por sus propiedades. Se crea
       // con una vista mínima ya escrita, para que muestre algo desde el principio.
       {
         label: "Nueva base",
-        onClick: () => void crearBase(carpeta.id),
+        onClick: () => void crearBase(carpeta.id).catch(avisarFallo("crear la base")),
       },
       {
         label: "Nuevo canvas",
-        onClick: () => void crearCanvas(carpeta.id),
+        onClick: () => void crearCanvas(carpeta.id).catch(avisarFallo("crear el canvas")),
       },
       // Plantillas (FUN-M-03): crea EN ESTA carpeta, no en la activa. Sin
       // Esporas la entrada queda deshabilitada con el motivo, nunca oculta: es
@@ -473,7 +493,7 @@ export function ExplorerPanel() {
         label: "Nueva carpeta",
         onClick: () => {
           const nombre = window.prompt("Nombre de la carpeta:", "Nueva carpeta");
-          if (nombre) void store.createCarpeta(nombre, carpeta.id);
+          if (nombre) void store.createCarpeta(nombre, carpeta.id).catch(avisarFallo("crear la carpeta"));
         },
       },
       {
@@ -515,7 +535,7 @@ export function ExplorerPanel() {
               ? `Eliminar "${carpeta.nombre}" mandará ${count} nota(s) a la papelera. ¿Continuar?`
               : `¿Eliminar la carpeta "${carpeta.nombre}"?`;
           void confirmar(message, "Eliminar").then((ok) => {
-            if (ok) void store.deleteCarpeta(carpeta.id);
+            if (ok) void store.deleteCarpeta(carpeta.id).catch(avisarFallo(`eliminar «${carpeta.nombre}»`));
           });
         },
       },
@@ -528,10 +548,13 @@ export function ExplorerPanel() {
         label: "Renombrar",
         onClick: () => setRenaming({ type: "nota", id: nota.id, valor: nota.titulo }),
       },
-      { label: "Duplicar", onClick: () => void store.duplicateNota(nota.id) },
+      {
+        label: "Duplicar",
+        onClick: () => void store.duplicateNota(nota.id).catch(avisarFallo(`duplicar «${nota.titulo}»`)),
+      },
       {
         label: "Exportar como .md",
-        onClick: () => void exportNoteMd(nota.id, nota.titulo),
+        onClick: () => void exportNoteMd(nota.id, nota.titulo).catch(avisarFallo(`exportar «${nota.titulo}»`)),
       },
       {
         label: "Exportar como PDF…",
@@ -547,12 +570,16 @@ export function ExplorerPanel() {
           const titulo = nota.titulo;
           const id = nota.id;
           useTabsStore.getState().closeNotaEverywhere(id);
-          void store.deleteNota(id).then(() =>
-            avisar(`«${titulo}» fue a la papelera`, {
-              etiqueta: "Deshacer",
-              hacer: () => void useVaultStore.getState().restoreNota(id),
-            }),
-          );
+          void store
+            .deleteNota(id)
+            .then(() =>
+              avisar(`«${titulo}» fue a la papelera`, {
+                etiqueta: "Deshacer",
+                hacer: () =>
+                  void useVaultStore.getState().restoreNota(id).catch(avisarFallo(`restaurar «${titulo}»`)),
+              }),
+            )
+            .catch(avisarFallo(`mandar «${titulo}» a la papelera`));
         },
       },
     ];
@@ -562,8 +589,9 @@ export function ExplorerPanel() {
     if (!renaming) return;
     const valor = renaming.valor.trim();
     if (valor) {
-      if (renaming.type === "carpeta") void store.renameCarpeta(renaming.id, valor);
-      else void store.renameNota(renaming.id, valor);
+      if (renaming.type === "carpeta") {
+        void store.renameCarpeta(renaming.id, valor).catch(avisarFallo("renombrar la carpeta"));
+      } else void store.renameNota(renaming.id, valor).catch(avisarFallo("renombrar la nota"));
     }
     setRenaming(null);
   }
@@ -709,24 +737,28 @@ export function ExplorerPanel() {
     {
       label: "Nuevo dibujo Excalidraw",
       icono: IconoDibujo,
-      onClick: () => void store.createNota(store.activeFolderId, "excalidraw").then(openNota),
+      onClick: () =>
+        void store
+          .createNota(store.activeFolderId, "excalidraw")
+          .then(openNota)
+          .catch(avisarFallo("crear el dibujo")),
     },
     {
       label: "Nueva base (tabla de notas)",
       icono: IconoBase,
-      onClick: () => void crearBase(store.activeFolderId),
+      onClick: () => void crearBase(store.activeFolderId).catch(avisarFallo("crear la base")),
     },
     {
       label: "Nuevo canvas (notas en el espacio)",
       icono: IconoCanvas,
-      onClick: () => void crearCanvas(store.activeFolderId),
+      onClick: () => void crearCanvas(store.activeFolderId).catch(avisarFallo("crear el canvas")),
     },
     {
       label: "Nueva carpeta",
       icono: FolderPlus,
       onClick: () => {
         const nombre = window.prompt("Nombre de la carpeta:", "Nueva carpeta");
-        if (nombre) void store.createCarpeta(nombre, store.activeFolderId);
+        if (nombre) void store.createCarpeta(nombre, store.activeFolderId).catch(avisarFallo("crear la carpeta"));
       },
     },
     {
@@ -783,7 +815,12 @@ export function ExplorerPanel() {
           className={styles.actionButton}
           title="Nueva nota"
           aria-label="Nueva nota"
-          onClick={() => void store.createNota(store.activeFolderId).then(openNota)}
+          onClick={(e) => {
+            // `DEF-135`: el botón no se queda con el foco, o el espacio y el
+            // Enter que se tecleen para la nota nueva crearían otra.
+            soltarFoco(e.currentTarget);
+            void store.createNota(store.activeFolderId).then(abrirNueva).catch(avisarFallo("crear la nota"));
+          }}
         >
           <FilePlus size={16} aria-hidden />
         </button>
@@ -796,7 +833,10 @@ export function ExplorerPanel() {
             className={`${styles.actionButton} ${styles.soloAncho}`}
             title={label}
             aria-label={label}
-            onClick={onClick}
+            onClick={(e) => {
+              soltarFoco(e.currentTarget); // `DEF-135`: ver «Nueva nota»
+              onClick();
+            }}
           >
             <Icono size={16} />
           </button>

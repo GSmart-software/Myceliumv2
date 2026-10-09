@@ -36,7 +36,10 @@ import {
   rehacer,
   type Historial,
 } from "@/lib/historialCanvas";
-import { markMissingWikilinks, resolveWikilink } from "@/lib/editor/wikilink";
+import { markMissingWikilinks } from "@/lib/editor/wikilink";
+import { pedirSaltoAAncla } from "@/lib/editor/pendingMatch";
+import { resolverReferencia } from "@/lib/wikilinks";
+import { soltarFoco } from "@/lib/editor/tituloPendiente";
 import { manejarClicDeEnlace } from "@/lib/enlacesExternos";
 import { renderNota } from "@/lib/markdown";
 import { notaDeRuta, rutaDeNota } from "@/lib/rutasNotas";
@@ -464,8 +467,8 @@ export function CanvasView({ notaId }: { notaId: string }) {
 
   const agregarNota = (notaDestino: string) => {
     const p = centro();
-    setEligiendoNota(false);
     const id = idNuevo();
+    setEligiendoNota(false);
     // Se guarda la RUTA, no el id: es lo que pide el formato y lo que hace que
     // el canvas se abra en Obsidian (ver `lib/rutasNotas.ts`).
     cambiar((c) => ({
@@ -487,10 +490,12 @@ export function CanvasView({ notaId }: { notaId: string }) {
   };
 
   const abrirPorTitulo = (titulo: string) => {
-    const destino = resolveWikilink(titulo, notas, carpetas);
+    const { nota: destino, ancla } = resolverReferencia(titulo, notas, carpetas);
     if (!destino) return;
     useTabsStore.getState().openNote(destino.id);
     router.replace(`/workspace?note=${encodeURIComponent(destino.id)}`);
+    // `[[Nota#Encabezado]]`: además de abrirla, ir al encabezado (`DEF-141`).
+    if (ancla) pedirSaltoAAncla(destino.id, ancla);
   };
 
   const abrirNota = (id: string) => {
@@ -591,7 +596,16 @@ export function CanvasView({ notaId }: { notaId: string }) {
       }}
     >
       <header className={styles.barra}>
-        <button type="button" className={styles.boton} onClick={agregarTexto}>
+        <button
+          type="button"
+          className={styles.boton}
+          onClick={(e) => {
+            // El foco pasa al texto de la tarjeta nueva; el botón no se lo queda,
+            // o un espacio tecleado para ella crearía otra (`DEF-135`).
+            soltarFoco(e.currentTarget);
+            agregarTexto();
+          }}
+        >
           <Type size={14} aria-hidden /> Tarjeta de texto
         </button>
         <button

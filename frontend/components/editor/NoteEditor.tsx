@@ -22,21 +22,39 @@ import { wrapSelection } from "@/lib/editor/commands";
 import { startCollab, type CollabHandle } from "@/lib/collab/collab";
 import { addCodeCopyButtons } from "@/lib/codeCopy";
 import { publishDoc, subscribeDoc } from "@/lib/editor/docBroker";
-import { takePendingMatch } from "@/lib/editor/pendingMatch";
+import {
+  pedirSaltoAAncla,
+  setPendingMatch,
+  takePendingMatch,
+  type Salto,
+} from "@/lib/editor/pendingMatch";
 import { liveExtensions, refreshAllLiveViews } from "@/lib/editor/livePreview";
 import { autoPairs } from "@/lib/editor/autoPairs";
-import { docTitleField, renombrarPorTitulo, setDocTitle } from "@/lib/editor/docTitle";
-import { attachHeadingFolds, headingFoldService } from "@/lib/editor/headingFold";
 import {
-  markMissingWikilinks,
-  resolveWikilink,
-  wikilinkCompletions,
-} from "@/lib/editor/wikilink";
+  type DestinoTrasTitulo,
+  docTitleField,
+  editarTitulo,
+  enfocarTrasTitulo,
+  renombrarPorTitulo,
+  salirDelTitulo,
+  setDocTitle,
+} from "@/lib/editor/docTitle";
+import { tomarEdicionDeTitulo } from "@/lib/editor/tituloPendiente";
+import { attachHeadingFolds, headingFoldService } from "@/lib/editor/headingFold";
+import { markMissingWikilinks, wikilinkCompletions } from "@/lib/editor/wikilink";
 import { registerView, unregisterView } from "@/lib/editor/viewRegistry";
 import { extensionesTab } from "@/lib/editor/tabWidth";
 import { manejarClicDeEnlace } from "@/lib/enlacesExternos";
 import { exportDiagram, renderExcalidrawIn, saveDiagram } from "@/lib/excalidraw";
 import { getCachedNote, putCachedNote } from "@/lib/idb";
+import { avisarFallo } from "@/stores/avisosStore";
+import { useHtmlDecorable } from "@/lib/useHtmlDecorable";
+import {
+  esAnclaPropia,
+  etiquetaDeReferencia,
+  lineaDeAncla,
+  resolverReferencia,
+} from "@/lib/wikilinks";
 import { EVENTO_NOTA_GUARDADA } from "@/lib/eventos";
 import { renderNota } from "@/lib/markdown";
 import { renderMermaidIn } from "@/lib/mermaid";
@@ -209,11 +227,33 @@ function toggleTaskInDoc(view: EditorView | null, index: number) {
   }
 }
 
-/** Selecciona y centra la primera coincidencia de `term` en la vista (HU-21 CA8). */
-function gotoMatch(view: EditorView, term: string) {
-  if (!term) return;
+/**
+ * Selecciona y centra la primera coincidencia de `term` en la vista (HU-21 CA8),
+ * o pone el cursor al principio de una línea (`{ linea }`, desde 1: el MCP de
+ * control, `FUN-L-09`, que ya resolvió el encabezado o el texto a su línea), o
+ * al encabezado o bloque de un `[[Nota#Encabezado]]` (`{ ancla }`, `DEF-141`).
+ * Devuelve la línea a la que fue, para que el panel de lectura la siga; `null`
+ * si no fue a ningún lado (un ancla que la nota no tiene la deja al principio,
+ * como Obsidian).
+ */
+function gotoMatch(view: EditorView, salto: Salto): number | null {
+  if (typeof salto !== "string") {
+    const doc = view.state.doc;
+    const numero = "ancla" in salto ? lineaDeAncla(doc.toString(), salto.ancla) : salto.linea;
+    if (numero === null) return null;
+    const linea = doc.line(Math.min(Math.max(1, Math.trunc(numero)), doc.lines));
+    view.dispatch({
+      selection: { anchor: linea.from },
+      // Un encabezado se lee desde arriba: va al borde superior, no al centro.
+      effects: EditorView.scrollIntoView(linea.from, { y: "ancla" in salto ? "start" : "center" }),
+    });
+    view.focus();
+    return linea.number;
+  }
+  const term = salto;
+  if (!term) return null;
   const idx = view.state.doc.toString().toLowerCase().indexOf(term.toLowerCase());
-  if (idx < 0) return;
+  if (idx < 0) return null;
   view.dispatch({
     selection: { anchor: idx, head: idx + term.length },
     // DEF-056: el comentario decía "centra" pero `scrollIntoView: true` usa la
@@ -222,6 +262,7 @@ function gotoMatch(view: EditorView, term: string) {
     effects: EditorView.scrollIntoView(idx, { y: "center" }),
   });
   view.focus();
+  return view.state.doc.lineAt(idx).number;
 }
 
 /**
@@ -302,6 +343,12 @@ export function NoteEditor({
   // CodeMirror, que se crea una sola vez (`FUN-M-24`).
   const notaIdRef = useRef(notaId);
   notaIdRef.current = notaId;
+  /**
+   * Foco que quedó pendiente al salir del título (`DEF-139`): renombrar cambia
+   * el id, la vista se destruye y se recrea, y si la nueva todavía no existe
+   * cuando hay que enfocarla, se la enfoca al crearla.
+   */
+  const focoTrasTituloRef = useRef<DestinoTrasTitulo | null>(null);
   const contentRef = useRef("");
   const dirtyRef = useRef(false);
   const remoteUpdatedAtRef = useRef<string | null>(null);
@@ -312,23 +359,61 @@ export function NoteEditor({
   const ultimoRenderMs = useRef(0);
   const syncingRef = useRef(false);
 
+  /**
+   * Lleva la vista a una línea y, en lectura o dividido, también el panel de
+   * lectura, que tiene su propio scroll (`DEF-141`). Se reusa el pendiente por
+   * línea de `DEF-055`; el de píxeles de `DEF-039` —volver a la pestaña donde
+   * estaba— cede, porque se pidió ir a otro lado.
+   */
+  const saltar = useCallback((view: EditorView, salto: Salto): number | null => {
+    const linea = gotoMatch(view, salto);
+    if (linea === null) return null;
+    if (modeRef.current === "read" || modeRef.current === "split") {
+      previewLineaPendienteRef.current = linea;
+      previewScrollPendienteRef.current = null;
+      setPreviewTick((t) => t + 1);
+    }
+    return linea;
+  }, []);
+
   const openByTitle = useCallback(
     (title: string) => {
-      const { notas, carpetas } = useVaultStore.getState();
-      // Acepta `título` o `Carpeta/título` para desambiguar homónimos.
-      const target = resolveWikilink(title, notas, carpetas);
-      if (target) {
-        useTabsStore.getState().openNote(target.id);
-        router.replace(`/workspace?note=${target.id}`);
+      // `[[#Encabezado]]`: un salto dentro de esta misma nota (`DEF-141`).
+      if (esAnclaPropia(title)) {
+        if (viewRef.current) saltar(viewRef.current, { ancla: title.trim().slice(1) });
+        return;
       }
+      const { notas, carpetas } = useVaultStore.getState();
+      // Acepta `título` o `Carpeta/título` para desambiguar homónimos, y el
+      // ancla (`Nota#Encabezado`) no participa en encontrar la nota (`DEF-141`).
+      const { nota: target, ancla } = resolverReferencia(title, notas, carpetas);
+      if (!target) return;
+      if (target.id === notaIdRef.current && ancla) {
+        if (viewRef.current) saltar(viewRef.current, { ancla });
+        return;
+      }
+      useTabsStore.getState().openNote(target.id);
+      router.replace(`/workspace?note=${target.id}`);
+      if (ancla) pedirSaltoAAncla(target.id, ancla);
     },
-    [router],
+    [router, saltar],
   );
 
-  // ¿Existe el archivo referenciado por un wikilink? (feedback de inexistencia)
+  // ¿Existe el archivo referenciado por un wikilink? (feedback de inexistencia).
+  // Un `[[#Encabezado]]` apunta a esta misma nota: existe.
   const noteExists = useCallback((target: string) => {
+    if (esAnclaPropia(target)) return true;
     const { notas, carpetas } = useVaultStore.getState();
-    return resolveWikilink(target, notas, carpetas) !== undefined;
+    return resolverReferencia(target, notas, carpetas).nota !== undefined;
+  }, []);
+
+  // Lo que muestra un enlace sin alias en la vista en vivo: `Tomate › Cuidados`
+  // para `[[Tomate#Cuidados]]`, pero `Q# y Quantum` para la nota que se llama
+  // así (`DEF-141`). Por eso resuelve contra el vault y no solo por la sintaxis.
+  const etiquetaDe = useCallback((target: string) => {
+    const { notas, carpetas } = useVaultStore.getState();
+    const r = resolverReferencia(target, notas, carpetas);
+    return etiquetaDeReferencia(r.base, r.ancla);
   }, []);
 
   // ── Persistencia local + sync ───────────────────────────────────
@@ -539,10 +624,21 @@ export function NoteEditor({
             renombrarPorTitulo.of((titulo) =>
               useVaultStore.getState().renameNota(notaIdRef.current, titulo),
             ),
+            // Adónde va el foco al confirmar o descartar el título (`DEF-139`).
+            // A la vista VIVA (`viewRef`), no a la del widget: si se renombró, esa
+            // ya está destruida y otra ocupa su lugar. Un frame de margen para que
+            // React termine de montarla; si aún no está, la toma `createView`.
+            salirDelTitulo.of((destino) => {
+              requestAnimationFrame(() => {
+                const v = viewRef.current;
+                if (v && v.dom.isConnected) enfocarTrasTitulo(v, destino);
+                else focoTrasTituloRef.current = destino;
+              });
+            }),
             EditorView.lineWrapping,
             placeholder("Escribí tu nota…"),
             liveCompartment.current.of(
-              modeRef.current === "live" ? liveExtensions(openByTitle, noteExists, notaId) : [],
+              modeRef.current === "live" ? liveExtensions(openByTitle, noteExists, notaId, etiquetaDe) : [],
             ),
             // Colaboración en vivo (HU-05/06/37); vacío salvo en notas
             // compartidas con relay disponible (cloudflare).
@@ -652,10 +748,26 @@ export function NoteEditor({
       setPreviewHtml(renderNota(content, true));
 
       // Si se abrió desde la búsqueda global, saltar a la coincidencia (HU-21 CA8)
-      const pendingTerm = takePendingMatch(notaId);
-      if (pendingTerm) gotoMatch(viewRef.current, pendingTerm);
+      const pendiente = takePendingMatch(notaId);
+      if (pendiente) saltar(viewRef.current, pendiente);
+
+      // Nota recién creada (`DEF-135`): el foco va al título, seleccionado, para
+      // que lo primero que se escriba la nombre. Si el título no se muestra, al
+      // cuerpo; en modo lectura no hay dónde escribir y no se toca nada.
+      if (tomarEdicionDeTitulo(notaId) && modeRef.current !== "read") {
+        const view = viewRef.current;
+        if (!editarTitulo(view)) view.focus();
+      }
+
+      // Se confirmó el título y la vista que había se desmontó antes de poder
+      // enfocarla (`DEF-139`): esta es la que la reemplaza.
+      const focoPendiente = focoTrasTituloRef.current;
+      if (focoPendiente !== null) {
+        focoTrasTituloRef.current = null;
+        if (modeRef.current !== "read") enfocarTrasTitulo(viewRef.current, focoPendiente);
+      }
     },
-    [onDocChanged, openByTitle, noteExists, notaId, instanceId, paneId],
+    [onDocChanged, openByTitle, noteExists, etiquetaDe, saltar, notaId, instanceId, paneId],
   );
 
   /**
@@ -791,16 +903,28 @@ export function NoteEditor({
   // Salto a coincidencia cuando la nota ya estaba abierta (HU-21 CA8)
   useEffect(() => {
     function onGoto(event: Event) {
-      const detail = (event as CustomEvent<{ notaId: string; term: string }>).detail;
+      const detail = (
+        event as CustomEvent<{ notaId: string; term?: string; linea?: number; ancla?: string }>
+      ).detail;
       if (detail?.notaId !== notaId) return;
       const view = viewRef.current;
       if (!view) return;
+      const salto: Salto =
+        typeof detail.ancla === "string"
+          ? { ancla: detail.ancla }
+          : typeof detail.linea === "number"
+            ? { linea: detail.linea }
+            : (detail.term ?? "");
       takePendingMatch(notaId);
-      gotoMatch(view, detail.term);
+      // Un ancla se busca en el contenido: si la vista todavía no lo tiene (la
+      // nota se está cargando), el salto queda pendiente para la carga.
+      if (saltar(view, salto) === null && typeof salto !== "string" && "ancla" in salto) {
+        setPendingMatch(notaId, salto);
+      }
     }
     window.addEventListener("micelio:goto-match", onGoto);
     return () => window.removeEventListener("micelio:goto-match", onGoto);
-  }, [notaId]);
+  }, [notaId, saltar]);
 
   // Espejo en tiempo real con otras instancias de la misma nota
   useEffect(() => {
@@ -874,7 +998,7 @@ export function NoteEditor({
       window.localStorage.setItem(`micelio-mode-${notaId}`, next);
       viewRef.current?.dispatch({
         effects: liveCompartment.current.reconfigure(
-          next === "live" ? liveExtensions(openByTitle, noteExists, notaId) : [],
+          next === "live" ? liveExtensions(openByTitle, noteExists, notaId, etiquetaDe) : [],
         ),
       });
       if (next === "split" || next === "read") {
@@ -887,7 +1011,7 @@ export function NoteEditor({
       // enfocarlo desplazaria el contenedor.
       if (next !== "read") requestAnimationFrame(() => viewRef.current?.focus());
     },
-    [notaId, openByTitle, noteExists],
+    [notaId, openByTitle, noteExists, etiquetaDe],
   );
 
   useEffect(() => {
@@ -921,6 +1045,17 @@ export function NoteEditor({
       addCodeCopyButtons(previewRef.current); // botón copiar en bloques de código
     }
   }, [previewHtml, mode, previewTick, notaId, vaultNotas, vaultCarpetas]);
+  // El HTML del preview, estable mientras el efecto de arriba no vuelva a correr
+  // (`DEF-133`): con un `{ __html }` nuevo en cada render, React reasignaba
+  // `innerHTML` en cualquier re-render y los embeds volvían a ser el marcador
+  // «Diagrama …». La lista tiene que ser la del efecto, sin `previewHtml`.
+  const previewInner = useHtmlDecorable(previewHtml, [
+    mode,
+    previewTick,
+    notaId,
+    vaultNotas,
+    vaultCarpetas,
+  ]);
 
   // Las flechas de plegado se inyectan en el DOM DESPUÉS de que React pinte, así
   // que cualquier re-render que reescriba el HTML del preview se las lleva —
@@ -955,14 +1090,17 @@ export function NoteEditor({
     if (!view) return;
     const vault = useVaultStore.getState();
     const carpetaId = vault.notas.find((n) => n.id === notaId)?.carpetaId ?? null;
-    void vault.createNota(carpetaId, "excalidraw").then((newId) => {
-      const titulo =
-        useVaultStore.getState().notas.find((n) => n.id === newId)?.titulo ??
-        "Dibujo sin título";
-      const { from } = view.state.selection.main;
-      view.dispatch({ changes: { from, insert: `![[${titulo}.excalidraw]]` } });
-      setEditingFile(newId); // abrir el editor embebido del nuevo dibujo
-    });
+    void vault
+      .createNota(carpetaId, "excalidraw")
+      .then((newId) => {
+        const titulo =
+          useVaultStore.getState().notas.find((n) => n.id === newId)?.titulo ??
+          "Dibujo sin título";
+        const { from } = view.state.selection.main;
+        view.dispatch({ changes: { from, insert: `![[${titulo}.excalidraw]]` } });
+        setEditingFile(newId); // abrir el editor embebido del nuevo dibujo
+      })
+      .catch(avisarFallo("crear el dibujo")); // `DEF-136`
   }, [notaId]);
 
   // DEF-039 CA2: en modo lectura (y en dividido) el scroller VISIBLE no es el de
@@ -1297,7 +1435,7 @@ export function NoteEditor({
                 <div className="mic-doc-title-texto">{notaTitulo}</div>
               </div>
             )}
-            <div className="mic-preview-body" dangerouslySetInnerHTML={{ __html: previewHtml }} />
+            <div className="mic-preview-body" dangerouslySetInnerHTML={previewInner} />
           </div>
         )}
       </div>

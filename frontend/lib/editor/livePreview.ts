@@ -44,7 +44,7 @@ import {
   controlTablaDe,
   esControlDeTabla,
 } from "@/lib/editor/tablaWidget";
-import { esEnlaceExterno, manejarClicDeEnlace } from "@/lib/enlacesExternos";
+import { destinoDeUrlSuelta, esEnlaceExterno, manejarClicDeEnlace } from "@/lib/enlacesExternos";
 import {
   ALLOW_VIDEO,
   esVideo,
@@ -55,7 +55,7 @@ import {
 import { renderExcalidrawInto } from "@/lib/excalidraw";
 import { getAllViews } from "@/lib/editor/viewRegistry";
 import { useUiStore } from "@/stores/uiStore";
-import { partirWikilink } from "@/lib/wikilinks";
+import { etiquetaDeDestino, partirWikilink } from "@/lib/wikilinks";
 import { REGLAS_CODIGO } from "@/lib/editor/paletaSintaxis";
 import { FormulaWidget, formulasEnLinea, formulasField } from "@/lib/editor/matematicas";
 
@@ -604,6 +604,7 @@ export function liveExtensions(
   onWikilinkClick: (title: string) => void,
   noteExists: (target: string) => boolean,
   notaId: string | null = null,
+  etiquetaDe: (target: string) => string = etiquetaDeDestino,
 ): Extension {
   return [
     syntaxHighlighting(micelioHighlight),
@@ -629,7 +630,7 @@ export function liveExtensions(
     // queda escribiendo a ciegas dentro de una fórmula dibujada.
     formulasField,
     navegarPorTitulo.of(onWikilinkClick),
-    livePreview(onWikilinkClick, noteExists, notaId),
+    livePreview(onWikilinkClick, noteExists, notaId, etiquetaDe),
   ];
 }
 
@@ -695,6 +696,35 @@ class CheckboxWidget extends WidgetType {
   }
 }
 
+/**
+ * Un `[[Nota#Encabezado]]` sin alias fuera de la línea activa (`DEF-141`): la
+ * etiqueta `Nota › Encabezado` en lugar del texto crudo. Lleva las mismas clases
+ * y el mismo `data-title` que la marca de un enlace común, así que el clic lo
+ * atiende el mismo `mousedown` de `livePreview` —por eso no ignora sus eventos—.
+ */
+class WikilinkAnclaWidget extends WidgetType {
+  constructor(
+    readonly etiqueta: string,
+    readonly destino: string,
+    readonly roto: boolean,
+  ) {
+    super();
+  }
+  eq(other: WikilinkAnclaWidget) {
+    return other.etiqueta === this.etiqueta && other.destino === this.destino && other.roto === this.roto;
+  }
+  toDOM() {
+    const span = document.createElement("span");
+    span.className = this.roto ? "mic-wikilink-cm mic-wikilink-cm-missing" : "mic-wikilink-cm";
+    span.dataset.title = this.destino;
+    span.textContent = this.etiqueta;
+    return span;
+  }
+  ignoreEvent() {
+    return false;
+  }
+}
+
 /** Etiqueta del tipo que reemplaza al marcador cuando no hay título. */
 class LabelWidget extends WidgetType {
   constructor(readonly label: string) {
@@ -755,13 +785,14 @@ export function livePreview(
   onWikilinkClick: (title: string) => void,
   noteExists: (target: string) => boolean,
   notaId: string | null = null,
+  etiquetaDe: (target: string) => string = etiquetaDeDestino,
 ) {
   return ViewPlugin.fromClass(
     class {
       decorations: DecorationSet;
 
       constructor(view: EditorView) {
-        this.decorations = buildDecorations(view, noteExists, notaId);
+        this.decorations = buildDecorations(view, noteExists, notaId, etiquetaDe);
       }
 
       update(update: ViewUpdate) {
@@ -779,7 +810,7 @@ export function livePreview(
           arbolNuevo ||
           refreshed
         ) {
-          this.decorations = buildDecorations(update.view, noteExists, notaId);
+          this.decorations = buildDecorations(update.view, noteExists, notaId, etiquetaDe);
         }
       }
     },
@@ -938,6 +969,7 @@ function buildDecorations(
   view: EditorView,
   noteExists: (target: string) => boolean,
   notaId: string | null = null,
+  etiquetaDe: (target: string) => string = etiquetaDeDestino,
 ): DecorationSet {
   const decos: PendingDeco[] = [];
   const doc = view.state.doc;
@@ -1118,11 +1150,38 @@ function buildDecorations(
           }
           case "EmphasisMark":
           case "StrikethroughMark":
-          case "LinkMark":
-          case "URL": {
+          case "LinkMark": {
             const line = doc.lineAt(node.from);
             if (!activeLines.has(line.number)) {
               decos.push({ from: node.from, to: node.to, deco: hide });
+            }
+            break;
+          }
+          case "URL": {
+            // Solo se oculta el destino de un `[texto](url)` o `![alt](url)`,
+            // donde lo visible es el texto (o la imagen). El parser también
+            // llama `URL` a una dirección suelta —`https://…`, `www.…`, un
+            // correo— y a la de `<https://…>`: ahí la URL ES el texto, y
+            // ocultarla la hacía desaparecer de la línea (`DEF-132`). Esas
+            // quedan a la vista y se abren con un clic, como cualquier enlace.
+            const padre = node.node.parent?.name;
+            if (padre === "Link" || padre === "Image") {
+              const line = doc.lineAt(node.from);
+              if (!activeLines.has(line.number)) {
+                decos.push({ from: node.from, to: node.to, deco: hide });
+              }
+              break;
+            }
+            const destino = destinoDeUrlSuelta(doc.sliceString(node.from, node.to));
+            if (esEnlaceExterno(destino)) {
+              decos.push({
+                from: node.from,
+                to: node.to,
+                deco: Decoration.mark({
+                  class: "mic-enlace-externo mic-url-suelta",
+                  attributes: { "data-href": destino, title: destino },
+                }),
+              });
             }
             break;
           }
@@ -1358,6 +1417,22 @@ function buildDecorations(
         }
         // Feedback de inexistencia: mismo color, más oscuro (CA8 mejora).
         const missing = !noteExists(target);
+        // Sin alias y con ancla (`[[Tomate#Cuidados]]`, `DEF-141`): fuera de la
+        // línea activa se muestra `Tomate › Cuidados`, como Obsidian, y no el
+        // texto crudo. Es un widget porque el `›` no está en el documento; con
+        // el cursor en la línea vuelve la fuente, como el resto.
+        if (!isActive && desdeEtiqueta === 0) {
+          const etiqueta = etiquetaDe(target);
+          if (etiqueta !== target) {
+            decos.push({
+              from: labelFrom,
+              to: innerTo,
+              deco: Decoration.replace({ widget: new WikilinkAnclaWidget(etiqueta, target, missing) }),
+            });
+            decos.push({ from: innerTo, to: start + match[0].length, deco: hide });
+            continue;
+          }
+        }
         decos.push({
           from: labelFrom,
           to: innerTo,

@@ -15,6 +15,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { ICONO_POR_TIPO } from "@/lib/iconosDeTipo";
 import { useDialogoModal } from "@/lib/useDialogoModal";
+import { pedirEdicionDeTitulo } from "@/lib/editor/tituloPendiente";
 import { ATMOSFERAS } from "@/lib/atmosferas";
 import { usePanelLayoutStore } from "@/stores/panelLayoutStore";
 import { useRecientesStore } from "@/stores/recientesStore";
@@ -22,6 +23,7 @@ import { usePreferencesStore } from "@/stores/preferencesStore";
 import { CALENDAR_TAB_ID, GRAPH_TAB_ID, useTabsStore } from "@/stores/tabsStore";
 import { hoy, nuevoRecordatorio } from "@/stores/recordatoriosStore";
 import { useUiStore } from "@/stores/uiStore";
+import { avisarFallo } from "@/stores/avisosStore";
 import { useVaultStore, type TreeCarpeta } from "@/stores/vaultStore";
 import { IconoGrafo } from "./IconoGrafo";
 import styles from "./PaletaComandos.module.css";
@@ -129,10 +131,13 @@ export function PaletaComandos() {
   }, [abierto, modo]);
 
   const abrirNota = useCallback(
-    (id: string) => {
+    (id: string, { editarTitulo = false }: { editarTitulo?: boolean } = {}) => {
+      // Nota recién creada «Sin título» (`DEF-135`): el foco lo pone el editor
+      // en el título, y `enfocarNota` no debe llevárselo al cuerpo después.
+      if (editarTitulo) pedirEdicionDeTitulo(id);
       useTabsStore.getState().openNote(id);
       router.replace(`/workspace?note=${encodeURIComponent(id)}`);
-      enfocarNota(id);
+      if (!editarTitulo) enfocarNota(id);
     },
     [router],
   );
@@ -146,7 +151,7 @@ export function PaletaComandos() {
         icono: FilePlus,
         ejecutar: async () => {
           const v = useVaultStore.getState();
-          abrirNota(await v.createNota(v.activeFolderId));
+          abrirNota(await v.createNota(v.activeFolderId), { editarTitulo: true });
         },
       },
       {
@@ -281,7 +286,12 @@ export function PaletaComandos() {
   const ejecutar = (o: Opcion | undefined) => {
     if (!o) return;
     cerrar();
-    void o.ejecutar();
+    // `DEF-136`: un comando que falla —crear una nota, sobre todo— se avisa en
+    // vez de quedar como promesa rechazada sin capturar. `Promise.resolve`
+    // cubre también los comandos síncronos que lanzan.
+    void Promise.resolve()
+      .then(() => o.ejecutar())
+      .catch(avisarFallo(`ejecutar «${o.titulo}»`));
   };
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {

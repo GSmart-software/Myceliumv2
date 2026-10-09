@@ -13,6 +13,7 @@ import { renderExcalidrawIn } from "@/lib/excalidraw";
 import { fetchNoteContent } from "@/lib/export";
 import { renderMarkdown } from "@/lib/markdown";
 import { renderMermaidIn } from "@/lib/mermaid";
+import { useHtmlDecorable } from "@/lib/useHtmlDecorable";
 import { useSidebarViewerStore } from "@/stores/sidebarViewerStore";
 import { CALENDAR_TAB_ID, GRAPH_TAB_ID } from "@/stores/tabsStore";
 import { useVaultStore } from "@/stores/vaultStore";
@@ -138,10 +139,12 @@ function ReadOnlyNote({ notaId }: { notaId: string }) {
       void renderExcalidrawIn(containerRef.current, notaId);
     }
   }, [html, notaId]);
+  // Mismo objeto mientras el efecto de arriba no vuelva a correr (`DEF-133`).
+  const inner = useHtmlDecorable(html, [notaId]);
 
   return (
     <div ref={containerRef} className="mic-preview mic-layout-read">
-      <div dangerouslySetInnerHTML={{ __html: html }} />
+      <div dangerouslySetInnerHTML={inner} />
     </div>
   );
 }

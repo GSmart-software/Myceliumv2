@@ -150,6 +150,27 @@
 /* .mic-preview .mic-mermaid svg { background: transparent; } */
 /* .mic-preview .mic-excalidraw-block { border: 1px dashed var(--mic-border); border-radius: 8px; } */
 
+/* Colores de Mermaid (```mermaid). Mermaid no lee CSS: sus colores salen de
+   estas variables, que siguen al tema, al modo y a la atmósfera. Al cambiarlas,
+   el diagrama se redibuja. Si un color no llega al contraste mínimo (texto
+   4.5:1, líneas y bordes 3:1 sobre el fondo), Mycelium lo acerca a la tinta
+   hasta que llegue.
+     --mic-mermaid-fondo    detrás de las etiquetas de las flechas
+     --mic-mermaid-nodo     relleno de las cajas
+     --mic-mermaid-nodo-2   cajas secundarias (actores, activaciones)
+     --mic-mermaid-grupo    subgrafos y notas
+     --mic-mermaid-borde    borde de las cajas
+     --mic-mermaid-linea    flechas y conectores
+     --mic-mermaid-texto    texto
+   El PDF con «Fondo blanco» no las usa: imprime los diagramas en grises. */
+/*
+:root[data-theme] {
+  --mic-mermaid-nodo: color-mix(in srgb, var(--mic-glow) 20%, var(--mic-bg-canvas));
+  --mic-mermaid-borde: var(--mic-glow);
+  --mic-mermaid-linea: var(--mic-text-primary);
+}
+*/
+
 /* Callouts (> [!tipo] Título).
    El estilo lo deciden el atributo  data-callout="<tipo>"  y DOS variables:
      --mic-callout-color  → color del borde, el título y el ícono
