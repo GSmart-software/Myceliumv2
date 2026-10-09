@@ -9,9 +9,11 @@ al usuario normal. **Reemplaza al modo avanzado** de `FUN-M-16` ([[autoactualiza
 
 > [!warning] Es oculto a propósito
 > Ni la ayuda integrada, ni el changelog, ni ninguna lista o búsqueda de la app nombran el
-> comando ni el modo. `scripts/test-modo-dev.mjs` falla si una página de `frontend/ayuda/`
-> lo menciona, y `npm run publicar` rechaza un changelog que diga «modo desarrollador»,
-> `>dev` o `FUN-S-36`.
+> comando, el modo **ni nada de lo que habilita** (regla del usuario, 2026-10-08: «todo lo
+> que pertenezca a funcionalidad de dev no puede aparecer en el changelog»). Una sola lista,
+> `frontend/scripts/secreto-dev.mjs`, alimenta los dos controles: `scripts/test-modo-dev.mjs`
+> falla si una página de `frontend/ayuda/` la toca, y `npm run publicar` rechaza el
+> changelog que la toque, antes de compilar.
 
 ## Cómo se activa
 
@@ -73,7 +75,13 @@ con **`soloDev: true`**:
 ```
 
 `comandosDisponibles` lo saca de la lista cuando el modo está apagado y la paleta le pone la
-marca «dev». No hace falta nada más. Si el comando nuevo debe esconderse también en otra
+marca «dev». En el código no hace falta nada más, pero **sumá su título a
+`scripts/secreto-dev.mjs`** si no lo cubre ya un patrón (hoy «comandos de desarrollador» y
+«Desactivar el modo desarrollador»): así no se cuela en un changelog ni en la ayuda.
+
+Lo mismo para cualquier otra funcionalidad nueva que quede detrás del modo: su ID y los
+nombres con que se ve en la app van a esa lista, y en la nota de su versión se documenta
+**fuera** de los delimitadores `notas-release` (ver [[Publicar una version]]). Si el comando nuevo debe esconderse también en otra
 búsqueda (Configuración, por ejemplo), esa búsqueda tiene que mirar `useUpdaterStore`
 (`estado.dev`) como hace `VentanaAjustes` con `soloDev`.
 
