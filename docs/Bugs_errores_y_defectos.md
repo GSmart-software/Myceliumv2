@@ -997,6 +997,11 @@ menos a la vista porque el azul se parece a sus colores.
 
 Reportado por el usuario el 2026-10-09, con capturas de los dos temas: «está desde hace mucho».
 
+# DEF-155
+Con los temas que se eligen solo en modo desarrollador (Arrecife, GSmart y Bioluminiscencia experimental), al escribir en un **buscador** —el del panel de búsqueda, el de Configuración, la paleta— aparece una **sombra con forma de óvalo alrededor del texto**, dentro de la caja del buscador, que se superpone al borde de la caja y a sus íconos.
+
+Reportado por el usuario el 2026-10-09, con captura del buscador del vault: «aparece un sombreado alrededor del input que termina sobreponiéndose al componente».
+
 ---
 
 > [!warning] Defectos sin reporte original

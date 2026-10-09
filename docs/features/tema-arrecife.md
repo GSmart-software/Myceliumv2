@@ -41,7 +41,7 @@ ajustada.
 | `warning` | `#FFB300` | Avisos (fondos 14–16%, bordes 38–40%) |
 | `ok` | `#3ECF8E` | Éxito |
 | `danger` | `#E5484D` | Destructivo |
-| foco | borde `cyan` + halo `0 0 0 3px rgba(58,184,216,0.25)` | Foco visible |
+| foco | borde `cyan` (el halo `0 0 0 3px rgba(58,184,216,0.25)` de la spec se quitó por `DEF-155`) | Foco visible |
 
 ### Oscuro (el predeterminado de Arrecife)
 
@@ -233,7 +233,7 @@ Lo que se llevó:
   vault), el marco de la muestra elegida en Apariencia.
 - **Selección suave** (`gradient.subtle`): pestaña activa, nota abierta en el árbol, categoría
   elegida de Configuración, opción marcada de la paleta.
-- **Inputs de texto**: borde 1.5px, radio 12, foco con borde en el color de foco y halo cian
+- **Inputs de texto**: borde 1.5px, radio 12, foco con borde en el color de foco (sin halo desde `DEF-155`: dibujaba un óvalo dentro de la caja de los buscadores)
   de 3px. No toca casillas, radios, deslizadores ni los de Excalidraw.
 - **Movimiento**: transiciones de 150–250ms; con «reducir movimiento» del sistema, ni
   transición ni elevación.
@@ -246,7 +246,7 @@ Lo que **no** se llevó, y por qué:
   de reglas `1px solid var(--mic-border)` en los módulos; llevarlos a 1.5px exige tocarlas una
   por una o un selector global que también adelgazaría los bordes de 2–4px (pestañas, callouts).
 - **El halo de foco en botones y demás**: siguen con el contorno de Mycelium (`outline` en
-  `--mic-focus`, que en oscuro ya es cian). El halo está solo en los inputs.
+  `--mic-focus`, que en oscuro ya es cian). El halo de los inputs también se quitó (`DEF-155`).
 - **Sombras de Arrecife** (`0 8px 28px`): Mycelium tiñe sus sombras con `base-deep`, que quedó
   derivado; no se reemplazaron una por una.
 - **El ítem del autocompletado y la opción elegida de un `<select>`** siguen con el acento:

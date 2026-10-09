@@ -207,7 +207,7 @@ derecha).
 
 - **Radios** 8/12/16 (de 4/8/16), como Arrecife; botones e inputs 12 explícito.
 - **Bordes de 1px**: son los de Mycelium; no hizo falta tocar nada. Los inputs de texto llevan
-  radio 12 y el foco en el acento con halo de 3px.
+  radio 12 y el foco en el acento (el halo de 3px se quitó por `DEF-155`).
 - **Manrope** en toda la interfaz: `--mic-font-sans` bajo el tema. La tipografía de las notas
   (`--mic-editor-font-family`, `--mic-preview-font-family`) es una preferencia aparte y no se
   toca.
