@@ -866,7 +866,7 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 
 #### `FUN-M-54` · `ATMOSFERA-AURORA` (—)
 - Spec en [[atmosfera-aurora]], ampliando [[atmosferas]]. Modelo: la forma de [[tema-bioexp]] (tema retirado el 2026-10-09), parametrizada con los colores del tema en vez de colores fijos. Pública: la ayuda (Configuración → Apariencia) y la plantilla de snippets la nombran.
-- 🛠️ Implementada en desktop el 2026-10-09, sin confirmar en la app. Web pendiente: se refleja con [[Reflejar cambios de desktop a web]] cuando el usuario la confirme.
+- 🛠️ Implementada en desktop el 2026-10-09, sin confirmar en la app. **Web: reflejada** el 2026-10-09 (merge `5f7c3bb`): sin las reglas de los temas de marca, que web no tiene, ni los cuatro módulos que web no tiene; la ayuda no aplica (web no tiene ayuda integrada).
 
 #### `FUN-M-53` ⛔ · `TEMA-BIOEXP` (—)
 - **Estado**: ⛔ **retirado el 2026-10-09** por decisión del usuario (rama `feat/quitar-bioexp-desktop`): se quitó del código entero y su estilo de detalles quedó en la atmósfera [[atmosfera-aurora]]. Un vault que lo tenía guardado cae al tema por defecto. El ID no se reutiliza.

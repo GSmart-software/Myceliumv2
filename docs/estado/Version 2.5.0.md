@@ -2,6 +2,11 @@
 
 **Solo desktop** (`desktop-tauri`) · 2026-10-09 · sobre [[Version 2.4.0]]
 
+> [!success] Publicada el 2026-10-09 a las 14:33 (UTC)
+> Por el circuito de CI: PR #4 de `desktop-tauri` a `despliegues`, artefactos de Windows, macOS y
+> Linux, `npm run publicar -- --ci`, ensayo primero. Las seis firmas verifican con la `pubkey` de la
+> app y lo que quedó en el bucket coincide con lo firmado (sha256 del `.exe` `c25f38c0…`).
+
 La versión de la **ayuda y la apariencia**. Llega la ayuda integrada, una wiki en su propia
 ventana con F1 (`FUN-L-27`). También llegan la atmósfera **Aurora** (`FUN-M-54`), la letra por
 defecto Geist Sans a 14px y una Configuración más liviana (`FUN-M-41`). Los enlaces a
