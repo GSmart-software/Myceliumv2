@@ -38,6 +38,7 @@ import { extensionesTab } from "@/lib/editor/tabWidth";
 import { manejarClicDeEnlace } from "@/lib/enlacesExternos";
 import { exportDiagram, renderExcalidrawIn, saveDiagram } from "@/lib/excalidraw";
 import { getCachedNote, putCachedNote } from "@/lib/idb";
+import { avisarFallo } from "@/stores/avisosStore";
 import { EVENTO_NOTA_GUARDADA } from "@/lib/eventos";
 import { renderNota } from "@/lib/markdown";
 import { renderMermaidIn } from "@/lib/mermaid";
@@ -964,14 +965,17 @@ export function NoteEditor({
     if (!view) return;
     const vault = useVaultStore.getState();
     const carpetaId = vault.notas.find((n) => n.id === notaId)?.carpetaId ?? null;
-    void vault.createNota(carpetaId, "excalidraw").then((newId) => {
-      const titulo =
-        useVaultStore.getState().notas.find((n) => n.id === newId)?.titulo ??
-        "Dibujo sin título";
-      const { from } = view.state.selection.main;
-      view.dispatch({ changes: { from, insert: `![[${titulo}.excalidraw]]` } });
-      setEditingFile(newId); // abrir el editor embebido del nuevo dibujo
-    });
+    void vault
+      .createNota(carpetaId, "excalidraw")
+      .then((newId) => {
+        const titulo =
+          useVaultStore.getState().notas.find((n) => n.id === newId)?.titulo ??
+          "Dibujo sin título";
+        const { from } = view.state.selection.main;
+        view.dispatch({ changes: { from, insert: `![[${titulo}.excalidraw]]` } });
+        setEditingFile(newId); // abrir el editor embebido del nuevo dibujo
+      })
+      .catch(avisarFallo("crear el dibujo")); // `DEF-136`
   }, [notaId]);
 
   // DEF-039 CA2: en modo lectura (y en dividido) el scroller VISIBLE no es el de

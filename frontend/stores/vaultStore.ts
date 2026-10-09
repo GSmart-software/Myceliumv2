@@ -521,13 +521,14 @@ export const useVaultStore = create<VaultState>()(
             token: token(),
             body: { destinoId },
           });
-        } catch {
-          // Revertir si el backend rechazó el movimiento.
+        } catch (e) {
+          // Revertir si el backend rechazó el movimiento, y decir por qué: antes
+          // la carpeta volvía a su lugar sin explicación (`DEF-136`).
           pendingMoves.delete(id);
           set((s) => ({
             carpetas: s.carpetas.map((c) => (c.id === id ? { ...c, padreId: prev } : c)),
           }));
-          return;
+          throw e;
         }
         await repararMoverCarpeta(previa, afectadas, id, destinoId);
         await get().loadTree(get().vaultId!);
@@ -650,13 +651,14 @@ export const useVaultStore = create<VaultState>()(
             token: token(),
             body: { destinoId },
           });
-        } catch {
-          // Revertir si el backend rechazó el movimiento.
+        } catch (e) {
+          // Revertir si el backend rechazó el movimiento, y decir por qué: antes
+          // la nota volvía a su lugar sin explicación (`DEF-136`).
           pendingMoves.delete(id);
           set((s) => ({
             notas: s.notas.map((n) => (n.id === id ? { ...n, carpetaId: prev } : n)),
           }));
-          return;
+          throw e;
         }
         await repararMoverNota(previa, id, destinoId);
         await get().loadTree(get().vaultId!);
