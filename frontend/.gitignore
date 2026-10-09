@@ -54,3 +54,5 @@ scripts/*.png
 /.diccionarios-fuente/
 # Carpeta temporal de scripts/test-ortografia.mjs (se borra sola al terminar).
 /.tmp-test-ortografia/
+# Carpeta temporal de scripts/test-tabla-alineacion.mjs (se borra sola al terminar).
+/.tmp-test-tabla-alineacion/
