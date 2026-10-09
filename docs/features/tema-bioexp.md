@@ -225,5 +225,6 @@ públicos.
 ## Relacionadas
 
 - [[tema-arrecife]] · [[tema-gsmart]] — los temas cuya forma sigue este.
+- [[atmosfera-aurora]] — la misma forma, pública y con los colores del tema puesto (`FUN-M-54`).
 - [[modo-dev]] · [[Lo del modo dev no se anuncia]].
 - [[BACKLOG]] — `FUN-M-53`.
