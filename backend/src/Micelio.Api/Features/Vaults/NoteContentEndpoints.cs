@@ -64,7 +64,7 @@ public static class NoteContentEndpoints
             }
 
             var actualizadoEn = await repo.TouchNotaContenidoAsync(
-                id, nota.GetString("titulo"), contenido, bytes.Length, ct);
+                id, nota.GetString("titulo"), nota.GetStringOrNull("tipo") ?? "markdown", contenido, bytes.Length, ct);
 
             return Results.Ok(new { id, actualizadoEn, tamanoBytes = bytes.Length });
         });

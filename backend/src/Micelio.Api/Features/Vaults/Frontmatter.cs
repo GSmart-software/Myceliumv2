@@ -295,21 +295,29 @@ public static partial class Frontmatter
     }
 
     /// <summary>
-    /// Texto que va al índice FTS: el CUERPO más los VALORES de las propiedades,
-    /// sin las claves ni la sintaxis YAML. Así buscar «activo» sigue encontrando
-    /// la nota, pero buscar «tags» deja de devolver todas las que tienen esa
-    /// clave — y los <c>snippet()</c> dejan de mostrar YAML.
+    /// Lo que va al índice FTS (<c>DEF-148</c>): el CUERPO como se lee
+    /// (<see cref="TextoBuscable"/>: los enlaces por su texto visible, sin marcas
+    /// de markdown; de un canvas o un dibujo, sus textos y no su JSON) en
+    /// <c>Contenido</c>, y en <c>Extra</c> lo que tiene que encontrarse sin verse
+    /// en el fragmento: los VALORES de las propiedades y los destinos ocultos de
+    /// los enlaces.
     /// </summary>
-    public static string TextoIndexable(string texto)
+    /// <remarks>
+    /// Las claves y la sintaxis YAML no entran (<c>FUN-M-04</c>): buscar «activo»
+    /// sigue encontrando la nota, pero buscar «tags» no devuelve todas las que
+    /// tienen esa clave. Y los valores ya no van pegados delante del cuerpo:
+    /// antes el fragmento de una coincidencia en una propiedad era el
+    /// frontmatter aplastado en una línea («cultivo cucurbitáceas Bancal 3
+    /// planificado…»).
+    /// </remarks>
+    public static (string Contenido, string Extra) TextoIndexable(string texto, string tipo = "markdown")
     {
         var fm = Separar(texto);
-        var cuerpo = Cuerpo(texto, fm);
-        if (!fm.Hay || !fm.Soportado || fm.Props.Count == 0) return cuerpo;
-        var valores = fm.Props
-            .SelectMany(p => p.Valores)
-            .Where(v => v.Length > 0)
-            .ToList();
-        return valores.Count == 0 ? cuerpo : $"{string.Join(' ', valores)}\n{cuerpo}";
+        var (visible, oculto) = TextoBuscable.De(Cuerpo(texto, fm), tipo);
+        IEnumerable<string> valores = !fm.Hay || !fm.Soportado
+            ? []
+            : fm.Props.SelectMany(p => p.Valores).Where(v => v.Length > 0);
+        return (visible, string.Join('\n', valores.Concat(oculto)));
     }
 
     /// <summary>
