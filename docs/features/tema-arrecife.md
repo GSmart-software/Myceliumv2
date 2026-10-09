@@ -301,6 +301,7 @@ plantilla no mencionan a Arrecife.
 
 ## Relacionadas
 
+- [[tema-gsmart]] — el segundo tema de marca (`FUN-M-52`), que sigue esta estructura.
 - [[modo-dev]] — el modo que lo esconde.
 - [[Lo del modo dev no se anuncia]] — por qué no se nombra.
 - [[Los temas los define Mycelium, no el usuario]] — Arrecife es una excepción hecha por el

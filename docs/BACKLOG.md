@@ -115,6 +115,7 @@ una fila se implementa, **se mueve** a la §4 (ver «Cómo leerlo»).
 | `FUN-M-48` | `PALETA-COMANDOS` | Ampliar la paleta de comandos (`>`): hoy tiene unos 12. Faltan, entre otros, cerrar pestaña, dividir panel, exportar, renombrar/mover/borrar la nota actual, nueva tabla/lienzo/dibujo/diagrama, insertar Espora, abrir la papelera, revelar en el explorador y cambiar de vista (vivo/lectura/fuente). Cada comando con su atajo si lo tiene. Salió de la [[Auditoria e2e 2026-10-07]] (`H5`) | ambas | — |
 | `FUN-M-49` | `EXPLORADOR-MULTISELECCION` | Selección múltiple en el explorador (Ctrl+clic, Shift+clic) para mover, borrar o exportar varios a la vez, y teclas **Supr** (a la papelera) y **F2** (renombrar) sobre lo seleccionado. Hoy limpiar ocho notas son ocho menús contextuales. La papelera ya tiene selección (`FUN-S-04`). Salió de la [[Auditoria e2e 2026-10-07]] (`H10`) | ambas | — |
 | `FUN-M-50` | `BUSQUEDA-OPERADORES` | Operadores en la búsqueda global: exclusión (`-término`), `OR` y comparaciones en propiedades (`kilos:>2`, `fecha:<2026-10-01`). Hoy solo hay AND implícito, frase exacta, `tag:` y `clave:valor`. Va después de `DEF-144`/`DEF-145`, que arreglan `clave:valor`. Salió de la [[Auditoria e2e 2026-10-07]] (`H18`) | ambas | — |
+| `FUN-M-52` | `TEMA-GSMART` | Un cuarto tema, **GSmart**, con la marca personal del usuario (degradado azul profundo → cian, grises fríos, Manrope y Michroma), con la misma presencia de marca que Arrecife. **Solo con el modo desarrollador**; apagarlo no saca el tema; sin atmósferas. Pedido por el usuario el 2026-10-08. Spec en [[tema-gsmart]] | desktop | — |
 
 ### 1.3 Grandes — tamaño L
 
@@ -860,6 +861,9 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 
 #### `FUN-M-50` · `BUSQUEDA-OPERADORES` (—)
 - Detalle y cómo se reprodujo en [[Auditoria e2e 2026-10-07]].
+
+#### `FUN-M-52` · `TEMA-GSMART` (—)
+- Spec en [[tema-gsmart]]. Sigue las decisiones de Arrecife ([[tema-arrecife]]). Valores: skill `gsmart-marca`.
 
 #### `FUN-M-51` · `TEMA-ARRECIFE` (—)
 - Spec en [[tema-arrecife]]. Decisiones del usuario (2026-10-08): colores y forma; apagar el modo dev no lo saca; las atmósferas no aplican y su selector queda atenuado, no oculto. Secreto como todo el modo dev ([[Lo del modo dev no se anuncia]]).
