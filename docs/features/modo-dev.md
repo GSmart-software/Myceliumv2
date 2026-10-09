@@ -89,5 +89,6 @@ búsqueda (Configuración, por ejemplo), esa búsqueda tiene que mirar `useUpdat
 
 - [[autoactualizacion]] — el actualizador y la selección de versión que quedan detrás.
 - [[configuracion]] — el pie y el buscador de Configuración.
+- [[tema-arrecife]] — el tema Arrecife (`FUN-M-51`), la primera función que no es de desarrollo detrás del modo.
 - [[Lo del modo dev no se anuncia]] — la decisión: nada del modo sale en el changelog ni en la ayuda.
 - [[Publicar una version]] — dónde se escribe el changelog y cuándo se comprueba.
