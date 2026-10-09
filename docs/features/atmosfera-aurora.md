@@ -5,18 +5,24 @@
 [[BACKLOG]] (`FUN-M-54` · `ATMOSFERA-AURORA`). Es la quinta de las [[atmosferas]].
 
 > [!info] Qué es
-> Una atmósfera nueva que lleva **el estilo de detalles gráficos de los temas experimentales
-> del modo dev** —degradados, brillos, resplandores— pero **sin colores propios**: reparte los
+> Una atmósfera nueva que lleva **el estilo de detalles gráficos del tema experimental del
+> modo dev** —degradados, brillos, resplandores— pero **sin colores propios**: reparte los
 > del tema puesto, `--mic-glow` y `--mic-accent`. Con Bioluminiscencia el degradado va del
 > verde agua al cian; con Cantarela, del dorado al ámbar. La puede elegir cualquiera, sin el
 > modo dev, para el modo oscuro y para el claro.
 
 ## Decisiones
 
-1. **El modelo es [[tema-bioexp]]**: cada regla de `styles/bioexp.css` y de sus módulos tiene su
-   gemelo en Aurora, con los colores fijos cambiados por los del tema. `scripts/test-temas.mjs`
-   los compara regla por regla; lo que se dejó afuera está en la lista `AURORA_SIN_GEMELO` del
-   test, con su motivo.
+1. **El modelo fue [[tema-bioexp]]**: cada regla de `styles/bioexp.css` y de sus módulos tuvo su
+   gemelo en Aurora, con los colores fijos cambiados por los del tema.
+   > [!info] Desde el 2026-10-09 el modelo ya no existe
+   > El tema Bioluminiscencia experimental se **retiró** (`FUN-M-53`) y su estilo quedó solo
+   > en Aurora. La paridad regla por regla de `scripts/test-temas.mjs` (con su lista
+   > `AURORA_SIN_GEMELO`) se reemplazó por una **lista explícita** de lo que Aurora tiene que
+   > cubrir, `AURORA_CUBRE`: los selectores de `styles/aurora.css` y, por módulo, los de cada
+   > componente, sacados de las reglas de Aurora de ese día. Lo que se dejó afuera a propósito
+   > (letra, radio y foco de los inputs) lo sigue vigilando el test de su hoja: sin
+   > `font-family` ni `:focus`.
 2. **Los fondos y el marco son los de Abisal** (`tokens.css` tal cual). Aurora no redefine
    ningún token `--mic-*` (lo prueba el test): pone la luz encima. Por eso Mermaid, la terminal
    y el PDF ven los colores de Abisal, y `smoke-mermaid-tema.mjs` no la recorre.
@@ -57,7 +63,7 @@ matiz y llevan texto blanco: `#107E8D → #0C6674` (Bioluminiscencia) y `#966714
 (Cantarela). En Bioluminiscencia claro el recorrido es corto porque el glow y el acento de ese
 tema son dos tonos del mismo cian: es lo primero a mirar en la app.
 
-## Qué lleva (gemelo de cada regla de Bioluminiscencia experimental)
+## Qué lleva (la lista `AURORA_CUBRE` del test)
 
 | Dónde | Qué |
 |---|---|
@@ -72,7 +78,7 @@ tema son dos tonos del mismo cian: es lo primero a mirar en la app.
 | Notas (`styles/aurora.css`) | título de la nota y H1 de lectura en el degradado de texto, `width: fit-content`, con resplandor; halo de su color en los títulos lisos (oscuro); etiquetas en pastilla; selección de texto en el acento; barras de desplazamiento; viñetas en `--mic-glow-texto` |
 | Muestra en Apariencia | el título en degradado, un filete bajo el marco y un brillo en el lienzo (Aurora no cambia tokens, así que su muestra no se diferenciaría de la de Abisal sin esto) |
 
-**Lo que no lleva** (`AURORA_SIN_GEMELO`): el radio y el foco de los inputs, y la letra de
+**Lo que no lleva** (lo que el tema retirado tenía y Aurora no): el radio y el foco de los inputs, y la letra de
 títulos de la nota, del menú de tablas, de las cabeceras del explorador, de los grupos de
 Configuración, de las secciones del menú de vaults y del código del visor. Tampoco los colores
 fijos de los títulos (`--mic-h1`…`--mic-h5`): quedan los de Abisal, que ya son del tema.
@@ -113,11 +119,12 @@ transparente, y el `color` solo no lo alcanzaba.
 
 - `frontend/styles/aurora.css` (nuevo, importado en `app/layout.tsx` después de los temas).
 - `frontend/lib/atmosferas.ts` — la quinta entrada.
-- 21 `.module.css` — los gemelos de las reglas de Bioluminiscencia experimental; en
-  `Settings.module.css` además la muestra y la grilla de cinco columnas (máx. 700px).
+- 21 `.module.css` — las reglas de cada componente (nacieron como gemelos de las del tema
+  experimental, hoy retirado); en `Settings.module.css` además la muestra y la grilla de cinco
+  columnas (máx. 700px).
 - `components/settings/VentanaAjustes.tsx` — «aurora» y «degradado» en el buscador.
 - `lib/printStyles.ts`, `public/plantilla-estilos.css`, `ayuda/06-configuracion/04-apariencia.md`.
-- `scripts/test-temas.mjs` — catálogo, acotado, paridad, contraste.
+- `scripts/test-temas.mjs` — catálogo, acotado, cobertura (`AURORA_CUBRE`), contraste.
 
 ## Qué mirar en la app
 

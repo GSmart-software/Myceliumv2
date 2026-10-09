@@ -53,12 +53,14 @@ La lógica pura vive en `frontend/lib/modoDev.ts` (`esConsultaDev`, `comandosDis
    `soloDev`, apagar el modo no cambia el tema—. Lo que los dos temas de marca comparten (no
    admiten atmósferas) vive en `TEMAS_DE_MARCA` de `lib/temas.ts`. `secreto-dev.mjs` atrapa
    «gsmart» (la palabra entera) y `FUN-M-52`.
-5. **Bioluminiscencia experimental** (`FUN-M-53`, [[tema-bioexp]]): la quinta muestra,
-   «Biolum. exp.», con los colores de Bioluminiscencia y la forma de los temas de marca. Mismas
-   reglas —marca «dev», alias del buscador («bioexp», «biolum. exp.», «experimental») con
-   `soloDev`, apagar el modo no cambia el tema, sin atmósferas (`TEMAS_DE_MARCA`)—.
-   `secreto-dev.mjs` atrapa «bioexp», «Bioluminiscencia (exp.)», «Biolum. exp.» y `FUN-M-53`,
-   pero **no** «Bioluminiscencia» a secas, que es el tema público por defecto.
+5. ~~**Bioluminiscencia experimental** (`FUN-M-53`, [[tema-bioexp]]): la quinta muestra,
+   «Biolum. exp.», con los colores de Bioluminiscencia y la forma de los temas de marca.~~
+   **Retirado el 2026-10-09**: el usuario ya no lo quiere y se quitó del código entero (muestra,
+   alias del buscador, hoja y reglas). Un vault que lo tenía guardado abre con el tema por
+   defecto. Su estilo de detalles pasó a la atmósfera pública [[atmosfera-aurora]].
+   `secreto-dev.mjs` **sigue** atrapando «bioexp», «Bioluminiscencia (exp.)», «Biolum. exp.» y
+   `FUN-M-53` —pero no «Bioluminiscencia» a secas, que es el tema público por defecto—: nunca
+   se publicó y un changelog tampoco tiene que nombrarlo ahora.
 
 F12 y Ctrl+Shift+I **siguen abiertos a todos** (`DevToolsHotkey`): no dependen del modo.
 
