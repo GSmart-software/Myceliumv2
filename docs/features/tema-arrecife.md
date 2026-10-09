@@ -302,6 +302,8 @@ plantilla no mencionan a Arrecife.
 ## Relacionadas
 
 - [[tema-gsmart]] — el segundo tema de marca (`FUN-M-52`), que sigue esta estructura.
+- [[tema-bioexp]] — Bioluminiscencia experimental (`FUN-M-53`), la misma estructura con los
+  colores de Bioluminiscencia.
 - [[modo-dev]] — el modo que lo esconde.
 - [[Lo del modo dev no se anuncia]] — por qué no se nombra.
 - [[Los temas los define Mycelium, no el usuario]] — Arrecife es una excepción hecha por el
