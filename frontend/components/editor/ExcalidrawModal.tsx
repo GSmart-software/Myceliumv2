@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  cargarExcalidraw,
   DibujoIlegible,
   encuadrarDibujo,
   hayAlgoDibujado,
@@ -19,7 +20,7 @@ import { ArchivoIlegible } from "./ArchivoIlegible";
 import styles from "./ExcalidrawModal.module.css";
 
 const Excalidraw = dynamic(
-  async () => (await import("@excalidraw/excalidraw")).Excalidraw,
+  async () => (await cargarExcalidraw()).Excalidraw,
   { ssr: false },
 );
 

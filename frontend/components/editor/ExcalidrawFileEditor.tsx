@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "@/lib/api";
 import { motivoDeExcepcion } from "@/lib/archivosIlegibles";
 import {
+  cargarExcalidraw,
   encuadrarDibujo,
   hayAlgoDibujado,
   IDIOMA_EXCALIDRAW,
@@ -19,7 +20,7 @@ import { ArchivoIlegible } from "./ArchivoIlegible";
 import styles from "./ExcalidrawFileEditor.module.css";
 
 const Excalidraw = dynamic(
-  async () => (await import("@excalidraw/excalidraw")).Excalidraw,
+  async () => (await cargarExcalidraw()).Excalidraw,
   { ssr: false },
 );
 

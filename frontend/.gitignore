@@ -56,3 +56,7 @@ scripts/*.png
 /.tmp-test-ortografia/
 # Carpeta temporal de scripts/test-tabla-alineacion.mjs (se borra sola al terminar).
 /.tmp-test-tabla-alineacion/
+
+# Fuentes de Excalidraw (`DEF-153`): las copia `npm run preparar-excalidraw` desde
+# node_modules en cada dev/build. Son ~13 MB que el paquete ya trae.
+/public/excalidraw-assets/
