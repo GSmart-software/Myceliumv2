@@ -1002,6 +1002,16 @@ Con los temas que se eligen solo en modo desarrollador (Arrecife, GSmart y Biolu
 
 Reportado por el usuario el 2026-10-09, con captura del buscador del vault: «aparece un sombreado alrededor del input que termina sobreponiéndose al componente».
 
+
+# DEF-156
+En la versión **web**, después de **renombrar** una nota la búsqueda la sigue encontrando por el **título viejo** y no por el nuevo, hasta que se la vuelve a guardar.
+
+Detectado el 2026-10-09 al reflejar a web los arreglos de búsqueda (`DEF-146`).
+
+# DEF-157
+En la versión **web**, una nota **duplicada** no aparece en la búsqueda hasta que se la edita y guarda.
+
+Detectado el 2026-10-09 al reflejar a web los arreglos de búsqueda (`DEF-148`). En desktop pasaba lo mismo y ya se había corregido con `DEF-148`.
 ---
 
 > [!warning] Defectos sin reporte original
