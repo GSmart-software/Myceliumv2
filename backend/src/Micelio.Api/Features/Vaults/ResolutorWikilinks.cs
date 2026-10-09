@@ -101,8 +101,48 @@ public sealed class ResolutorWikilinks
         return TipoPorExtension.TryGetValue(ext, out var tipo) ? (tipo, nombre[..i]) : null;
     }
 
-    /// <summary>El id de la nota a la que apunta <paramref name="referencia"/>, o null.</summary>
+    /// <summary>
+    /// El id de la nota a la que apunta <paramref name="referencia"/>, o null.
+    ///
+    /// 6. **El ancla** (`DEF-141`, `resolverReferenciaEnIndice` del cliente): si
+    ///    la referencia entera no resuelve y su último segmento lleva `#`
+    ///    (`Nota#Encabezado`, `Nota#^bloque`), se prueba sin el ancla. Primero
+    ///    entera, porque hay títulos y carpetas con `#` («Q# y Quantum»,
+    ///    «C#/Estudio») que resuelven por el texto completo. Antes de `DEF-141`
+    ///    un `[[Tomate#Cuidados]]` no era arista del grafo ni retroenlace.
+    /// </summary>
     public string? Resolver(string referencia)
+    {
+        if (ResolverExacto(referencia) is { } entero) return entero;
+        foreach (var corte in CortesDeAncla(referencia))
+        {
+            if (corte.Length > 0 && ResolverExacto(corte) is { } id) return id;
+        }
+        return null;
+    }
+
+    /// <summary>
+    /// Las formas sin ancla de una referencia, de la más larga a la más corta
+    /// (`cortesDeAncla` del cliente). El ancla vive en el ÚLTIMO segmento
+    /// (`C#/Nota#Sección`: la carpeta `C#` no es un ancla) y puede empezar en su
+    /// primer `#` (`Nota#H1#H2`, encabezado anidado) o en el último
+    /// (`Q# y Quantum#Intro`, un título con `#`). Sin `#` en el último segmento,
+    /// ninguna.
+    /// </summary>
+    private static IEnumerable<string> CortesDeAncla(string destino)
+    {
+        var i = destino.LastIndexOf('/');
+        var dir = destino[..(i + 1)];
+        var seg = destino[(i + 1)..];
+        var primero = seg.IndexOf('#');
+        if (primero < 0) yield break;
+        var ultimo = seg.LastIndexOf('#');
+        if (ultimo != primero) yield return (dir + seg[..ultimo]).Trim();
+        yield return (dir + seg[..primero]).Trim();
+    }
+
+    /// <summary>Las reglas 1 a 5 sobre la referencia TAL CUAL, sin quitarle el ancla.</summary>
+    private string? ResolverExacto(string referencia)
     {
         var partes = referencia.Split('/')
             .Select(s => s.Trim())

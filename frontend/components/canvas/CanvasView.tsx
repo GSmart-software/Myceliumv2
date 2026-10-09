@@ -36,7 +36,9 @@ import {
   rehacer,
   type Historial,
 } from "@/lib/historialCanvas";
-import { markMissingWikilinks, resolveWikilink } from "@/lib/editor/wikilink";
+import { markMissingWikilinks } from "@/lib/editor/wikilink";
+import { pedirSaltoAAncla } from "@/lib/editor/pendingMatch";
+import { resolverReferencia } from "@/lib/wikilinks";
 import { soltarFoco } from "@/lib/editor/tituloPendiente";
 import { manejarClicDeEnlace } from "@/lib/enlacesExternos";
 import { renderNota } from "@/lib/markdown";
@@ -488,10 +490,12 @@ export function CanvasView({ notaId }: { notaId: string }) {
   };
 
   const abrirPorTitulo = (titulo: string) => {
-    const destino = resolveWikilink(titulo, notas, carpetas);
+    const { nota: destino, ancla } = resolverReferencia(titulo, notas, carpetas);
     if (!destino) return;
     useTabsStore.getState().openNote(destino.id);
     router.replace(`/workspace?note=${encodeURIComponent(destino.id)}`);
+    // `[[Nota#Encabezado]]`: además de abrirla, ir al encabezado (`DEF-141`).
+    if (ancla) pedirSaltoAAncla(destino.id, ancla);
   };
 
   const abrirNota = (id: string) => {
