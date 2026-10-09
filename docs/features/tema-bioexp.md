@@ -1,5 +1,14 @@
 # FUN-M-53 — Bioluminiscencia experimental (solo modo dev)
 
+> [!warning] Retirado el 2026-10-09
+> El usuario lo retiró; su estilo de detalles pasó a la atmósfera [[atmosfera-aurora]].
+> Se quitó del código entero el mismo día que se implementó (rama
+> `feat/quitar-bioexp-desktop`): `styles/bioexp.css`, la fuente Space Grotesk, su paleta en
+> `tokens.css` y en el PDF, la muestra, el alias del buscador y las reglas de los módulos. Un
+> vault que lo tenía guardado abre con el tema por defecto (`temaValido`, con test). Nunca se
+> publicó; `secreto-dev.mjs` lo sigue atrapando para que un changelog no lo nombre. Lo que
+> sigue es el registro de lo que fue. Fila en [[BACKLOG]] (§3.1, retiradas).
+
 **Solo desktop.** Pedido por el usuario el 2026-10-09, después de los dos temas de marca,
 [[tema-arrecife]] y [[tema-gsmart]]: «quiero ver cómo queda» Bioluminiscencia —el tema por
 defecto de Mycelium— con el mismo estilo de detalles visuales que esos dos. Fila en
