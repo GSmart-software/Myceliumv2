@@ -611,8 +611,9 @@ circuito completo contra un bucket de pruebas antes de tocar el de producción.
 
 1. Creá un segundo bucket público, `mycelium-releases-pruebas`, con la misma estructura
    (§ 1.1). **La clave de firma es la misma**: lo que cambia es dónde están los archivos.
-2. En Mycelium: Configuración → Vault → pie del panel → **siete clics sobre el número de
-   versión**. Aparece "modo avanzado" y, con él, el campo **Servidor de actualizaciones**.
+2. En Mycelium: paleta (Ctrl+P) → escribí **`>dev`** y Enter: se enciende el modo
+   desarrollador ([[modo-dev]]; hasta 2026-10-08 eran siete clics sobre el número de
+   versión). En Configuración → Actualizaciones aparece el campo **Servidor de actualizaciones**.
 3. Pegá ahí `https://<BASE-DE-PRUEBAS>/latest.json` y salí del campo.
 4. **Buscar actualizaciones**. A partir de acá todo mira al bucket de pruebas.
 5. Para volver a producción, vaciá el campo: se usa el compilado.
