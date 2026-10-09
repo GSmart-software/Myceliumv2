@@ -52,3 +52,18 @@
 .ctaSecondary:hover {
   background: color-mix(in srgb, var(--mic-glow) 15%, transparent);
 }
+
+/* Aurora (`FUN-M-54`): la acción principal con el degradado del tema (styles/aurora.css)
+   y su sombra de luz. Las otras atmósferas no cambian. */
+:global(:root[data-atmosfera='aurora']) .cta {
+  background: var(--aurora-degradado);
+  color: var(--aurora-sobre-degradado);
+  box-shadow: var(--aurora-sombra-boton);
+  transition: var(--aurora-transicion);
+}
+
+:global(:root[data-atmosfera='aurora']) .cta:hover:not(:disabled) {
+  background: var(--aurora-degradado);
+  filter: var(--aurora-hover);
+  transform: var(--aurora-elevar);
+}

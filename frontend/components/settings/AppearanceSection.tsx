@@ -75,10 +75,11 @@ export function AppearanceSection() {
 }
 
 /**
- * Las cuatro atmósferas de un modo. Cada muestra repite `data-theme`,
+ * Las cinco atmósferas de un modo. Cada muestra repite `data-theme`,
  * `data-dark` y `data-atmosfera` en su propio <span>: las reglas de tokens.css
  * y atmosferas.css la pintan como se vería ESA combinación, aunque la app esté
- * en el otro modo.
+ * en el otro modo. Aurora (`FUN-M-54`) no cambia tokens: su muestra adelanta la
+ * luz con reglas propias en Settings.module.css.
  */
 function SelectorAtmosfera({
   titulo,

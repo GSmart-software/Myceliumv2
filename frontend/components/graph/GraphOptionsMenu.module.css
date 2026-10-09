@@ -246,3 +246,8 @@
   outline: 2px solid var(--mic-focus);
   outline-offset: 2px;
 }
+
+/* Aurora (`FUN-M-54`): el interruptor encendido lleva el degradado del tema. */
+:global(:root[data-atmosfera='aurora']) .switch input:checked + .switchTrack {
+  background: var(--aurora-degradado);
+}

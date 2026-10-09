@@ -106,3 +106,18 @@
 .btnPrimary:hover {
   background: color-mix(in srgb, var(--mic-accent) 85%, black);
 }
+
+/* Aurora (`FUN-M-54`): el botón primario con el degradado del tema (styles/aurora.css)
+   y su sombra de luz. Las otras atmósferas no cambian. */
+:global(:root[data-atmosfera='aurora']) .btnPrimary {
+  background: var(--aurora-degradado);
+  color: var(--aurora-sobre-degradado);
+  box-shadow: var(--aurora-sombra-boton);
+  transition: var(--aurora-transicion);
+}
+
+:global(:root[data-atmosfera='aurora']) .btnPrimary:hover:not(:disabled) {
+  background: var(--aurora-degradado);
+  filter: var(--aurora-hover);
+  transform: var(--aurora-elevar);
+}

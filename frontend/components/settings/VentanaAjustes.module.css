@@ -309,3 +309,8 @@
 .salir:hover {
   background: color-mix(in srgb, var(--mic-callout-caution-border) 8%, transparent);
 }
+
+/* Aurora (`FUN-M-54`): la categoría elegida, con la selección suave del tema. */
+:global(:root[data-atmosfera='aurora']) .categoriaActiva {
+  background: var(--aurora-degradado-suave);
+}
