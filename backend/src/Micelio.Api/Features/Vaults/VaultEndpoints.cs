@@ -172,13 +172,25 @@ public static class VaultEndpoints
             var titulo = await EnsureUniqueTituloAsync(repo, vaultId, carpetaId, nota.GetString("titulo"), ct);
             var nuevoId = await repo.CreateNotaAsync(vaultId, carpetaId, titulo, tipo, ct);
 
-            // Copia del contenido (md o excalidraw) hacia la clave de la nueva nota
+            // Copia del contenido (md o excalidraw) hacia la clave de la nueva nota,
+            // y su índice: sin él, la copia no se encontraba en la búsqueda hasta
+            // que se editara (`DEF-148`: guardar, renombrar y duplicar indexan lo mismo).
+            string? contenido = null;
             await using (var origen = await blobs.GetAsync(nota.GetString("r2_key"), ct))
             {
-                if (origen is not null && await repo.GetNotaAsync(nuevoId, ct) is { } nueva)
+                if (origen is not null)
                 {
-                    await blobs.PutAsync(nueva.GetString("r2_key"), origen, "text/plain", ct);
+                    using var reader = new StreamReader(origen, System.Text.Encoding.UTF8);
+                    contenido = await reader.ReadToEndAsync(ct);
                 }
+            }
+            if (contenido is not null && await repo.GetNotaAsync(nuevoId, ct) is { } nueva)
+            {
+                await using (var copia = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(contenido)))
+                {
+                    await blobs.PutAsync(nueva.GetString("r2_key"), copia, "text/plain", ct);
+                }
+                await repo.ReindexarNotaAsync(nuevoId, titulo, tipo, contenido, ct);
             }
 
             return Results.Created($"/notas/{nuevoId}", new { id = nuevoId, titulo });

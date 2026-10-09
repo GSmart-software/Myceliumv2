@@ -1,3 +1,5 @@
+using Micelio.Api.Features.Common;
+using Micelio.Api.Features.Vaults;
 using Micelio.Api.Ports;
 
 namespace Micelio.Api.Adapters.Local;
@@ -10,6 +12,8 @@ namespace Micelio.Api.Adapters.Local;
 /// </summary>
 public sealed class LocalDbInitializer(
     ID1Client d1,
+    VaultRepository repo,
+    IBlobStorage blobs,
     IConfiguration config,
     IHostEnvironment env,
     ILogger<LocalDbInitializer> logger) : IHostedService
@@ -29,12 +33,69 @@ public sealed class LocalDbInitializer(
                 $"No se encontró el esquema local en '{schemaPath}'. Configurar Storage:Local:SchemaPath.");
         }
 
+        var reindexar = await MigrarIndiceBusquedaAsync(cancellationToken);
+
         var schemaSql = await File.ReadAllTextAsync(schemaPath, cancellationToken);
         await d1.QueryAsync(schemaSql, ct: cancellationToken);
         logger.LogInformation("Modo local: esquema aplicado desde {SchemaPath}", schemaPath);
 
         await MigrateAsync(cancellationToken);
         await SeedAsync(cancellationToken);
+
+        if (reindexar)
+        {
+            var n = await repo.ReindexarAsync(blobs, vaultId: null, cancellationToken);
+            logger.LogInformation("Modo local: índice de búsqueda rehecho ({Notas} notas).", n);
+        }
+    }
+
+    /// <summary>
+    /// Lleva una base anterior al índice de búsqueda de <c>DEF-144</c>,
+    /// <c>DEF-148</c> y <c>DEF-152</c>. Corre ANTES del esquema, porque el
+    /// esquema crea un índice sobre las columnas que esto agrega:
+    /// <list type="bullet">
+    /// <item><c>notas_fts</c> sin la columna <c>extra</c> se borra (FTS5 no admite
+    /// <c>ADD COLUMN</c>) y el esquema la recrea vacía.</item>
+    /// <item><c>propiedades</c> recibe <c>clave_plegada</c> y <c>valor_plegado</c>.</item>
+    /// <item><c>etiquetas</c> la crea el esquema.</item>
+    /// </list>
+    /// Devuelve si hay que reindexar: plegar y limpiar el texto se hace en C#
+    /// (<see cref="Plegado"/>, <see cref="TextoBuscable"/>), así que las filas se
+    /// llenan releyendo los archivos, una vez. En una base nueva no hace nada.
+    /// </summary>
+    private async Task<bool> MigrarIndiceBusquedaAsync(CancellationToken ct)
+    {
+        var reindexar = false;
+
+        var fts = await ColumnasAsync("notas_fts", ct);
+        if (fts.Count > 0 && !fts.Contains("extra"))
+        {
+            await d1.QueryAsync("DROP TABLE notas_fts", ct: ct);
+            reindexar = true;
+        }
+
+        var propiedades = await ColumnasAsync("propiedades", ct);
+        if (propiedades.Count > 0 && !propiedades.Contains("clave_plegada"))
+        {
+            await d1.BatchAsync(
+            [
+                new D1Statement("ALTER TABLE propiedades ADD COLUMN clave_plegada TEXT NOT NULL DEFAULT ''"),
+                new D1Statement("ALTER TABLE propiedades ADD COLUMN valor_plegado TEXT NOT NULL DEFAULT ''"),
+            ], ct);
+            reindexar = true;
+        }
+
+        if (reindexar)
+        {
+            logger.LogInformation("Modo local: índice de búsqueda anterior a DEF-148; se rehace.");
+        }
+        return reindexar;
+    }
+
+    private async Task<HashSet<string>> ColumnasAsync(string tabla, CancellationToken ct)
+    {
+        var filas = await d1.QueryAsync("SELECT name FROM pragma_table_info(?)", [tabla], ct);
+        return filas.Results.Select(f => f.GetString("name")).ToHashSet();
     }
 
     public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;

@@ -118,7 +118,13 @@ public static class PropiedadesEndpoints
         // las notas guardadas antes tienen el YAML crudo dentro del índice de
         // texto y ninguna fila en `propiedades`, así que ni el filtro
         // `clave:valor` ni el autocompletado del panel las ven. Después solo se
-        // necesita si el índice se corrompe — guardar una nota ya la reindexa.
+        // necesita si el índice se corrompe — guardar una nota ya la reindexa —
+        // o tras una migración del índice en D1 (`DEF-148`/`DEF-152`: ver
+        // `migrations/d1/2026-10-busqueda.sql`; en modo local la hace sola
+        // `LocalDbInitializer`).
+        //
+        // Lee cada archivo por su `r2_key` (un dibujo o un lienzo no son `.md`) y
+        // reescribe solo el índice: no cambia la fecha de modificación de nada.
         group.MapPost("/vaults/{vaultId}/reindexar", async (
             string vaultId,
             ClaimsPrincipal user,
@@ -128,22 +134,7 @@ public static class PropiedadesEndpoints
         {
             if (await SinAcceso(user, vaultId, repo, ct)) return Prohibido();
 
-            var (_, notas) = await repo.GetTreeAsync(vaultId, ct);
-            var reindexadas = 0;
-            foreach (var n in notas)
-            {
-                var id = n.GetString("id");
-                // Secuencial a propósito: es mantenimiento que se corre una vez,
-                // y así no compite con el tráfico normal por conexiones ni por E/S.
-                await using var stream = await blobs.GetAsync($"vaults/{vaultId}/notas/{id}.md", ct);
-                if (stream is null) continue;
-                using var reader = new StreamReader(stream, Encoding.UTF8);
-                var contenido = await reader.ReadToEndAsync(ct);
-                await repo.TouchNotaContenidoAsync(
-                    id, n.GetString("titulo"), contenido, Encoding.UTF8.GetByteCount(contenido), ct);
-                reindexadas++;
-            }
-
+            var reindexadas = await repo.ReindexarAsync(blobs, vaultId, ct);
             return Results.Ok(new { reindexadas });
         });
     }

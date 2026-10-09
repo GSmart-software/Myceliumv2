@@ -102,25 +102,49 @@ CREATE TABLE IF NOT EXISTS papelera (
 );
 
 -- Índice full-text del contenido de notas (HU-21). Se actualiza al guardar.
+-- `contenido` es el texto LEGIBLE de la nota y `extra` lo que se busca sin
+-- mostrarse —valores de propiedades, destinos de enlaces con alias—; el
+-- fragmento de un resultado sale de `contenido` (DEF-148). Una base anterior,
+-- sin `extra`, la rehace LocalDbInitializer antes de aplicar este esquema.
 CREATE VIRTUAL TABLE IF NOT EXISTS notas_fts USING fts5(
   nota_id UNINDEXED,
   titulo,
-  contenido
+  contenido,
+  extra
 );
 
 -- Propiedades del frontmatter YAML de cada nota (FUN-M-04). El índice NO es la
 -- fuente de verdad —lo son los archivos—, pero es lo que las hace CONSULTABLES.
 -- Una fila POR ELEMENTO de lista, así `clave='tags' AND valor='activo'` funciona
 -- sin LIKE. Se reescribe entera (delete + insert) al guardar contenido.
+-- `clave_plegada` y `valor_plegado` son la clave y el valor sin tildes ni
+-- mayúsculas (DEF-144): las compara el filtro `clave:valor` de la búsqueda.
+-- Se pliegan en el backend porque `NOCASE`/`lower()` de SQLite solo entienden ASCII.
 CREATE TABLE IF NOT EXISTS propiedades (
-  nota_id  TEXT NOT NULL REFERENCES notas(id) ON DELETE CASCADE,
-  clave    TEXT NOT NULL,
-  valor    TEXT NOT NULL,
-  tipo     TEXT NOT NULL,
-  orden    INTEGER NOT NULL DEFAULT 0
+  nota_id       TEXT NOT NULL REFERENCES notas(id) ON DELETE CASCADE,
+  clave         TEXT NOT NULL,
+  valor         TEXT NOT NULL,
+  tipo          TEXT NOT NULL,
+  orden         INTEGER NOT NULL DEFAULT 0,
+  clave_plegada TEXT NOT NULL DEFAULT '',
+  valor_plegado TEXT NOT NULL DEFAULT ''
 );
 CREATE INDEX IF NOT EXISTS idx_propiedades_nota  ON propiedades(nota_id);
 CREATE INDEX IF NOT EXISTS idx_propiedades_clave ON propiedades(clave);
+CREATE INDEX IF NOT EXISTS idx_propiedades_plegado ON propiedades(clave_plegada, valor_plegado);
+
+-- Etiquetas de cada nota (DEF-152): `tags:` del frontmatter más los `#tag` del
+-- cuerpo fuera del código, una fila por etiqueta. Es lo que filtra `tag:x` en
+-- la búsqueda —antes `tag:x` buscaba la palabra x en todo el texto—.
+-- `tag_plegado` va sin tildes, mayúsculas, `#` inicial ni `/` final; el índice
+-- trae `nota_id` para que el filtro no toque la tabla.
+CREATE TABLE IF NOT EXISTS etiquetas (
+  nota_id     TEXT NOT NULL REFERENCES notas(id) ON DELETE CASCADE,
+  tag         TEXT NOT NULL,
+  tag_plegado TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_etiquetas_nota    ON etiquetas(nota_id);
+CREATE INDEX IF NOT EXISTS idx_etiquetas_plegado ON etiquetas(tag_plegado, nota_id);
 
 -- Snippets de CSS personalizado por usuario (estilo Obsidian, HU-13/15).
 -- El contenido vive en blob (usuarios/{id}/css/{snippetId}.css).

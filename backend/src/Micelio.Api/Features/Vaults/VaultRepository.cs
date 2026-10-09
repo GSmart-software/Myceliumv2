@@ -171,10 +171,21 @@ public sealed class VaultRepository(ID1Client d1)
         return result.Results.Count > 0 ? result.Results[0] : null;
     }
 
+    /// <summary>
+    /// Renombra la nota y, en la misma transacción, el título de su fila de
+    /// búsqueda: el orden de los resultados compara la consulta con
+    /// <c>notas_fts.titulo</c> (<c>DEF-146</c>), y sin esto la nota renombrada se
+    /// seguía encontrando —y ordenando— por el título viejo hasta el próximo
+    /// guardado de su contenido.
+    /// </summary>
     public Task RenameNotaAsync(string notaId, string titulo, CancellationToken ct = default) =>
-        d1.QueryAsync(
-            "UPDATE notas SET titulo = ?, actualizado_en = ? WHERE id = ?",
-            [titulo, Now(), notaId], ct);
+        d1.BatchAsync(
+        [
+            new D1Statement(
+                "UPDATE notas SET titulo = ?, actualizado_en = ? WHERE id = ?",
+                [titulo, Now(), notaId]),
+            new D1Statement("UPDATE notas_fts SET titulo = ? WHERE nota_id = ?", [titulo, notaId]),
+        ], ct);
 
     public Task MoveNotaAsync(string notaId, string? carpetaId, CancellationToken ct = default) =>
         d1.QueryAsync(
@@ -200,38 +211,104 @@ public sealed class VaultRepository(ID1Client d1)
     /// el nuevo actualizado_en.
     /// </summary>
     /// <remarks>
-    /// Lo que va al FTS es <see cref="Frontmatter.TextoIndexable"/>, no el
-    /// archivo crudo: el cuerpo más los VALORES de las propiedades, sin las
-    /// claves ni la sintaxis YAML. Si se indexara el archivo entero, buscar
-    /// «tags» devolvería todas las notas que tienen esa clave y los
-    /// <c>snippet()</c> mostrarían YAML en vez de texto.
-    ///
     /// Todo va en el MISMO batch (una transacción): el índice de una nota nunca
     /// puede quedar medio escrito, con las propiedades viejas y el texto nuevo.
+    /// Qué se escribe, en <see cref="IndiceStatements"/>.
     /// </remarks>
     public async Task<string> TouchNotaContenidoAsync(
-        string notaId, string titulo, string contenido, long tamanoBytes, CancellationToken ct = default)
+        string notaId, string titulo, string tipo, string contenido, long tamanoBytes, CancellationToken ct = default)
     {
         var now = Now();
         var statements = new List<D1Statement>
         {
             new("UPDATE notas SET tamano_bytes = ?, actualizado_en = ? WHERE id = ?",
                 [tamanoBytes, now, notaId]),
-            new("DELETE FROM notas_fts WHERE nota_id = ?", [notaId]),
-            new("INSERT INTO notas_fts (nota_id, titulo, contenido) VALUES (?, ?, ?)",
-                [notaId, titulo, Frontmatter.TextoIndexable(contenido)]),
-            new("DELETE FROM propiedades WHERE nota_id = ?", [notaId]),
         };
-        statements.AddRange(PropiedadesStatements(notaId, contenido));
+        statements.AddRange(IndiceStatements(notaId, titulo, tipo, contenido));
         await d1.BatchAsync(statements, ct);
         return now;
     }
 
     /// <summary>
+    /// Reescribe solo el índice de una nota (búsqueda, propiedades y etiquetas),
+    /// sin tocar su fecha de modificación: es mantenimiento, no una edición.
+    /// </summary>
+    public async Task ReindexarNotaAsync(
+        string notaId, string titulo, string tipo, string contenido, CancellationToken ct = default) =>
+        await d1.BatchAsync([.. IndiceStatements(notaId, titulo, tipo, contenido)], ct);
+
+    /// <summary>
+    /// Reescribe el índice (búsqueda, propiedades y etiquetas) de todas las notas
+    /// de un vault —o de todos, con <paramref name="vaultId"/> nulo—, releyendo
+    /// cada archivo por su <c>r2_key</c>. Incluye las de la papelera: si se
+    /// restauran, vuelven a encontrarse. No toca la fecha de modificación de
+    /// nada: es mantenimiento, no una edición. Devuelve cuántas reindexó.
+    /// </summary>
+    /// <remarks>
+    /// Secuencial a propósito: es mantenimiento que se corre una vez (al
+    /// migrar el índice), y así no compite con el tráfico normal por conexiones
+    /// ni por E/S.
+    /// </remarks>
+    public async Task<int> ReindexarAsync(IBlobStorage blobs, string? vaultId, CancellationToken ct = default)
+    {
+        var notas = vaultId is null
+            ? await d1.QueryAsync("SELECT id, titulo, tipo, r2_key FROM notas", ct: ct)
+            : await d1.QueryAsync(
+                "SELECT id, titulo, tipo, r2_key FROM notas WHERE vault_id = ?", [vaultId], ct);
+        var reindexadas = 0;
+        foreach (var n in notas.Results)
+        {
+            string contenido;
+            await using (var stream = await blobs.GetAsync(n.GetString("r2_key"), ct))
+            {
+                if (stream is null) continue;
+                using var reader = new StreamReader(stream, System.Text.Encoding.UTF8);
+                contenido = await reader.ReadToEndAsync(ct);
+            }
+            await d1.BatchAsync(
+                [.. IndiceStatements(
+                    n.GetString("id"), n.GetString("titulo"), n.GetStringOrNull("tipo") ?? "markdown", contenido)],
+                ct);
+            reindexadas++;
+        }
+        return reindexadas;
+    }
+
+    /// <summary>
+    /// Las sentencias que reescriben el índice de una nota: su fila de
+    /// <c>notas_fts</c>, sus <c>propiedades</c> y sus <c>etiquetas</c>. Sin tocar
+    /// <c>notas</c>, para que reindexar (al migrar el esquema o desde
+    /// <c>/reindexar</c>) no cambie la fecha de modificación de nada.
+    /// </summary>
+    /// <remarks>
+    /// Al FTS va <see cref="Frontmatter.TextoIndexable"/>, no el archivo crudo
+    /// (<c>DEF-148</c>): en <c>contenido</c> el cuerpo como se lee —de donde sale
+    /// el <c>snippet()</c> del resultado— y en <c>extra</c> los VALORES de las
+    /// propiedades y los destinos ocultos de los enlaces, que se encuentran sin
+    /// ensuciar el fragmento.
+    /// </remarks>
+    public static IEnumerable<D1Statement> IndiceStatements(
+        string notaId, string titulo, string tipo, string contenido)
+    {
+        var (buscable, extra) = Frontmatter.TextoIndexable(contenido, tipo);
+        yield return new("DELETE FROM notas_fts WHERE nota_id = ?", [notaId]);
+        yield return new("INSERT INTO notas_fts (nota_id, titulo, contenido, extra) VALUES (?, ?, ?, ?)",
+            [notaId, titulo, buscable, extra]);
+        yield return new("DELETE FROM propiedades WHERE nota_id = ?", [notaId]);
+        foreach (var s in PropiedadesStatements(notaId, contenido)) yield return s;
+        yield return new("DELETE FROM etiquetas WHERE nota_id = ?", [notaId]);
+        foreach (var s in EtiquetasStatements(notaId, tipo, contenido)) yield return s;
+    }
+
+    /// <summary>
     /// INSERTs de las propiedades de una nota: una fila por elemento de lista,
-    /// para poder filtrar por valor exacto sin LIKE. Un frontmatter ausente o
-    /// fuera del subconjunto soportado no aporta ninguna (se muestra crudo y no
-    /// se interpreta, igual que en el cliente).
+    /// para poder filtrar por valor sin mirar el resto de la lista. Un
+    /// frontmatter ausente o fuera del subconjunto soportado no aporta ninguna
+    /// (se muestra crudo y no se interpreta, igual que en el cliente).
+    ///
+    /// Cada fila lleva además la clave y el valor PLEGADOS (<c>DEF-144</c>, ver
+    /// <see cref="Plegado"/>): son las columnas que compara el filtro
+    /// <c>clave:valor</c> de la búsqueda.
     /// </summary>
     private static IEnumerable<D1Statement> PropiedadesStatements(string notaId, string contenido)
     {
@@ -242,9 +319,33 @@ public sealed class VaultRepository(ID1Client d1)
             for (var i = 0; i < p.Valores.Count; i++)
             {
                 yield return new D1Statement(
-                    "INSERT INTO propiedades (nota_id, clave, valor, tipo, orden) VALUES (?, ?, ?, ?, ?)",
-                    [notaId, p.Clave, p.Valores[i], p.Tipo, i]);
+                    """
+                    INSERT INTO propiedades (nota_id, clave, valor, tipo, orden, clave_plegada, valor_plegado)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    [notaId, p.Clave, p.Valores[i], p.Tipo, i, Plegado.Plegar(p.Clave), Plegado.Plegar(p.Valores[i])]);
             }
+        }
+    }
+
+    /// <summary>
+    /// INSERTs de las etiquetas de una nota (<c>DEF-152</c>): las de <c>tags:</c>
+    /// del frontmatter más los <c>#tag</c> del cuerpo fuera del código
+    /// (<see cref="Frontmatter.Etiquetas"/>, las mismas que colorean el grafo),
+    /// con la etiqueta plegada en <c>tag_plegado</c> para el filtro <c>tag:x</c>.
+    /// Un dibujo, un lienzo o una base no se escanean como prosa: no tienen.
+    /// </summary>
+    private static IEnumerable<D1Statement> EtiquetasStatements(string notaId, string tipo, string contenido)
+    {
+        if (tipo != "markdown") yield break;
+        var vistas = new HashSet<string>();
+        foreach (var tag in Frontmatter.Etiquetas(contenido))
+        {
+            var plegada = Plegado.PlegarEtiqueta(tag);
+            if (plegada.Length == 0 || !vistas.Add(plegada)) continue;
+            yield return new D1Statement(
+                "INSERT INTO etiquetas (nota_id, tag, tag_plegado) VALUES (?, ?, ?)",
+                [notaId, tag, plegada]);
         }
     }
 
@@ -283,14 +384,15 @@ public sealed class VaultRepository(ID1Client d1)
         ], ct);
 
     public Task DeleteNotaPermanentlyAsync(string notaId, CancellationToken ct = default) =>
-        // papelera, notas_fts y propiedades se limpian por separado; el blob se
-        // borra vía IBlobStorage (HU-04). `propiedades` tiene ON DELETE CASCADE,
+        // papelera, notas_fts, propiedades y etiquetas se limpian por separado; el
+        // blob se borra vía IBlobStorage (HU-04). Las dos últimas tienen ON DELETE CASCADE,
         // pero se borra explícitamente: D1 no garantiza las claves foráneas.
         d1.BatchAsync(
         [
             new D1Statement("DELETE FROM papelera WHERE nota_id = ?", [notaId]),
             new D1Statement("DELETE FROM notas_fts WHERE nota_id = ?", [notaId]),
             new D1Statement("DELETE FROM propiedades WHERE nota_id = ?", [notaId]),
+            new D1Statement("DELETE FROM etiquetas WHERE nota_id = ?", [notaId]),
             new D1Statement("DELETE FROM notas WHERE id = ?", [notaId]),
         ], ct);
 
