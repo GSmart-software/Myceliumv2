@@ -19,7 +19,7 @@ propuso que las cuatro quedaran elegibles como un estilo aparte.
 Nombres decididos por el usuario el 2026-09-19: el eje es **Atmósfera**; lo que había
 antes pasa a llamarse **Abisal** (así lo llamaba el código desde el prototipo legacy).
 
-## Las cuatro atmósferas
+## Las cinco atmósferas
 
 | Atmósfera | Idea | Defecto |
 |---|---|---|
@@ -27,11 +27,18 @@ antes pasa a llamarse **Abisal** (así lo llamaba el código desde el prototipo 
 | **Niebla** | Sobria, grises fríos con un matiz del tema. En oscuro la nota es lo más claro (como VS Code); en claro el marco también es claro (como Obsidian). | **oscuro** |
 | **Bosque** | El color del tema en el marco, con cuerpo; la nota casi neutra. | **claro** |
 | **Papel** | Editorial y cálida: papel y carbón tibio, títulos en la tinta. | — |
+| **Aurora** | Los fondos de Abisal con luz encima: degradados, brillos y resplandores en los colores del tema (botones, títulos, pestañas, rail, etiquetas). Agregada el 2026-10-09 (`FUN-M-54`); detalle en [[atmosfera-aurora]]. | — |
+
+> [!info] Aurora es la única con forma
+> Las otras cuatro solo redefinen tokens en `styles/atmosferas.css`. Aurora no toca ningún
+> token: sus reglas viven en `styles/aurora.css` y en los módulos de cada componente
+> (`:global(:root[data-atmosfera='aurora'])`), como las de los temas con forma. Spec, variables
+> por modo y tabla de contraste en [[atmosfera-aurora]].
 
 ## Comportamiento
 
 - Configuración → Apariencia: debajo de Tema y Modo, **«Atmósfera en modo oscuro»** y
-  **«Atmósfera en modo claro»**, cuatro muestras cada uno. Las dos se eligen siempre; la del
+  **«Atmósfera en modo claro»**, cinco muestras cada uno (cuatro hasta Aurora). Las dos se eligen siempre; la del
   otro modo rige cuando se cambie de modo.
 - Cada muestra es una **ventana en miniatura pintada con esa combinación** (tema actual ×
   ese modo × esa atmósfera), aunque la app esté en el otro modo.
@@ -65,4 +72,4 @@ el caso límite; se ajustó `--mic-marco-texto` en Bosque, Niebla claro y Papel 
 
 ## Relacionadas
 
-[[Rediseñar la UI con impeccable]] · [[DESIGN]] · [[BACKLOG]]
+[[Rediseñar la UI con impeccable]] · [[DESIGN]] · [[BACKLOG]] · [[atmosfera-aurora]]
