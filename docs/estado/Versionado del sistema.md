@@ -6,8 +6,9 @@ Se muestra al pie del drawer de Configuración y sale de una constante compartid
 `frontend/lib/version.ts` → `APP_VERSION`.
 
 > [!info] Estado actual
-> **desktop `2.4.0`**, preparada el 2026-10-06 y pendiente de publicar ([[Version 2.4.0]]: los
-> archivos del vault y los estados de tarea). La publicada es la `2.3.0`, del 2026-10-03
+> **desktop `2.5.0`**, consolidada el 2026-10-09 y pendiente de publicar ([[Version 2.5.0]]: la
+> ayuda integrada y la atmósfera Aurora). La publicada es la `2.4.0`, del 2026-10-06 ([[Version 2.4.0]]: los archivos del vault y
+> los estados de tarea; la primera compilada por CI). La anterior es la `2.3.0`, del 2026-10-03
 > ([[Version 2.3.0]]: el MCP de control y las
 > skills de IA por herramienta; la anterior es [[Version 2.2.0]], del 2026-09-28) · **web
 > `2.1.0`**

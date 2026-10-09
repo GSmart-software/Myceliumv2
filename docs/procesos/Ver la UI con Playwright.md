@@ -150,6 +150,13 @@ defecto que [frontend/AGENTS.md](../../frontend/AGENTS.md) pide probar siempre.
 - **Memoria.** Lanzado en segundo plano desde una sesión de IA, el sistema lo cortó por
   falta de memoria a los pocos minutos (2026-09-19, con otro `next dev` y otra sesión
   abiertos). Levantalo cuando vayas a capturar, no antes, y cerralo al terminar.
+- **Cerrarla por PID, nunca por nombre.** La app de desarrollo y el Mycelium instalado
+  (`%LOCALAPPDATA%\Mycelium\app.exe`) se llaman los dos `app.exe`: `taskkill /IM app.exe`
+  cerró también las ventanas del usuario (2026-10-07). Se cierra la tarea que la lanzó y el
+  PID que escucha en el 3000/9222.
+- **Clics en un `<canvas>` con coordenadas de captura.** La ventana corre con
+  `devicePixelRatio` 1.25: la captura mide 1600×1000 y la página 1280×800. Para hacer clic en
+  el grafo con lo que se ve en la captura, dividir por 1.25. Ver [[Auditoria e2e 2026-10-07]].
 
 ## Relacionadas
 

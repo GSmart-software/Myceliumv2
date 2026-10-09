@@ -55,6 +55,19 @@ los reasigna a **todas** las instancias vivas, incluidas las ocultas de fondo.
 > mismo problema del grafo en `DEF-030`, que se arregló agregando `tema`/`modoOscuro`
 > a las dependencias del efecto de simulación.
 
+El tercer caso fue **Mermaid** (`DEF-142`, 2026-10-07): se inicializaba sin tema y
+dibujaba con su paleta clara de fábrica, también en oscuro. Además de re-leer al
+cambiar el tema (aquí, redibujar cada diagrama desde su fuente), dejó dos trampas:
+
+- **`getComputedStyle` no resuelve `color-mix()` dentro de una variable.** Leer
+  `--mic-x` devuelve el texto de la fórmula; asignarlo a `color` de una sonda devuelve
+  `color(srgb …)`, que muchas librerías (Mermaid usa khroma) no entienden. Lo que sí
+  sirve siempre: pintar el color en un píxel de un `<canvas>` y leer `getImageData`.
+- **La librería es global.** `mermaid.initialize` + `render` de dos llamadores con
+  temas distintos (la nota y el PDF) se pisan entre `await`s: van por una cola.
+
+Ver `lib/mermaid.ts` y `lib/mermaidTema.ts`.
+
 ## El contenedor tiene que estirar al hijo
 
 **Síntoma** (visible en una captura del usuario): una consola anclada en el panel

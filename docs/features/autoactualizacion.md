@@ -312,11 +312,16 @@ Se registra como **`FUN-M-16` · `UPDATER-SELECCION-VERSION`**, aparte de `FUN-L
 toda la infraestructura pero es un entregable distinto, y si `FUN-L-14` se hace grande, esto
 se puede cortar sin dañarla.
 
-**Cómo se llega**: pulsando **siete veces sobre el número de versión** en el pie de
-Configuración se activa el **modo avanzado**, y con él aparece la sección de versiones. Es
-el gesto de Android y Chrome para el modo desarrollador: imposible de encontrar por
-accidente, trivial de recordar, y no agrega ninguna superficie visible. Queda activado de
-forma persistente hasta que se apague.
+**Cómo se llega**: con el **modo desarrollador** ([[modo-dev]], `FUN-S-36`), que se
+enciende con el comando oculto **`>dev`** de la paleta. Con él aparecen la sección de
+versiones y el campo del servidor. Queda activado de forma persistente hasta que se apague.
+
+> [!info] Antes eran siete clics (2026-08 → 2026-10-08)
+> Hasta `FUN-S-36` esto era el **modo avanzado**: siete pulsaciones sobre el número de versión
+> del pie de Configuración, el gesto de Android y Chrome. Se reemplazó por `>dev` para tener
+> un único modo de desarrollador que además habilita comandos propios en la paleta. El
+> estado guardado se conserva: quien tenía el modo avanzado encendido quedó con el modo
+> desarrollador encendido (`actualizador.json` lee la clave vieja `avanzado` como `dev`).
 
 **Qué hace**: lee `versions.json` del bucket (§ 3.2), lista lo publicado con su fecha y sus
 notas, y permite instalar la que se elija — **siempre con confirmación**, y con la

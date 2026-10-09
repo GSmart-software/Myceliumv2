@@ -2,6 +2,15 @@
 
 **Solo desktop** (`desktop-tauri`) · 2026-10-06 · sobre [[Version 2.3.0]]
 
+> [!success] Publicada el 2026-10-06 a las 22:43 (UTC)
+> La **primera por el circuito de CI** (`FUN-L-28`): PR #3 de `desktop-tauri` a `despliegues`
+> (fusionado a las 21:54 UTC, en `f263388`), artefactos de Windows, macOS y Linux bajados del
+> run y `npm run publicar -- --ci`, ensayo primero. El script firmó los seis instaladores
+> actualizables, verificó cada firma contra la `pubkey` de la app, subió los siete archivos y
+> los tres manifiestos, y comprobó que lo que quedó en el bucket es lo firmado (sha256 del
+> `.exe` `2d471a84…`). Detalle: el zip de Linux llegó con extensión `.zip.opdownload` (descarga
+> del navegador sin renombrar) pero estaba completo; se descomprimió aparte.
+
 La versión de los **archivos del vault**. El explorador deja de esperar al índice y muestra
 lo que pasa en el disco al instante (`FUN-M-42`, que completa `FUN-M-14`); cualquier tipo de
 archivo se puede soltar desde Windows (`FUN-S-26`), tiene su menú (`FUN-S-27`) y se ve dentro

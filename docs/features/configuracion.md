@@ -55,8 +55,10 @@ renombra un ajuste hay que renombrarlo también en el índice.
   Tab queda atrapado dentro, Escape cierra y al cerrar el foco vuelve a donde estaba.
 - Escape con texto en el buscador **lo limpia primero** y no cierra la ventana.
 - Flechas, Inicio y Fin recorren las categorías desde la que tiene el foco.
-- Los siete clics sobre la versión que activan el modo avanzado (`FUN-M-16`) siguen ahí,
-  ahora en el pie de la ventana.
+- ~~Los siete clics sobre la versión que activan el modo avanzado (`FUN-M-16`) siguen ahí,
+  ahora en el pie de la ventana.~~ Desde `FUN-S-36` (2026-10-08) el número de versión es
+  texto: el modo desarrollador se enciende desde la paleta ([[modo-dev]]). Con el modo
+  encendido, el pie dice «· dev» junto a la versión.
 
 ## Lo que se ajustó de las secciones
 
@@ -139,8 +141,9 @@ El índice era una lista de rótulos exactos: quien no supiera que el ajuste se 
 
 - los **alias** son cómo lo llamaría quien no sabe cómo se llama — se busca por ellos, pero
   lo que se muestra y a lo que se salta es siempre el rótulo;
-- **`soloAvanzado`** saca del índice lo que vive tras los siete clics mientras no esté
-  encendido: ofrecerlo era mandar a un salto que no llegaba a ningún lado;
+- **`soloAvanzado`** (desde `FUN-S-36`, **`soloDev`**) saca del índice lo que vive tras el
+  modo desarrollador mientras no esté encendido: ofrecerlo era mandar a un salto que no
+  llegaba a ningún lado;
 - faltaba **«Shell por defecto»**, que no estaba indexado.
 
 ### Lo demás
@@ -149,7 +152,8 @@ El índice era una lista de rótulos exactos: quien no supiera que el ajuste se 
   dispositivo», herencia de la línea web, en la versión cuyo principio es que nada sale de
   la máquina. Se guardan en el índice local del vault abierto, y eso es lo que dice ahora.
 - **El modo avanzado se alcanza con el teclado**: los siete clics vivían en el `<footer>`, así
-  que sin ratón era inalcanzable. Ahora el número de versión es un `<button>`.
+  que sin ratón era inalcanzable. Ahora el número de versión es un `<button>`. *(Superado por
+  `FUN-S-36`: el modo se enciende con `>dev` en la paleta y la versión volvió a ser texto.)*
 - **La marca del salto tiene color propio** (`--mic-marca`, el acento) y un fondo teñido.
   Usaba `--mic-focus` sin que el foco estuviera ahí: dos anillos iguales se leen como dos
   focos.

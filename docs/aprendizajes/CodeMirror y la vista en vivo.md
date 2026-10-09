@@ -95,6 +95,16 @@ Lo que hay que sostener cuando un widget deja de ser un adorno y pasa a editar e
 >   cambian, la quinta regla obliga a medir en cada `mouseover`. Reservarles el lugar con
 >   `visibility` y sacar el menú del flujo con `position: absolute` lo evita de raíz.
 
+> [!warning] Al cerrar un control del widget, el foco hay que devolverlo a mano (`DEF-139`)
+> Quitar del DOM un `<input>` enfocado deja el foco en `<body>`: lo que se teclee después
+> no va a ningún lado. Todo control que se cierre por teclado (Enter, Esc) tiene que decir
+> adónde va el foco. Y ojo con **cuál** vista: si la acción del control cambia el id de la
+> nota —renombrar, en modo carpeta el id es la ruta—, `NoteEditor` **destruye la vista y
+> crea otra**; la `view` que el widget recibió ya está desmontada cuando la acción termina.
+> El título lo resuelve con un facet (`salirDelTitulo`) que el editor implementa sobre
+> `viewRef`, un frame después, y con un pendiente que toma `createView` si la nueva todavía
+> no existe.
+
 > [!tip] Lo que CodeMirror ya resuelve solo
 > Las mutaciones del DOM **dentro** de un widget se ignoran (`readMutation` devuelve `null`
 > para los tiles de widget), y la selección no se fuerza mientras el `activeElement` no sea
@@ -313,6 +323,22 @@ La casilla de una tarea pasó de visual a clicable. Lo que hizo falta: `ignoreEv
 debajo del puntero antes del `click`— y la posición del documento pedida al DOM en el
 momento (`view.posAtDOM(span)`), no guardada al dibujar. Antes de escribir se comprueba que
 ahí siga habiendo un marcador.
+
+## Esconder una línea entera: widget, no `Decoration.replace({})` (`DEF-150 k`)
+
+Para que las cercas ` ``` ` de un bloque de código desaparezcan con el cursor fuera, no
+sirve reemplazarlas por nada: una línea cuyo contenido queda todo oculto se queda sin
+nada que le dé alto en el DOM y puede colapsar (y con ella el height-map). Se reemplazan
+por un widget que ocupa la línea (`display: inline-block; width: 100%; min-height: 1em`),
+el mismo truco de la regla horizontal (`HrWidget`). De paso, el widget de la apertura
+muestra el lenguaje. Con `ignoreEvent() → false`, un clic en él lleva el cursor ahí y la
+cerca reaparece en crudo. «Activo» es **el bloque**, no la línea: cualquier línea del
+bloque con el cursor muestra las dos cercas.
+
+La viñeta «•» de una lista (`DEF-150 b`) es el mismo patrón al revés: el widget ocupa **un**
+carácter, igual que el `-` que reemplaza, para que la sangría no salte al entrar y salir de
+la línea. En una tarea se oculta de `ListMark.from` a `TaskMarker.from` (dos reemplazos
+contiguos, sin solaparse: el de la casilla empieza donde termina el otro).
 
 ## Relacionadas
 

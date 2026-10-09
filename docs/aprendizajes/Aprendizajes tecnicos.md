@@ -19,6 +19,7 @@ y qué principio general dejó.
 | [[Tauri y el WebView]] | ConPTY, `dragDropEnabled`, `elementFromPoint`, límites del WebView2 |
 | [[Compilacion y entorno de desarrollo]] | `cargo` sin memoria, `tee` que oculta fallos, `pipefail` que inventa fallos en CI, procesos huérfanos en `:3000` |
 | [[Auditoria de codigo 2026-09-26]] | Auditoría a tres bandas (complejidad, eficiencia, código muerto) con mediciones sobre tres vaults, cuatro defectos nuevos y el plan en tandas; los tres informes crudos enlazados desde ahí |
+| [[Auditoria e2e 2026-10-07]] | Uso intensivo de la app por CDP, como un usuario: 40 hallazgos, `DEF-134` a `DEF-150` y `FUN-S-31` a `FUN-M-50`; el patrón de fondo (crear no mueve el foco, nada impide dos títulos iguales) y cómo manejar la ventana de desarrollo sin cerrar la instalada |
 | [[Como construye Obsidian su grafo]] | Por qué el grafo de Obsidian es fluido: índice de enlaces persistente e incremental, grafo como lectura del índice, física en un worker con Barnes-Hut, WebGL; qué copiar y en qué orden |
 | [[Rendimiento del grafo]] | Dónde se va el tiempo por frame (repulsión O(n²), `shadowBlur`, flujo animado) y el segundo análisis para más de 1.000 notas (`DEF-109`) |
 | [[Rendimiento de la apertura del vault]] | Por qué tarda abrir un vault grande: `.mycignore` insuficiente, 14 MB por IPC, 11.000 statements sueltos |
@@ -207,6 +208,149 @@ y qué principio general dejó.
     ni `remark-gfm` (lectura) aceptaban `[-]`; extender uno solo habría hecho aparecer y
     desaparecer la casilla al cambiar de vista. Detalle en [[estados-de-tarea]] y
     [[CodeMirror y la vista en vivo]].
+19. **Un nombre de nodo no dice lo mismo en todo contexto: decidí mirando el padre.** La vista
+    en vivo ocultaba todo nodo `URL` fuera de la línea del cursor, pensando en el `(url)` de
+    `[texto](url)`, donde lo visible es el texto. Pero GFM también llama `URL` a una dirección
+    suelta (`https://…`, `www.…`, un correo) y a la de `<https://…>`, y ahí la URL **es** el
+    texto: desaparecía entera (`DEF-132`). Al decorar o esconder un nodo del árbol de
+    `@lezer/markdown`, preguntá **dentro de qué** está (`node.node.parent?.name`) antes de
+    tratarlo, sobre todo si lo que hacés es ocultarlo. Ver [[bugs-progreso]].
+20. **Cuando la referencia es un nombre y no una identidad, toda operación que cambia nombres
+    o profundidades cambia a dónde llevan referencias que nadie tocó.** `[[Tomate]]` no
+    apunta a un archivo: apunta a «la nota llamada Tomate más cercana a la raíz». Renombrar
+    otra nota a «Tomate» en la raíz **robaba** los enlaces del cultivo sin escribir un byte,
+    y el renombrado siguiente —que repara «los enlaces que llegan a esta nota» según el
+    índice— los reescribía hacia la nota equivocada: el índice había registrado el robo como
+    verdad (`DEF-134`). La reparación no puede preguntar «quién enlaza a lo que cambia» sino
+    «a dónde llevaba cada enlace **antes**, y a dónde lleva **después**»: se resuelve contra
+    los dos estados del vault y se escribe con ruta lo que cambiaría. Y eso hay que leerlo
+    antes de la operación, porque después el índice ya re-resolvió. Ver
+    [[titulos-homonimos]].
+21. **Un botón que crea algo editable tiene que entregar el foco.** Crear es asíncrono y el
+    `<button>` pulsado conserva el foco; un botón enfocado se activa con **espacio y Enter**,
+    así que lo que el usuario teclea para lo nuevo crea más cosas (`DEF-135`: diez notas
+    «Sin título» por escribir un título). Lo creado tiene que tomar el foco cuando exista
+    —un pedido de un solo uso que consume quien lo monta, como `pendingMatch`— y el botón
+    soltarlo en el clic. Y su pariente: **un actualizador de `setState` tiene que ser puro.**
+    El lienzo sorteaba el id de la tarjeta nueva dentro del actualizador y desde ahí la
+    marcaba en edición; React lo corre dos veces en desarrollo y se queda con una pasada, así
+    que la tarjeta podía tener otro id que el «en edición» y nunca abría su texto. Lo que no
+    es determinista (`Math.random`, `Date.now`) y los otros `setState` van afuera. Ver
+    [[bugs-progreso]].
+22. **Si el documento ya se modifica sin mutar, deshacer es guardar referencias.** El lienzo
+    no tenía historial y Supr perdía una tarjeta sin vuelta (`DEF-137`). Como cada cambio
+    del `Canvas` ya devolvía un objeto nuevo, el historial es una pila de snapshots
+    (`lib/historialCanvas.ts`): sin comandos inversos que escribir por operación ni forma de
+    deshacer hacia un estado que nunca existió. La granularidad la dan **gestos con clave**
+    —abrir anota el «antes», cerrar empuja un paso si algo cambió—: la clave evita que el
+    `blur` tardío de la edición de texto cierre el arrastre que lo provocó. Y un historial
+    de snapshots **se descarta al recargar desde disco**: volver a uno de ellos pisaría lo
+    que llegó de afuera. Ver [[bugs-progreso]].
+23. **«No pisar lo que se está editando» no basta: tampoco hay que pisar lo de afuera.**
+    El editor ignoraba el aviso del watcher mientras la nota estaba sucia, y el guardado
+    escribía sin mirar el disco: lo que había escrito la IA desaparecía (`DEF-138`). Todo
+    guardado que parte de una lectura tiene que comparar el disco con **esa base** justo
+    antes de escribir —leyendo el archivo, no el índice, que va detrás del watcher— y, si
+    los dos lados cambiaron, no decidir solo. Y la base es de la pestaña: tomar el disco
+    como base al volver a ella absorbe el cambio de afuera. Ver [[def-138-cambio-externo]].
+24. **En SQLite, `NOCASE` y `lower()` solo entienden ASCII; lo que compare como el FTS se
+    pliega en JS y se guarda plegado.** El texto de la búsqueda ignoraba tildes porque lo
+    pliega el tokenizador `unicode61` de `notas_fts`, pero el filtro `clave:valor`
+    comparaba la tabla `propiedades` cruda con `COLLATE NOCASE`: «solanaceas» no
+    encontraba «solanáceas», ni «Á» a «á» (`DEF-144`). `tauri-plugin-sql` no deja registrar
+    funciones propias, así que el plegado (`plegar`, `lib/db/fts.ts`) va en JS al escribir
+    —columnas `clave_plegada`/`valor_plegado`, con índice— y al consultar. Una columna
+    nueva en el índice de un vault ya abierto se **migra en el lugar** (`ALTER TABLE` +
+    llenar lo que quedó en NULL), no con un reindexado que relee todos los archivos. Ver
+    [[bugs-progreso]].
+25. **Un `LIKE '%x%'` no es caro si una igualdad sobre la columna anterior del índice ya
+    acotó el rango.** El filtro `clave:valor` por palabra (`DEF-145`) usa un `LIKE` con `%`
+    adelante, que no puede usar el índice por sí solo; pero `clave_plegada = ?` es la
+    primera columna de `idx_propiedades_plegado`, así que SQLite recorre solo las filas de
+    esa clave y evalúa el `LIKE` sobre el valor leído del índice. Un `instr(col, ?) > 0`
+    previo descarta barato las filas que ni contienen el término, antes de los `replace`
+    que arman las palabras: con 20.000 notas, de 38 a 20 ms con coincidencias y de 31 a
+    2,5 ms sin ninguna. Y al tokenizar una consulta, `clave:"con espacios"` tiene que ser
+    **un** token: la frase entre comillas no siempre empieza en la comilla. Ver
+    [[bugs-progreso]].
+26. **El `rank` (bm25) de FTS5 puntúa la fila entera, no la columna: un título no pesa más
+    que el cuerpo.** La nota «Tomate», con un cuerpo largo que no repetía la palabra, salía
+    detrás de todas las que la mencionaban varias veces (`DEF-146`). Para que el título
+    mande, el `ORDER BY` lo resuelve con subconsultas FTS restringidas a la columna
+    (`f.rowid IN (SELECT rowid FROM notas_fts WHERE notas_fts MATCH 'titulo : ^"…"')`; `^`
+    ancla la frase a la primera palabra de la columna) y deja `rank` como desempate. Va en
+    SQL y no en el cliente porque el `LIMIT` puede dejar afuera justo la nota buscada.
+    Costo: sin `ORDER BY rank` puro, FTS5 ya no ordena por dentro y el `snippet` se calcula
+    para cada coincidencia antes de ordenar: con 20.000 notas que TODAS coinciden, de 31 a
+    61 ms; con ~1 000 coincidencias, de 2,6 a 6 ms. Ver [[bugs-progreso]].
+27. **Una regla de resolución que se agrega en una sola punta vuelve a partir el
+    resolutor único.** `FUN-M-40` dejó un resolutor para el editor y el grafo, pero
+    `FUN-L-25` le enseñó el ancla (`[[Nota#Sección]]`) solo al grafo, envolviéndolo en
+    `lib/enlacesNota.ts`: el grafo contaba la arista y el editor, la lectura, el lienzo y
+    el calendario pintaban el mismo enlace roto (`DEF-141`). La regla nueva va **dentro**
+    del resolutor compartido (`resolveWikilinkEnIndice`), no en un envoltorio de quien la
+    necesitó primero. Ver [[bugs-progreso]].
+28. **Un atributo de presentación HTML (`align`, `width`, `bgcolor`) pierde contra
+    cualquier regla CSS de autor.** El navegador lo aplica con especificidad cero, así que
+    `.mic-preview td { text-align: left }` pisaba el `align="right"` que remark-rehype pone
+    en las celdas de una columna `---:`, y en lectura todas las columnas quedaban a la
+    izquierda (`DEF-143`). No hacía falta sospechar de un sanitizador: no había. La salida
+    es nombrar el atributo en el selector (`.mic-preview td[align="right"]`), que gana por
+    especificidad sin abrir `style` en línea. Cuando una regla base fija una propiedad que
+    el HTML generado también fija, **comprobá que el caso particular siga ganando**. Ver
+    [[bugs-progreso]].
+29. **Lo que se muestra de un índice FTS se limpia al indexar, no al pintar.** El fragmento
+    de un resultado es el `snippet()` de la columna, que corta diez palabras en cualquier
+    lugar: limpiarlo después no sabe qué hacer con `…Pulgón|pulgones]]` partido a la mitad
+    (`DEF-148`). Por eso la columna que da el fragmento guarda el texto **como se lee**
+    (`lib/textoBuscable.ts`), y lo que debe encontrarse sin verse —valores de propiedades,
+    destinos de alias, URLs— va a otra columna (`extra`) del mismo FTS: `MATCH` sin filtro
+    de columna busca en las dos, y `{contenido extra} : …` restringe a ambas. Un FTS5 **no
+    admite `ALTER TABLE ADD COLUMN`**: cambiarle columnas es borrarlo y recrearlo, y la
+    reparación de notas sin fila de búsqueda (`DEF-121`) hace el resto sin código propio.
+    Ver [[bugs-progreso]].
+30. **Un componente de terceros con interfaz propia llega en inglés y con sus assets en un
+    CDN, salvo que le digas lo contrario.** `<Excalidraw>` sin `langCode` mostraba
+    «Library» y «To move canvas…» en una app en español (`DEF-147`); con `langCode="es-ES"`
+    la traducción viaja en un chunk propio del bundle (`import()` dinámico del paquete), así
+    que funciona offline en Tauri. Sus **fuentes**, en cambio, se piden a `esm.sh` si no hay
+    `window.EXCALIDRAW_ASSET_PATH`. Al integrar una librería con UI, revisá **idioma** y
+    **de dónde baja lo que carga en tiempo de ejecución**, y pasá el idioma desde **una
+    constante** (`IDIOMA_EXCALIDRAW`) para que ninguna instancia nueva lo olvide.
+31. **Para el FTS, la puntuación no existe: un término `"#x"` es la palabra `x`.** El
+    tokenizador `unicode61` descarta todo lo que no es letra ni número, así que `tag:x`
+    —que se buscaba como `"#x"*`— encontraba la palabra en cualquier lado, y
+    `tag:solanaceas` traía la nota que solo decía `familia: solanáceas` (`DEF-152`). Lo que
+    tiene estructura (una etiqueta, una propiedad) se filtra por **su tabla** del índice
+    —`etiquetas`, ya derivada para el grafo—, plegado como el texto y con índice. Una
+    jerarquía con separador (`huerta/riego`) se pide por índice como igualdad **o** rango
+    (`t = 'x' OR (t > 'x/' AND t < 'x0')`: `0` es el carácter que sigue a `/`), que SQLite
+    resuelve con `MULTI-INDEX OR`. Y si una consulta auxiliar filtra por la clave de un
+    índice que no conviene (`clave_plegada = 'tags'` recorre las `tags` del vault entero),
+    `+columna` la saca del índice y deja que mande el de `nota_id`. Ver [[bugs-progreso]].
+32. **En un lienzo, el eje z no es solo el orden del arreglo: los marcos van al fondo.**
+    JSON Canvas dice que el orden de `nodes` es el apilado, y el lienzo pintaba el `<svg>`
+    de las flechas primero y después cada nodo en ese orden: un grupo tapaba las flechas
+    entre las tarjetas que contiene, y si el archivo lo listaba al final, también las
+    tarjetas (`DEF-151`). Obsidian —y ahora Mycelium, con `ordenDePintado` en
+    `lib/canvas.ts`— pinta en **capas**: grupos (de mayor a menor área, para que uno
+    anidado siga tocándose) → flechas → tarjetas. Para probar un apilado en el navegador,
+    `elementFromPoint` **ignora** lo que tiene `pointer-events: none` (como el SVG de las
+    flechas): en la prueba se le da `pointer-events: stroke` y así responde si, y solo si,
+    está pintado encima (`scripts/smoke-lienzo-grupos.mjs`). Ver [[bugs-progreso]].
+33. **En React 19, `dangerouslySetInnerHTML={{ __html }}` reasigna `innerHTML` en cada
+    render, aunque el texto sea el mismo.** React compara la prop por **identidad del
+    objeto**, y el literal crea uno nuevo por render. Todo lo que un efecto agrega después
+    al DOM de ese HTML —el dibujo de un embed de Excalidraw o draw.io, un Mermaid, los
+    botones de copiar, las flechas de plegado— se borra con cualquier re-render ajeno, y
+    si el efecto que decora no tiene esa causa entre sus dependencias, no vuelve a correr:
+    quedaba el placeholder «Diagrama Croquis de la huerta» hasta que la nota cambiara
+    (`DEF-133`; `DEF-050` era el mismo mecanismo con las flechas de plegado, y se tapó
+    corriendo ese efecto en cada render). Para HTML que se decora, el objeto se
+    **memoiza** con las mismas dependencias que el efecto decorador
+    (`lib/useHtmlDecorable.ts`): el HTML crudo vuelve solo cuando el efecto va a volver a
+    correr. Prueba en Chromium con el React real: `scripts/smoke-html-decorable.mjs`. Ver
+    [[bugs-progreso]].
 
 ## Relacionadas
 

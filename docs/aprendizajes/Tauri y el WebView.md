@@ -96,6 +96,35 @@ entero en memoria. Los comandos sin `async` corren en el **hilo principal**: el 
 copie mucho va con `#[tauri::command(async)]`. Caso: `FUN-S-26`, en
 [[archivos-del-vault-en-vivo]].
 
+## `invoke` rechaza con TEXTO, no con un `Error`
+
+Un comando que devuelve `Result<_, String>` —y el plugin SQL, que serializa sus errores
+como texto— llega al `catch` como `"UNIQUE constraint failed: notas.id"`. El patrón
+`e instanceof Error ? e.message : "Error desconocido"` **tira ese texto**: el usuario y el
+registro ven «Error desconocido». Para sacar el mensaje de cualquier rechazo está
+`mensajeDeError` (`lib/mensajeError.ts`). Pasó dos veces: al abrir un vault ya abierto en
+otra ventana (arreglado a mano en `vaultSessionStore`) y en todo el dispatcher `lib/api.ts`
+(`DEF-136`).
+
+Y la otra mitad de ese defecto: **elegir un nombre libre y ocuparlo tiene que ser un solo
+paso**. Entre leer el índice y el `INSERT` hay `await` de IPC; dos creaciones seguidas
+eligen el mismo nombre. Las creaciones van por la cola `conNombreReservado` (`vaultFs.ts`).
+
+## Una dependencia puede bajar sus recursos de un CDN en tiempo de ejecución
+
+Que un paquete esté en `node_modules` no significa que todo lo suyo viaje en el bundle.
+Excalidraw 0.18 baja las **fuentes de los dibujos** con `fetch` a
+`window.EXCALIDRAW_ASSET_PATH` y, si no está definido, a `esm.sh` (`DEF-153`). Como la CSP
+de Tauri es `null`, nada lo bloqueaba: **con red se veía bien**, y por eso nadie lo notó
+hasta probar sin ella. Se arregla sirviendo esos archivos desde `public/` (los copia
+`scripts/preparar-excalidraw.mjs`, como `preparar-drawio.mjs` con draw.io) y apuntando la
+librería ahí antes de importarla (`cargarExcalidraw()`).
+
+La forma de encontrarlos es probar **con la red bloqueada** y mirar las peticiones a otros
+orígenes (los smoke de Excalidraw lo hacen con `page.route`). Vale para toda librería nueva
+que dibuje texto, traduzca o cargue *workers*: `DEF-147` (el idioma) resultó viajar en un
+chunk propio; las fuentes, no.
+
 ## Relacionadas
 
 - [[Aprendizajes tecnicos]] — mapa del área.

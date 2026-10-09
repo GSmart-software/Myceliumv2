@@ -16,6 +16,36 @@ orquestador como los subagentes.
 | Reflejo a web | `npm ci` + `tsc` + `npx next build` | worktree de `web-cloud` |
 | Módulo con tests headless | `node --test scripts/test-<modulo>.mjs` | `frontend/` |
 | Smoke tests (si aplica) | `node scripts/smoke-*.mjs` | `frontend/` |
+| Tokens (`styles/tokens.css`), clases globales `mic-*` o la plantilla de snippets | `node --test scripts/test-plantilla-estilos.mjs` | `frontend/` |
+| Páginas de la ayuda (`frontend/ayuda/`) | `npm run generar-ayuda` + `node --test scripts/test-ayuda.mjs` | `frontend/` |
+
+> [!important] Cada funcionalidad y cada defecto corregido responden dos preguntas (regla del usuario, 2026-10-06)
+> **¿Cambia lo que dice la ayuda? ¿Cambia lo que se puede estilar?** Vale para todo cambio
+> —hecho por un subagente o directo por el orquestador—, también para un defecto: un arreglo
+> puede volver falsa una página que describía el comportamiento roto (pasó con `DEF-130`, cuya
+> página advertía la trampa de la X). La respuesta va en el informe y en el resumen al
+> usuario: «ayuda: actualizada (qué página) / no aplica (por qué)» y lo mismo para la
+> plantilla; un «no aplica» sin motivo no vale. El detalle de cada una, en los dos callouts
+> que siguen. Ver también `CLAUDE.md` § «5. Integrar».
+
+> [!important] Una funcionalidad nueva no se da por terminada sin su página de ayuda
+> Regla de [[ayuda-integrada]] (`FUN-L-27`, 2026-10-06). Si el usuario puede hacer algo
+> que antes no podía, la ayuda integrada (F1) tiene que contarlo: una página nueva o un
+> párrafo en la que corresponde, con un ejemplo ```` ```ejemplo ```` si es sintaxis. Si
+> cambia una sintaxis o un atajo, se corrige la página en el mismo cambio. Un tipo de
+> archivo nuevo en `lib/extensionesDeTipo` hace fallar `scripts/test-ayuda.mjs` hasta
+> que una página lo declare en `cubre:`. Cómo se escribe una página: [[ayuda-integrada]]
+> § «Implementación de la parte A».
+
+> [!important] Una superficie con tokens o clases públicas actualiza la plantilla de snippets
+> Regla de `DEF-123` (2026-10-06). La plantilla de snippets (`frontend/public/plantilla-estilos.css`,
+> la de «Nuevo snippet» y «Descargar plantilla») es la documentación de lo que el usuario
+> puede estilar. Si agregás o renombrás una variable `--mic-*` de `styles/tokens.css` o una
+> clase global `mic-*` pensada para estilarse, la plantilla se toca en el mismo cambio, con un
+> ejemplo comentado. Lo obliga `node --test scripts/test-plantilla-estilos.mjs`: falla con un
+> token de `tokens.css` que la plantilla no menciona (o que no está en su lista `EXCLUIDOS`,
+> con el motivo) y con una variable o clase que la plantilla nombra y ya no existe. Las clases
+> de los `.module.css` no van: cambian en cada build.
 
 > [!info] `src-tauri/` es un workspace desde `FUN-L-09`
 > La app es el paquete raíz; en `crates/` viven `mycelium-mcp` (el servidor del

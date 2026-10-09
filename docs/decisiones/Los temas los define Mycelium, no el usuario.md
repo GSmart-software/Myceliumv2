@@ -52,6 +52,10 @@ Vale guardarlo: es el terreno de cualquier estilo nuevo que se agregue más adel
   la lista de swatches de Apariencia y —el que más se olvida— **`lib/printStyles.ts`**, el
   CSS autocontenido del PDF, que lleva los colores de los dos temas escritos dentro. Sumar un
   tema significa tocar esos siete, incluido el del PDF, o exportar sale con otros colores.
+  Desde el tercero, **Arrecife** ([[tema-arrecife]], `FUN-M-51`, 2026-10-08), el tipo, la
+  validación del tema guardado y las muestras de Apariencia viven juntos en `lib/temas.ts`;
+  siguen aparte `styles/tokens.css`, `lib/printStyles.ts` (un test los compara) y el buscador
+  de ajustes.
 
 ## Relacionadas
 

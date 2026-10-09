@@ -61,6 +61,8 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
   qué queda aprendido para los estilos que sí se agreguen.
 - [[Skill o MCP, segun quien sabe hacerlo]] — 2026-10-01: lo que es contenido va por skill;
   lo que tiene reglas o estado de la app (calendario, diccionario, renombrar), por MCP.
+- [[Lo del modo dev no se anuncia]] — 2026-10-08: ni el modo desarrollador ni nada de lo
+  que habilita sale en el changelog ni en la ayuda; `npm run publicar` lo rechaza.
 
 ## Procesos
 
@@ -107,6 +109,9 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
 - [[busqueda-modos-y-arbol]] — elegir dónde busca el panel del vault, ver los resultados
   por carpeta, y las guías de indentación (`FUN-M-20` · `FUN-S-17`).
 - [[titulo-renombra]] — escribir en el título de la nota renombra el archivo (`FUN-M-24`).
+- [[titulos-homonimos]] — dos notas con el mismo título: renombrar, crear o mover nunca
+  cambia a dónde lleva un enlace; los que cambiarían van con su ruta, y un aviso lo cuenta
+  (`DEF-134`).
 - [[metadata-yaml]] — frontmatter YAML como propiedades: ver, editar e indexar (`FUN-M-04`).
 - [[ventanas-multiples]] — varios vaults abiertos a la vez, uno por ventana (`FUN-L-16`).
 - [[auditoria-y-relinkeado]] — adoptar un vault que ya existía: descubrir cómo se
@@ -152,7 +157,9 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
   vista de lectura (`FUN-M-28`).
 - [[esporas-plantillas]] — plantillas de notas ("Esporas") con variables (`FUN-M-03`).
 - [[autoactualizacion]] — aviso diario de versión nueva, actualización con un clic y
-  selección de versión en modo avanzado (`FUN-L-14` + `FUN-M-16`).
+  selección de versión en modo desarrollador (`FUN-L-14` + `FUN-M-16`).
+- [[modo-dev]] — el modo desarrollador: comando oculto `>dev` de la paleta, qué queda detrás
+  y cómo sumar un comando de desarrollador (`FUN-S-36`). Solo-desktop.
 - [[auditoria-y-relinkeado]] — adoptar un vault que viene de otro proyecto: descubrir cómo
   se referencian sus documentos y convertir esas referencias en `[[wikilinks]]` (`FUN-M-17`).
 - [[canvas]] — notas y textos en un lienzo infinito, con `[[enlaces]]` que funcionan
@@ -166,6 +173,9 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
 - [[Auditoria de codigo 2026-09-26]] — la auditoría a tres bandas (complejidad, eficiencia,
   código muerto): qué se creía y no era, `DEF-110` a `DEF-113`, y el plan en tandas con las
   decisiones pendientes.
+- [[Auditoria e2e 2026-10-07]] — Mycelium usado a fondo como pruebas de extremo a extremo:
+  40 hallazgos, `DEF-134` a `DEF-150` (`DEF-134` corrompe enlaces al renombrar) y el bloque R
+  del [[BACKLOG]].
 - [[Como construye Obsidian su grafo]] — el modelo de referencia: por qué Obsidian no
   «construye» el grafo, y qué de eso conviene copiar en Mycelium y en qué orden.
 - [[Rendimiento del grafo]] — análisis del costo por frame, propuestas de optimización y el segundo análisis para vaults de más de 1.000 notas (`DEF-109`).
@@ -188,10 +198,13 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
   enlaces en pestaña nueva. Sin publicar.
 - [[Version 2.0.0 de web]] — el rediseño de la interfaz, **reflejado a web** el
   2026-09-22. **Numeración propia**: coincidir con la 2.0.0 de escritorio es casualidad.
-- [[Version 2.4.0]] — **release en preparación de desktop** (2026-10-06): los archivos del
+- [[Version 2.5.0]] — **release actual de desktop**, consolidada el 2026-10-09 y pendiente de
+  publicar: la ayuda integrada (F1), la atmósfera Aurora, Geist Sans 14px por defecto, enlaces
+  a encabezados y cinco arreglos de búsqueda.
+- [[Version 2.4.0]] — la anterior de desktop, publicada el 2026-10-06: los archivos del
   vault al instante, soltar y operar cualquier archivo, imágenes en las notas y estados de
   tarea; primera compilada por CI para Windows, macOS y Linux.
-- [[Version 2.3.0]] — **release publicada de desktop**, 2026-10-03: la IA trabaja
+- [[Version 2.3.0]] — la anterior de desktop, publicada el 2026-10-03: la IA trabaja
   con Mycelium —el MCP de control y las skills por herramienta—, más la recarga y el
   encuadre de dibujos, la papelera con selección múltiple y los arreglos hasta `DEF-124`.
 - [[Version 2.2.0]] — la anterior de desktop, publicada el 2026-09-28: el

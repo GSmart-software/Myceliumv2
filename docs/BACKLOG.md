@@ -89,6 +89,12 @@ una fila se implementa, **se mueve** a la §4 (ver «Cómo leerlo»).
 | `FUN-S-18` | `EMBED-SIN-EXTENSION` | Que un embed **resuelva por título**, como ya hacen los `[[enlaces]]`: hoy `![[Mi diagrama]]` queda escrito tal cual y hay que poner `![[Mi diagrama.excalidraw]]` o `![[Mi diagrama.drawio]]`. El reconocedor exige la extensión porque **decide por ella** qué dibuja; resolver primero el destino y mirar después su tipo es lo que falta. Salió de probar `FUN-L-20` el 2026-09-23: el usuario escribió la forma de Obsidian y no pasó nada | ambas | — |
 | `FUN-S-19` | `EMBED-CANVAS` | Que `![[lienzo.canvas]]` **muestre el lienzo** dentro de la nota, como ya hace `![[dibujo.excalidraw]]`. Hoy no dibuja nada: los embeds de canvas **nunca se implementaron** —la spec de `FUN-L-18` no los prometía— y el texto queda escrito tal cual. Se descubrió el 2026-09-23, probando `FUN-L-20`, al comparar los tres tipos: el de Excalidraw anda y los otros dos no. **Hoy solo falta el canvas**: el embed de draw.io se resolvió en `516306d` (2026-09-23) | ambas | — |
 | `FUN-S-23` | `REINDEXAR-VAULT` | Un botón en Configuración → Vault para **reconstruir el índice** desde cero, con aviso. Hoy la única vía es encontrar `index-<hash>.db` en el app-data y apartarlo a mano, que no es descubrible. Estaba bloqueado por `DEF-107`, **ya resuelto**: los snippets, la apariencia y la papelera viven en `.mycelium/` y vuelven solos. Falta una pieza: al salir de un vault la app **no cierra el índice**, así que el botón tiene que cerrarlo antes de borrarlo. Salió del incidente de `DEF-105` el 2026-09-25 | desktop | — |
+| `FUN-S-29` | `EMBED-BASE` | Embeber una vista `.base` en una nota (`![[tabla.base#Vista]]`), para que una nota índice muestre la tabla derivada en vez de una copia a mano. Propuesta 4 de [[ia-vaults-intensivos]] | desktop | — |
+| `FUN-S-31` | `ENLACE-ROTO-CREA` | Que el clic en un `[[enlace]]` a una nota que **no existe** la cree (en la carpeta por defecto) y la abra, como Obsidian. Hoy no hace nada, y la ayuda lo dice así («no lleva a ningún lado»): al cambiarlo, se actualiza la página «Enlaces». Salió de la [[Auditoria e2e 2026-10-07]] (`H4`) | ambas | — |
+| `FUN-S-32` | `MENU-NOTA-COMPLETO` | Completar el menú contextual de una nota en el explorador: **Mover a…** (elegir carpeta, reparando enlaces), **Abrir al lado** (en un pane nuevo) y **Copiar enlace** (`[[Título]]` al portapapeles). Salió de la [[Auditoria e2e 2026-10-07]] (`H11`) | ambas | — |
+| `FUN-S-33` | `EDITOR-RESALTADO` | Dibujar `==resaltado==` (sintaxis de Obsidian) en vivo, en lectura y al exportar. Hoy queda el texto con los `==`. Suma una clase `mic-*` a la plantilla de snippets. Salió de la [[Auditoria e2e 2026-10-07]] (`H31`) | ambas | — |
+| `FUN-S-34` | `NAV-ATRAS-ENTRE-PESTANAS` | Que **Atrás** vuelva a la nota de origen cuando un enlace se abrió en una pestaña nueva: hoy la pestaña nueva nace sin historial y el botón queda deshabilitado. Salió de la [[Auditoria e2e 2026-10-07]] (`H1`) | ambas | — |
+| `FUN-S-35` | `PANE-DIVIDIR-DUPLICA` | Que «Dividir a la derecha/abajo» **muestre la misma nota en los dos lados** (como Obsidian), en lugar de mover la pestaña al pane nuevo. Salió de la [[Auditoria e2e 2026-10-07]] (`H37`) | ambas | — |
 
 ### 1.2 Intermedias — tamaño M
 
@@ -99,9 +105,16 @@ una fila se implementa, **se mueve** a la §4 (ver «Cómo leerlo»).
 | `FUN-M-15` | `LINKS-POR-ALIAS` | Resolver `[[enlaces]]` por la propiedad `aliases` de la nota destino: hoy se parsea e indexa pero **no tiene comportamiento**. Toca la resolución de wikilinks, el autocompletado y el grafo. Continuación de `FUN-M-04` | ambas | — |
 | `FUN-M-18` | `EDITOR-REINDENTAR` | Reindentar las notas al ancho de tabulación configurado, para que el cambio se vea también en la vista en vivo y no solo al leer. Es una **edición masiva del vault**: reutiliza el respaldo, el manifiesto y el deshacer de `FUN-M-17`. Continuación de `FUN-S-02` | ambas | — |
 | `FUN-M-23` | `MERMAID-VISOR` | Visor propio para los diagramas Mermaid en la vista de lectura: al hacer clic se abre una ventana interna donde el diagrama se maneja como una imagen —**zoom** y **desplazamiento**—, porque hoy uno grande no se puede leer. **Segunda fase, si la primera sale bien**: sobre esa ventana, un **dibujo efímero** con unos pocos colores (se borra al cerrar, no se guarda nada) y un **puntero láser** para señalar sin dibujar. Pensado para explicar un diagrama a alguien | ambas | — |
+| `FUN-M-43` | `MERMAID-EN-VIVO` | Dibujar los diagramas **Mermaid en la vista en vivo**, como ya se ven en lectura, dividido, el PDF y la ayuda; hoy en vivo el bloque queda como código | ambas | — |
 | `FUN-M-22` | `EXPORT-FEEDBACK-DESCARGA` | Avisar de la exportación: una tarjeta abajo a la derecha que indica que se está descargando, permanece 10-15 s al terminar —con cierre manual— y ofrece **abrir la carpeta** donde quedó el archivo. Hoy exportar no da ninguna señal | ambas (difiere) | — |
 | `FUN-M-37` | `EMBED-NOTA` | **Embeber una nota dentro de otra** (transclusión), como en Obsidian: `![[nota]]` muestra su contenido en el lugar. Hoy esa sintaxis **cuenta como enlace en el grafo pero no dibuja nada**, así que el usuario que la escribe no ve ni un error. Es `M` porque renderizar markdown dentro de markdown trae lo suyo: ciclos (A embebe B que embebe A), profundidad, qué pasa con el frontmatter de la nota embebida y si se puede editar ahí o solo leer. Misma tanda que `FUN-S-18`, de probar `FUN-L-20` | ambas | — |
-| `FUN-M-41` | `UX-AJUSTES-MENOS-TEXTO` | Aligerar la ventana de **Configuración**: hoy cada ajuste lleva mucho texto explicativo y la pantalla se siente cargada. Que se lea de un vistazo sin perder lo que explica —las explicaciones pasan a segundo plano— | ambas | — |
+| `FUN-M-44` | `VAULT-VERIFICADORES` | Los chequeos de salud y de esquemas, marcados como diagnósticos en el editor **al guardar**, y una tool `mycelium_diagnosticos` para que el agente lea lo marcado. **Sin** ejecutar comandos guardados en el vault (riesgo de seguridad). Propuesta 3 de [[ia-vaults-intensivos]] | desktop | — |
+| `FUN-M-45` | `MCP-CONSULTAR-INDICE` | Tools MCP para consultar el índice: `mycelium_buscar` (solo notas indexadas), `mycelium_enlaces` (salientes y backlinks) y `mycelium_base` (las filas de una vista `.base`). Propuesta 4 de [[ia-vaults-intensivos]] | desktop | — |
+| `FUN-M-46` | `PROPIEDADES-ESQUEMAS` | Esquemas de propiedades por carpeta o por `tipo` (claves obligatorias, tipos, valores permitidos), con avisos en el editor y aviso específico para un valor que empieza con `#` sin comillas. Propuesta 5 de [[ia-vaults-intensivos]] | desktop | — |
+| `FUN-M-47` | `RENOMBRE-ALIAS` | Al renombrar, conservar el nombre anterior como alias; y al ver un borrado + creación casi idéntica en disco, ofrecer reparar los enlaces. Depende de `FUN-M-15`. Propuesta 7 de [[ia-vaults-intensivos]] | desktop | — |
+| `FUN-M-48` | `PALETA-COMANDOS` | Ampliar la paleta de comandos (`>`): hoy tiene unos 12. Faltan, entre otros, cerrar pestaña, dividir panel, exportar, renombrar/mover/borrar la nota actual, nueva tabla/lienzo/dibujo/diagrama, insertar Espora, abrir la papelera, revelar en el explorador y cambiar de vista (vivo/lectura/fuente). Cada comando con su atajo si lo tiene. Salió de la [[Auditoria e2e 2026-10-07]] (`H5`) | ambas | — |
+| `FUN-M-49` | `EXPLORADOR-MULTISELECCION` | Selección múltiple en el explorador (Ctrl+clic, Shift+clic) para mover, borrar o exportar varios a la vez, y teclas **Supr** (a la papelera) y **F2** (renombrar) sobre lo seleccionado. Hoy limpiar ocho notas son ocho menús contextuales. La papelera ya tiene selección (`FUN-S-04`). Salió de la [[Auditoria e2e 2026-10-07]] (`H10`) | ambas | — |
+| `FUN-M-50` | `BUSQUEDA-OPERADORES` | Operadores en la búsqueda global: exclusión (`-término`), `OR` y comparaciones en propiedades (`kilos:>2`, `fecha:<2026-10-01`). Hoy solo hay AND implícito, frase exacta, `tag:` y `clave:valor`. Va después de `DEF-144`/`DEF-145`, que arreglan `clave:valor`. Salió de la [[Auditoria e2e 2026-10-07]] (`H18`) | ambas | — |
 
 ### 1.3 Grandes — tamaño L
 
@@ -113,7 +126,8 @@ una fila se implementa, **se mueve** a la §4 (ver «Cómo leerlo»).
 | `FUN-L-10` | `VAULT-INDEX-EN-RUST` | Mover el indexado entero a Rust: el walker lee y escribe el índice en el mismo proceso, en **una** transacción, sin pasar contenido por IPC. Resuelve de raíz lo que `FUN-M-12` mitigó desde el frontend (incluido el `BEGIN`/`COMMIT` que el pool de `tauri-plugin-sql` impide). Continuación de `FUN-M-12` | desktop | — |
 | `FUN-L-13` | `UI-IDIOMAS` | La interfaz en varios idiomas (español, inglés, italiano) y preparada para agregar más. Hoy todos los textos están escritos en español dentro de los componentes | ambas | — |
 | `FUN-L-21` | `DIAGNOSTICO-FALLOS` | Que **ningún fallo pase en silencio**: todo lo que sale mal, en el frontend o en Rust, deja una línea en la consola de F12 con el área, la operación y el error original. Para depurar y para usuarios experimentados. No es sembrar `console.error`: es una **fachada única** (`lib/fallos.ts`) con **tres niveles** —fallo, degradado, esperado—, destinos intercambiables, redes globales para lo que escapa de todo `catch`, `tauri-plugin-log` hacia la webview también en release, y un **chequeo automático** que impide volver a escribir un `catch {}` vacío. Medido el 2026-09-25: de 100 `catch`, **6** registran algo; 24 están vacíos y 40 siguen de largo en silencio. Pedido por el usuario el 2026-09-25. Spec en [[registro-de-fallos]] | ambas (difiere) | — |
-| `FUN-L-27` | `AYUDA-INTEGRADA` | Una **ayuda** dentro de Configuración, tipo wiki, con todo lo que Mycelium ofrece: cada herramienta y los estilos especiales del markdown propios de Mycelium (p. ej. los `_` que estilan distinto que `*`). Spec en [[ayuda-integrada]] | ambas | — |
+| `FUN-L-30` | `VAULT-SALUD` | Salud del grafo con el criterio del índice: tool `mycelium_salud` (rotos, huérfanas, títulos duplicados, embeds rotos), `mycelium_validar_nota` y un panel en la app. Propuesta 2 de [[ia-vaults-intensivos]] | desktop | — |
+| `FUN-L-31` | `MCP-SESIONES` | Coordinación entre sesiones de IA: registro de sesiones activas, reservas con vencimiento (aviso, no bloqueo) en `mycelium_reservar`, y actividad agrupada por sesión. Investigar antes de especificar. Propuesta 6 de [[ia-vaults-intensivos]] | desktop | — |
 | `FUN-L-28` | `INSTALADORES-MAC-LINUX` | Instaladores de **macOS (Apple Silicon)** y **Linux (x64)**, que eran parte de la propuesta y nunca se compilaron. Los genera **GitHub Actions al fusionar un PR hacia la rama `despliegues`**. CI compila **sin** la clave del updater: firma y publica `npm run publicar -- --ci <carpeta>` en la PC del usuario, que agrega `darwin-aarch64` y `linux-x86_64` a `latest.json`. Firma de Apple ad-hoc. Decidido por el usuario el 2026-10-05. Spec en [[instaladores-mac-linux]] | desktop | — |
 
 ### 1.4 Muy grandes — tamaño XL
@@ -168,6 +182,7 @@ reutilizan**.
 |---|---|---|---|---|
 | `FUN-L-23` ⛔ | `GRAPH-DISPOSICIONES` | **Retirada el 2026-09-27** (`d972c4d`) por decisión del usuario tras probarla en la app: «no me está gustando para nada el resultado; las disposiciones las vamos a quitar, solamente nos vamos a quedar con cúmulo». Se retira del código (queda solo el cúmulo) y la spec [[grafo-disposiciones]] se conserva como registro. Lo que sigue en esta fila es lo que fue: Tres **disposiciones** más para el grafo global, elegibles **por vault** desde el menú del grafo, además del cúmulo de fuerzas actual: **Anillo de colonias** (las notas en un anillo agrupadas por carpeta, los enlaces curvados por el borde o por el centro según crucen o no), **Crecimiento** (cada nota brota junto a las que ya enlazaba, en orden de creación; sin física y estable al agregar notas) y **Sustrato** (la simulación del cúmulo dibujada como micelio: hifas ahusadas, esporas, cuerpos fructíferos en los hubs y un halo en las zonas densas). Salen de la exploración de [[Representaciones de micelio para el grafo]] sobre tres vaults; el «Rizoma radial» se descartó porque presupone una nota raíz. Las tres nuevas se dibujan a una capa estática (sin redibujo en reposo). Decidido por el usuario el 2026-09-26. Spec en [[grafo-disposiciones]] | ambas | — |
 | `FUN-M-36` ⛔ | `THEME-PERSONALIZADO` | **Descartada el 2026-09-23** por decisión del usuario, el mismo día que registró la idea (`cbd574b`): demasiada personalización puede arruinar el producto, y quien quiera tocar colores ya tiene los snippets de CSS. Los estilos nuevos se siguen agregando, pero hechos y medidos acá, como las cuatro atmósferas. El criterio: **lo que Mycelium ofrece, Mycelium lo garantiza**. La spec se convirtió en la decisión [[Los temas los define Mycelium, no el usuario]], que conserva lo aprendido. Lo que fue: que el usuario **cree sus propios temas** —un nombre y los colores de identidad, principal y secundario, con el resto de la paleta **derivada por fórmula**, como ya hacen las [[atmosferas]]—, en Apariencia bajo «Temas personalizados». Era `M` porque el tema es una **unión cerrada de dos literales** repetida en siete sitios —incluido el CSS del PDF— y pasaba a ser un dato; el riesgo era el **contraste** (los temas actuales están medidos ≥4,5:1 en los 16 combos) | ambas | — |
+| `FUN-M-53` ⛔ | `TEMA-BIOEXP` | **Retirada el 2026-10-09** por decisión del usuario, el mismo día que se implementó: ya no lo quiere. Se quitó del código entero (tema, hoja `bioexp.css`, fuente Space Grotesk, reglas de los módulos, muestra y alias del buscador); un vault que lo tenía guardado abre con el tema por defecto. Su estilo de detalles pasó a la atmósfera pública [[atmosfera-aurora]] (`FUN-M-54`). Era solo del modo dev y nunca salió en un release; `secreto-dev.mjs` lo sigue atrapando para que un changelog no lo nombre. La spec [[tema-bioexp]] se conserva como registro. Lo que fue: un quinto tema, **Bioluminiscencia experimental** (muestra «Biolum. exp.»): los colores de Bioluminiscencia —verde agua `#3DFFC4` y cian `#19E6FF` sobre el azul-negro abisal— con la forma y la presencia de marca de Arrecife y GSmart, para ver cómo queda. **Solo con el modo desarrollador**; apagarlo no saca el tema; sin atmósferas. Pedido por el usuario el 2026-10-09. **Implementada en desktop el 2026-10-09** (rama `feat/tema-bioexp-desktop`), **sin confirmar en la app**: `data-theme="bioexp"`, degradado de tres tonos (verde agua → cian → azul abisal `#3D8BFF`) con texto oscuro, resplandores en oscuro (títulos, isotipo, rail, botones), marco claro y acentos derivados en claro, Space Grotesk en títulos y etiquetas, y el gemelo de cada regla de Arrecife y GSmart en los módulos. Spec en [[tema-bioexp]] | desktop | — |
 
 ---
 
@@ -191,6 +206,8 @@ mientras estaba pendiente; el detalle de lo construido está en la spec de cada 
 | `FUN-S-25` 🛠️ | `MYCIGNORE-EN-PESTANA` | Editar el `.mycignore` en una **pestaña** de Mycelium, con el visor y editor de archivos que no son notas (`FUN-L-11`), en vez del cuadro de texto chico dentro de Configuración. **Implementada el 2026-10-06**, sin confirmar en la app | desktop | — |
 | `FUN-S-27` 🛠️ | `MENU-CUALQUIER-ARCHIVO` | Clic derecho (y tecla Menú) en **cualquier archivo** del explorador, no solo en los tipos que Mycelium maneja (notas, `.base`, `.excalidraw`, `.canvas`, `.drawio`): abrir, abrir con la aplicación predeterminada, renombrar (sin tocar la extensión), duplicar, guardar una copia, mostrar en el explorador y eliminar. **Implementada en desktop el 2026-10-06**, sin confirmar en la app. Solo desktop: web no lista archivos que no son notas | desktop | — |
 | `FUN-S-28` 🛠️ | `MENUS-CON-ICONOS` | Un **ícono por entrada** en los menús del explorador (carpeta, nota, archivo, submenú de Esporas), con los mismos íconos de tipo del árbol y separadores por grupo (crear · traer · organizar · eliminar). **Implementada en desktop el 2026-10-06**, sin confirmar en la app | ambas | — |
+| `FUN-S-30` 🛠️ | `MYCIGNORE-NEGACIONES` | Negaciones `!` en `.mycignore`, como en gitignore, para poder ver e indexar p. ej. `.claude/*.md` (las normas del vault) y enlazarlas. Hoy la sintaxis no las admite. Propuesta 8 de [[ia-vaults-intensivos]]. **Implementada en desktop el 2026-10-06** (rama `feat/mycignore-negaciones-desktop`), **sin confirmar en la app**: semántica de git —gana la última regla que coincide y lo de adentro de una carpeta ignorada no vuelve si no vuelve la carpeta—, `\!` literal, `/` inicial que ancla y `**`. Para ver `.claude/` alcanza con `!.claude/` debajo de `.*/`. `.mycelium/` sigue ignorado siempre. Spec en [[mycignore]] § Negaciones | desktop | — |
+| `FUN-S-36` 🛠️ | `MODO-DEV` | Comando oculto **`>dev`** en la paleta: escribirlo exacto y Enter activa o apaga el **modo desarrollador**, que no aparece en ninguna lista, búsqueda ni ayuda. **Reemplaza al modo avanzado** de `FUN-M-16` (los siete clics en la versión desaparecen): con dev activo se ven las opciones del actualizador («Versiones publicadas», «Servidor de actualizaciones») y un grupo de **comandos de desarrollador** en la paleta. Las herramientas de desarrollador (F12) siguen abiertas a todos. Pedida por el usuario el 2026-10-08. **Implementada en desktop el 2026-10-08**, sin confirmar en la app (rama `feat/modo-dev-desktop`): el número de versión vuelve a ser texto, con «· dev» al lado mientras el modo esté encendido; el estado guardado del modo avanzado se conserva. Spec en [[modo-dev]] | desktop | — |
 | `FUN-S-02` 🟢🌐 | `EDITOR-TAB-WIDTH` | Cuánto sangra un nivel de indentación: **al leer** cambia listas y tabuladores de todos los documentos al instante (CSS), **al escribir** es lo que inserta <kbd>Tab</kbd>. Valor libre 1–16, por defecto 4. **Confirmada en desktop** el 2026-08-03 tras rehacerla por `DEF-049`/`DEF-050`, y **reflejada en web** el 2026-08-08. Continuación: `FUN-M-18` (reindentar), para que el cambio se vea también en la vista en vivo | ambas | C-M-10 |
 | `FUN-S-03` 🟢🌐 | `EXPLORER-EXTENSIONES` | Mostrar la extensión de **todos** los archivos —el enunciado original decía «no-markdown», pero dejar sin extensión justo al tipo más común la hace parecer una omisión en vez de la norma—, **y listar los que Mycelium no indexa** (PDF, imágenes, código, texto): hasta ahora ni aparecían, así que el vault se veía más vacío de lo que está. **Implementado en desktop** el 2026-08-18 (sin confirmar). Se listan aparte de `store.notas` a propósito: meterlos ahí los metería en el autocompletado de `[[`, en la búsqueda y en el grafo. La extensión va **pegada al nombre** (`nota.md`), no en un elemento aparte: se lee como un solo texto. **Abrirlos ya es posible** desde `FUN-L-11` (2026-08-22): el clic abre el visor. **Confirmado en la app** el 2026-09-03 y **reflejado a web** el mismo día (`ec7d01e`), a medias por naturaleza: la extensión sí, listar lo no indexado no (en web no hay carpeta que recorrer) | ambas | C-M-12 |
 | `FUN-S-09` 🟢 | `CODE-RESALTADO-SINTAXIS` | Colorear los archivos de código al visualizarlos según su lenguaje (palabras reservadas, tipos, cadenas). **Depende de `FUN-L-11`**: sin visor de código no hay nada que colorear — y como ese visor es **solo-desktop**, esta también lo es (figuraba como «ambas», corregido el 2026-09-04). **Implementado y confirmado en la app** el 2026-09-05. Lo hace **CodeMirror**, no `highlight.js`: el lector pasó de dos `<pre>` a un editor de solo lectura, que dibuja solo las líneas visibles —así que el archivo grande le cuesta **menos**, que era justo el motivo por el que no se usaba— y de paso leer y editar dejan de poder verse distinto. El lenguaje sale del **nombre** del archivo y la gramática se carga bajo demanda, así que el bundle no crece por soportar cuarenta lenguajes. Spec en [[otros-tipos-de-archivo]] § 8 | desktop | — |
@@ -208,6 +225,10 @@ mientras estaba pendiente; el detalle de lo construido está en la spec de cada 
 
 | ID | Nombre | Descripción | Aplica | Orig. |
 |---|---|---|---|---|
+| `FUN-M-54` 🛠️ | `ATMOSFERA-AURORA` | Una quinta atmósfera, **Aurora**, pública: los detalles gráficos de los temas experimentales —degradados, brillos, resplandores— **con los colores del tema puesto** (`--mic-glow` → `--mic-accent`): del verde agua al cian con Bioluminiscencia, del dorado al ámbar con Cantarela. Se elige para el modo oscuro y para el claro. No cambia la letra ni los fondos (usa los de Abisal). Pedido por el usuario el 2026-10-09. **Implementada en desktop el 2026-10-09** (rama `feat/atmosfera-aurora-desktop`), **sin confirmar en la app**; **web pendiente**, se refleja después con [[Reflejar cambios de desktop a web]]. Spec en [[atmosfera-aurora]] | ambas | — |
+| `FUN-M-52` 🛠️ | `TEMA-GSMART` | Un cuarto tema, **GSmart**, con la marca personal del usuario (degradado azul profundo → cian, grises fríos, Manrope y Michroma), con la misma presencia de marca que Arrecife. **Solo con el modo desarrollador**; apagarlo no saca el tema; sin atmósferas. Pedido por el usuario el 2026-10-08. **Implementada en desktop el 2026-10-09** (rama `feat/tema-gsmart-desktop`), **sin confirmar en la app**: `data-theme="gsmart"` con la paleta de la marca sobre los `--mic-*` (el aguamarina como segundo tono, derivado en claro), la forma y las letras en `styles/gsmart.css` y en los módulos —el degradado en cada lugar donde Arrecife lleva el suyo—, Manrope y Michroma empaquetadas con `next/font/google` (sin red) y `TEMAS_DE_MARCA` en `lib/temas.ts` para lo que comparten los dos temas de marca. Spec en [[tema-gsmart]] | desktop | — |
+| `FUN-M-51` 🛠️ | `TEMA-ARRECIFE` | Un tercer tema, **Arrecife**, con el branding de otro proyecto del usuario (paleta oscura y clara, gradiente cian→violeta, radios, bordes de 1.5px, Geist en la UI). **Solo con el modo desarrollador**: la muestra aparece solo con `>dev`, y apagarlo no saca el tema. Las atmósferas no aplican (su selector queda deshabilitado). Pedido por el usuario el 2026-10-08. **Implementada en desktop el 2026-10-08** (rama `feat/tema-arrecife-desktop`), **sin confirmar en la app**: `data-theme="arrecife"` con los roles de la marca mapeados a los `--mic-*` (cian y violeta derivados donde el crudo no llega a 4.5:1), la forma en `styles/arrecife.css` y en los módulos bajo `:root[data-theme='arrecife']`, sin `data-atmosfera` con ese tema, y `lib/temas.ts` con la lógica pura (tema válido, muestras según el modo dev, atmósfera sí/no). Spec en [[tema-arrecife]] | desktop | — |
+| `FUN-M-41` 🛠️ | `UX-AJUSTES-MENOS-TEXTO` | Aligerar la ventana de **Configuración**: cada ajuste con su nombre, su control y **una línea** visible; el resto de la explicación, plegado detrás de «Más». Los avisos de pérdida de datos siguen visibles. **Implementada en desktop el 2026-10-06**, sin confirmar en la app; web después | ambas | — |
 | `FUN-M-11` 🛠️ | `VAULT-MYCIGNORE` | `.mycignore` por vault (estilo `.gitignore`) para decidir qué archivos/carpetas ignora Mycelium; por defecto `.*/` + carpetas de build. **Implementado en desktop** (sin confirmar); parte **web** pendiente (otra semántica). Spec en `docs/features/mycignore.md` | ambas | — |
 | `FUN-M-12` 🛠️ | `VAULT-INDEX-PERF` | Rendimiento de la apertura del vault: default de `.mycignore` con `node_modules/`/`target/`/`dist/`/`out/`, metadatos sin contenido + `leer_archivos` en tandas, carpetas incrementales, WAL y progreso visible. **Implementado en desktop** (sin confirmar); spec en `docs/features/rendimiento-apertura-vault.md`. Salió en [[Version 1.1.1]] | desktop | — |
 | `FUN-M-14` 🛠️ | `VAULT-WATCH-REINDEX-DIRIGIDO` | El watcher emite `vault-cambios` **con las rutas afectadas** y `lib/vaultWatch.ts` las descartaba: reindexaba el vault entero ante cualquier cambio. Usar esas rutas para reindexar solo lo tocado. Continuación de `FUN-M-12`. Primera parte en `FUN-M-38` (`d3c94be`): las escrituras propias de la app ya no reindexan. **Completada con `FUN-M-42` el 2026-10-04** (rama `feat/arbol-en-vivo-desktop`), **sin confirmar en la app**: `indexarRutas` indexa solo las rutas del evento —notas nuevas, tocadas o incompletas; borra lo ausente y lo que colgaba de una carpeta ida, salvo la papelera— y el esquema del índice se crea una vez por sesión. Vault sintético de 2.000 notas, dos notas tocadas: 26,8 → 9,6 ms sin IPC, sin los 170 KB del recorrido. El indexado completo queda para la apertura, la importación, «Reindexar» y la reconciliación. Spec en [[archivos-del-vault-en-vivo]] § Implementación de B | desktop | — |
@@ -241,6 +262,8 @@ mientras estaba pendiente; el detalle de lo construido está en la spec de cada 
 
 | ID | Nombre | Descripción | Aplica | Orig. |
 |---|---|---|---|---|
+| `FUN-L-29` 🛠️ | `IA-INSTRUCCIONES-POR-CAPAS` | Instrucciones de IA en un **bloque gestionado** dentro de `CLAUDE.md` (sin archivos de conflicto), archivos de Mycelium con prefijo propio y un **núcleo de ~2 KB** con el resto en skills (~4.000 tokens menos por sesión). Framework 2.0.0. Propuesta 1 de [[ia-vaults-intensivos]]. **Implementada en desktop el 2026-10-06** (rama `feat/ia-instrucciones-por-capas-desktop`), sin confirmar en la app: el bloque `<!-- mycelium:inicio vX -->` … `<!-- mycelium:fin -->` (2,2 KB, era ~20 KB), la skill nueva `mycelium-operar`, los comandos en `.claude/commands/mycelium/` y la migración desde la 1.x. Spec en [[ia-framework-vault]] | desktop | — |
+| `FUN-L-27` 🛠️ | `AYUDA-INTEGRADA` | Una **ayuda** tipo wiki, en su propia ventana (F1, la paleta o Configuración): 33 páginas en 8 temas, con buscador y ejemplos dibujados con el motor real. **Implementada en desktop el 2026-10-06** (partes A y B), sin confirmar en la app; web después. Spec en [[ayuda-integrada]] | ambas | — |
 | `FUN-L-03` 🛠️ | `FILES-BASES-TABLA` | Archivo `.base` (formato de Obsidian) que agrega notas por sus propiedades y las muestra en una tabla, con filtros y columnas configurables. Solo lectura. **Implementado en las dos ramas** el 2026-08-08 (sin confirmar); sale en la [[Version 1.6.0]]; spec en [[bases-tabla]] | ambas | C-I-07b |
 | `FUN-L-08` 🛠️ | `IA-FRAMEWORK-VAULT` | Framework IA versionado generado en el vault (CLAUDE.md + **8 skills** —desde la `1.7.0` del framework, con `FUN-L-26`— + 6 comandos en `.claude/`) para que Claude Code use el vault como **memoria**: recuperar antes de responder y consolidar lo que valga recordar, navegando por vínculos. Botón opt‑in en Configuración → Vault. **Implementada** (sin confirmar explícitamente). El framework salió en [[Version 1.1.0]]; spec en `docs/features/ia-framework-vault.md` | desktop | — |
 | `FUN-L-09` 🛠️ | `IA-MCP-MYCELIUM` | Servidor MCP de **control** de Mycelium: la IA muestra cosas en pantalla, modifica el calendario y el diccionario del vault, renombra y mueve sin romper enlaces y usa la papelera. La mitad de búsqueda se evaluó y **no entra** ([[mcp-control]]). **Las cuatro partes integradas en `desktop-tauri`** el 2026-10-03 (merge `bb35fa9`), pendientes de confirmación del usuario en la app; sin publicar | desktop | — |
@@ -537,6 +560,34 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 - **Web**: `ContextMenu.*` se trae entero; en `ExplorerPanel.tsx` (divergente) van a mano
   los `icono:` y `separadorAntes:` de los menús de carpeta y de nota.
 
+#### `FUN-S-29` · `EMBED-BASE` (—)
+- Embeber una vista `.base` en una nota. Detalle en [[ia-vaults-intensivos]] § 4. Va con los
+  otros embeds pendientes (`FUN-S-19`, `FUN-M-37`).
+
+#### `FUN-S-30` · `MYCIGNORE-NEGACIONES` (—)
+- Negaciones `!` en `.mycignore`. Detalle y cuidados (orden de evaluación, carpeta ignorada que
+  no se recorre) en [[ia-vaults-intensivos]] § 8. Lo construido, en [[mycignore]] § Negaciones.
+
+#### `FUN-S-31` · `ENLACE-ROTO-CREA` (—)
+- Detalle y cómo se reprodujo en [[Auditoria e2e 2026-10-07]].
+
+#### `FUN-S-32` · `MENU-NOTA-COMPLETO` (—)
+- Detalle y cómo se reprodujo en [[Auditoria e2e 2026-10-07]].
+
+#### `FUN-S-33` · `EDITOR-RESALTADO` (—)
+- Detalle y cómo se reprodujo en [[Auditoria e2e 2026-10-07]].
+
+#### `FUN-S-34` · `NAV-ATRAS-ENTRE-PESTANAS` (—)
+- Detalle y cómo se reprodujo en [[Auditoria e2e 2026-10-07]].
+
+#### `FUN-S-35` · `PANE-DIVIDIR-DUPLICA` (—)
+- Detalle y cómo se reprodujo en [[Auditoria e2e 2026-10-07]].
+
+#### `FUN-S-36` · `MODO-DEV` (—)
+- Spec en [[modo-dev]]. Decisiones del usuario (2026-10-08): `>dev` reemplaza a los siete clics del modo avanzado; detrás quedan las opciones del actualizador y los comandos de desarrollador; F12 sigue para todos.
+- 🛠️ Implementada en desktop el 2026-10-08, sin confirmar en la app.
+- Regla del usuario (2026-10-08): nada del modo ni de lo que habilita sale en el changelog ni en la ayuda; `npm run publicar` lo rechaza. Ver [[Lo del modo dev no se anuncia]].
+
 ### Tamaño M
 
 #### `FUN-M-01` · `TRASH-PREVIEW` (C-M-13)
@@ -749,7 +800,20 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   muestra el frontmatter de la embebida, si se puede embeber un trozo (`![[nota#título]]`) y
   si desde el embed se edita o solo se lee.
 
-#### `FUN-M-41` · `UX-AJUSTES-MENOS-TEXTO`
+#### `FUN-M-43` · `MERMAID-EN-VIVO` (—)
+- **Qué es**: en la vista en vivo, un bloque ```` ```mermaid ```` se dibuja como diagrama
+  cuando el cursor no está adentro, igual que las tablas o las fórmulas en bloque; con el
+  cursor adentro vuelve a ser texto para editarlo.
+- **De dónde sale**: lo encontró la parte B de la ayuda integrada (`FUN-L-27`, 2026-10-06)
+  al verificar contra el código; la página «Fórmulas y diagramas» avisa que en vivo no se
+  dibuja. Registrada como pendiente por el usuario el mismo día.
+- **A tener en cuenta**: Mermaid renderiza asíncrono y su alto no se conoce hasta dibujarlo,
+  así que el widget tiene que medir después (`requestMeasure`, como las imágenes de
+  `DEF-126`) para no descolocar el cursor. Comparte motor con `FUN-M-23` (el visor con zoom
+  de lectura): conviene hacerlas juntas, y el clic en el diagrama en vivo puede abrir ese
+  visor.
+
+#### `FUN-M-41` · `UX-AJUSTES-MENOS-TEXTO` — 🛠️ desktop
 - **Qué es**: una pasada sobre la ventana de Configuración para que **se lea de un
   vistazo**: cada ajuste con su nombre y su control, y la explicación larga fuera de la
   vista principal (un «?» o un texto que aparece al pasar el puntero o al enfocar), salvo
@@ -760,6 +824,61 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   ordenaron los ajustes pero no recortaron el texto. Si `FUN-L-27` (ayuda integrada) entra
   antes, las explicaciones largas pueden enlazar a su página en vez de quedarse en el ajuste.
   Pedida por el usuario el 2026-10-03.
+- **Decisión** (usuario, 2026-10-06): **una línea + «Más»**, frente a solo un «?» con globo
+  (esconde todo y un globo con párrafos se lee mal) o recortar sin plegar (se pierde el
+  matiz). Primero desktop; web se refleja cuando se confirme en la app.
+- **Implementada el 2026-10-06** (sin confirmar en la app):
+  - Componente `components/settings/Explicacion.tsx`: la frase visible y un botón «Más»
+    de divulgación (`aria-expanded`, `aria-controls`) que abre el resto en el lugar, con un
+    filete a la izquierda. Cada explicación se abre por su cuenta. `Interruptor` suma la
+    prop `detalle` al lado de `ayuda`.
+  - Reescritas a una línea las explicaciones de Editor (ancho de tabulación, pestañas,
+    autocerrar, corrector, números de línea, título), Vault (último vault, Esporas,
+    referencias, exportar, importar, instrucciones de IA, control de la IA, `.mycignore`),
+    Terminal, Grafo, Actualizaciones (comprobación diaria y el modo avanzado), CSS y los
+    diccionarios del corrector. Nada se borró: lo que no entra en la línea está en «Más».
+  - Siguen siempre visibles los avisos (`.warn`) y los mensajes de estado cortos
+    («Cargando…», «Disponible solo con un vault en carpeta», la versión fijada).
+  - El buscador de la ventana no cambia: busca por rótulo y alias, no por el texto.
+
+#### `FUN-M-44` · `VAULT-VERIFICADORES` (—)
+- Diagnósticos al guardar con los chequeos incluidos, y `mycelium_diagnosticos`. Sin comandos
+  del vault. Detalle en [[ia-vaults-intensivos]] § 3.
+
+#### `FUN-M-45` · `MCP-CONSULTAR-INDICE` (—)
+- `mycelium_buscar`, `mycelium_enlaces` y `mycelium_base`. Detalle en [[ia-vaults-intensivos]] § 4.
+
+#### `FUN-M-46` · `PROPIEDADES-ESQUEMAS` (—)
+- Esquemas de propiedades y el aviso del `#` sin comillas. Detalle en [[ia-vaults-intensivos]] § 5.
+
+#### `FUN-M-47` · `RENOMBRE-ALIAS` (—)
+- Alias al renombrar y detección de renombres hechos por fuera; depende de `FUN-M-15`. Detalle
+  en [[ia-vaults-intensivos]] § 7.
+
+#### `FUN-M-48` · `PALETA-COMANDOS` (—)
+- Detalle y cómo se reprodujo en [[Auditoria e2e 2026-10-07]].
+
+#### `FUN-M-49` · `EXPLORADOR-MULTISELECCION` (—)
+- Detalle y cómo se reprodujo en [[Auditoria e2e 2026-10-07]].
+
+#### `FUN-M-50` · `BUSQUEDA-OPERADORES` (—)
+- Detalle y cómo se reprodujo en [[Auditoria e2e 2026-10-07]].
+
+#### `FUN-M-54` · `ATMOSFERA-AURORA` (—)
+- Spec en [[atmosfera-aurora]], ampliando [[atmosferas]]. Modelo: la forma de [[tema-bioexp]] (tema retirado el 2026-10-09), parametrizada con los colores del tema en vez de colores fijos. Pública: la ayuda (Configuración → Apariencia) y la plantilla de snippets la nombran.
+- 🛠️ Implementada en desktop el 2026-10-09, sin confirmar en la app. Web pendiente: se refleja con [[Reflejar cambios de desktop a web]] cuando el usuario la confirme.
+
+#### `FUN-M-53` ⛔ · `TEMA-BIOEXP` (—)
+- **Estado**: ⛔ **retirado el 2026-10-09** por decisión del usuario (rama `feat/quitar-bioexp-desktop`): se quitó del código entero y su estilo de detalles quedó en la atmósfera [[atmosfera-aurora]]. Un vault que lo tenía guardado cae al tema por defecto. El ID no se reutiliza.
+- Spec en [[tema-bioexp]], conservada como registro. Seguía las decisiones de Arrecife y GSmart ([[tema-arrecife]], [[tema-gsmart]]), con los colores de Bioluminiscencia.
+
+#### `FUN-M-52` · `TEMA-GSMART` (—)
+- Spec en [[tema-gsmart]]. Sigue las decisiones de Arrecife ([[tema-arrecife]]). Valores: skill `gsmart-marca`.
+- 🛠️ Implementada en desktop el 2026-10-09, sin confirmar en la app. La correspondencia de colores, las cifras de contraste y lo que no se llevó están en la spec.
+
+#### `FUN-M-51` · `TEMA-ARRECIFE` (—)
+- Spec en [[tema-arrecife]]. Decisiones del usuario (2026-10-08): colores y forma; apagar el modo dev no lo saca; las atmósferas no aplican y su selector queda atenuado, no oculto. Secreto como todo el modo dev ([[Lo del modo dev no se anuncia]]).
+- 🛠️ Implementada en desktop el 2026-10-08, sin confirmar en la app. La correspondencia de colores, las cifras de contraste y lo que no se llevó están en la spec.
 
 ### Tamaño L
 
@@ -1274,7 +1393,7 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
   instalador quedó en 40,3 MB, por encima de lo estimado, y el usuario lo aceptó.
 - Spec completa en [[drawio]].
 
-#### `FUN-L-27` · `AYUDA-INTEGRADA`
+#### `FUN-L-27` · `AYUDA-INTEGRADA` — 🛠️ desktop
 - **Qué es**: una sección de **ayuda** en Configuración, navegable como una wiki: una página
   por herramienta (notas, propiedades, Esporas, bases, lienzos, dibujos, draw.io,
   calendario, grafo, terminal, corrector, IA del vault…) y una referencia de la **sintaxis
@@ -1283,6 +1402,23 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 - **Objetivo**: que el usuario descubra lo que puede hacer sin salir de la app.
 - **Lo difícil**: que **no se desactualice** —lo que acaba de pasar con la plantilla de
   snippets (`DEF-123`)—. Spec en [[ayuda-integrada]]. Pedida por el usuario el 2026-10-03.
+- **Parte A hecha en desktop el 2026-10-06** (rama `feat/ayuda-integrada-desktop`, sin
+  confirmar en la app): la ventana (F1, comando «Ayuda» de la paleta, botón «Ayuda» en
+  Configuración), índice de temas y subtemas, buscador, render con el motor real y
+  ejemplos copiables, el circuito `frontend/ayuda/*.md` → `lib/ayuda/paginasGeneradas.ts`
+  y el test de cobertura. Tres páginas escritas; las demás del índice están como
+  «próximamente». **Sigue ⬜ hasta la parte B** (el resto de las páginas). Detalle en
+  [[ayuda-integrada]] § «Implementación de la parte A».
+
+#### `FUN-L-29` · `IA-INSTRUCCIONES-POR-CAPAS` (—)
+- Bloque gestionado en `CLAUDE.md`, prefijo propio y núcleo corto. Framework 2.0.0. Detalle en
+  [[ia-vaults-intensivos]] § 1; lo construido, en [[ia-framework-vault]].
+
+#### `FUN-L-30` · `VAULT-SALUD` (—)
+- Salud del grafo por MCP y en un panel. Detalle en [[ia-vaults-intensivos]] § 2.
+
+#### `FUN-L-31` · `MCP-SESIONES` (—)
+- Coordinación entre sesiones de IA; investigar primero. Detalle en [[ia-vaults-intensivos]] § 6.
 
 ### Tamaño XL
 
@@ -1682,12 +1818,28 @@ Objects no hay edición simultánea. `FUN-L-06` (historial de quién cambió qu�
 `FUN-S-07` (afinar presencia) son parte de la misma experiencia y carecen de sentido
 sueltas. Es rearquitectura → **major**.
 
+#### Q · Mycelium para vaults con agentes — `FUN-M-45` + `FUN-L-30` + `FUN-L-29` + `FUN-S-30` + `FUN-M-46` + `FUN-M-47` + `FUN-M-44` + `FUN-S-29` + `FUN-L-31` · minor · desktop
+Salen de un documento de propuestas escrito desde un vault de uso intensivo con agentes
+(2026-10-06): con muchos agentes escribiendo, la memoria se degrada sin que nadie lo note, y
+la salida es que Mycelium **exponga lo que su índice ya calcula** y **valide** lo que el agente
+escribe. Orden propuesto: primero exponer el índice (`FUN-M-45`, `FUN-L-30`), después el
+framework por capas (`FUN-L-29`), las negaciones de `.mycignore` (`FUN-S-30`), y el resto. La
+propuesta 9 (diagnóstico de `.mycignore`) se descartó por decisión del usuario. Ver
+[[ia-vaults-intensivos]].
+
 #### P · Configuración que se lee y que enseña — `FUN-M-41` + `FUN-S-25` + `FUN-L-27` + `DEF-123` · minor · ambas
 Todo pasa por la ventana de ajustes: menos texto en cada ajuste (`FUN-M-41`), el
 `.mycignore` fuera de ella, en su pestaña (`FUN-S-25`, solo desktop), una ayuda a la que esas
 explicaciones pueden remitir (`FUN-L-27`) y la plantilla de snippets puesta al día
 (`DEF-123`), que es el mismo problema que la ayuda tiene que evitar: documentación que
 envejece. Registradas el 2026-10-03.
+
+#### R · Lo que salió de usar Mycelium a fondo — `FUN-S-31` + `FUN-S-32` + `FUN-S-33` + `FUN-S-34` + `FUN-S-35` + `FUN-M-48` + `FUN-M-49` + `FUN-M-50` · minor · ambas
+Mejoras de la [[Auditoria e2e 2026-10-07]]: el uso intensivo del vault de demostración mostró
+que lo que más falta es **operar sin el mouse y en lote** (paleta, selección múltiple, menú
+completo) y **sintaxis de Obsidian** que un vault importado ya trae (`==resaltado==`). Los
+defectos de la misma auditoría (`DEF-134` a `DEF-150`) van antes y por su cuenta: son
+correcciones, no este bloque. Registradas el 2026-10-07.
 
 ### Van solas
 
@@ -1713,7 +1865,7 @@ dígito es el que sugiere la guía «Relación tamaño ↔ versión», no uno ac
 | `FUN-S-23` `REINDEXAR-VAULT` | **Sin agrupar**. Roza el bloque A (índice del vault), pero no comparte su código: es un botón en Configuración → Vault que cierra y borra el índice | minor |
 | `FUN-M-18` `EDITOR-REINDENTAR` | **Sin agrupar**. Es continuación de `FUN-S-02` y reutiliza el respaldo, el manifiesto y el deshacer de `FUN-M-17`, así que conviene hacerla **después** de completar esa | minor |
 | `FUN-M-22` `EXPORT-FEEDBACK-DESCARGA` | **Sin agrupar**. Solo toca la exportación | minor |
-| `FUN-M-23` `MERMAID-VISOR` | **Sin agrupar**. Solo toca la vista de lectura de los diagramas Mermaid | minor |
+| `FUN-M-23` `MERMAID-VISOR` + `FUN-M-43` `MERMAID-EN-VIVO` | **Sin agrupar** con el resto, pero juntas entre sí: las dos son el render de Mermaid —el visor con zoom en lectura y el dibujo en la vista en vivo— | minor |
 | `FUN-L-21` `DIAGNOSTICO-FALLOS` | **Sin agrupar**. Recorre todo el proyecto (frontend y Rust), así que no comparte código con una funcionalidad concreta sino con todas | a decidir: el usuario común no ve nada nuevo (patch), pero gana un registro para usuarios experimentados |
 
 ### Las dos que pueden viajar de acompañantes
