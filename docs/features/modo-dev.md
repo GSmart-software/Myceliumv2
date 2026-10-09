@@ -48,6 +48,11 @@ La lógica pura vive en `frontend/lib/modoDev.ts` (`esConsultaDev`, `comandosDis
    vault que lo tiene se sigue pintando así. La muestra la filtra `temasVisibles(dev)` de
    `lib/temas.ts`, con el mismo `comandosDisponibles` de la paleta. `secreto-dev.mjs` atrapa
    «arrecife» y `FUN-M-51`.
+4. **El tema GSmart** (`FUN-M-52`, [[tema-gsmart]]): la cuarta muestra, la marca personal del
+   usuario, con las mismas reglas que Arrecife —marca «dev», alias del buscador («gsmart») con
+   `soloDev`, apagar el modo no cambia el tema—. Lo que los dos temas de marca comparten (no
+   admiten atmósferas) vive en `TEMAS_DE_MARCA` de `lib/temas.ts`. `secreto-dev.mjs` atrapa
+   «gsmart» (la palabra entera) y `FUN-M-52`.
 
 F12 y Ctrl+Shift+I **siguen abiertos a todos** (`DevToolsHotkey`): no dependen del modo.
 
