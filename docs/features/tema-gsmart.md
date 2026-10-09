@@ -270,5 +270,7 @@ nombran.
 ## Relacionadas
 
 - [[tema-arrecife]] — el primer tema de marca; este sigue su estructura.
+- [[tema-bioexp]] — el tercer tema con esta forma (`FUN-M-53`), con los colores de
+  Bioluminiscencia; el test de paridad le exige las reglas de este y las de Arrecife.
 - [[modo-dev]] · [[Lo del modo dev no se anuncia]].
 - [[BACKLOG]] — `FUN-M-52`.

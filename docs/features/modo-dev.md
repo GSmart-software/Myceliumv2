@@ -53,6 +53,12 @@ La lógica pura vive en `frontend/lib/modoDev.ts` (`esConsultaDev`, `comandosDis
    `soloDev`, apagar el modo no cambia el tema—. Lo que los dos temas de marca comparten (no
    admiten atmósferas) vive en `TEMAS_DE_MARCA` de `lib/temas.ts`. `secreto-dev.mjs` atrapa
    «gsmart» (la palabra entera) y `FUN-M-52`.
+5. **Bioluminiscencia experimental** (`FUN-M-53`, [[tema-bioexp]]): la quinta muestra,
+   «Biolum. exp.», con los colores de Bioluminiscencia y la forma de los temas de marca. Mismas
+   reglas —marca «dev», alias del buscador («bioexp», «biolum. exp.», «experimental») con
+   `soloDev`, apagar el modo no cambia el tema, sin atmósferas (`TEMAS_DE_MARCA`)—.
+   `secreto-dev.mjs` atrapa «bioexp», «Bioluminiscencia (exp.)», «Biolum. exp.» y `FUN-M-53`,
+   pero **no** «Bioluminiscencia» a secas, que es el tema público por defecto.
 
 F12 y Ctrl+Shift+I **siguen abiertos a todos** (`DevToolsHotkey`): no dependen del modo.
 
