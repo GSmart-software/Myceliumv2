@@ -95,6 +95,7 @@ una fila se implementa, **se mueve** a la §4 (ver «Cómo leerlo»).
 | `FUN-S-33` | `EDITOR-RESALTADO` | Dibujar `==resaltado==` (sintaxis de Obsidian) en vivo, en lectura y al exportar. Hoy queda el texto con los `==`. Suma una clase `mic-*` a la plantilla de snippets. Salió de la [[Auditoria e2e 2026-10-07]] (`H31`) | ambas | — |
 | `FUN-S-34` | `NAV-ATRAS-ENTRE-PESTANAS` | Que **Atrás** vuelva a la nota de origen cuando un enlace se abrió en una pestaña nueva: hoy la pestaña nueva nace sin historial y el botón queda deshabilitado. Salió de la [[Auditoria e2e 2026-10-07]] (`H1`) | ambas | — |
 | `FUN-S-35` | `PANE-DIVIDIR-DUPLICA` | Que «Dividir a la derecha/abajo» **muestre la misma nota en los dos lados** (como Obsidian), en lugar de mover la pestaña al pane nuevo. Salió de la [[Auditoria e2e 2026-10-07]] (`H37`) | ambas | — |
+| `FUN-S-36` | `MODO-DEV` | Comando oculto **`>dev`** en la paleta: escribirlo exacto y Enter activa o apaga el **modo desarrollador**, que no aparece en ninguna lista, búsqueda ni ayuda. **Reemplaza al modo avanzado** de `FUN-M-16` (los siete clics en la versión desaparecen): con dev activo se ven las opciones del actualizador («Versiones publicadas», «Servidor de actualizaciones») y un grupo de **comandos de desarrollador** en la paleta. Las herramientas de desarrollador (F12) siguen abiertas a todos. Pedida por el usuario el 2026-10-08 | desktop | — |
 
 ### 1.2 Intermedias — tamaño M
 
@@ -577,6 +578,9 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 
 #### `FUN-S-35` · `PANE-DIVIDIR-DUPLICA` (—)
 - Detalle y cómo se reprodujo en [[Auditoria e2e 2026-10-07]].
+
+#### `FUN-S-36` · `MODO-DEV` (—)
+- Spec en [[modo-dev]]. Decisiones del usuario (2026-10-08): `>dev` reemplaza a los siete clics del modo avanzado; detrás quedan las opciones del actualizador y los comandos de desarrollador; F12 sigue para todos.
 
 ### Tamaño M
 
