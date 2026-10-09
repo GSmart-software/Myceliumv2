@@ -2,7 +2,7 @@ import JSZip from "jszip";
 import { api } from "@/lib/api";
 import { getCachedNote } from "@/lib/idb";
 import { renderMarkdown } from "@/lib/markdown";
-import { renderMermaidIn } from "@/lib/mermaid";
+import { renderMermaidIn, type TemaMermaid } from "@/lib/mermaid";
 import { renderExcalidrawIn } from "@/lib/excalidraw";
 import { buildPrintCss, type PdfPrintOpts } from "@/lib/printStyles";
 import { useAuthStore } from "@/stores/authStore";
@@ -110,8 +110,13 @@ export async function exportVaultZip(
 /**
  * Renderiza la nota a HTML fuera de pantalla, incluyendo los SVG de Mermaid y
  * Excalidraw (HU-10 CA4), para enviarlo al backend tal cual se imprime.
+ *
+ * Mermaid (`DEF-142`): con «Fondo blanco» el documento se imprime con el tema
+ * claro aunque la ventana esté en oscuro, así que los diagramas van con el tema
+ * fijo de impresión (grises sobre blanco, legibles también en blanco y negro).
+ * Sin «Fondo blanco» el PDF conserva el tema de la ventana, y Mermaid también.
  */
-async function renderNoteHtml(notaId: string): Promise<string> {
+async function renderNoteHtml(notaId: string, temaMermaid: TemaMermaid): Promise<string> {
   const content = await fetchNoteContent(notaId);
   const container = document.createElement("div");
   container.className = "mic-preview";
@@ -122,7 +127,7 @@ async function renderNoteHtml(notaId: string): Promise<string> {
   container.innerHTML = renderMarkdown(content);
   document.body.appendChild(container);
   try {
-    await renderMermaidIn(container);
+    await renderMermaidIn(container, temaMermaid);
     await renderExcalidrawIn(container, notaId);
     return container.innerHTML;
   } finally {
@@ -184,7 +189,7 @@ export async function exportNotePdf(
   // Con fondo blanco se ignora el modo oscuro (blanco + negro); el estilo (fondo,
   // colores, callouts) viaja en el CSS que compone buildPrintCss (DEF-024).
   const { tema, modoOscuro } = usePreferencesStore.getState();
-  const html = await renderNoteHtml(notaId);
+  const html = await renderNoteHtml(notaId, opts.fondoBlanco ? "imprimir" : "mycelium");
   const res = await fetch(`${API_URL}/notas/${notaId}/exportar-pdf`, {
     method: "POST",
     credentials: "include",
