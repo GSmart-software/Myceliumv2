@@ -989,6 +989,14 @@ funcionar sin red.
 
 Detectado el 2026-10-08 al arreglar `DEF-147` ([[Auditoria e2e 2026-10-07]]).
 
+# DEF-154
+El logo de Mycelium de la barra superior tiene tres puntos: los dos de arriba toman los
+colores del tema, pero **el de abajo es siempre el mismo azul**, sea cual sea el tema. Con
+Cantarela (ámbar) se ve un punto azul que no pertenece a la paleta; con Bioluminiscencia pasa
+menos a la vista porque el azul se parece a sus colores.
+
+Reportado por el usuario el 2026-10-09, con capturas de los dos temas: «está desde hace mucho».
+
 ---
 
 > [!warning] Defectos sin reporte original
