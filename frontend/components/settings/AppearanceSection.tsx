@@ -36,6 +36,7 @@ export function AppearanceSection() {
               type="button"
               className={`${styles.swatch} ${tema === t.value ? styles.swatchActive : ""}`}
               aria-pressed={tema === t.value}
+              title={t.nombre}
               onClick={() => setTema(t.value)}
             >
               <span className={styles.swatchPreview} style={{ background: t.canvas }}>
@@ -43,7 +44,9 @@ export function AppearanceSection() {
                 <span className={styles.swatchDot} style={{ background: t.accent }} />
                 <span className={styles.swatchDot} style={{ background: t.mist }} />
               </span>
-              <span className={styles.swatchName}>{t.nombre}</span>
+              <span className={`${styles.swatchName} ${styles.swatchNameLinea}`}>
+                <span className={styles.swatchNameTexto}>{t.nombre}</span>
+              </span>
             </button>
           ))}
         </div>
@@ -75,10 +78,11 @@ export function AppearanceSection() {
 }
 
 /**
- * Las cuatro atmósferas de un modo. Cada muestra repite `data-theme`,
+ * Las cinco atmósferas de un modo. Cada muestra repite `data-theme`,
  * `data-dark` y `data-atmosfera` en su propio <span>: las reglas de tokens.css
  * y atmosferas.css la pintan como se vería ESA combinación, aunque la app esté
- * en el otro modo.
+ * en el otro modo. Aurora (`FUN-M-54`) no cambia tokens: su muestra adelanta la
+ * luz con reglas propias en Settings.module.css.
  */
 function SelectorAtmosfera({
   titulo,

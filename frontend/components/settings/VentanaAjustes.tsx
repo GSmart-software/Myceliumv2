@@ -69,8 +69,8 @@ const CATEGORIAS: Categoria[] = [
     ajustes: [
       { rotulo: "Tema", alias: ["colores", "bioluminiscencia", "cantarela", "paleta"] },
       { rotulo: "Modo oscuro", alias: ["modo claro", "oscuro", "claro", "noche"] },
-      { rotulo: "Atmósfera en modo oscuro", alias: ["abisal", "niebla", "bosque", "papel", "fondo"] },
-      { rotulo: "Atmósfera en modo claro", alias: ["abisal", "niebla", "bosque", "papel", "fondo"] },
+      { rotulo: "Atmósfera en modo oscuro", alias: ["abisal", "niebla", "bosque", "papel", "aurora", "fondo", "degradado"] },
+      { rotulo: "Atmósfera en modo claro", alias: ["abisal", "niebla", "bosque", "papel", "aurora", "fondo", "degradado"] },
     ],
   },
   {
