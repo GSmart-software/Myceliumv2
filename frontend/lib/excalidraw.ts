@@ -6,6 +6,15 @@ import { diagnosticarExcalidraw, motivoDeExcepcion } from "@/lib/archivosIlegibl
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5279";
 
+/**
+ * Idioma de la interfaz de Excalidraw (`DEF-147`). Sin `langCode`, el editor
+ * arranca en inglés («Library», «To move canvas, hold mouse wheel…») en una app
+ * que está entera en español. `es-ES` viene en el paquete (traducción al ~96 %;
+ * lo que falte cae al inglés) y se carga como chunk propio del bundle, sin CDN:
+ * funciona offline. Va en **toda** instancia de `<Excalidraw>`.
+ */
+export const IDIOMA_EXCALIDRAW = "es-ES";
+
 /** Escena .excalidraw mínima que persistimos (HU-16 CA4/CA5). */
 export type ExcalidrawScene = {
   type?: string;
