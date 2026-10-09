@@ -30,6 +30,14 @@ export const PREVIEW_FONTS: FontOption[] = [
   { label: "Lora", value: "var(--font-lora), serif" },
 ];
 
+/**
+ * La letra de un vault que no la eligió: Geist Sans a 14px, en edición y en
+ * lectura (decisión del usuario, 2026-10-09; antes eran JetBrains Mono y Source
+ * Serif 4 a 16px). Es la misma letra que la interfaz.
+ */
+const FUENTE_DEFECTO = "var(--font-geist-sans), sans-serif";
+const TAMANO_FUENTE_DEFECTO = 14;
+
 export type Tema = "bioluminiscencia" | "cantarela";
 
 /**
@@ -177,10 +185,10 @@ export type Preferencias = {
 };
 
 const DEFAULT_PREFS: Preferencias = {
-  editorFont: EDITOR_FONTS[0].value,
-  editorSize: 16,
-  previewFont: PREVIEW_FONTS[0].value,
-  previewSize: 16,
+  editorFont: FUENTE_DEFECTO,
+  editorSize: TAMANO_FUENTE_DEFECTO,
+  previewFont: FUENTE_DEFECTO,
+  previewSize: TAMANO_FUENTE_DEFECTO,
   previewTabs: true,
   graphContinuousSim: false,
   autoCloseBrackets: true,
