@@ -41,6 +41,13 @@ La lógica pura vive en `frontend/lib/modoDev.ts` (`esConsultaDev`, `comandosDis
    su nombre—. Se distinguen por una marca «dev» discreta antes del título. Hoy son:
    - «Desactivar el modo desarrollador».
    - «Abrir las herramientas de desarrollador» (el mismo comando `alternar_devtools` que F12).
+3. **El tema Arrecife** (`FUN-M-51`, [[tema-arrecife]]): la tercera muestra de Configuración →
+   Apariencia, con la marca «dev» de la paleta. Es la primera funcionalidad detrás del modo que
+   **no** es de desarrollo. Sin el modo la muestra no existe y su alias en el buscador de
+   Configuración («arrecife») lleva `soloDev`; pero **apagar el modo no cambia el tema**: un
+   vault que lo tiene se sigue pintando así. La muestra la filtra `temasVisibles(dev)` de
+   `lib/temas.ts`, con el mismo `comandosDisponibles` de la paleta. `secreto-dev.mjs` atrapa
+   «arrecife» y `FUN-M-51`.
 
 F12 y Ctrl+Shift+I **siguen abiertos a todos** (`DevToolsHotkey`): no dependen del modo.
 

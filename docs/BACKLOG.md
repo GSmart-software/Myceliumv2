@@ -115,7 +115,6 @@ una fila se implementa, **se mueve** a la §4 (ver «Cómo leerlo»).
 | `FUN-M-48` | `PALETA-COMANDOS` | Ampliar la paleta de comandos (`>`): hoy tiene unos 12. Faltan, entre otros, cerrar pestaña, dividir panel, exportar, renombrar/mover/borrar la nota actual, nueva tabla/lienzo/dibujo/diagrama, insertar Espora, abrir la papelera, revelar en el explorador y cambiar de vista (vivo/lectura/fuente). Cada comando con su atajo si lo tiene. Salió de la [[Auditoria e2e 2026-10-07]] (`H5`) | ambas | — |
 | `FUN-M-49` | `EXPLORADOR-MULTISELECCION` | Selección múltiple en el explorador (Ctrl+clic, Shift+clic) para mover, borrar o exportar varios a la vez, y teclas **Supr** (a la papelera) y **F2** (renombrar) sobre lo seleccionado. Hoy limpiar ocho notas son ocho menús contextuales. La papelera ya tiene selección (`FUN-S-04`). Salió de la [[Auditoria e2e 2026-10-07]] (`H10`) | ambas | — |
 | `FUN-M-50` | `BUSQUEDA-OPERADORES` | Operadores en la búsqueda global: exclusión (`-término`), `OR` y comparaciones en propiedades (`kilos:>2`, `fecha:<2026-10-01`). Hoy solo hay AND implícito, frase exacta, `tag:` y `clave:valor`. Va después de `DEF-144`/`DEF-145`, que arreglan `clave:valor`. Salió de la [[Auditoria e2e 2026-10-07]] (`H18`) | ambas | — |
-| `FUN-M-51` | `TEMA-ARRECIFE` | Un tercer tema, **Arrecife**, con el branding de otro proyecto del usuario (paleta oscura y clara, gradiente cian→violeta, radios, bordes de 1.5px, Geist en la UI). **Solo con el modo desarrollador**: la muestra aparece solo con `>dev`, y apagarlo no saca el tema. Las atmósferas no aplican (su selector queda deshabilitado). Pedido por el usuario el 2026-10-08. Spec en [[tema-arrecife]] | desktop | — |
 
 ### 1.3 Grandes — tamaño L
 
@@ -225,6 +224,7 @@ mientras estaba pendiente; el detalle de lo construido está en la spec de cada 
 
 | ID | Nombre | Descripción | Aplica | Orig. |
 |---|---|---|---|---|
+| `FUN-M-51` 🛠️ | `TEMA-ARRECIFE` | Un tercer tema, **Arrecife**, con el branding de otro proyecto del usuario (paleta oscura y clara, gradiente cian→violeta, radios, bordes de 1.5px, Geist en la UI). **Solo con el modo desarrollador**: la muestra aparece solo con `>dev`, y apagarlo no saca el tema. Las atmósferas no aplican (su selector queda deshabilitado). Pedido por el usuario el 2026-10-08. **Implementada en desktop el 2026-10-08** (rama `feat/tema-arrecife-desktop`), **sin confirmar en la app**: `data-theme="arrecife"` con los roles de la marca mapeados a los `--mic-*` (cian y violeta derivados donde el crudo no llega a 4.5:1), la forma en `styles/arrecife.css` y en los módulos bajo `:root[data-theme='arrecife']`, sin `data-atmosfera` con ese tema, y `lib/temas.ts` con la lógica pura (tema válido, muestras según el modo dev, atmósfera sí/no). Spec en [[tema-arrecife]] | desktop | — |
 | `FUN-M-41` 🛠️ | `UX-AJUSTES-MENOS-TEXTO` | Aligerar la ventana de **Configuración**: cada ajuste con su nombre, su control y **una línea** visible; el resto de la explicación, plegado detrás de «Más». Los avisos de pérdida de datos siguen visibles. **Implementada en desktop el 2026-10-06**, sin confirmar en la app; web después | ambas | — |
 | `FUN-M-11` 🛠️ | `VAULT-MYCIGNORE` | `.mycignore` por vault (estilo `.gitignore`) para decidir qué archivos/carpetas ignora Mycelium; por defecto `.*/` + carpetas de build. **Implementado en desktop** (sin confirmar); parte **web** pendiente (otra semántica). Spec en `docs/features/mycignore.md` | ambas | — |
 | `FUN-M-12` 🛠️ | `VAULT-INDEX-PERF` | Rendimiento de la apertura del vault: default de `.mycignore` con `node_modules/`/`target/`/`dist/`/`out/`, metadatos sin contenido + `leer_archivos` en tandas, carpetas incrementales, WAL y progreso visible. **Implementado en desktop** (sin confirmar); spec en `docs/features/rendimiento-apertura-vault.md`. Salió en [[Version 1.1.1]] | desktop | — |
@@ -863,6 +863,7 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 
 #### `FUN-M-51` · `TEMA-ARRECIFE` (—)
 - Spec en [[tema-arrecife]]. Decisiones del usuario (2026-10-08): colores y forma; apagar el modo dev no lo saca; las atmósferas no aplican y su selector queda atenuado, no oculto. Secreto como todo el modo dev ([[Lo del modo dev no se anuncia]]).
+- 🛠️ Implementada en desktop el 2026-10-08, sin confirmar en la app. La correspondencia de colores, las cifras de contraste y lo que no se llevó están en la spec.
 
 ### Tamaño L
 
