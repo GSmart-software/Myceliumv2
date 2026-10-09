@@ -240,7 +240,8 @@ nota, así que no ensucian nada.
 > actualizaciones»—. Todo eso es deliberadamente oculto (regla del usuario, 2026-10-08),
 > así que tampoco va una línea como «mejoras para desarrolladores». El script **rechaza**
 > el changelog que lo mencione; la lista vive en `frontend/scripts/secreto-dev.mjs`, la
-> misma que impide nombrarlo en la ayuda. F12 no entra: es de todos.
+> misma que impide nombrarlo en la ayuda. F12 no entra: es de todos. Ver
+> [[Lo del modo dev no se anuncia]].
 >
 > Si los delimitadores no están, el script **no publica** y te dice qué agregar. Es a
 > propósito: un changelog vacío deja al usuario decidiendo a ciegas, y volcar el documento

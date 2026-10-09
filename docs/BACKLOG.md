@@ -582,6 +582,7 @@ revisar y ajustar: los apartados **A definir** marcan decisiones abiertas.
 #### `FUN-S-36` · `MODO-DEV` (—)
 - Spec en [[modo-dev]]. Decisiones del usuario (2026-10-08): `>dev` reemplaza a los siete clics del modo avanzado; detrás quedan las opciones del actualizador y los comandos de desarrollador; F12 sigue para todos.
 - 🛠️ Implementada en desktop el 2026-10-08, sin confirmar en la app.
+- Regla del usuario (2026-10-08): nada del modo ni de lo que habilita sale en el changelog ni en la ayuda; `npm run publicar` lo rechaza. Ver [[Lo del modo dev no se anuncia]].
 
 ### Tamaño M
 

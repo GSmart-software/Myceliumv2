@@ -61,6 +61,8 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
   qué queda aprendido para los estilos que sí se agreguen.
 - [[Skill o MCP, segun quien sabe hacerlo]] — 2026-10-01: lo que es contenido va por skill;
   lo que tiene reglas o estado de la app (calendario, diccionario, renombrar), por MCP.
+- [[Lo del modo dev no se anuncia]] — 2026-10-08: ni el modo desarrollador ni nada de lo
+  que habilita sale en el changelog ni en la ayuda; `npm run publicar` lo rechaza.
 
 ## Procesos
 

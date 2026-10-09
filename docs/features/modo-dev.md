@@ -13,7 +13,7 @@ al usuario normal. **Reemplaza al modo avanzado** de `FUN-M-16` ([[autoactualiza
 > que pertenezca a funcionalidad de dev no puede aparecer en el changelog»). Una sola lista,
 > `frontend/scripts/secreto-dev.mjs`, alimenta los dos controles: `scripts/test-modo-dev.mjs`
 > falla si una página de `frontend/ayuda/` la toca, y `npm run publicar` rechaza el
-> changelog que la toque, antes de compilar.
+> changelog que la toque, antes de compilar. La decisión y su alcance: [[Lo del modo dev no se anuncia]].
 
 ## Cómo se activa
 
@@ -89,4 +89,5 @@ búsqueda (Configuración, por ejemplo), esa búsqueda tiene que mirar `useUpdat
 
 - [[autoactualizacion]] — el actualizador y la selección de versión que quedan detrás.
 - [[configuracion]] — el pie y el buscador de Configuración.
-- [[Publicar una version]] — por qué el changelog no puede nombrarlo.
+- [[Lo del modo dev no se anuncia]] — la decisión: nada del modo sale en el changelog ni en la ayuda.
+- [[Publicar una version]] — dónde se escribe el changelog y cuándo se comprueba.
