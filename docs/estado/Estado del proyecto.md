@@ -6,7 +6,10 @@ Foto de dónde está Mycelium hoy. Para el detalle de cada tema, seguir los enla
 
 ## Resumen
 
-- **Versión: desktop `2.4.0`, publicada el 2026-10-06** ([[Version 2.4.0]]:
+- **Versión: desktop `2.5.0`, consolidada el 2026-10-09 y pendiente de publicar** ([[Version 2.5.0]]:
+  la ayuda integrada `FUN-L-27`, la atmósfera Aurora `FUN-M-54`, Geist Sans 14px por defecto,
+  enlaces a encabezados `DEF-141` y cinco arreglos de búsqueda). La publicada es la
+  `2.4.0`, del 2026-10-06 ([[Version 2.4.0]]:
   los archivos del vault —el explorador al instante `FUN-M-42`, soltar cualquier archivo
   `FUN-S-26`, el menú de los archivos `FUN-S-27`, las imágenes en las notas `DEF-126`—, los
   estados de tarea `FUN-S-01` y los instaladores de los tres sistemas por CI `FUN-L-28`).
