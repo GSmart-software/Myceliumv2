@@ -46,11 +46,11 @@ abismo**. Lo que lo distingue de los otros dos es que en oscuro las cosas **irra
 - el isotipo de la barra, con dos halos (el primer color y uno más ancho del segundo);
 - la barra activa del rail y su ícono, y el borde izquierdo de la nota abierta del árbol;
 - los botones primarios, con un filete de luz y sombra cian;
-- el foco de los inputs, con halo y resplandor.
+- ~~el foco de los inputs, con halo y resplandor~~: quitado por `DEF-155`, el foco es solo el borde en el cian.
 
 En claro no hay abismo del que salir: los mismos lugares llevan sombras suaves o nada. Lo que
 cambia con el modo va en **variables por modo** (`--bioexp-resplandor`, `--bioexp-brillo`,
-`--bioexp-brillo-icono`, `--bioexp-brillo-logo`, `--bioexp-ambiente`, `--bioexp-halo`,
+`--bioexp-brillo-icono`, `--bioexp-brillo-logo`, `--bioexp-ambiente`,
 `--bioexp-sombra-boton`, `--bioexp-gradiente-texto`, `--bioexp-gradiente-suave`) y no en reglas
 `[data-dark]` de los módulos: ahí toda regla del tema empieza con
 `:global(:root[data-theme='bioexp'])` y nada más (lo exige `test-temas.mjs`).
@@ -168,7 +168,7 @@ públicos.
 | Configuración, paleta, menú de vaults | categoría y opción marcadas con la selección suave; títulos de grupo y de sección en Space Grotesk espaciada |
 | Visor de archivos | el código en la mono empaquetada (como en GSmart) |
 | Notas (`bioexp.css`) | título del documento y H1 de lectura en el degradado, ajustados al texto (`width: fit-content`), con resplandor; H1–H5 en cian, verde agua, azul y mezclas; halo en los títulos lisos (oscuro); etiquetas en pastilla con el degradado al 14–18% y filete; selección de texto en cian; barras de desplazamiento en el degradado; viñetas en el verde agua |
-| Inputs de texto | radio 12; foco en el cian con halo (y resplandor en oscuro) |
+| Inputs de texto | radio 12; foco con el borde en el cian (sin halo: `DEF-155`) |
 
 - **Radios** 8/12/16 (de 4/8/16), como Arrecife y GSmart; botones e inputs 12 explícito.
 - **Space Grotesk** solo en títulos y etiquetas: el nombre de la app, el título de la nota, los
