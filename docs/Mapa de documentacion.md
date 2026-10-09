@@ -155,7 +155,9 @@ proyecto: si buscás algo, arrancá desde acá y seguí los enlaces.
   vista de lectura (`FUN-M-28`).
 - [[esporas-plantillas]] — plantillas de notas ("Esporas") con variables (`FUN-M-03`).
 - [[autoactualizacion]] — aviso diario de versión nueva, actualización con un clic y
-  selección de versión en modo avanzado (`FUN-L-14` + `FUN-M-16`).
+  selección de versión en modo desarrollador (`FUN-L-14` + `FUN-M-16`).
+- [[modo-dev]] — el modo desarrollador: comando oculto `>dev` de la paleta, qué queda detrás
+  y cómo sumar un comando de desarrollador (`FUN-S-36`). Solo-desktop.
 - [[auditoria-y-relinkeado]] — adoptar un vault que viene de otro proyecto: descubrir cómo
   se referencian sus documentos y convertir esas referencias en `[[wikilinks]]` (`FUN-M-17`).
 - [[canvas]] — notas y textos en un lienzo infinito, con `[[enlaces]]` que funcionan

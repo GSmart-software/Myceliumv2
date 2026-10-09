@@ -1,0 +1,84 @@
+# FUN-S-36 — Modo desarrollador (`>dev`)
+
+**Solo desktop.** Implementada el 2026-10-08 (rama `feat/modo-dev-desktop`), sin confirmar
+en la app. Fila en [[BACKLOG]] (`FUN-S-36` · `MODO-DEV`).
+
+Un modo **oculto** que habilita lo que sirve para desarrollar y probar Mycelium y estorba
+al usuario normal. **Reemplaza al modo avanzado** de `FUN-M-16` ([[autoactualizacion]]
+§ 4.3), que se activaba con siete clics en el número de versión del pie de Configuración.
+
+> [!warning] Es oculto a propósito
+> Ni la ayuda integrada, ni el changelog, ni ninguna lista o búsqueda de la app nombran el
+> comando ni el modo. `scripts/test-modo-dev.mjs` falla si una página de `frontend/ayuda/`
+> lo menciona, y `npm run publicar` rechaza un changelog que diga «modo desarrollador»,
+> `>dev` o `FUN-S-36`.
+
+## Cómo se activa
+
+En la paleta (Ctrl+P, o Ctrl+O y empezar con `>`), escribir **`>dev`** y Enter. Alterna:
+lo enciende si estaba apagado y lo apaga si estaba encendido. La paleta se cierra y un aviso
+breve confirma «Modo desarrollador activado» / «Modo desarrollador desactivado».
+
+- Vale sin importar mayúsculas ni espacios alrededor de `dev` (`> DEV `). Tiene que ser
+  exactamente `dev`: `>de` o `>devx` no hacen nada especial.
+- **No es una opción**: no aparece al escribir `>d`, `>de` ni `>dev`. Mientras la consulta es
+  `>dev` la lista se ve como cualquier consulta sin coincidencias («Ningún comando se llama
+  así.»), y Enter dispara el cambio.
+- En modo notas (sin `>`), `dev` es una búsqueda más: una nota llamada «dev» se abre normal.
+- También se apaga con el comando de desarrollador «Desactivar el modo desarrollador».
+
+La lógica pura vive en `frontend/lib/modoDev.ts` (`esConsultaDev`, `comandosDisponibles`).
+
+## Qué queda detrás
+
+1. **Actualizador**: en Configuración → Actualizaciones, «Versiones publicadas» (instalar
+   cualquier versión, incluida una anterior) y «Servidor de actualizaciones» (endpoint propio).
+   Sus entradas del buscador de Configuración llevan `soloDev: true`: sin el modo no se
+   encuentran.
+2. **Comandos de desarrollador** en la paleta: sin el modo **no existen** —ni buscándolos por
+   su nombre—. Se distinguen por una marca «dev» discreta antes del título. Hoy son:
+   - «Desactivar el modo desarrollador».
+   - «Abrir las herramientas de desarrollador» (el mismo comando `alternar_devtools` que F12).
+
+F12 y Ctrl+Shift+I **siguen abiertos a todos** (`DevToolsHotkey`): no dependen del modo.
+
+**Indicador**: con el modo encendido, el pie de Configuración dice «Mycelium vX.Y.Z · dev».
+Explica por qué hay opciones de más en Actualizaciones sin decir cómo se llega; apagado no
+se ve nada. El número de versión ya no es un botón.
+
+## Persistencia
+
+Global a la app (no por vault) y sobrevive reinicios: el campo `dev` de `actualizador.json`
+en el config-dir, el mismo archivo y mecanismo que usaba el modo avanzado. Se cambia con el
+comando Rust `updater_set_dev` y se lee en `updater_estado` (`EstadoUpdater.dev`).
+
+**Compatibilidad**: el campo se llamaba `avanzado`. `#[serde(alias = "avanzado")]` lee los
+archivos viejos, así quien tenía el modo avanzado encendido quedó con el modo desarrollador
+encendido; al próximo guardado se escribe como `dev`. Lo cubre el test
+`el_modo_avanzado_guardado_se_lee_como_dev` de `actualizador.rs`.
+
+## Cómo agregar un comando de desarrollador
+
+En `frontend/components/workspace/PaletaComandos.tsx`, sumar la opción al arreglo `comandos`
+con **`soloDev: true`**:
+
+```ts
+{
+  id: "cmd-dev-algo",
+  titulo: "Hacer algo de desarrollo",
+  icono: Wrench,
+  soloDev: true,
+  ejecutar: () => { /* … */ },
+},
+```
+
+`comandosDisponibles` lo saca de la lista cuando el modo está apagado y la paleta le pone la
+marca «dev». No hace falta nada más. Si el comando nuevo debe esconderse también en otra
+búsqueda (Configuración, por ejemplo), esa búsqueda tiene que mirar `useUpdaterStore`
+(`estado.dev`) como hace `VentanaAjustes` con `soloDev`.
+
+## Relacionadas
+
+- [[autoactualizacion]] — el actualizador y la selección de versión que quedan detrás.
+- [[configuracion]] — el pie y el buscador de Configuración.
+- [[Publicar una version]] — por qué el changelog no puede nombrarlo.
