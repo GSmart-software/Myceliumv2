@@ -1012,6 +1012,11 @@ Detectado el 2026-10-09 al reflejar a web los arreglos de búsqueda (`DEF-146`).
 En la versión **web**, una nota **duplicada** no aparece en la búsqueda hasta que se la edita y guarda.
 
 Detectado el 2026-10-09 al reflejar a web los arreglos de búsqueda (`DEF-148`). En desktop pasaba lo mismo y ya se había corregido con `DEF-148`.
+
+# DEF-158
+Con **varios vaults abiertos a la vez**, cada uno en su ventana, **renombrar o mover** una carpeta o un documento en un vault hace aparecer una **copia fantasma** en el explorador de los **otros** vaults: la carpeta o el archivo se listan ahí como si existieran, pero no existen en esos vaults. Al refrescar el explorador —solo o con el botón— la copia desaparece.
+
+Reportado por el usuario el 2026-10-11, en uso normal con varias ventanas abiertas.
 ---
 
 > [!warning] Defectos sin reporte original
