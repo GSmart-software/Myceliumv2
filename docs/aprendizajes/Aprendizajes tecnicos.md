@@ -351,6 +351,20 @@ y qué principio general dejó.
     (`lib/useHtmlDecorable.ts`): el HTML crudo vuelve solo cuando el efecto va a volver a
     correr. Prueba en Chromium con el React real: `scripts/smoke-html-decorable.mjs`. Ver
     [[bugs-progreso]].
+34. **En Tauri 2, un evento «de una ventana» necesita las dos puntas acotadas.**
+    `Emitter::emit` manda a **todas** las ventanas aunque se llame sobre una:
+    `ventana.emit(...)` no la acota, y eso parece lo contrario. Para una sola hay que usar
+    `emit_to(ventana.label(), ...)`. Pero no alcanza: el `listen` de
+    `@tauri-apps/api/event` escucha con destino `Any`, y Tauri (`match_any_or_filter`)
+    le entrega **cualquier** evento, también el dirigido a otra ventana. El oyente tiene
+    que ser `getCurrentWebviewWindow().listen(...)`. `FUN-L-16` (varios vaults a la vez)
+    había cambiado `app.emit` por `ventana.emit` en el watcher, creyendo acotarlo, y el
+    frontend seguía con el `listen` global. Con dos vaults abiertos, renombrar o mover en
+    uno aplicaba el cambio también al árbol del otro: copias fantasma que se iban al
+    refrescar (`DEF-158`). Lo mismo pasaba con `open-files`, la salida de la terminal y el
+    hover del marco. El modelo correcto ya estaba en el MCP de control (`control.rs` +
+    `lib/mcpControl.ts`). Lo vigila `scripts/test-eventos-ventana.mjs`. Ver
+    [[bugs-progreso]].
 
 ## Relacionadas
 
